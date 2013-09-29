@@ -3,7 +3,7 @@ layout: post
 title: "Deploy Ruby on Rails Project to Heroku on Ubuntu"
 date: 2013-09-29 09:23
 comments: true
-categories: 
+categories: [Ruby]
 ---
 
 <!-- **Content start here** -->
