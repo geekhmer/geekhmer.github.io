@@ -3,7 +3,7 @@ layout: post
 title: "The most gem that you need for developing Ruby on Rails project"
 date: 2013-10-06 18:04
 comments: true
-categories: 
+categories: [Ruby]
 ---
 
 <!-- **Content start here** -->
