@@ -4,6 +4,8 @@ title: "Facebook fan page auto Like"
 date: 2013-10-02 18:24
 comments: true
 categories: [Facebook]
+keywords: facebook,javascript,facebook fan page,facebook fan page auto like
+description: facebook fan page auto like
 ---
 
 <!-- **Content start here** -->

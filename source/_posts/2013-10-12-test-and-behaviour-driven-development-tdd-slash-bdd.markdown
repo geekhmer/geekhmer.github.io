@@ -4,6 +4,8 @@ title: "Test and Behaviour Driven Development (TDD/BDD)"
 date: 2013-10-12 00:36
 comments: true
 categories: [testing]
+keywords: tdd,bdd,tesing software,test driven development,behaviour driven development,testing,tdd workflow,tdd processing,bdd workflow,bdd processing
+description: test and behaviour driven development
 ---
 
 <p>

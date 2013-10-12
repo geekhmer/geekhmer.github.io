@@ -4,6 +4,8 @@ title: "The most gem that you need for developing Ruby on Rails project"
 date: 2013-10-06 18:04
 comments: true
 categories: [Ruby]
+keywords: gem,ruby,ruby on rails,rails,the most gem,the most gem that you need for developing ruby on rails project
+description: the most gem that you need for developing ruby on rails project
 ---
 
 <!-- **Content start here** -->
