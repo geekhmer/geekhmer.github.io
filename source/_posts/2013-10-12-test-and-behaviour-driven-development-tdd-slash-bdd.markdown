@@ -8,7 +8,7 @@ categories: [testing]
 
 <p>
   <strong>1. What is TDD/BDD?</strong><br/>
-  Express expected behaviour before writing code
+  Express expected behaviour before writing code.
 </p>
 <p>
   <strong>2. Why is TDD/BDD a good thing?</strong><br/>
