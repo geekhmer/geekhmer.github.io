@@ -12,7 +12,6 @@ description: facebook fan page auto like
 <p>
   When someone click anywhere on your site they will automatically like your page, no need to put like button.
 </p>
-
 <p>
   <strong>1. Put the below code in head tag:</strong>
 </p>
@@ -34,7 +33,6 @@ description: facebook fan page auto like
 
 </script>
 {% endcodeblock %}
-
 <p>
   <strong>2. Put the below code in body tag:</strong>
 </p>
@@ -47,7 +45,6 @@ description: facebook fan page auto like
 <p>
 And then find YOUR_PAGE_URL in src iframe and replace it with your facebook fan page url (ex: <a href="http://www.facebook.com/GeeKhmer" target="_blank">http://www.facebook.com/GeeKhmer</a>).
 </p>
-
 <p>
   <strong>3. Put the below code anywhere in html tag:</strong>
 </p>
@@ -77,7 +74,6 @@ And then find YOUR_PAGE_URL in src iframe and replace it with your facebook fan 
   }
 </script>
 {% endcodeblock %}
-
 <p>
   You can download the <a href="https://github.com/Bunlong/facebook_auto_like" target="_blank">source code</a> and try it out.
 </p>
