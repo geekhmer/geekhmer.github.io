@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby Metaprogramming | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby-metaprogramming/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2013-11-30T11:07:23+07:00</updated>
+  <updated>2013-11-30T11:21:23+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,97 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[method_missing]]></title>
+    <link href="http://geekhmer.github.io/blog/2013/11/30/method-missing/"/>
+    <updated>2013-11-30T11:15:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2013/11/30/method-missing</id>
+    <content type="html"><![CDATA[<!-- **Content start here** -->
+
+
+<p>
+  method_missing use for creating dynamic methods.
+</p>
+
+
+<p>
+  <strong>example</strong><br/>
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>example </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Klass</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">method_missing</span><span class="p">(</span><span class="n">method_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">block</span><span class="p">)</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;if method_name.to_s =~ /</span><span class="o">^</span><span class="n">find_by_</span><span class="p">(</span><span class="o">.</span><span class="n">+</span><span class="p">)</span><span class="vg">$/</span>
+</span><span class='line'>  <span class="n">run_find_by_method</span><span class="p">(</span><span class="vg">$1</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'><span class="k">else</span>
+</span><span class='line'>  <span class="k">super</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  def run_find_by_method(attrs, *args, &amp;amp;block)&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">attrs</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_and_&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">attrs_with_args</span> <span class="o">=</span> <span class="o">[</span><span class="n">attrs</span><span class="p">,</span> <span class="n">args</span><span class="o">].</span><span class="n">transpose</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">conditions</span> <span class="o">=</span> <span class="no">Hash</span><span class="o">[</span><span class="n">attrs_with_args</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+</span><span class='line'><span class="n">conditions</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">str</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">key</span><span class="si">}</span><span class="s2"> = &#39;</span><span class="si">#{</span><span class="n">value</span><span class="si">}</span><span class="s2">&#39; and &quot;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">p</span> <span class="s2">&quot;select * from tbl where </span><span class="si">#{</span><span class="n">str</span><span class="o">[</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="o">-</span><span class="mi">6</span><span class="o">]</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;k = Klass.new</span>
+</span><span class='line'><span class="sr">k.find_by_name(&amp;ldquo;Bunlong&amp;rdquo;)</span>
+</span><span class='line'><span class="sr">k.find_by_name_and_email(&amp;ldquo;Bunlong&amp;rdquo;, &amp;ldquo;&lt;a href=&quot;&amp;#x6d;&amp;#97;&amp;#x69;&amp;#108;&amp;#x74;&amp;#111;&amp;#x3a;&amp;#98;&amp;#x75;&amp;#110;&amp;#108;&amp;#111;&amp;#x6e;&amp;#x67;&amp;#46;&amp;#x76;&amp;#x61;&amp;#x6e;&amp;#64;&amp;#x67;&amp;#109;&amp;#97;&amp;#x69;&amp;#108;&amp;#46;&amp;#x63;&amp;#x6f;&amp;#109;&quot;&gt;&amp;#x62;&amp;#x75;&amp;#110;&amp;#108;&amp;#111;&amp;#x6e;&amp;#103;&amp;#x2e;&amp;#118;&amp;#97;&amp;#x6e;&amp;#x40;&amp;#103;&amp;#109;&amp;#97;&amp;#x69;&amp;#x6c;&amp;#46;&amp;#99;&amp;#111;&amp;#x6d;&lt;/</span><span class="n">a</span><span class="o">&gt;&amp;</span><span class="n">rdquo</span><span class="p">;)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[include_vs_extend]]></title>
