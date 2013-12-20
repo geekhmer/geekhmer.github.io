@@ -10,51 +10,59 @@ description: How to develop Facebook Page Tab?
 
 <!-- **Content start here** -->
 <p>
-  <strong>Why need have Facebook Fan Page?</strong><br/>
-  1. Unlimited Friend Count.<br/>
-  2. Search Engine Results.<br/>
-  3. Tagging Your Brand.<br/>
-  4. Facebook Insights.<br/>
-  5. Advertising.<br/>
-  6. Admin Connections.<br/>
-  7. Check-Ins & Location Services.<br/>
-  8. Facebook Page Tabs.
+  One of the most interesting features of Apps on facebook.com is the ability for your apps (Facebook Page Tab) to be used within the context of a Facebook Fan Pages.<br/>
 </p>
 
 <p>
-  <strong>Facebook Fan Pages</strong><br/>
-  1. Facebook Fan Pages is the tools for your business, 
-  brand or organization.<br/>
-  2. Facebook Fan Pages are a heavily used feature of Facebook.<br/>
-  3. Facebook Fan Pages as their "social home" on the web.<br/>
-  4. To create Facebook Fan Pages go to the link <a href="https://www.facebook.com/about/pages" target="_blank">https://www.facebook.com/about/pages</a>.
-</p>
-<p>
-  <img src="/images/facebook_fan_page_tool.png" width="680" /><br/>
-</p>
-
-<p>
-  <strong>Facebook Page Tab</strong><br/>
-  One of the most interesting features of Apps on facebook.com is the ability for your apps(Facebook Page Tab) to be used within the context of a Facebook Fan Pages.<br/>
-</p>
-<p>
-  <img src="/images/sample_facebook_fan_page.png" width="680" /><br/>
-</p>
-
-<p>
-  <strong>Configuring Facebook Page Tab</strong><br/>
-  To configure Facebook Page Tab go to the link <a href="https://developers.facebook.com/apps" target="_blank">https://developers.facebook.com/apps</a>.<br/>
+  <strong>1. To create Facebook Page Tab go to the link <a href="https://developers.facebook.com/apps" target="_blank">https://developers.facebook.com/apps</a>.<br/></strong>
+  Then click button Create New App.
 </p>
 <p>
   <img src="/images/create_new_app_button.png" width="680" /><br/>
 </p>
 <p>
-  Click on button Create New App.
+  <strong>2. Create New App</strong><br/>
+  Then enter App Name, App Namespace and choose Apps for Pages for App Category. And click button Continuce.
 </p>
 <p>
   <img src="/images/create_new_app_popup.png" width="680" /><br/>
 </p>
 <p>
-  Enter App Name, App Namespace and App Category: Apps for Pages.<br/>
-  Click on button Continue.
+  <strong>3. Setting Basic</strong><br/>
+  Then select Website with Facebook Login and Page Tab to fill the information.<br/>
+</p>
+<p>
+  <img src="/images/app_basic_form.png" width="680" /><br/>
+</p>
+<p>
+  <strong>4. Fill the information</strong><br/>
+  - With Website with Facebook Login, Enter your Site URL.<br/>
+  - With Page Tab, Enter your Page Tab Name, Page Tab URL, Secure Page Tab URL, Page Tab Edit URL and Page Tab Image. And click on button Save Changes. 
+</p>
+<p>
+  <img src="/images/setup_facebook_page_tab.png" width="680" /><br/>
+</p>
+
+<p>
+  <strong>5. Adding an Facebook Page Tab to a Page</strong><br/>
+  - As a Facebook Page Tab App developer, you can prompt users to install
+  your Page Tab App by including an "Install this Page Tab
+  App" link.<br/>
+  - http://www.facebook.com/dialog/pagetab?app_id=APP_ID&next=URL<br/>
+  - Where APP_ID and URL can be found in your app setting (<a href="https://developers.facebook.com/apps" target="_blank">https://developers.facebook.com/apps</a>).<br/>
+</p>
+<p>
+  <img src="/images/add_page_tab.png" width="680" /><br/>
+</p>
+<p>
+  Then please go to your Facebook Fan Page, and click on your Page Tab.
+</p>
+<p>
+  <img src="/images/sample_facebook_fan_page.png" width="680" /><br/>
+</p>
+<p>
+  Enjoy it
+</p>
+<p>
+  <img src="/images/geekhmer_facebook_page_tab_content.png" width="680" /><br/>
 </p>
