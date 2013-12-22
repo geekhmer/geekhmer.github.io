@@ -13,7 +13,7 @@ description: How to set Facebook Page Tab content auto resize height?
 The height of Facebook Page Tab is fixed at 800px, so to set Facebook Page Tab content auto resize height you must add code below at the bottom of body tag.<br/>
 </p>
 <p>
-  <img src="/images/page_tab_not_yet_resize.png" width="680" /><br/>
+  <a class="fancybox" href="/images/page_tab_not_yet_resize.png"><img src="/images/page_tab_not_yet_resize.png" width="680" /></a><br/>
 </p>
 {% codeblock code for auto resize height lang:html %}
 <div id="fb-root"></div>
@@ -36,5 +36,5 @@ The height of Facebook Page Tab is fixed at 800px, so to set Facebook Page Tab c
   Enjoy it
 </p>
 <p>
-  <img src="/images/page_tab_resize_already.png" width="680" /><br/>
+  <a class="fancybox" href="/images/page_tab_resize_already.png"><img src="/images/page_tab_resize_already.png" width="680" /></a><br/>
 </p>

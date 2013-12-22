@@ -30,9 +30,9 @@ description: test and behaviour driven development
 </p>
 <p> 
   TDD<br/>
-  <img src="/images/tdd.png" /><br/>
+  <a class="fancybox" href="/images/tdd.png"><img src="/images/tdd.png" /></a><br/>
 </p>
 <p>
   BDD<br/>
-  <img src="/images/bdd.png" />
+  <a class="fancybox" href="/images/tdd.png"><img src="/images/bdd.png" /></a>
 </p>

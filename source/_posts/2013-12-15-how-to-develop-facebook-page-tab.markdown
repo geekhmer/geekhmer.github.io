@@ -18,21 +18,21 @@ description: How to develop Facebook Page Tab?
   Then click button Create New App.
 </p>
 <p>
-  <img src="/images/create_new_app_button.png" width="680" /><br/>
+  <a class="fancybox" href="/images/create_new_app_button.png"><img src="/images/create_new_app_button.png" width="680" /></a><br/>
 </p>
 <p>
   <strong>2. Create New App</strong><br/>
   Then enter App Name, App Namespace and choose Apps for Pages for App Category. And click button Continuce.
 </p>
 <p>
-  <img src="/images/create_new_app_popup.png" width="680" /><br/>
+  <a class="fancybox" href="/images/create_new_app_popup.png"><img src="/images/create_new_app_popup.png" width="680" /></a><br/>
 </p>
 <p>
   <strong>3. Setting Basic</strong><br/>
   Then select Website with Facebook Login and Page Tab to fill the information.<br/>
 </p>
 <p>
-  <img src="/images/app_basic_form.png" width="680" /><br/>
+  <a class="fancybox" href="/images/app_basic_form.png"><img src="/images/app_basic_form.png" width="680" /></a><br/>
 </p>
 <p>
   <strong>4. Fill the information</strong><br/>
@@ -40,7 +40,7 @@ description: How to develop Facebook Page Tab?
   - With Page Tab, Enter your Page Tab Name, Page Tab URL, Secure Page Tab URL, Page Tab Edit URL and Page Tab Image. And click on button Save Changes. 
 </p>
 <p>
-  <img src="/images/setup_facebook_page_tab.png" width="680" /><br/>
+  <a class="fancybox" href="/images/setup_facebook_page_tab.png"><img src="/images/setup_facebook_page_tab.png" width="680" /></a><br/>
 </p>
 
 <p>
@@ -52,17 +52,17 @@ description: How to develop Facebook Page Tab?
   - Where APP_ID and URL can be found in your app setting (<a href="https://developers.facebook.com/apps" target="_blank">https://developers.facebook.com/apps</a>).<br/>
 </p>
 <p>
-  <img src="/images/add_page_tab.png" width="680" /><br/>
+  <a class="fancybox" href="/images/add_page_tab.png"><img src="/images/add_page_tab.png" width="680" /></a><br/>
 </p>
 <p>
   Then please go to your Facebook Fan Page, and click on your Page Tab.
 </p>
 <p>
-  <img src="/images/sample_facebook_fan_page.png" width="680" /><br/>
+  <a class="fancybox" href="/images/sample_facebook_fan_page.png"><img src="/images/sample_facebook_fan_page.png" width="680" /></a><br/>
 </p>
 <p>
   Enjoy it
 </p>
 <p>
-  <img src="/images/geekhmer_facebook_page_tab_content.png" width="680" /><br/>
+  <a class="fancybox" href="/images/geekhmer_facebook_page_tab_content.png"><img src="/images/geekhmer_facebook_page_tab_content.png" width="680" /></a><br/>
 </p>
