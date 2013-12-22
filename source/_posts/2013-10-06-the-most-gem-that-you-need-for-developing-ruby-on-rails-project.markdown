@@ -164,3 +164,8 @@ description: the most gem that you need for developing ruby on rails project
   Description: The Exception Notifier plugin provides a mailer object and a default set of templates for sending email notifications when errors occur in a Rails application.<br/>
   Source: <a href="https://github.com/rails/exception_notification" target="_blank">https://github.com/rails/exception_notification</a>
 </p>
+<p>
+  <strong>32. assets_helper</strong><br/>
+  Description:  is the gem that use to include css and javascript by controller name automatically, it mean that include only css and javascript file in the controller that you are running.<br/>
+  Source: <a href="https://github.com/Bunlong/assets_helper" target="_blank">https://github.com/Bunlong/assets_helper</a>
+</p>
