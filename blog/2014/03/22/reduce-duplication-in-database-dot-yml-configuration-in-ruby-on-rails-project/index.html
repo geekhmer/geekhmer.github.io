@@ -1,0 +1,474 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Reduce duplication in database.yml configuration in Ruby on Rails Project - GeeKhmer</title>
+  <meta name="author" content="Bunlong Van">
+  
+  
+  <meta name="description" content="The blog of Computer general, Networking, Programming(javascript, ruby, php, java) in Cambodia country.">
+
+  <meta name="keywords" content="geekhmer,khmer,cambodia,geek khmer,khmer geek,geek cambodia,cambodia geek,hacker,khmer hacker,hacker khmer,hacking,coding,programming,testing,Ruby,Ruby khmer,khmer Ruby,Rubyist,khmer Rubyist,Rubyist khmer,Rubyist cambodia,cambodia Rubyist,Ruby on Rails,Ruby on Rails khmer,khmer Ruby on Rails,Cambodia Ruby,Ruby Cambodia,Cambodia Ruby on Rails,Ruby on Rails Cambodia,RSpec TDD,RSpec BDD,facebook,computer general,networking">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://geekhmer.github.io/blog/2014/03/22/reduce-duplication-in-database-dot-yml-configuration-in-ruby-on-rails-project">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="" rel="alternate" title="GeeKhmer" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+<link href="/stylesheets/jquery.fancybox.css" media="screen, projection" rel="stylesheet" type="text/css">
+<script src="/javascripts/libs/jquery.fancybox.pack.js"></script>
+<script src="/javascripts/init_fancybox.js"></script>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1>
+    <!-- <a href="/">GeeKhmer</a> -->
+    <div class="logo" />
+  </h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation">
+  <form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:geekhmer.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+  </form>
+
+<ul class="subscription" data-subscription="rss">
+  
+  
+</ul>
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Reduce Duplication in database.yml Configuration in Ruby on Rails Project</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-22T00:03:00+07:00" pubdate data-updated="true">Mar 22<span>nd</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>
+  By default rails generate database.yml that have the same attributes in each environment. So to reduce duplication we use aliasing to essentially perform a hash merge on the fly in the code.<br/>
+  So far so good please take a look the below code.<br/>
+</p>
+
+
+
+
+<p>
+  <strong>Before refactor</strong><br/>
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>database.yml </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">development</span><span class="o">:</span>
+</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_development</span>
+</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
+</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
+</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
+</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
+</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
+</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">test</span><span class="o">:</span>
+</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_test</span>
+</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
+</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
+</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
+</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
+</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
+</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">staging</span><span class="o">:</span>
+</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_staging</span>
+</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
+</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
+</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
+</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
+</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
+</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">production</span><span class="o">:</span>
+</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_production</span>
+</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
+</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
+</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
+</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
+</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
+</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>After refactor</strong><br/>
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>database.yml </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">defaults</span><span class="o">:</span> <span class="o">&amp;</span><span class="nx">defaults</span>
+</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
+</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
+</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
+</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
+</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">development</span><span class="o">:</span>
+</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_development</span>
+</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
+</span><span class='line'>  <span class="o">&lt;&lt;:</span> <span class="o">*</span><span class="nx">defaults</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">test</span><span class="o">:</span>
+</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_test</span>
+</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
+</span><span class='line'>  <span class="o">&lt;&lt;:</span> <span class="o">*</span><span class="nx">defaults</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">staging</span><span class="o">:</span>
+</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_staging</span>
+</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
+</span><span class='line'>  <span class="o">&lt;&lt;:</span> <span class="o">*</span><span class="nx">defaults</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">production</span><span class="o">:</span>
+</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_production</span>
+</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
+</span><span class='line'>  <span class="o">&lt;&lt;:</span> <span class="o">*</span><span class="nx">defaults</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Bunlong Van</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-22T00:03:00+07:00" pubdate data-updated="true">Mar 22<span>nd</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ruby/'>Ruby</a>, <a class='category' href='/blog/categories/ruby-on-rails/'>Ruby on Rails</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2014/03/22/reduce-duplication-in-database-dot-yml-configuration-in-ruby-on-rails-project/" data-via="" data-counturl="http://geekhmer.github.io/blog/2014/03/22/reduce-duplication-in-database-dot-yml-configuration-in-ruby-on-rails-project/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/03/17/rvm-ruby-version-manager/" title="Previous Post: RVM - Ruby Version Manager">&laquo; RVM - Ruby Version Manager</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Author</h1>
+  <ul>
+    <li style="height: 100px; font-size: 13px;">
+      <img src="/images/about.jpg" width="85" height="85" class="left" />
+      My name is Bunlong Van. I am a Rubyist, Javascripter living in Phnom Penh Cambodia.
+    </li>
+  </ul>
+</section><section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/03/22/reduce-duplication-in-database-dot-yml-configuration-in-ruby-on-rails-project/">Reduce Duplication in database.yml Configuration in Ruby on Rails Project</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/17/rvm-ruby-version-manager/">RVM - Ruby Version Manager</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/02/04/ruby-websocket-and-real-time-app-tutorial/">Ruby Websocket and Real-time App Tutorial</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/02/01/top-three-front-end-mvc-framework/">Top Three Front-End MVC Framework</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/01/31/what-is-websocket/">What Is Websocket?</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Category</h1>
+  <ul id="recent_posts">
+    
+      <li>
+        <a href="/blog/categories/facebook/">Facebook [ 4 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby/">Ruby [ 13 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/heroku/">Heroku [ 1 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/testing/">Testing [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/layout/">Layout [ 1 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby-metaprogramming/">Ruby metaprogramming [ 4 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/websocket/">Websocket [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/front-end-mvc-framework/">Front-end mvc framework [ 1 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 1 ]</a>
+      </li>
+    
+  </ul>
+</section><section>
+  <h1>Resources</h1>
+  <ul id="recent_posts">
+    <li>
+      <a href="https://www.facebook.com" target="_blank">
+        <img src="/images/logo_facebook.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://github.com" target="_blank">
+        <img src="/images/logo_github.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://www.linode.com" target="_blank">
+        <img src="/images/logo_linode.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://newrelic.com" target="_blank">
+        <img src="/images/logo_newrelic.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://www.ruby-lang.org/en/" target="_blank">
+        <img src="/images/logo_ruby.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://guides.rubyonrails.org" target="_blank">
+        <img src="/images/logo_rails_guides.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://railscasts.com" target="_blank">
+        <img src="/images/logo_rails_casts.png" />
+      </a>
+    </li>
+  </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 GeeKhmer, <a href="http://www.linkedin.com/in/bunlongvan" target="_blank" style="text-decoration: none;">Bunlong Van</a>
+</p>
+
+</footer>
+  
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=680307038646755&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

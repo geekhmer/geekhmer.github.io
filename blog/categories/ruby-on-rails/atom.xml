@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Ruby on Rails | GeeKhmer]]></title>
+  <link href="http://geekhmer.github.io/blog/categories/ruby-on-rails/atom.xml" rel="self"/>
+  <link href="http://geekhmer.github.io/"/>
+  <updated>2014-03-22T00:47:50+07:00</updated>
+  <id>http://geekhmer.github.io/</id>
+  <author>
+    <name><![CDATA[Bunlong Van]]></name>
+    <email><![CDATA[bunlong.van@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Reduce duplication in database.yml configuration in Ruby on Rails Project]]></title>
+    <link href="http://geekhmer.github.io/blog/2014/03/22/reduce-duplication-in-database-dot-yml-configuration-in-ruby-on-rails-project/"/>
+    <updated>2014-03-22T00:03:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2014/03/22/reduce-duplication-in-database-dot-yml-configuration-in-ruby-on-rails-project</id>
+    <content type="html"><![CDATA[<p>
+  By default rails generate database.yml that have the same attributes in each environment. So to reduce duplication we use aliasing to essentially perform a hash merge on the fly in the code.<br/>
+  So far so good please take a look the below code.<br/>
+</p>
+
+
+
+
+<p>
+  <strong>Before refactor</strong><br/>
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>database.yml </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">development</span><span class="o">:</span>
+</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_development</span>
+</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
+</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
+</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
+</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
+</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
+</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">test</span><span class="o">:</span>
+</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_test</span>
+</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
+</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
+</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
+</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
+</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
+</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">staging</span><span class="o">:</span>
+</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_staging</span>
+</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
+</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
+</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
+</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
+</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
+</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">production</span><span class="o">:</span>
+</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_production</span>
+</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
+</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
+</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
+</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
+</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
+</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>After refactor</strong><br/>
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>database.yml </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">defaults</span><span class="o">:</span> <span class="o">&amp;</span><span class="nx">amp</span><span class="p">;</span><span class="nx">defaults</span>
+</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
+</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
+</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
+</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
+</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">development</span><span class="o">:</span>
+</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_development</span>
+</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
+</span><span class='line'>  <span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="o">:</span> <span class="o">*</span><span class="nx">defaults</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">test</span><span class="o">:</span>
+</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_test</span>
+</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
+</span><span class='line'>  <span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="o">:</span> <span class="o">*</span><span class="nx">defaults</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">staging</span><span class="o">:</span>
+</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_staging</span>
+</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
+</span><span class='line'>  <span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="o">:</span> <span class="o">*</span><span class="nx">defaults</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">production</span><span class="o">:</span>
+</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_production</span>
+</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
+</span><span class='line'>  <span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="o">:</span> <span class="o">*</span><span class="nx">defaults</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+]]></content>
+  </entry>
+  
+</feed>
