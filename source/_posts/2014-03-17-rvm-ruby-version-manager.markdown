@@ -9,7 +9,7 @@ keywords: ruby, Ruby, RVM, Ruby Version Manager, RVM - Ruby Version Manager, Ins
 
 <img src="/images/rvm.png" width="300" />
 <p>
-  Ruby is a very popular programming language that has Ruby on Rails, or RoR, is a popular development framework that allows you to easily get your application up and running with minimal hassle.<br/>
+  Ruby is a very popular programming language that has Ruby on Rails or RoR is a popular development framework that allows you to easily get your application up and running with minimal hassle.<br/>
 </p>
 <p>
   Developing applications often times requires that you emulate different environments. Different versions of Ruby may be necessary for different projects. With conventional installations, this would impede your ability to be flexible.<br/>
