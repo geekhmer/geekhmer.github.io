@@ -78,9 +78,10 @@ MapDraggableMarker.prototype.init = function() {
   <script type="text/javascript" src="google_map_draggable.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
-      var lat = ($("#latitude").val() == "") ? 11.558831 : $("#latitude").val();
-      var lng = ($("#longitude").val() == "") ? 104.917445 : $("#longitude").val();
-      var mapDraggableMarker = new MapDraggableMarker($("#canvas")[0], lat, lng, 15, 6, $("#latitude"), $("#longitude"));
+      var lat = ($("#latitude").val() == "") ? 11.558831 : $("#latitude").val(),
+          lng = ($("#longitude").val() == "") ? 104.917445 : $("#longitude").val(),
+          mapDraggableMarker = new MapDraggableMarker($("#canvas")[0], lat, lng, 15, 6, $("#latitude"), $("#longitude"));
+          
       mapDraggableMarker.init();
     });
   </script>
