@@ -22,39 +22,44 @@ keywords: Google map, Google map draggable maker
   google_map_draggable_maker.js is a small library use to make google draggable easily:
 </p>
 {% codeblock google_map_draggable_maker.js lang:javascript %}
-  MapDraggableMarker = function(element, lat, lng, zoom, coordsLenght, elementLat, elementLng) {
-    this.element = element;
-    this.lat = lat;
-    this.lng = lng;
-    this.zoom = zoom;
-    this.coordsLenght = coordsLenght;
-    this.elementLat = elementLat;
-    this.elementLng = elementLng;
+// -------------------------------------------------------------------
+// @author Bunlong <bunlong.van@gmail>
+// Created :  6 Jun 2014 by Bunlong
+// -------------------------------------------------------------------
 
-    this.map = new google.maps.Map(element, {
-      zoom: this.zoom,
-      center: new google.maps.LatLng(this.lat, this.lng),
-      mapTypeId: google.maps.MapTypeId.ROADMAP
-    });
-    this.marker = new google.maps.Marker({
-      position: new google.maps.LatLng(this.lat, this.lng),
-      draggable: true
-    });
-  }
+MapDraggableMarker = function(element, lat, lng, zoom, coordsLenght, elementLat, elementLng) {
+  this.element = element;
+  this.lat = lat;
+  this.lng = lng;
+  this.zoom = zoom;
+  this.coordsLenght = coordsLenght;
+  this.elementLat = elementLat;
+  this.elementLng = elementLng;
 
-  MapDraggableMarker.prototype.addListenerToMarker = function() {
-    var self = this;
-    google.maps.event.addListener(this.marker, 'dragend', function(evt) {
-      self.elementLat.val(evt.latLng.lat().toFixed(self.coordsLenght));
-      self.elementLng.val(evt.latLng.lng().toFixed(self.coordsLenght));
-    });
-  }
+  this.map = new google.maps.Map(element, {
+    zoom: this.zoom,
+    center: new google.maps.LatLng(this.lat, this.lng),
+    mapTypeId: google.maps.MapTypeId.ROADMAP
+  });
+  this.marker = new google.maps.Marker({
+    position: new google.maps.LatLng(this.lat, this.lng),
+    draggable: true
+  });
+}
 
-  MapDraggableMarker.prototype.init = function() {
-    this.addListenerToMarker();
-    this.map.setCenter(this.marker.position);
-    this.marker.setMap(this.map);
-  }
+MapDraggableMarker.prototype.addListenerToMarker = function() {
+  var self = this;
+  google.maps.event.addListener(this.marker, 'dragend', function(evt) {
+    self.elementLat.val(evt.latLng.lat().toFixed(self.coordsLenght));
+    self.elementLng.val(evt.latLng.lng().toFixed(self.coordsLenght));
+  });
+}
+
+MapDraggableMarker.prototype.init = function() {
+  this.addListenerToMarker();
+  this.map.setCenter(this.marker.position);
+  this.marker.setMap(this.map);
+}
 {% endcodeblock %}
 
 <p>
