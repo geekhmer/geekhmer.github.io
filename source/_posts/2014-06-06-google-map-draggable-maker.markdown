@@ -19,7 +19,7 @@ keywords: Google map, Google map draggable maker
 </p>
 
 <p>
-  google_map_draggable_maker.js is a small library use to make google draggable easily:
+  google_map_draggable_maker.js is a small library use to make google map draggable easily:
 </p>
 {% codeblock google_map_draggable_maker.js lang:javascript %}
 // -------------------------------------------------------------------
@@ -41,6 +41,7 @@ MapDraggableMarker = function(element, lat, lng, zoom, coordsLenght, elementLat,
     center: new google.maps.LatLng(this.lat, this.lng),
     mapTypeId: google.maps.MapTypeId.ROADMAP
   });
+
   this.marker = new google.maps.Marker({
     position: new google.maps.LatLng(this.lat, this.lng),
     draggable: true
@@ -49,6 +50,7 @@ MapDraggableMarker = function(element, lat, lng, zoom, coordsLenght, elementLat,
 
 MapDraggableMarker.prototype.addListenerToMarker = function() {
   var self = this;
+  
   google.maps.event.addListener(this.marker, 'dragend', function(evt) {
     self.elementLat.val(evt.latLng.lat().toFixed(self.coordsLenght));
     self.elementLng.val(evt.latLng.lng().toFixed(self.coordsLenght));
