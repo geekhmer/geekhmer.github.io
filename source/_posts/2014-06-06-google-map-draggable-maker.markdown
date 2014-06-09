@@ -27,16 +27,18 @@ keywords: Google map, Google map draggable maker
 // Created :  6 Jun 2014 by Bunlong
 // -------------------------------------------------------------------
 
-MapDraggableMarker = function(element, lat, lng, zoom, coordsLenght, elementLat, elementLng) {
-  this.element = element;
-  this.lat = lat;
-  this.lng = lng;
-  this.zoom = zoom;
-  this.coordsLenght = coordsLenght;
-  this.elementLat = elementLat;
-  this.elementLng = elementLng;
+// options = {elementh, lat:, lng, zoom, coordsLenght, elementLat, elementLng}
 
-  this.map = new google.maps.Map(element, {
+MapDraggableMarker = function(options) {
+  this.element = options.element;
+  this.lat = options.lat;
+  this.lng = options.lng;
+  this.zoom = options.zoom;
+  this.coordsLenght = options.coordsLenght;
+  this.elementLat = options.elementLat;
+  this.elementLng = options.elementLng;
+
+  this.map = new google.maps.Map(this.element, {
     zoom: this.zoom,
     center: new google.maps.LatLng(this.lat, this.lng),
     mapTypeId: google.maps.MapTypeId.ROADMAP
@@ -77,12 +79,22 @@ MapDraggableMarker.prototype.init = function() {
   <link rel="stylesheet" href="styles.css" />
   <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
   <script type="text/javascript" src="jquery-1.11.1.min.js"></script>
-  <script type="text/javascript" src="google_map_draggable.js"></script>
+  <script type="text/javascript" src="google_map_draggable_maker.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
       var lat = ($("#latitude").val() == "") ? 11.558831 : $("#latitude").val(),
           lng = ($("#longitude").val() == "") ? 104.917445 : $("#longitude").val(),
-          mapDraggableMarker = new MapDraggableMarker($("#canvas")[0], lat, lng, 15, 6, $("#latitude"), $("#longitude"));
+          zoom = 15,
+          coordslenght = 6;
+
+          mapDraggableMarker = new MapDraggableMarker({ element: $("#canvas")[0], 
+                                                        lat: lat, 
+                                                        lng: lng, 
+                                                        zoom: zoom, 
+                                                        coordsLenght: coordslenght, 
+                                                        elementLat: $("#latitude"), 
+                                                        elementLng: $("#longitude")
+                                                      });
           
       mapDraggableMarker.init();
     });
