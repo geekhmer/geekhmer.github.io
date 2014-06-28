@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2014-06-28T08:15:53+07:00</updated>
+  <updated>2014-06-28T12:00:59+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,91 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Using Strong Parameters With Fields For &amp; Nested Forms in Rails 4]]></title>
+    <link href="http://geekhmer.github.io/blog/2014/06/28/using-strong-parameters-with-fields-for-and-nested-forms-in-rails-4/"/>
+    <updated>2014-06-28T11:48:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2014/06/28/using-strong-parameters-with-fields-for-and-nested-forms-in-rails-4</id>
+    <content type="html"><![CDATA[<p>
+  With strong_parameters becoming the standard way of handling security in Rails 4, I played around with it. It works great except the documentation isn’t clear on how to handle nested forms inside Rails, specifically with the accepts_nested_attributes_for in the model and fields_for in views.<br/>
+  So far so good, let take a look a short example below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>account.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Account</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:people</span>
+</span><span class='line'>  <span class="n">accepts_nested_attributes_for</span> <span class="ss">:people</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>person.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Person</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:account</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>accounts_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AccountsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">new</span>
+</span><span class='line'>    <span class="vi">@account</span> <span class="o">=</span> <span class="no">Account</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>    <span class="vi">@account</span><span class="o">.</span><span class="n">people</span><span class="o">.</span><span class="n">build</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="vi">@account</span> <span class="o">=</span> <span class="no">Account</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">new_account_params</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="vi">@account</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'>      <span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+</span><span class='line'>        <span class="nb">format</span><span class="o">.</span><span class="n">html</span> <span class="p">{</span><span class="n">redirect_to</span> <span class="n">root_path</span><span class="p">,</span> <span class="ss">notice</span><span class="p">:</span> <span class="s2">&quot;Account created successfully.&quot;</span><span class="p">}</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">new_account_params</span>
+</span><span class='line'>    <span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:account</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:id</span><span class="p">,</span> <span class="ss">:name</span><span class="p">,</span> <span class="n">people_attributes</span><span class="p">:</span> <span class="o">[</span><span class="ss">:id</span><span class="p">,</span> <span class="ss">:email</span><span class="p">,</span> <span class="ss">:password</span><span class="p">,</span> <span class="ss">:password_confirmation</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Why Ruby?]]></title>
@@ -2567,87 +2652,6 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[method_missing]]></title>
-    <link href="http://geekhmer.github.io/blog/2013/11/30/method-missing/"/>
-    <updated>2013-11-30T11:15:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2013/11/30/method-missing</id>
-    <content type="html"><![CDATA[<p>
-  method_missing use for creating dynamic methods.
-</p>
-
-
-
-
-<p>
-  <strong>example</strong><br/>
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>example </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Klass</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">method_missing</span><span class="p">(</span><span class="n">method_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">if</span> <span class="n">method_name</span><span class="o">.</span><span class="n">to_s</span> <span class="o">=~</span> <span class="sr">/^find_by_(.+)$/</span>
-</span><span class='line'>      <span class="n">run_find_by_method</span><span class="p">(</span><span class="vg">$1</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">else</span>
-</span><span class='line'>      <span class="k">super</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">run_find_by_method</span><span class="p">(</span><span class="n">attrs</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">attrs</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_and_&#39;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">attrs_with_args</span> <span class="o">=</span> <span class="o">[</span><span class="n">attrs</span><span class="p">,</span> <span class="n">args</span><span class="o">].</span><span class="n">transpose</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">conditions</span> <span class="o">=</span> <span class="no">Hash</span><span class="o">[</span><span class="n">attrs_with_args</span><span class="o">]</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-</span><span class='line'>    <span class="n">conditions</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="o">|</span>
-</span><span class='line'>      <span class="n">str</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">key</span><span class="si">}</span><span class="s2"> = &#39;</span><span class="si">#{</span><span class="n">value</span><span class="si">}</span><span class="s2">&#39; and &quot;</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nb">p</span> <span class="s2">&quot;select * from tbl where </span><span class="si">#{</span><span class="n">str</span><span class="o">[</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="o">-</span><span class="mi">6</span><span class="o">]</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">k</span> <span class="o">=</span> <span class="no">Klass</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'><span class="n">k</span><span class="o">.</span><span class="n">find_by_name</span><span class="p">(</span><span class="s2">&quot;Bunlong&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="n">k</span><span class="o">.</span><span class="n">find_by_name_and_email</span><span class="p">(</span><span class="s2">&quot;Bunlong&quot;</span><span class="p">,</span> <span class="s2">&quot;bunlong.van@gmail.com&quot;</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
 
 ]]></content>
   </entry>
