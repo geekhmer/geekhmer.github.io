@@ -12,6 +12,7 @@ description: test and behaviour driven development
   <strong>1. What is TDD/BDD?</strong><br/>
   Express expected behaviour before writing code.
 </p>
+
 <p>
   <strong>2. Why is TDD/BDD a good thing?</strong><br/>
   - Enjoy more efficient and predictable course of development.<br/>
@@ -20,18 +21,22 @@ description: test and behaviour driven development
   - Improve the design of our software.<br/>
   - Reliable document.
 </p>
+
 <p>
   <strong>3. How do we do TDD/BDD?</strong><br/>
   - Write test programs.<br/>
   - Run the tests automatically.<br/>
 </p>
+
 <p>
   <strong>Workflow/Processing</strong><br/>
 </p>
+
 <p> 
   TDD<br/>
   <a class="fancybox" href="/images/tdd.png"><img src="/images/tdd.png" /></a><br/>
 </p>
+
 <p>
   BDD<br/>
   <a class="fancybox" href="/images/tdd.png"><img src="/images/bdd.png" /></a>

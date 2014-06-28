@@ -8,10 +8,10 @@ keywords: block, what is block
 description: what is block?
 ---
 
-<!-- **Content start here** -->
 <p>
   A block is just a bit of code that can be executed. 
 </p>
+
 {% codeblock example lang:ruby %}
 [1, 2, 3].each { |num| puts num }
 
@@ -36,6 +36,7 @@ end
   A block is a piece of code that is declared but not run in the place it's written. 
   The idea is to run when to call it.
 </p>
+
 {% codeblock default block using yield lang:ruby %}
 def to_do
   yield

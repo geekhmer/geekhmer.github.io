@@ -8,7 +8,6 @@ keywords: define_singleton_method, define singleton method, ruby metaprogramming
 description: define singleton method
 ---
 
-<!-- **Content start here** -->
 <p>
   define_singleton_method use to define singleton method.
 </p>

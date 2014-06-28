@@ -8,7 +8,6 @@ keywords: include, extend, include_vs_extend, ruby
 description: include_vs_extend
 ---
 
-<!-- **Content start here** -->
 <p>
   <strong>include</strong><br/>
   include use for adding methods to an instance of a class.
@@ -17,6 +16,7 @@ description: include_vs_extend
 <p>
   <strong>example</strong><br/>
 </p>
+
 {% codeblock example lang:ruby %}
 module Foo
   def foo
@@ -42,6 +42,7 @@ Bar.foo # => NoMethodError: undefined method ‘foo’ for Bar:Class
 <p>
   <strong>example</strong><br/>
 </p>
+
 {% codeblock example lang:ruby %}
 module Foo
   def foo
@@ -69,6 +70,7 @@ bar.foo # => NoMethodError: undefined method ‘foo’ for #<Baz:0x1e708>
 <p>
   <strong>example</strong><br/>
 </p>
+
 {% codeblock example lang:ruby %}
 module Foo
   def self.included(base)

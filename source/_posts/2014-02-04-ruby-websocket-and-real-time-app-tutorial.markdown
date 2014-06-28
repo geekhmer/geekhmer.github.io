@@ -86,6 +86,7 @@ EventMachine.run {
 </body>
 </html>
 {% endcodeblock %}
+
 <p>
   Feel free to provide your suggestions and to point out errors.
 </p>

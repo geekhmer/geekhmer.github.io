@@ -12,7 +12,7 @@ keywords: top three front-end mvc framework, top front-end mvc framework, top th
 </p>
 
 <p>
-JavaScript MVC Frameworks are a big topic nowadays that we use JS to bind data, send it back between server and client and actually implement lots of logic, so we want to structure our code in the MVC or similar patterns. In this article I want to show the most front-end MVC framework:
+  JavaScript MVC Frameworks are a big topic nowadays that we use JS to bind data, send it back between server and client and actually implement lots of logic, so we want to structure our code in the MVC or similar patterns. In this article I want to show the most front-end MVC framework:
 </p>
 
 <p>

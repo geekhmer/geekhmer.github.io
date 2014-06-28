@@ -7,7 +7,9 @@ categories: Erlang
 keywords: Why Erlang?, Why Erlang, Erlang, Erlang programming language
 ---
 
-<img src="/images/logo_erlang.png" />
+<p>
+  <img src="/images/logo_erlang.png" />
+</p>
 
 <p>
   Erlang is a programming language traditionally used to build massively scalable soft real-time systems with requirements on high availability. Some of its uses are in telecoms, banking, e-commerce, computer telephony, realtime application and instant messaging. Erlang’s runtime system has built-in support for concurrency, distribution and fault tolerance.

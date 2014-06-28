@@ -8,7 +8,6 @@ keywords: abstractclass, abstract class, ruby metaprogramming
 description: abstract class
 ---
 
-<!-- **Content start here** -->
 {% codeblock example lang:ruby %}
 class AbstractKlass  
   def method_name  

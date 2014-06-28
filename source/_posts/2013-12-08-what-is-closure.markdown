@@ -8,19 +8,19 @@ keywords: closure, proc, lambda, what is closure, what is proc, what is lambda
 description: What is Closure, Proc and Lambda?
 ---
 
-<!-- **Content start here** -->
 <p>
-<strong>1. Closure</strong><br/>
-<strong>Closure</strong> is block of code/function/method that has two properties:<br/>
-- It can be passed around like an object (to be called later).<br/>
-- It remembers the values of all the variables that were in scope when the function was created, then it is able to access those variables when it is called.<br/><br/>
-<strong>Proc & Lambda</strong> are closure.
+  <strong>1. Closure</strong><br/>
+  <strong>Closure</strong> is block of code/function/method that has two properties:<br/>
+  - It can be passed around like an object (to be called later).<br/>
+  - It remembers the values of all the variables that were in scope when the function was created, then it is able to access those variables when it is called.<br/><br/>
+  <strong>Proc & Lambda</strong> are closure.
 </p>
 
 <p>
-<strong>2. Proc (Procedure)</strong><br/>
-Proc is a closure and an object that can be bound to a variable and reused.
+  <strong>2. Proc (Procedure)</strong><br/>
+  Proc is a closure and an object that can be bound to a variable and reused.
 </p>
+
 {% codeblock default proc lang:ruby %}
 p = Proc.new { puts "Hello Rubyist" }
 p.call # prints Hello Rubyist
@@ -65,11 +65,12 @@ to_do(a, b)
 {% endcodeblock %}
 
 <p>
-<strong>3. Lambda</strong><br/>
-Lambdas are a more strict form of Proc, something like:<br/>
-- Lambda are more strict with regard to argument checking.<br/>
-- Lambdas can return a value with the return keyword.
+  <strong>3. Lambda</strong><br/>
+  Lambdas are a more strict form of Proc, something like:<br/>
+  - Lambda are more strict with regard to argument checking.<br/>
+  - Lambdas can return a value with the return keyword.
 </p>
+
 {% codeblock default lambda lang:ruby %}
 l = lambda { puts "Hello Rubyist" }
 l.call # prints "Hello Rubyist"

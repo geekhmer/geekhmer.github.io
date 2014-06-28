@@ -21,6 +21,7 @@ keywords: Google map, Google map draggable maker
 <p>
   google_map_draggable_maker.js is a small library use to make google map draggable easily:
 </p>
+
 {% codeblock google_map_draggable_maker.js lang:javascript %}
 // -------------------------------------------------------------------
 // @author Bunlong <bunlong.van@gmail>

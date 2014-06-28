@@ -8,23 +8,26 @@ keywords: layout,grid layout,dynamic grid layout,masonry,dynamic grid layout wit
 description: dynamic grid layout with masonry
 ---
 
-<!-- **Content start here** -->
 <p>
   <strong>What is Masonry?</strong><br/>
   Masonry is a JavaScript grid layout library. It works by placing elements in optimal position based on available vertical space.
 </p>
+
 <p>
   <strong>Add JQuery & Masonry script</strong><br/>
   Add JQuery and Masonry script in head tag.
 </p>
+
 {% codeblock Add JQuery & Masonary script lang:html %}
 <script type="text/javascript" src="jquery-1.9.1.js"></script>
 <script type="text/javascript" src="masonry.pkgd.js"></script>
 {% endcodeblock %}
+
 <p>
   <strong>Create Item</strong><br/>
   All items are wrapped in a container.
 </p>
+
 {% codeblock Create Item lang:html %}
 <div id="container">
   <div class="box-item">Item1</div>
@@ -32,10 +35,12 @@ description: dynamic grid layout with masonry
   <div class="box-item">Item3</div>
 </div>
 {% endcodeblock %}
+
 <p>
   <strong>Create Item CSS style</strong><br/>
   Item style should be floated.
 </p>
+
 {% codeblock Create Item CSS style lang:html %}
 .box-item {
   width: 220px;
@@ -44,10 +49,12 @@ description: dynamic grid layout with masonry
   float: left;
 }
 {% endcodeblock %}
+
 <p>
   <strong>Run Masonry</strong><br/>
   The script to run Masonry.
 </p>
+
 {% codeblock Masongry script lang:html %}
 $(function(){
   $('#container').masonry({
@@ -55,9 +62,11 @@ $(function(){
   });
 });
 {% endcodeblock %}
+
 <p>
   <strong>Full Code</strong><br/>
 </p>
+
 {% codeblock Full Code lang:html %}
 <!doctype html>
 <html lang="en">
@@ -135,6 +144,7 @@ $(function(){
 </body>
 </html>
 {% endcodeblock %}
+
 <p>
   You can download the <a href="https://github.com/Bunlong/masonry" target="_blank">source code</a> and try it out.
 </p>

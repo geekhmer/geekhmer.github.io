@@ -8,48 +8,58 @@ keywords: deploy,heroku,ubuntu,ruby,ruby on rails,rails,deploy ruby on rails pro
 description: deploy ruby on rails project to heroku on ubuntu
 ---
 
-<!-- **Content start here** -->
 <p>
   <strong>1. Installation heroku environment <a href="https://toolbelt.heroku.com/">(www.toolbelt.heroku.com)</a></strong><br/>
   Open your terminal and type command below:<br/>
 </p>
+
 <p>
   1. <code>wget -qO- https://toolbelt.heroku.com/install.sh | sh</code><br/>
   2. <code>gem install heroku foreman</code><br/>
   3. <code>heroku login</code><br/>
 </p>
+
 <p>
   <strong>2.  Installation git<br/></strong>
   Open your terminal and type command below:<br/>
 </p>
+
 <p>
   1. <code>sudo apt-get install git-core</code><br/>
   2. <code>sudo apt-get install expat openssl zlib1g zlib1g-dev</code><br/>
 </p>
+
 <p>
   <strong>3. Create Ruby on Rails project<br/></strong>
   Open your terminal and type command below:<br/>
 </p>
+
 <p>
   <code>rails new app_name -d postgresql</code><br/>
 </p>
+
 <p>
   Then open Gemfile and add two gem below:
 </p>
+
 <p>
   <code>gem “heroku”</code><br/>
   <code>gem “thin”</code><br/>
 </p>
+
 <p>
   Open your terminal and type command below:<br/>
 </p>
+
 <p>
   <code>sudo apt-get install expat openssl zlib1g zlib1g-dev</code><br/>
 </p>
+
 <p>
   <strong>4. Deploy to heroku<br/></strong>
   Open your terminal and type command below:<br/>
 </p>
+
 <p>
   1. <code>cd project_name</code><br/>
   2. <code>git init</code><br/>
@@ -59,10 +69,12 @@ description: deploy ruby on rails project to heroku on ubuntu
   6. <code>heroku git:remote -a heroku_app_name</code><br/>
   7. <code>git push heroku master</code><br/>
 </p>
+
 <p>
   <strong>Each time you wish to deploy to Heroku<br/></strong>
   Open your terminal and type command below:<br/>
 </p>
+
 <p>
   1. <code>git add -A</code><br/>
   2. <code>git commit -m “commit for deploy to heroku”</code><br/>

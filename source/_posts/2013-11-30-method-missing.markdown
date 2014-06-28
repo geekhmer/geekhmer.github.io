@@ -8,13 +8,14 @@ keywords: method_missing, method missing, ruby
 description: method_missing
 ---
 
-<!-- **Content start here** -->
 <p>
   method_missing use for creating dynamic methods.
 </p>
+
 <p>
   <strong>example</strong><br/>
 </p>
+
 {% codeblock example lang:ruby %}
 class Klass
   def method_missing(method_name, *args, &block)
