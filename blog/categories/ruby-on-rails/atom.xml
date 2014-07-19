@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby on Rails | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby-on-rails/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2014-07-01T09:40:06+07:00</updated>
+  <updated>2014-07-19T08:26:05+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,204 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Useful Best Coding in Ruby on Rails Project]]></title>
+    <link href="http://geekhmer.github.io/blog/2014/07/17/useful-best-coding-in-ruby-on-rails-project/"/>
+    <updated>2014-07-17T22:24:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2014/07/17/useful-best-coding-in-ruby-on-rails-project</id>
+    <content type="html"><![CDATA[<p>
+  While a lot of techniques and libraries have come and gone as the community's preferred way of doing something, there are some best practices that remain, and can lead to writing the clean code, most secure and maintainable Ruby on Rails code possible.<br/><br/>
+  Listed here there are the most popular and useful best coding you can use as a Ruby on Rails developer:
+</p>
+
+
+
+
+<p>
+  <strong>Fat Model - Thin Controller</strong><br/>
+  The most important ways to write clear and concise cod in Ruby on Rails is "Fat Model - Thin Controller". Model and Controller are parts of MVC(Model - View - Controller), many logic should go in the Model, and Controller is a nice interface between the view and Model.<br/><br/>
+  In priactice, We should move any logic that isn't about the response(setting a flash message, redirect, render view) to the model instead of the controller, anyway we can reuse it where possible and make it possible for testing outside of the Controller.
+</p>
+
+
+
+
+<p>
+  Let look at sample example we have code in brands_controller.rb:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>brands_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>  <span class="vi">@brands</span> <span class="o">=</span> <span class="no">Brand</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">:products</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">products</span><span class="o">.</span><span class="n">category_uuid</span> <span class="o">=</span> <span class="p">?</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">AA43D840</span><span class="o">-</span><span class="no">C70B</span><span class="o">-</span><span class="mi">11</span><span class="no">E3</span><span class="o">-</span><span class="mi">9</span><span class="no">C51</span><span class="o">-</span><span class="no">B888E33867FC</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;)</span><span class="o">.</span><span class="n">uniq</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  We can refactor it like this:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>brands_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>  <span class="vi">@brands</span> <span class="o">=</span> <span class="no">Brand</span><span class="o">.</span><span class="n">find_brands_by_category</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">AA43D840</span><span class="o">-</span><span class="no">C70B</span><span class="o">-</span><span class="mi">11</span><span class="no">E3</span><span class="o">-</span><span class="mi">9</span><span class="no">C51</span><span class="o">-</span><span class="no">B888E33867FC</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Then we can move the logic into model brand.rb:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>brand.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">find_brands_by_category</span><span class="p">(</span><span class="n">uuid</span><span class="p">)</span>
+</span><span class='line'>  <span class="no">Brand</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">:products</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">products</span><span class="o">.</span><span class="n">category_uuid</span> <span class="o">=</span> <span class="p">?</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="n">uuid</span><span class="p">)</span><span class="o">.</span><span class="n">uniq</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  With the methods Brand.find_brands_by_category, we’ve not only made it simpler to test our code, we’ve also made it possible to reuse that same set of conditions in another location. But as we’ll see shortly, even this is still not ideal.
+</p>
+
+
+
+
+<p>
+  <strong>Reusable Scopes and Relations</strong><br/>
+  Ruby on Rails provides a better way -- scopes to avoid duplication condition in another methods.
+</p>
+
+
+
+
+<p>
+  Let look at sample example we have code in brands.rb:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>brand.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">scope</span> <span class="ss">:under_portal</span><span class="p">,</span> <span class="nb">lambda</span><span class="p">{</span> <span class="o">|</span><span class="n">portal_uuid</span><span class="o">|</span> <span class="n">where</span><span class="p">(</span><span class="n">portal_uuid</span><span class="p">:</span> <span class="n">portal_uuid</span><span class="p">)</span> <span class="k">unless</span> <span class="n">portal_uuid</span><span class="o">.</span><span class="n">blank?</span> <span class="p">}</span>
+</span><span class='line'><span class="n">scope</span> <span class="ss">:under_listing</span><span class="p">,</span> <span class="nb">lambda</span><span class="p">{</span> <span class="o">|</span><span class="n">alias_id</span><span class="o">|</span> <span class="n">where</span><span class="p">(</span><span class="n">listing_alias_id</span><span class="p">:</span> <span class="n">alias_id</span><span class="p">)</span> <span class="k">unless</span> <span class="n">alias_id</span><span class="o">.</span><span class="n">blank?</span> <span class="p">}</span>
+</span><span class='line'><span class="n">scope</span> <span class="ss">:under_category</span><span class="p">,</span> <span class="nb">lambda</span><span class="p">{</span> <span class="o">|</span><span class="n">category_uuid</span><span class="o">|</span> <span class="n">where</span><span class="p">(</span><span class="n">category_uuid</span><span class="p">:</span> <span class="n">category_uuid</span><span class="p">)</span> <span class="k">unless</span> <span class="n">category_uuid</span><span class="o">.</span><span class="n">blank?</span> <span class="p">}</span>
+</span><span class='line'><span class="n">scope</span> <span class="ss">:under_brand</span><span class="p">,</span> <span class="nb">lambda</span><span class="p">{</span> <span class="o">|</span><span class="n">brand_uuid</span><span class="o">|</span> <span class="n">where</span><span class="p">(</span><span class="n">brand_uuid</span><span class="p">:</span> <span class="n">brand_uuid</span><span class="p">)</span> <span class="k">unless</span> <span class="n">brand_uuid</span><span class="o">.</span><span class="n">blank?</span> <span class="p">}</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;def self.set_scope(portal_uuid, listing_alias_id, category_uuid=nil, brand_uuid=nil)</span>
+</span><span class='line'><span class="sr">  self.under_portal(portal_uuid).under_listing(listing_alias_id).under_category(category_uuid).under_brand(brand_uuid)</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>Virtual Attributes</strong><br/>
+  If you find that you’re manipulating data before passing it to a model (for example, converting the type of an object), it’s likely time you started structuring your code to take advantage of virtual attributes.<br/>
+</p>
+
+
+
+
+<p>
+  Virtual attributes are a very simple idea—essentially, all you’re doing is defining your own getter and setter methods.<br/>
+</p>
+
+
+
+
+<p>
+  Let look at sample example we have code:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>brand.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'><span class="vi">@user</span><span class="o">.</span><span class="n">first_name</span><span class="p">,</span> <span class="vi">@user</span><span class="o">.</span><span class="n">last_name</span> <span class="o">=</span> <span class="n">params</span><span class="o">[</span><span class="ss">:user</span><span class="o">][</span><span class="ss">:full_name</span><span class="o">].</span><span class="n">split</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span> <span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="mi">2</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  We could remove the second line, and instead add the following to our User model:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>brand.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">full_name</span><span class="o">=</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</span><span class='line'>  <span class="nb">self</span><span class="o">.</span><span class="n">first_name</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="n">last_name</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span> <span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="mi">2</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>Use the Built-in Ruby Duck Typing Methods</strong><br/>
+  Ruby uses several conventions that can make development easier like implementing a to_s instance method on an object will give you a standard way of getting a string representation of your object.
+</p>
+
+
+<p>
+  By implementing these standard type conversions—in addition to to_s, there’s also to_i for integers, let have a look at the following string interpolation:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>brand.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Hello</span> <span class="n">there</span><span class="p">,</span> <span class="c1">#{user.name}&amp;rdquo;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>Use Non-database-backed Models</strong><br/>
+  Although models in Rails are mostly based on ActiveRecord::Base or some other type of object mapper for a database, it’s important to remember that in MVC, the M isn’t restricted to database-backed models.
+</p>
+
+
+
+
+<p>
+  Using non-database-backed models can help to organize logic which might otherwise become muddy. For example, there are libraries that give you anActiveRecord-like interface for contact form emails.
+</p>
+
+
+
+
+<p>
+  When it comes time to interact with these models in your controller code, your code will be that much cleaner, as you can use the exact same approach as with database-backed models.
+</p>
+
+
+
+
+<p>
+  <strong>Package Your Code into Gems</strong><br/>
+  I you've used Ruby on Rails, you've noticed the wealth of rubygems available to Rails developers.
+  When you write code you think is general enough—which usually just means you’ve written it more than once before in another application, let extract it into a gem suitable for a wider range of purposes.<br/>
+</p>
+
+
+
+
+<p>
+  So far so good, there are hundreds of coding practices or techniques that can make your life as a Ruby on Rails developer easier, but I’ve tried to pick out some. :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Gems for Helping Speed Up Your Ruby on Rails Application]]></title>
