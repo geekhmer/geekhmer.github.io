@@ -3,7 +3,7 @@ layout: post
 title: "Deploy Ruby on Rails 4 to Heroku on Ubuntu"
 date: 2014-07-21 21:20
 comments: true
-categories: [Ruby, Heroku]
+categories: [Ruby, Heroku, Ruby on Rails]
 keywords: deploy,heroku,ubuntu,ruby,ruby on rails,rails,deploy ruby on rails project to heroku on ubuntu
 description: deploy ruby on rails 4 to heroku on ubuntu
 ---
