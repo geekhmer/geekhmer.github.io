@@ -184,7 +184,7 @@ class Coffee
   end
 
   def origin
-    "Colombia"
+    "Cambodia"
   end
 end
 
