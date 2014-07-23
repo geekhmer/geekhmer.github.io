@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2014-07-21T23:06:39+07:00</updated>
+  <updated>2014-07-23T08:23:39+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,394 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Decorator Design Pattern]]></title>
+    <link href="http://geekhmer.github.io/blog/2014/07/22/decorator-design-pattern/"/>
+    <updated>2014-07-22T20:10:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2014/07/22/decorator-design-pattern</id>
+    <content type="html"><![CDATA[<p>
+  In the object-oriented world, simple applications usually require small classes with static behaviors. Adding, modifying, and sharing those behaviors can be achieved by mixing in modules or inheriting from other classes at compile time.<br/>
+
+</p>
+
+
+
+
+<p>
+  However, more complex applications might require a particular instance of a class to gain additional functionality at runtime. To modify the behavior of an object dynamically, we can utilize the decorator design pattern.<br/>
+</p>
+
+
+
+
+<p>
+  <strong>When to Decorate</strong><br/>
+  Decoration can be used to add behavior to any individual object without affecting the behavior of other objects of the same class. Essentially the existing object is being wrapped with additional functionality. 
+</p>
+
+
+
+
+<p>
+  <strong>Some practical problems that can be solved by decoration are</strong><br/>
+  - applying one or more UI elements to a specific UI widget at runtime.<br/>
+  - saving an ActiveRecord model in various ways based on conditionals in a Rails controller.<br/>
+  - adding additional information to data streams by pre/appending with additional stream data.<br/>
+</p>
+
+
+
+
+<p>
+  <strong>Implementations of Decorators in Ruby</strong><br/>
+  There are several ways to implement the decorator pattern in Ruby, but I cover my 3 favorite ways:<br/>
+  - Class + Method Missing decorator<br/>
+  - Module + Extend + Super decorator<br/>
+  - Plain Old Ruby Object decorator<br/>
+</p>
+
+
+
+
+<p>
+  <strong>Class + Method Missing Decorator</strong><br/>
+  The benefits of this implementation are:<br/>
+  - can be wrapped infinitely using Ruby instantiation.<br/>
+  - delegates through all decorators.<br/>
+  - can use the same decorator more than once on the same component.<br/>
+  - transparently uses component&#8217;s original interface.<br/>
+</p>
+
+
+
+
+<p>
+  The drawbacks of this implementation are:<br/>
+  - uses method_missing.<br/>
+  - the class of the decorated object is the decorator.<br/>
+</p>
+
+
+
+
+<p>
+  Sample example
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>sample.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Decorator</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">decorated</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@decorated</span> <span class="o">=</span> <span class="n">decorated</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">method_missing</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="vi">@decorated</span><span class="o">.</span><span class="n">respond_to?</span><span class="p">(</span><span class="n">meth</span><span class="p">)</span>
+</span><span class='line'>      <span class="vi">@decorated</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="k">super</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">respond_to?</span><span class="p">(</span><span class="n">meth</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@decorated</span><span class="o">.</span><span class="n">respond_to?</span><span class="p">(</span><span class="n">meth</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Coffee</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="mi">2</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Milk</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Decorator</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="vi">@decorated</span><span class="o">.</span><span class="n">cost</span> <span class="o">+</span> <span class="mi">0</span><span class="o">.</span><span class="mi">4</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Whip</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Decorator</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="vi">@decorated</span><span class="o">.</span><span class="n">cost</span> <span class="o">+</span> <span class="mi">0</span><span class="o">.</span><span class="mi">2</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Sprinkles</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Decorator</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="vi">@decorated</span><span class="o">.</span><span class="n">cost</span> <span class="o">+</span> <span class="mi">0</span><span class="o">.</span><span class="mi">3</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Whip</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Coffee</span><span class="o">.</span><span class="n">new</span><span class="p">)</span><span class="o">.</span><span class="n">cost</span> <span class="c1">#=&gt; 2.2</span>
+</span><span class='line'><span class="no">Sprinkles</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Whip</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Milk</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Coffee</span><span class="o">.</span><span class="n">new</span><span class="p">)))</span><span class="o">.</span><span class="n">cost</span> <span class="c1">#=&gt; 2.9</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Factory class</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">CoffeeFactory</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">cappuccino</span>
+</span><span class='line'>    <span class="no">Sprinkles</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Cream</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Milk</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Coffee</span><span class="o">.</span><span class="n">new</span><span class="p">)))</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">CoffeeFactory</span><span class="o">.</span><span class="n">cappucino</span><span class="o">.</span><span class="n">kind_of?</span> <span class="no">Coffee</span> <span class="c1">#=&gt; true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Module + Extend + Super Decorator</strong><br/>
+  The benefits of this implementation are:<br/>
+  - it delegates through all decorators.<br/>
+  - has all of the original interface because it is the original object.<br/>
+</p>
+
+
+
+
+<p>
+  The drawbacks of this implementation are:<br/>
+  - can not use the same decorator more than once on the same object.<br/>
+  - difficult to tell which decorator added the functionality.<br/>
+</p>
+
+
+
+
+<p>
+  Sample example
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>sample.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Coffee</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="mi">2</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">module</span> <span class="nn">Milk</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="k">super</span> <span class="o">+</span> <span class="mi">0</span><span class="o">.</span><span class="mi">4</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">module</span> <span class="nn">Sugar</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="k">super</span> <span class="o">+</span> <span class="mi">0</span><span class="o">.</span><span class="mi">2</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">coffee</span> <span class="o">=</span> <span class="no">Coffee</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">coffee</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="no">Milk</span><span class="p">)</span>
+</span><span class='line'><span class="n">coffee</span><span class="o">.</span><span class="n">cost</span>   <span class="c1">#=&gt; 2.4</span>
+</span><span class='line'><span class="n">coffee</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="no">Sugar</span><span class="p">)</span>
+</span><span class='line'><span class="n">coffee</span><span class="o">.</span><span class="n">cost</span>   <span class="c1">#=&gt; 2.6</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Plain Old Ruby Object Decorator</strong><br/>
+  The benefits of this implementation are:<br/>
+  - can be wrapped infinitely using Ruby instantiation.<br/>
+  - delegates through all decorators.<br/>
+  - can use same decorator more than once on component.<br/>
+</p>
+
+
+
+
+<p>
+  The drawbacks of this implementation are:<br/>
+  - cannot transparently use component&#8217;s original interface.<br/>
+</p>
+
+
+
+
+<p>
+  Sample example
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>sample.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Coffee</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="mi">2</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">origin</span>
+</span><span class='line'>    <span class="s2">&quot;Colombia&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Sugar</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@component</span> <span class="o">=</span> <span class="n">component</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="vi">@component</span><span class="o">.</span><span class="n">cost</span> <span class="o">+</span> <span class="mi">0</span><span class="o">.</span><span class="mi">2</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Milk</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@component</span> <span class="o">=</span> <span class="n">component</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="vi">@component</span><span class="o">.</span><span class="n">cost</span> <span class="o">+</span> <span class="mi">0</span><span class="o">.</span><span class="mi">4</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">coffee</span> <span class="o">=</span> <span class="no">Coffee</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="no">Sugar</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Milk</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">coffee</span><span class="p">))</span><span class="o">.</span><span class="n">cost</span>  <span class="c1">#=&gt; 2.6</span>
+</span><span class='line'><span class="no">Sugar</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Sugar</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">coffee</span><span class="p">))</span><span class="o">.</span><span class="n">cost</span> <span class="c1">#=&gt; 2.4</span>
+</span><span class='line'><span class="no">Sugar</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Milk</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">coffee</span><span class="p">))</span><span class="o">.</span><span class="n">class</span> <span class="c1">#=&gt; Sugar</span>
+</span><span class='line'><span class="no">Milk</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">coffee</span><span class="p">)</span><span class="o">.</span><span class="n">origin</span>           <span class="c1">#=&gt; NoMethodError</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, Let decorate your way with Decorator Design Pattern. :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Deploy Ruby on Rails 4 to Heroku on Ubuntu]]></title>
@@ -2621,126 +3009,6 @@
 
 <p>
   <a class="fancybox" href="http://geekhmer.github.io/images/page_tab_resize_already.png"><img src="http://geekhmer.github.io/images/page_tab_resize_already.png" width="680" /></a><br/>
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[How to develop Facebook Page Tab?]]></title>
-    <link href="http://geekhmer.github.io/blog/2013/12/15/how-to-develop-facebook-page-tab/"/>
-    <updated>2013-12-15T11:01:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2013/12/15/how-to-develop-facebook-page-tab</id>
-    <content type="html"><![CDATA[<p>
-  One of the most interesting features of Apps on facebook.com is the ability for your apps (Facebook Page Tab) to be used within the context of a Facebook Fan Pages.<br/>
-</p>
-
-
-
-
-<p>
-  <strong>1. To create Facebook Page Tab go to the link <a href="https://developers.facebook.com/apps" target="_blank">https://developers.facebook.com/apps</a>.<br/></strong>
-  Then click button Create New App.
-</p>
-
-
-
-
-<p>
-  <a class="fancybox" href="http://geekhmer.github.io/images/create_new_app_button.png"><img src="http://geekhmer.github.io/images/create_new_app_button.png" width="680" /></a><br/>
-</p>
-
-
-
-
-<p>
-  <strong>2. Create New App</strong><br/>
-  Then enter App Name, App Namespace and choose Apps for Pages for App Category. And click button Continuce.
-</p>
-
-
-
-
-<p>
-  <a class="fancybox" href="http://geekhmer.github.io/images/create_new_app_popup.png"><img src="http://geekhmer.github.io/images/create_new_app_popup.png" width="680" /></a><br/>
-</p>
-
-
-
-
-<p>
-  <strong>3. Setting Basic</strong><br/>
-  Then select Website with Facebook Login and Page Tab to fill the information.<br/>
-</p>
-
-
-
-
-<p>
-  <a class="fancybox" href="http://geekhmer.github.io/images/app_basic_form.png"><img src="http://geekhmer.github.io/images/app_basic_form.png" width="680" /></a><br/>
-</p>
-
-
-
-
-<p>
-  <strong>4. Fill the information</strong><br/>
-  - With Website with Facebook Login, Enter your Site URL.<br/>
-  - With Page Tab, Enter your Page Tab Name, Page Tab URL, Secure Page Tab URL, Page Tab Edit URL and Page Tab Image. And click on button Save Changes. 
-</p>
-
-
-
-
-<p>
-  <a class="fancybox" href="http://geekhmer.github.io/images/setup_facebook_page_tab.png"><img src="http://geekhmer.github.io/images/setup_facebook_page_tab.png" width="680" /></a><br/>
-</p>
-
-
-
-
-<p>
-  <strong>5. Adding an Facebook Page Tab to a Page</strong><br/>
-  - As a Facebook Page Tab App developer, you can prompt users to install
-  your Page Tab App by including an &#8220;Install this Page Tab
-  App&#8221; link.<br/>
-  - http://www.facebook.com/dialog/pagetab?app_id=APP_ID&next=URL<br/>
-  - Where APP_ID and URL can be found in your app setting (<a href="https://developers.facebook.com/apps" target="_blank">https://developers.facebook.com/apps</a>).<br/>
-</p>
-
-
-
-
-<p>
-  <a class="fancybox" href="http://geekhmer.github.io/images/add_page_tab.png"><img src="http://geekhmer.github.io/images/add_page_tab.png" width="680" /></a><br/>
-</p>
-
-
-
-
-<p>
-  Then please go to your Facebook Fan Page, and click on your Page Tab.
-</p>
-
-
-
-
-<p>
-  <a class="fancybox" href="http://geekhmer.github.io/images/sample_facebook_fan_page.png"><img src="http://geekhmer.github.io/images/sample_facebook_fan_page.png" width="680" /></a><br/>
-</p>
-
-
-
-
-<p>
-  Enjoy it
-</p>
-
-
-
-
-<p>
-  <a class="fancybox" href="http://geekhmer.github.io/images/geekhmer_facebook_page_tab_content.png"><img src="http://geekhmer.github.io/images/geekhmer_facebook_page_tab_content.png" width="680" /></a><br/>
 </p>
 
 ]]></content>
