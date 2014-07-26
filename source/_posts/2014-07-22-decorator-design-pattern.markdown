@@ -30,10 +30,11 @@ keywords: ruby,design pattern,decorator design pattern
 
 <p>
   <strong>Implementations of Decorators in Ruby</strong><br/>
-  There are several ways to implement the decorator pattern in Ruby, but I cover my 3 favorite ways:<br/>
+  There are several ways to implement the decorator pattern in Ruby, but I cover my 4 favorite ways:<br/>
   - Class + Method Missing decorator<br/>
   - Module + Extend + Super decorator<br/>
   - Plain Old Ruby Object decorator<br/>
+  - SimpleDelegator + Super + Getobj decorator<br/>
 </p>
 
 <p>
@@ -213,6 +214,51 @@ Sugar.new(Milk.new(coffee)).cost  #=> 2.6
 Sugar.new(Sugar.new(coffee)).cost #=> 2.4
 Sugar.new(Milk.new(coffee)).class #=> Sugar
 Milk.new(coffee).origin           #=> NoMethodError
+{% endcodeblock %}
+
+<p>
+  <strong>SimpleDelegator + Super + Getobj</strong><br/>
+  The benefits of this implementation are:<br/>
+  - can be wrapped infinitely using Ruby instantiation.<br/>
+  - delegates through all decorators.<br/>
+  - can use same decorator more than once on component.<br/>
+  - transparently uses component's original interface.<br/>
+  - class if the component.<br/>
+</p>
+
+<p>
+  The drawbacks of this implementation are:<br/>
+  - it redefines class.<br/>
+</p>
+
+<p>
+  Sample example
+</p>
+
+{% codeblock sample.rb lang:ruby %}
+class Coffee
+  def cost
+    2
+  end
+
+  def origin
+    'Cambodia'
+  end
+end
+
+require 'delegate'
+
+class Decorator < SimpleDelegator
+  def class
+    __getobj__.class
+  end
+end
+
+class Milk < Decorator
+  def cost
+    super + 0.4
+  end
+end
 {% endcodeblock %}
 
 <p>
