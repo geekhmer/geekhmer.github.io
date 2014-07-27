@@ -16,7 +16,7 @@ keywords: websocket, ruby websocket, ruby websocket tutorial, ruby websocket rea
   In the part we focus on server part. In ruby we use eventmachine, em-websocket gem to install websocket server.<br/>
   To install eventmachine run <code>gem install eventmachine</code><br/>
   To install em-websocket run <code>gem install em-websocket</code><br/>
-  Make a file server.rb and implement codes below:<br/>
+  Make a file server.rb and implement codes below:
 </p>
 
 {% codeblock server.rb lang:ruby %}
@@ -49,7 +49,7 @@ EventMachine.run {
 <p>
   <strong>Websocket Client</strong><br/>
   So far, so good. But the main purpose of a websocket server is to get the message from client and relay data to the client. How do we do that? Turns out that is pretty simple too.<br/>
-  Make a file index.html and implement codes below:<br/>
+  Make a file index.html and implement codes below:
 </p>
 
 {% codeblock index.html lang:html %}

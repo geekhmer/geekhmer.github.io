@@ -5,7 +5,6 @@ date: 2013-11-30 09:16
 comments: true
 categories: [Ruby, Ruby Metaprogramming]
 keywords: define_singleton_method, define singleton method, ruby metaprogramming
-description: define singleton method
 ---
 
 <p>
@@ -13,8 +12,9 @@ description: define singleton method
 </p>
 
 <p>
-  <strong>example</strong><br/>
+  <strong>example</strong>
 </p>
+
 {% codeblock example lang:ruby %}
 class Sayer
   def self.shouts(*words)

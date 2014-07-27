@@ -4,8 +4,7 @@ title: "Test and Behaviour Driven Development (TDD/BDD)"
 date: 2013-10-12 00:36
 comments: true
 categories: [testing]
-keywords: tdd,bdd,tesing software,test driven development,behaviour driven development,testing,tdd workflow,tdd processing,bdd workflow,bdd processing
-description: test and behaviour driven development
+keywords: tdd, bdd, tesing software, test driven development, behaviour driven development, testing, tdd workflow, tdd processing, bdd workflow, bdd processing
 ---
 
 <p>
@@ -25,16 +24,16 @@ description: test and behaviour driven development
 <p>
   <strong>3. How do we do TDD/BDD?</strong><br/>
   - Write test programs.<br/>
-  - Run the tests automatically.<br/>
+  - Run the tests automatically.
 </p>
 
 <p>
-  <strong>Workflow/Processing</strong><br/>
+  <strong>Workflow/Processing</strong>
 </p>
 
 <p> 
   TDD<br/>
-  <a class="fancybox" href="/images/tdd.png"><img src="/images/tdd.png" /></a><br/>
+  <a class="fancybox" href="/images/tdd.png"><img src="/images/tdd.png" /></a>
 </p>
 
 <p>

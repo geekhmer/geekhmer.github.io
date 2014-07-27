@@ -12,11 +12,11 @@ keywords: ruby, Ruby, RVM, Ruby Version Manager, RVM - Ruby Version Manager, Ins
 </p>
 
 <p>
-  Ruby is a very popular programming language that has Ruby on Rails or RoR is a popular development framework that allows you to easily get your application up and running with minimal hassle.<br/>
+  Ruby is a very popular programming language that has Ruby on Rails or RoR is a popular development framework that allows you to easily get your application up and running with minimal hassle.
 </p>
 
 <p>
-  Developing applications often times requires that you emulate different environments. Different versions of Ruby may be necessary for different projects. With conventional installations, this would impede your ability to be flexible.<br/>
+  Developing applications often times requires that you emulate different environments. Different versions of Ruby may be necessary for different projects. With conventional installations, this would impede your ability to be flexible.
 </p>
 
 <p>
@@ -53,7 +53,7 @@ keywords: ruby, Ruby, RVM, Ruby Version Manager, RVM - Ruby Version Manager, Ins
 <p>
   <strong>Installing Rails</strong><br/>
   To install the latest Rails:<br/>
-  <code>gem install rails</code><br/>
+  <code>gem install rails</code>
 </p>
 
 <p>
@@ -67,7 +67,7 @@ keywords: ruby, Ruby, RVM, Ruby Version Manager, RVM - Ruby Version Manager, Ins
   <code>rvm gemset list_all</code><br/><br/>
   By default, you should have two gemsets configured:<br/>
   - default: the gemset that is applied if no other gemset is specified.<br/>
-  - global: this gemset is inherited by every other gemset that is used. This set generally does not need to be selected because it will be included automatically. You should install shared gems here.<br/>
+  - global: this gemset is inherited by every other gemset that is used. This set generally does not need to be selected because it will be included automatically. You should install shared gems here.
 </p>
 
 <p>

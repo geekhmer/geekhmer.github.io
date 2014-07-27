@@ -5,7 +5,6 @@ date: 2013-11-30 10:56
 comments: true
 categories: [Ruby, Ruby Metaprogramming]
 keywords: include, extend, include_vs_extend, ruby
-description: include_vs_extend
 ---
 
 <p>
@@ -14,7 +13,7 @@ description: include_vs_extend
 </p>
 
 <p>
-  <strong>example</strong><br/>
+  <strong>example</strong>
 </p>
 
 {% codeblock example lang:ruby %}
@@ -40,7 +39,7 @@ Bar.foo # => NoMethodError: undefined method ‘foo’ for Bar:Class
 </p>
 
 <p>
-  <strong>example</strong><br/>
+  <strong>example</strong>
 </p>
 
 {% codeblock example lang:ruby %}
@@ -68,7 +67,7 @@ bar.foo # => NoMethodError: undefined method ‘foo’ for #<Baz:0x1e708>
 </p>
 
 <p>
-  <strong>example</strong><br/>
+  <strong>example</strong>
 </p>
 
 {% codeblock example lang:ruby %}

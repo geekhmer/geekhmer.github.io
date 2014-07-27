@@ -15,7 +15,7 @@ keywords: Google map, Google map draggable maker
 </p>
 
 <p>
-  <strong>Practice</strong><br/>
+  <strong>Practice</strong>
 </p>
 
 <p>

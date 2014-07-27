@@ -19,14 +19,14 @@ keywords: Why Erlang?, Why Erlang, Erlang, Erlang programming language
   <strong>High Availability/Reliability</strong><br/>
   - Simple and consistent error recovery and supervision hierarchiess.<br/>
   - Built-in fault tolerance.<br/>
-  - Software upgrade (hot code loading) during runtime.<br/>
+  - Software upgrade (hot code loading) during runtime.
 </p>
 
 <p>
   <strong>Scalability/Heterogeneity</strong><br/>
   - Run on a variety of platforms, supports heterogeneous networks.<br/>
   - Network aware runtime, out-of-the-box distributed architectures.<br/>
-  - Lightweight processes, highly scalable transparent or explicit concurrency.<br/>
+  - Lightweight processes, highly scalable transparent or explicit concurrency.
 </p>
 
 <p>
@@ -34,7 +34,7 @@ keywords: Why Erlang?, Why Erlang, Erlang, Erlang programming language
   - Functional programming language, high abstraction level, concise readable programs.<br/>
   - 4–20 times less code compared to C/C++/Java.<br/>
   - Suitable for rapid prototyping.<br/>
-  - Powerful middleware and libraries (OTP).<br/>
+  - Powerful middleware and libraries (OTP).
 </p>
 
 <p>

@@ -4,8 +4,7 @@ title: "Acceptance/Feature test, Integration test, Unit test, Smoke test, Regres
 date: 2013-10-14 21:12
 comments: true
 categories: [testing]
-keywords: tesing software,testing,acceptance test,feature test,integration test,unit test,smoke test,regression test
-description: Acceptance/Feature test, Integration test, Unit test, Smoke test, Regression test
+keywords: tesing software, testing, acceptance test, feature test, integration test, unit test, smoke test, regression test
 ---
 
 <p>

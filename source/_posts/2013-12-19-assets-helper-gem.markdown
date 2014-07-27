@@ -30,7 +30,7 @@ description: assets_helper is the gem that use to include css and javascript by 
 
 <p>
   <strong>Usage</strong><br/>
-  1. Add <code>before_filter :include_css, :include_javascript</code> in application_controller.rb:<br/>
+  1. Add <code>before_filter :include_css, :include_javascript</code> in application_controller.rb:
 </p>
 
 {% codeblock application_controller.rb lang:ruby %}
@@ -42,7 +42,7 @@ end
 {% endcodeblock %}
 
 <p>
-  2. Add <code>= yield :asset</code> n your layout file (exp: application.html.haml):<br/>
+  2. Add <code>= yield :asset</code> n your layout file (exp: application.html.haml):
 </p>
 
 {% codeblock application.html.haml lang:ruby %}
@@ -62,7 +62,7 @@ end
 </p>
 
 <p>
-  4. Go to app/assets/javascripts and create a folder name homes like your controller (homes) you create below. And input javascript file that you use for controller homes in this folder ( app/assets/javascripts/homes ), and no need to include in application.js file.<br/>
+  4. Go to app/assets/javascripts and create a folder name homes like your controller (homes) you create below. And input javascript file that you use for controller homes in this folder ( app/assets/javascripts/homes ), and no need to include in application.js file.
 </p>
 
 <p>
@@ -74,13 +74,13 @@ end
 </p>
 
 <p>
-  <a class="fancybox" href="/images/css_homes.png"><img src="/images/css_homes.png" width="680" /></a><br/>
+  <a class="fancybox" href="/images/css_homes.png"><img src="/images/css_homes.png" width="680" /></a>
 </p>
 
 <p>
-  So whenever you run homes controller, it include only css and javascript file that you use for homes controller, and can make your project run fast.<br/>
+  So whenever you run homes controller, it include only css and javascript file that you use for homes controller, and can make your project run fast.
 </p>
 
 <p>
-  <a class="fancybox" href="/images/browser_homes_controller.png"><img src="/images/browser_homes_controller.png" width="680" /></a><br/>
+  <a class="fancybox" href="/images/browser_homes_controller.png"><img src="/images/browser_homes_controller.png" width="680" /></a>
 </p>

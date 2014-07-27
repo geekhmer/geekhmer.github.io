@@ -5,7 +5,6 @@ date: 2013-11-30 11:15
 comments: true
 categories: [Ruby, Ruby Metaprogramming]
 keywords: method_missing, method missing, ruby
-description: method_missing
 ---
 
 <p>
@@ -13,7 +12,7 @@ description: method_missing
 </p>
 
 <p>
-  <strong>example</strong><br/>
+  <strong>example</strong>
 </p>
 
 {% codeblock example lang:ruby %}

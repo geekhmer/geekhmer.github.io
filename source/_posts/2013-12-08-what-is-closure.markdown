@@ -5,7 +5,6 @@ date: 2013-12-08 17:02
 comments: true
 categories: [Ruby]
 keywords: closure, proc, lambda, what is closure, what is proc, what is lambda
-description: What is Closure, Proc and Lambda?
 ---
 
 <p>

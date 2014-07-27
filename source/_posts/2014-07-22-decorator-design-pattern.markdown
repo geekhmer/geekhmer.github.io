@@ -4,16 +4,15 @@ title: "Decorator Design Pattern"
 date: 2014-07-22 20:10
 comments: true
 categories: [Ruby, Design Pattern]
-keywords: ruby,design pattern,decorator design pattern
+keywords: ruby, design pattern, decorator design pattern
 ---
 
 <p>
-  In the object-oriented world, simple applications usually require small classes with static behaviors. Adding, modifying, and sharing those behaviors can be achieved by mixing in modules or inheriting from other classes at compile time.<br/>
-
+  In the object-oriented world, simple applications usually require small classes with static behaviors. Adding, modifying, and sharing those behaviors can be achieved by mixing in modules or inheriting from other classes at compile time.
 </p>
 
 <p>
-  However, more complex applications might require a particular instance of a class to gain additional functionality at runtime. To modify the behavior of an object dynamically, we can utilize the decorator design pattern.<br/>
+  However, more complex applications might require a particular instance of a class to gain additional functionality at runtime. To modify the behavior of an object dynamically, we can utilize the decorator design pattern.
 </p>
 
 <p>
@@ -25,7 +24,7 @@ keywords: ruby,design pattern,decorator design pattern
   <strong>Some practical problems that can be solved by decoration are</strong><br/>
   - applying one or more UI elements to a specific UI widget at runtime.<br/>
   - saving an ActiveRecord model in various ways based on conditionals in a Rails controller.<br/>
-  - adding additional information to data streams by pre/appending with additional stream data.<br/>
+  - adding additional information to data streams by pre/appending with additional stream data.
 </p>
 
 <p>
@@ -34,7 +33,7 @@ keywords: ruby,design pattern,decorator design pattern
   - Class + Method Missing decorator<br/>
   - Module + Extend + Super decorator<br/>
   - Plain Old Ruby Object decorator<br/>
-  - SimpleDelegator + Super + Getobj decorator<br/>
+  - SimpleDelegator + Super + Getobj decorator
 </p>
 
 <p>
@@ -43,13 +42,13 @@ keywords: ruby,design pattern,decorator design pattern
   - can be wrapped infinitely using Ruby instantiation.<br/>
   - delegates through all decorators.<br/>
   - can use the same decorator more than once on the same component.<br/>
-  - transparently uses component's original interface.<br/>
+  - transparently uses component's original interface.
 </p>
 
 <p>
   The drawbacks of this implementation are:<br/>
   - uses method_missing.<br/>
-  - the class of the decorated object is the decorator.<br/>
+  - the class of the decorated object is the decorator.
 </p>
 
 <p>
@@ -122,13 +121,13 @@ CoffeeFactory.cappucino.kind_of? Coffee #=> true
   <strong>Module + Extend + Super Decorator</strong><br/>
   The benefits of this implementation are:<br/>
   - it delegates through all decorators.<br/>
-  - has all of the original interface because it is the original object.<br/>
+  - has all of the original interface because it is the original object.
 </p>
 
 <p>
   The drawbacks of this implementation are:<br/>
   - can not use the same decorator more than once on the same object.<br/>
-  - difficult to tell which decorator added the functionality.<br/>
+  - difficult to tell which decorator added the functionality.
 </p>
 
 <p>
@@ -166,12 +165,12 @@ coffee.cost   #=> 2.6
   The benefits of this implementation are:<br/>
   - can be wrapped infinitely using Ruby instantiation.<br/>
   - delegates through all decorators.<br/>
-  - can use same decorator more than once on component.<br/>
+  - can use same decorator more than once on component.
 </p>
 
 <p>
   The drawbacks of this implementation are:<br/>
-  - cannot transparently use component's original interface.<br/>
+  - cannot transparently use component's original interface.
 </p>
 
 <p>
@@ -223,12 +222,12 @@ Milk.new(coffee).origin           #=> NoMethodError
   - delegates through all decorators.<br/>
   - can use same decorator more than once on component.<br/>
   - transparently uses component's original interface.<br/>
-  - class if the component.<br/>
+  - class if the component.
 </p>
 
 <p>
   The drawbacks of this implementation are:<br/>
-  - it redefines class.<br/>
+  - it redefines class.
 </p>
 
 <p>

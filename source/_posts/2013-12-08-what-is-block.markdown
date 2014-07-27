@@ -5,7 +5,6 @@ date: 2013-12-08 10:29
 comments: true
 categories: [Ruby]
 keywords: block, what is block
-description: what is block?
 ---
 
 <p>

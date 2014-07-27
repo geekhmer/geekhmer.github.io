@@ -4,8 +4,7 @@ title: "Dynamic Grid Layout with Masonry"
 date: 2013-10-21 00:35
 comments: true
 categories: [Layout]
-keywords: layout,grid layout,dynamic grid layout,masonry,dynamic grid layout with masonry
-description: dynamic grid layout with masonry
+keywords: layout, grid layout, dynamic grid layout, masonry, dynamic grid layout with masonry
 ---
 
 <p>
@@ -64,7 +63,7 @@ $(function(){
 {% endcodeblock %}
 
 <p>
-  <strong>Full Code</strong><br/>
+  <strong>Full Code</strong>
 </p>
 
 {% codeblock Full Code lang:html %}

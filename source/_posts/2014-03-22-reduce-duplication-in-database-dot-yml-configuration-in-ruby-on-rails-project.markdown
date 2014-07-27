@@ -9,11 +9,11 @@ keywords: Reduce duplication in database.yml, database.yml, Reduce duplication i
 
 <p>
   By default rails generate database.yml that have the same attributes in each environment. So to reduce duplication we use aliasing to essentially perform a hash merge on the fly in the code.<br/>
-  So far so good please take a look the below code.<br/>
+  So far so good please take a look the below code.
 </p>
 
 <p>
-  <strong>Before refactor</strong><br/>
+  <strong>Before refactor</strong>
 </p>
 
 {% codeblock database.yml lang:javascript %}
@@ -55,7 +55,7 @@ production:
 {% endcodeblock %}
 
 <p>
-  <strong>After refactor</strong><br/>
+  <strong>After refactor</strong>
 </p>
 
 {% codeblock database.yml lang:javascript %}

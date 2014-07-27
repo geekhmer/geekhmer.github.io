@@ -41,5 +41,5 @@ keywords: websocket, what is websocket?, benefit from webSocket, websocket benef
 
 <p>
   <strong>Processing</strong><br/><br/>
-  <a class="fancybox" href="/images/websocket_processing.png"><img src="/images/websocket_processing.png" width="680" /></a><br/>
+  <a class="fancybox" href="/images/websocket_processing.png"><img src="/images/websocket_processing.png" width="680" /></a>
 </p>

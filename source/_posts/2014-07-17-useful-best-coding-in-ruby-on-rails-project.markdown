@@ -21,6 +21,7 @@ keywords: Useful Best Coding in Ruby on Rails Project
 <p>
   Let look at sample example we have code in brands_controller.rb:
 </p>
+
 {% codeblock brands_controller.rb lang:ruby %}
 def index
   @brands = Brand.joins(:products).where('products.category_uuid = ?', 'AA43D840-C70B-11E3-9C51-B888E33867FC').uniq
@@ -30,6 +31,7 @@ end
 <p>
   We can refactor it like this:
 </p>
+
 {% codeblock brands_controller.rb lang:ruby %}
 def index
   @brands = Brand.find_brands_by_category('AA43D840-C70B-11E3-9C51-B888E33867FC')
@@ -39,6 +41,7 @@ end
 <p>
   Then we can move the logic into model brand.rb:
 </p>
+
 {% codeblock brand.rb lang:ruby %}
 def self.find_brands_by_category(uuid)
   Brand.joins(:products).where('products.category_uuid = ?', uuid).uniq
@@ -71,16 +74,17 @@ end
 
 <p>
   <strong>Virtual Attributes</strong><br/>
-  If you find that you’re manipulating data before passing it to a model (for example, converting the type of an object), it’s likely time you started structuring your code to take advantage of virtual attributes.<br/>
+  If you find that you’re manipulating data before passing it to a model (for example, converting the type of an object), it’s likely time you started structuring your code to take advantage of virtual attributes.
 </p>
 
 <p>
-  Virtual attributes are a very simple idea—essentially, all you’re doing is defining your own getter and setter methods.<br/>
+  Virtual attributes are a very simple idea—essentially, all you’re doing is defining your own getter and setter methods.
 </p>
 
 <p>
   Let look at sample example we have code:
 </p>
+
 {% codeblock brand.rb lang:ruby %}
 @user = User.new(params[:user])
 @user.first_name, @user.last_name = params[:user][:full_name].split(" ", 2)
@@ -89,6 +93,7 @@ end
 <p>
   We could remove the second line, and instead add the following to our User model:
 </p>
+
 {% codeblock brand.rb lang:ruby %}
 def full_name=(value)
   self.first_name, self.last_name = value.to_s.split(" ", 2)
@@ -99,9 +104,11 @@ end
   <strong>Use the Built-in Ruby Duck Typing Methods</strong><br/>
   Ruby uses several conventions that can make development easier like implementing a to_s instance method on an object will give you a standard way of getting a string representation of your object.
 </p>
+
 <p>
   By implementing these standard type conversions—in addition to to_s, there’s also to_i for integers, let have a look at the following string interpolation:
 </p>
+
 {% codeblock brand.rb lang:ruby %}
 "Hello there, #{user.name}"
 {% endcodeblock %}
@@ -122,7 +129,7 @@ end
 <p>
   <strong>Package Your Code into Gems</strong><br/>
   I you've used Ruby on Rails, you've noticed the wealth of rubygems available to Rails developers.
-  When you write code you think is general enough—which usually just means you’ve written it more than once before in another application, let extract it into a gem suitable for a wider range of purposes.<br/>
+  When you write code you think is general enough—which usually just means you’ve written it more than once before in another application, let extract it into a gem suitable for a wider range of purposes.
 </p>
 
 <p>

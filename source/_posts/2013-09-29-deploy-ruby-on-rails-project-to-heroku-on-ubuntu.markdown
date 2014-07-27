@@ -4,38 +4,37 @@ title: "Deploy Ruby on Rails Project to Heroku on Ubuntu"
 date: 2013-09-29 09:23
 comments: true
 categories: [Ruby, Heroku, Ruby on Rails]
-keywords: deploy,heroku,ubuntu,ruby,ruby on rails,rails,deploy ruby on rails project to heroku on ubuntu
-description: deploy ruby on rails project to heroku on ubuntu
+keywords: deploy, heroku, ubuntu, ruby, ruby on rails, rails, deploy ruby on rails project to heroku on ubuntu
 ---
 
 <p>
   <strong>1. Installation heroku environment <a href="https://toolbelt.heroku.com/">(www.toolbelt.heroku.com)</a></strong><br/>
-  Open your terminal and type command below:<br/>
+  Open your terminal and type command below:
 </p>
 
 <p>
   1. <code>wget -qO- https://toolbelt.heroku.com/install.sh | sh</code><br/>
   2. <code>gem install heroku foreman</code><br/>
-  3. <code>heroku login</code><br/>
+  3. <code>heroku login</code>
 </p>
 
 <p>
   <strong>2.  Installation git<br/></strong>
-  Open your terminal and type command below:<br/>
+  Open your terminal and type command below:
 </p>
 
 <p>
   1. <code>sudo apt-get install git-core</code><br/>
-  2. <code>sudo apt-get install expat openssl zlib1g zlib1g-dev</code><br/>
+  2. <code>sudo apt-get install expat openssl zlib1g zlib1g-dev</code>
 </p>
 
 <p>
   <strong>3. Create Ruby on Rails project<br/></strong>
-  Open your terminal and type command below:<br/>
+  Open your terminal and type command below:
 </p>
 
 <p>
-  <code>rails new app_name -d postgresql</code><br/>
+  <code>rails new app_name -d postgresql</code>
 </p>
 
 <p>
@@ -43,40 +42,40 @@ description: deploy ruby on rails project to heroku on ubuntu
 </p>
 
 <p>
-  <code>gem “heroku”</code><br/>
-  <code>gem “thin”</code><br/>
+  <code>gem "heroku"</code><br/>
+  <code>gem "thin"</code>
 </p>
 
 <p>
-  Open your terminal and type command below:<br/>
+  Open your terminal and type command below:
 </p>
 
 <p>
-  <code>sudo apt-get install expat openssl zlib1g zlib1g-dev</code><br/>
+  <code>sudo apt-get install expat openssl zlib1g zlib1g-dev</code>
 </p>
 
 <p>
   <strong>4. Deploy to heroku<br/></strong>
-  Open your terminal and type command below:<br/>
+  Open your terminal and type command below:
 </p>
 
 <p>
   1. <code>cd project_name</code><br/>
   2. <code>git init</code><br/>
   3. <code>git add .</code><br/>
-  4. <code>git commit -m “my first commit”</code><br/>
+  4. <code>git commit -m "my first commit"</code><br/>
   5. <code>heroku create heroku_app_name</code><br/>
   6. <code>heroku git:remote -a heroku_app_name</code><br/>
-  7. <code>git push heroku master</code><br/>
+  7. <code>git push heroku master</code>
 </p>
 
 <p>
   <strong>Each time you wish to deploy to Heroku<br/></strong>
-  Open your terminal and type command below:<br/>
+  Open your terminal and type command below:
 </p>
 
 <p>
   1. <code>git add -A</code><br/>
-  2. <code>git commit -m “commit for deploy to heroku”</code><br/>
-  3. <code>git push -f heroku</code><br/>
+  2. <code>git commit -m "commit for deploy to heroku"</code><br/>
+  3. <code>git push -f heroku</code>
 </p>

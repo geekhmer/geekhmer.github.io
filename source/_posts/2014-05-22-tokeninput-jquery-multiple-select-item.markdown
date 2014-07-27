@@ -17,7 +17,7 @@ keywords: javascript, jquery, tokeninput jquery multiple select item
 </p>
 
 <p>
-  <strong>Practice</strong><br/>
+  <strong>Practice</strong>
 </p>
 
 {% codeblock demo.html lang:javascript %}
