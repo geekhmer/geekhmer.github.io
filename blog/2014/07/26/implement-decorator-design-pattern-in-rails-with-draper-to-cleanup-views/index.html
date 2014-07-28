@@ -5,13 +5,13 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Deploy Ruby on Rails 4 to Heroku on Ubuntu - GeeKhmer</title>
+  <title>Implement Decorator Design Pattern in Rails with Draper to Cleanup Views - GeeKhmer</title>
   <meta name="author" content="Bunlong Van">
   
   
   <meta name="description" content="The website of computer programming Ruby, Ruby and Rails, Javascript and Erlang base in Cambodia.">
 
-  <meta name="keywords" content="deploy, heroku,ubuntu, ruby, ruby on rails, rails, deploy ruby on rails project to heroku on ubuntu">
+  <meta name="keywords" content="decorator pattern, decorator design pattern, draper, implement decorator design pattern in rails with draper to cleanup views">
 
   <!-- http://t.co/dKP3o1e -->
   <meta name="HandheldFriendly" content="True">
@@ -19,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://geekhmer.github.io/blog/2014/07/21/deploy-ruby-on-rails-4-to-heroku-on-ubuntu">
+  <link rel="canonical" href="http://geekhmer.github.io/blog/2014/07/26/implement-decorator-design-pattern-in-rails-with-draper-to-cleanup-views">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="" rel="alternate" title="GeeKhmer" type="application/atom+xml">
@@ -74,7 +74,7 @@
   
   <header>
     
-      <h1 class="entry-title">Deploy Ruby on Rails 4 to Heroku on Ubuntu</h1>
+      <h1 class="entry-title">Implement Decorator Design Pattern in Rails With Draper to Cleanup Views</h1>
     
     
       <p class="meta">
@@ -90,7 +90,7 @@
   
 
 
-<time datetime="2014-07-21T21:20:00+07:00" pubdate data-updated="true">Jul 21<span>st</span>, 2014</time>
+<time datetime="2014-07-26T21:29:00+07:00" pubdate data-updated="true">Jul 26<span>th</span>, 2014</time>
         
       </p>
     
@@ -98,224 +98,150 @@
 
 
 <div class="entry-content"><p>
-  Ruby on Rails is a popular web framework written in Ruby. In this artical covers using Rails 4 on Heroku. The many step for deploying Rails 4 to Heroku below:
+  Ruby on Rails is an awesome framework to build web application. Rails relies on the MVC pattern, and lots of conventions, code becomes complex to maintain, productivity start to decrease, etc.
 </p>
 
 
 
 
 <p>
-  <strong>1. Installation heroku environment <a href="https://toolbelt.heroku.com/">(www.toolbelt.heroku.com)</a></strong> &#8211; if you not yet have<br/>
-  Open your terminal and type command below:
+  We can find a lot of reasons to this(too much logic in controllers, fat models, lack of services layers, etc.), but I will just name one: logic in view, logic in view is bug prone, difficult to test, and can be a pain for front-end developers.
 </p>
 
 
 
 
 <p>
-  1. <code>wget -qO- https://toolbelt.heroku.com/install.sh | sh</code><br/>
-  2. <code>gem install heroku foreman</code><br/>
-  3. <code>heroku login</code>
+  Sample problem
 </p>
 
 
 
 
-<p>
-  <strong>2. Installation git</strong> &#8211; if you not yet have<br/>
-  Open your terminal and type command below:
-</p>
-
-
-
-
-<p>
-  1. <code>sudo apt-get install git-core</code><br/>
-  2. <code>sudo apt-get install expat openssl zlib1g zlib1g-dev</code>
-</p>
-
-
-
-
-<p>
-  <strong>3. Create Ruby on Rails project<br/></strong>
-  Open your terminal and type command below:
-</p>
-
-
-
-
-<p>
-  <code>rails new app_name -d postgresql</code>
-</p>
-
-
-
-
-<p>
-  Go into you project, Open your terminal and type command below:
-</p>
-
-
-
-
-<p>
-  <code>cd app_name</code>
-</p>
-
-
-
-
-<p>
-  We will first create a controller called welcome for our home page to live, Open your terminal and type command below:
-</p>
-
-
-
-
-<p>
-  <code>rails generate controller welcome</code>
-</p>
-
-
-
-
-<p>
-   Next then add an index page in directory app/views/welcome/index.html.erb
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>index.html.rb </span></figcaption>
+<figure class='code'><figcaption><span>articles_controller.rb </span></figcaption>
  <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;h2&gt;</span>Hello World<span class="nt">&lt;/h2&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="nt">&lt;p&gt;</span>
-</span><span class='line'>  The time is now: <span class="err">&lt;</span>%= Time.now %&gt;
-</span><span class='line'><span class="nt">&lt;/p&gt;</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ArticlesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>    <span class="vi">@article</span> <span class="o">=</span> <span class="no">Article</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 
 
-<p>
-  We need to have Rails route to index action. We’ll edit config/routes.rb
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>routes.rb </span></figcaption>
+<figure class='code'><figcaption><span>show.html.haml </span></figcaption>
  <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">root</span> <span class="s1">&#39;welcome#index&#39;</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">-</span> <span class="k">if</span> <span class="n">can?</span> <span class="ss">:update</span><span class="p">,</span> <span class="vi">@article</span> <span class="o">%&gt;</span>
+</span><span class='line'>  <span class="o">=</span> <span class="n">link_to</span> <span class="s2">&quot;Edit&quot;</span><span class="p">,</span> <span class="n">edit_article_path</span><span class="p">(</span><span class="vi">@article</span><span class="p">)</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 
 
 <p>
-  Let run the rails app and visiting http://localhost:3000 in your browser, Open your terminal and type command below:
+  Well, you got it, logic in view. And since rails don&#8217;t have view inheritance, this code will have to be copy-pasted over and over, I would rather have something like: <code>= @article.link_to_edit</code>
 </p>
 
 
 
 
 <p>
-  <code>rails server</code>
+  So, how can we remove logic from the view?
 </p>
 
 
 
 
 <p>
-  Then open Gemfile and add gems below at the end:
+  <strong>Decorator Design Pattern save the views</strong><br/>
+  As usual, we can find a solution with a pattern. the decorator design pattern will help us remove logic from views in our Rails applications.<br/>
+  The idea is to insert an object between the model and the view, well there is a good ruby gem is <a href="https://github.com/drapergem/draper" target="_blank">Draper</a> that work well.
 </p>
 
 
 
 
 <p>
-  <code>gem 'heroku'</code><br/>
-  <code>gem 'thin'</code><br/>
-  <code>gem 'rails_12factor', group: :production</code>
+  Let create a decorator for the Article class
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>article_decorator.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ArticleDecorator</span> <span class="o">&lt;</span> <span class="ss">Draper</span><span class="p">:</span><span class="ss">:Decorator</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">link_to_edit</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">h</span><span class="o">.</span><span class="n">can?</span> <span class="ss">:update</span><span class="p">,</span> <span class="n">object</span>
+</span><span class='line'>      <span class="n">h</span><span class="o">.</span><span class="n">link_to</span> <span class="s2">&quot;Edit&quot;</span><span class="p">,</span> <span class="n">h</span><span class="o">.</span><span class="n">edit_article_path</span><span class="p">(</span><span class="n">object</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>articles_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ArticlesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>    <span class="vi">@article</span> <span class="o">=</span> <span class="no">ArticleDecorator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Article</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">))</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>show.html.haml </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">=</span> <span class="vi">@article</span><span class="o">.</span><span class="n">link_to_edit</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  A few things to notice here. From the controller, we call the decorate method on a instance of article, this will return a decorated version of the article object.
 </p>
 
 
 
 
 <p>
-  Then open your terminal and type command below:
+  In the ArticleDecorator class, we have access to the decorated object with the object method and to all view helpers through the h object.<br/>
+  We can now call the link_to_edit method on the article object from our view, and the decorator will take care of the logic, and return a formatted link if the user has the right edit this resource, and nothing if he does not.
 </p>
 
 
 
 
 <p>
-  <code>bundle install</code>
+  The code is easier to test, we just instantiate a new instance of the ArticleDecorator, and check the output of the link_to_edit method. No need to test whole renderd view, searching through the DOM object tree.
 </p>
 
 
 
 
 <p>
-  Rails 4 requires Ruby 1.9.3 or above. Heroku has a recent version of Ruby installed, however you can specify an exact version by using the ruby DSL in your Gemfile by adding ruby &#8220;2.1.1&#8221; at the end of Gemfile. 
-</p>
-
-
-
-
-<p>
-  <code>ruby "2.1.1"</code>
-</p>
-
-
-
-
-<p>
-  <strong>4. Deploy to heroku<br/></strong>
-  Open your terminal and type command below:
-</p>
-
-
-
-
-<p>
-  1. <code>cd project_name</code><br/>
-  2. <code>git init</code><br/>
-  3. <code>git add .</code><br/>
-  4. <code>git commit -m “my first commit”</code><br/>
-  5. <code>heroku create heroku_app_name</code><br/>
-  6. <code>heroku git:remote -a heroku_app_name</code><br/>
-  7. <code>git push heroku master</code>
-</p>
-
-
-
-
-<p>
-  <strong>Each time you wish to deploy to Heroku<br/></strong>
-  Open your terminal and type command below:
-</p>
-
-
-
-
-<p>
-  1. <code>git add -A</code><br/>
-  2. <code>git commit -m “commit for deploy to heroku”</code><br/>
-  3. <code>git push -f heroku</code>
-</p>
-
-
-
-
-<p>
-  So far so good, You now have your first application deployed to Heroku. The next step is to deploy your own application. :)
+  So far so good, we gain code readablility, code reuse, better testing, and in addition, we even lost a few lines of duplicated code. :)
 </p>
 
 </div>
@@ -340,12 +266,12 @@
   
 
 
-<time datetime="2014-07-21T21:20:00+07:00" pubdate data-updated="true">Jul 21<span>st</span>, 2014</time>
+<time datetime="2014-07-26T21:29:00+07:00" pubdate data-updated="true">Jul 26<span>th</span>, 2014</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/heroku/'>Heroku</a>, <a class='category' href='/blog/categories/ruby/'>Ruby</a>, <a class='category' href='/blog/categories/ruby-on-rails/'>Ruby on Rails</a>
+    <a class='category' href='/blog/categories/ruby/'>Ruby</a>, <a class='category' href='/blog/categories/ruby-on-rails/'>Ruby on Rails</a>
   
 </span>
 
@@ -354,7 +280,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2014/07/21/deploy-ruby-on-rails-4-to-heroku-on-ubuntu/" data-via="" data-counturl="http://geekhmer.github.io/blog/2014/07/21/deploy-ruby-on-rails-4-to-heroku-on-ubuntu/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2014/07/26/implement-decorator-design-pattern-in-rails-with-draper-to-cleanup-views/" data-via="" data-counturl="http://geekhmer.github.io/blog/2014/07/26/implement-decorator-design-pattern-in-rails-with-draper-to-cleanup-views/" >Tweet</a>
   
   
   
@@ -365,10 +291,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/07/17/useful-best-coding-in-ruby-on-rails-project/" title="Previous Post: Useful Best Coding in Ruby on Rails Project">&laquo; Useful Best Coding in Ruby on Rails Project</a>
+        <a class="basic-alignment left" href="/blog/2014/07/24/vim-the-best-programming-editor-for-unix/" title="Previous Post: Vim - The Best Programming Editor for UNIX">&laquo; Vim - The Best Programming Editor for UNIX</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2014/07/22/decorator-design-pattern/" title="Next Post: Decorator Design Pattern">Decorator Design Pattern &raquo;</a>
       
     </p>
   </footer>

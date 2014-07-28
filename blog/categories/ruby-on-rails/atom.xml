@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby on Rails | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby-on-rails/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2014-07-26T08:53:41+07:00</updated>
+  <updated>2014-07-28T08:14:38+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,160 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Implement Decorator Design Pattern in Rails with Draper to Cleanup Views]]></title>
+    <link href="http://geekhmer.github.io/blog/2014/07/26/implement-decorator-design-pattern-in-rails-with-draper-to-cleanup-views/"/>
+    <updated>2014-07-26T21:29:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2014/07/26/implement-decorator-design-pattern-in-rails-with-draper-to-cleanup-views</id>
+    <content type="html"><![CDATA[<p>
+  Ruby on Rails is an awesome framework to build web application. Rails relies on the MVC pattern, and lots of conventions, code becomes complex to maintain, productivity start to decrease, etc.
+</p>
+
+
+
+
+<p>
+  We can find a lot of reasons to this(too much logic in controllers, fat models, lack of services layers, etc.), but I will just name one: logic in view, logic in view is bug prone, difficult to test, and can be a pain for front-end developers.
+</p>
+
+
+
+
+<p>
+  Sample problem
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>articles_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ArticlesController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@article = Article.find(params[:id])</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>show.html.haml </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span> <span class="k">if</span> <span class="n">can?</span> <span class="ss">:update</span><span class="p">,</span> <span class="vi">@article</span> <span class="o">%&gt;</span>
+</span><span class='line'>  <span class="o">=</span> <span class="n">link_to</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Edit</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="n">edit_article_path</span><span class="p">(</span><span class="vi">@article</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Well, you got it, logic in view. And since rails don't have view inheritance, this code will have to be copy-pasted over and over, I would rather have something like: <code>= @article.link_to_edit</code>
+</p>
+
+
+
+
+<p>
+  So, how can we remove logic from the view?
+</p>
+
+
+
+
+<p>
+  <strong>Decorator Design Pattern save the views</strong><br/>
+  As usual, we can find a solution with a pattern. the decorator design pattern will help us remove logic from views in our Rails applications.<br/>
+  The idea is to insert an object between the model and the view, well there is a good ruby gem is <a href="https://github.com/drapergem/draper" target="_blank">Draper</a> that work well.
+</p>
+
+
+
+
+<p>
+  Let create a decorator for the Article class
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>article_decorator.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ArticleDecorator</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">Draper</span><span class="p">:</span><span class="ss">:Decorator</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">link_to_edit</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;if h.can? :update, object</span>
+</span><span class='line'><span class="sr">  h.link_to &quot;Edit&quot;, h.edit_article_path(object)</span>
+</span><span class='line'><span class="sr">end</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>articles_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ArticlesController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@article = ArticleDecorator.new(Article.find(params[:id]))</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>show.html.haml </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">=</span> <span class="vi">@article</span><span class="o">.</span><span class="n">link_to_edit</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  A few things to notice here. From the controller, we call the decorate method on a instance of article, this will return a decorated version of the article object.
+</p>
+
+
+
+
+<p>
+  In the ArticleDecorator class, we have access to the decorated object with the object method and to all view helpers through the h object.<br/>
+  We can now call the link_to_edit method on the article object from our view, and the decorator will take care of the logic, and return a formatted link if the user has the right edit this resource, and nothing if he does not.
+</p>
+
+
+
+
+<p>
+  The code is easier to test, we just instantiate a new instance of the ArticleDecorator, and check the output of the link_to_edit method. No need to test whole renderd view, searching through the DOM object tree.
+</p>
+
+
+
+
+<p>
+  So far so good, we gain code readablility, code reuse, better testing, and in addition, we even lost a few lines of duplicated code. :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Deploy Ruby on Rails 4 to Heroku on Ubuntu]]></title>
@@ -27,7 +181,7 @@
 
 <p>
   <strong>1. Installation heroku environment <a href="https://toolbelt.heroku.com/">(www.toolbelt.heroku.com)</a></strong> -- if you not yet have<br/>
-  Open your terminal and type command below:<br/>
+  Open your terminal and type command below:
 </p>
 
 
@@ -36,7 +190,7 @@
 <p>
   1. <code>wget -qO- https://toolbelt.heroku.com/install.sh | sh</code><br/>
   2. <code>gem install heroku foreman</code><br/>
-  3. <code>heroku login</code><br/>
+  3. <code>heroku login</code>
 </p>
 
 
@@ -44,7 +198,7 @@
 
 <p>
   <strong>2. Installation git</strong> -- if you not yet have<br/>
-  Open your terminal and type command below:<br/>
+  Open your terminal and type command below:
 </p>
 
 
@@ -52,7 +206,7 @@
 
 <p>
   1. <code>sudo apt-get install git-core</code><br/>
-  2. <code>sudo apt-get install expat openssl zlib1g zlib1g-dev</code><br/>
+  2. <code>sudo apt-get install expat openssl zlib1g zlib1g-dev</code>
 </p>
 
 
@@ -60,28 +214,28 @@
 
 <p>
   <strong>3. Create Ruby on Rails project<br/></strong>
-  Open your terminal and type command below:<br/>
+  Open your terminal and type command below:
 </p>
 
 
 
 
 <p>
-  <code>rails new app_name -d postgresql</code><br/>
+  <code>rails new app_name -d postgresql</code>
 </p>
 
 
 
 
 <p>
-  Go into you project, Open your terminal and type command below:<br/>
+  Go into you project, Open your terminal and type command below:
 </p>
 
 
 
 
 <p>
-  <code>cd app_name</code><br/>
+  <code>cd app_name</code>
 </p>
 
 
@@ -95,14 +249,14 @@
 
 
 <p>
-  <code>rails generate controller welcome</code><br/>
+  <code>rails generate controller welcome</code>
 </p>
 
 
 
 
 <p>
-   Next then add an index page in directory app/views/welcome/index.html.erb<br/>
+   Next then add an index page in directory app/views/welcome/index.html.erb
 </p>
 
 
@@ -130,7 +284,7 @@
 </span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p><p>
-  We need to have Rails route to index action. We’ll edit config/routes.rb<br/>
+  We need to have Rails route to index action. We’ll edit config/routes.rb
 </p></p>
 
 <p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>routes.rb </span></figcaption>
@@ -143,21 +297,21 @@
 </p></p>
 
 <p><p>
-  <code>rails server</code><br/>
+  <code>rails server</code>
 </p></p>
 
 <p><p>
-  Then open Gemfile and add gems below at the end:<br/>
+  Then open Gemfile and add gems below at the end:
 </p></p>
 
 <p><p>
   <code>gem &lsquo;heroku&rsquo;</code><br/>
   <code>gem &lsquo;thin&rsquo;</code><br/>
-  <code>gem &lsquo;rails_12factor&rsquo;, group: :production</code></code>
+  <code>gem &lsquo;rails_12factor&rsquo;, group: :production</code>
 </p></p>
 
 <p><p>
-  Then open your terminal and type command below:<br/>
+  Then open your terminal and type command below:
 </p></p>
 
 <p><p>
@@ -169,12 +323,12 @@
 </p></p>
 
 <p><p>
-  <code>ruby &ldquo;2.1.1&rdquo;</code><br/>
+  <code>ruby &ldquo;2.1.1&rdquo;</code>
 </p></p>
 
 <p><p>
   <strong>4. Deploy to heroku<br/></strong>
-  Open your terminal and type command below:<br/>
+  Open your terminal and type command below:
 </p></p>
 
 <p><p>
@@ -184,18 +338,18 @@
   4. <code>git commit -m “my first commit”</code><br/>
   5. <code>heroku create heroku_app_name</code><br/>
   6. <code>heroku git:remote -a heroku_app_name</code><br/>
-  7. <code>git push heroku master</code><br/>
+  7. <code>git push heroku master</code>
 </p></p>
 
 <p><p>
   <strong>Each time you wish to deploy to Heroku<br/></strong>
-  Open your terminal and type command below:<br/>
+  Open your terminal and type command below:
 </p></p>
 
 <p><p>
   1. <code>git add -A</code><br/>
   2. <code>git commit -m “commit for deploy to heroku”</code><br/>
-  3. <code>git push -f heroku</code><br/><br/>
+  3. <code>git push -f heroku</code>
 </p></p>
 
 <p><p>
@@ -309,14 +463,14 @@
 
 <p>
   <strong>Virtual Attributes</strong><br/>
-  If you find that you’re manipulating data before passing it to a model (for example, converting the type of an object), it’s likely time you started structuring your code to take advantage of virtual attributes.<br/>
+  If you find that you’re manipulating data before passing it to a model (for example, converting the type of an object), it’s likely time you started structuring your code to take advantage of virtual attributes.
 </p>
 
 
 
 
 <p>
-  Virtual attributes are a very simple idea—essentially, all you’re doing is defining your own getter and setter methods.<br/>
+  Virtual attributes are a very simple idea—essentially, all you’re doing is defining your own getter and setter methods.
 </p>
 
 
@@ -354,6 +508,8 @@
 </p>
 
 
+
+
 <p>
   By implementing these standard type conversions—in addition to to_s, there’s also to_i for integers, let have a look at the following string interpolation:
 </p>
@@ -389,7 +545,7 @@
 <p>
   <strong>Package Your Code into Gems</strong><br/>
   I you've used Ruby on Rails, you've noticed the wealth of rubygems available to Rails developers.
-  When you write code you think is general enough—which usually just means you’ve written it more than once before in another application, let extract it into a gem suitable for a wider range of purposes.<br/>
+  When you write code you think is general enough—which usually just means you’ve written it more than once before in another application, let extract it into a gem suitable for a wider range of purposes.
 </p>
 
 
@@ -547,27 +703,6 @@
 </span><span class='line'>
 </span><span class='line'><span class="sr">&lt;p&gt;  end</span>
 </span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Autoload All Files in Lib Directory Ruby on Rails]]></title>
-    <link href="http://geekhmer.github.io/blog/2014/04/24/autoload-all-files-in-lib-directory-ruby-on-rails/"/>
-    <updated>2014-04-24T21:59:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2014/04/24/autoload-all-files-in-lib-directory-ruby-on-rails</id>
-    <content type="html"><![CDATA[<p>
-  In Ruby on Rails to create your own ruby library you have to create ruby library in /lib directory, so far so good to autoload all ruby library in /lib directory you have to add some code below in /config/application.rb.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>application.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">config</span><span class="p">.</span><span class="nx">autoload_paths</span> <span class="o">+=</span> <span class="o">%</span><span class="nx">W</span><span class="p">(</span><span class="err">#</span><span class="p">{</span><span class="nx">config</span><span class="p">.</span><span class="nx">root</span><span class="p">}</span><span class="o">/</span><span class="nx">lib</span><span class="p">)</span>
-</span><span class='line'><span class="nx">config</span><span class="p">.</span><span class="nx">autoload_paths</span> <span class="o">+=</span> <span class="nx">Dir</span><span class="p">[</span><span class="o">&amp;</span><span class="nx">ldquo</span><span class="p">;</span><span class="err">#</span><span class="p">{</span><span class="nx">config</span><span class="p">.</span><span class="nx">root</span><span class="p">}</span><span class="o">/</span><span class="nx">lib</span><span class="cm">/**/</span><span class="o">&amp;</span><span class="nx">rdquo</span><span class="p">;]</span>
-</span><span class='line'><span class="nx">config</span><span class="p">.</span><span class="nx">autoload_paths</span> <span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span> <span class="o">&amp;</span><span class="nx">ldquo</span><span class="p">;</span><span class="err">#</span><span class="p">{</span><span class="nx">config</span><span class="p">.</span><span class="nx">root</span><span class="p">}</span><span class="o">/</span><span class="nx">lib</span><span class="o">&amp;</span><span class="nx">rdquo</span><span class="p">;</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div></p>
 ]]></content>
   </entry>

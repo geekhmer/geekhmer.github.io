@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2014-07-26T08:53:41+07:00</updated>
+  <updated>2014-07-28T08:14:38+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -14,33 +14,188 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Implement Decorator Design Pattern in Rails with Draper to Cleanup Views]]></title>
+    <link href="http://geekhmer.github.io/blog/2014/07/26/implement-decorator-design-pattern-in-rails-with-draper-to-cleanup-views/"/>
+    <updated>2014-07-26T21:29:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2014/07/26/implement-decorator-design-pattern-in-rails-with-draper-to-cleanup-views</id>
+    <content type="html"><![CDATA[<p>
+  Ruby on Rails is an awesome framework to build web application. Rails relies on the MVC pattern, and lots of conventions, code becomes complex to maintain, productivity start to decrease, etc.
+</p>
+
+
+
+
+<p>
+  We can find a lot of reasons to this(too much logic in controllers, fat models, lack of services layers, etc.), but I will just name one: logic in view, logic in view is bug prone, difficult to test, and can be a pain for front-end developers.
+</p>
+
+
+
+
+<p>
+  Sample problem
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>articles_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ArticlesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>    <span class="vi">@article</span> <span class="o">=</span> <span class="no">Article</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>show.html.haml </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">-</span> <span class="k">if</span> <span class="n">can?</span> <span class="ss">:update</span><span class="p">,</span> <span class="vi">@article</span> <span class="o">%&gt;</span>
+</span><span class='line'>  <span class="o">=</span> <span class="n">link_to</span> <span class="s2">&quot;Edit&quot;</span><span class="p">,</span> <span class="n">edit_article_path</span><span class="p">(</span><span class="vi">@article</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Well, you got it, logic in view. And since rails don&#8217;t have view inheritance, this code will have to be copy-pasted over and over, I would rather have something like: <code>= @article.link_to_edit</code>
+</p>
+
+
+
+
+<p>
+  So, how can we remove logic from the view?
+</p>
+
+
+
+
+<p>
+  <strong>Decorator Design Pattern save the views</strong><br/>
+  As usual, we can find a solution with a pattern. the decorator design pattern will help us remove logic from views in our Rails applications.<br/>
+  The idea is to insert an object between the model and the view, well there is a good ruby gem is <a href="https://github.com/drapergem/draper" target="_blank">Draper</a> that work well.
+</p>
+
+
+
+
+<p>
+  Let create a decorator for the Article class
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>article_decorator.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ArticleDecorator</span> <span class="o">&lt;</span> <span class="ss">Draper</span><span class="p">:</span><span class="ss">:Decorator</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">link_to_edit</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">h</span><span class="o">.</span><span class="n">can?</span> <span class="ss">:update</span><span class="p">,</span> <span class="n">object</span>
+</span><span class='line'>      <span class="n">h</span><span class="o">.</span><span class="n">link_to</span> <span class="s2">&quot;Edit&quot;</span><span class="p">,</span> <span class="n">h</span><span class="o">.</span><span class="n">edit_article_path</span><span class="p">(</span><span class="n">object</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>articles_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ArticlesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>    <span class="vi">@article</span> <span class="o">=</span> <span class="no">ArticleDecorator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Article</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">))</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>show.html.haml </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">=</span> <span class="vi">@article</span><span class="o">.</span><span class="n">link_to_edit</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  A few things to notice here. From the controller, we call the decorate method on a instance of article, this will return a decorated version of the article object.
+</p>
+
+
+
+
+<p>
+  In the ArticleDecorator class, we have access to the decorated object with the object method and to all view helpers through the h object.<br/>
+  We can now call the link_to_edit method on the article object from our view, and the decorator will take care of the logic, and return a formatted link if the user has the right edit this resource, and nothing if he does not.
+</p>
+
+
+
+
+<p>
+  The code is easier to test, we just instantiate a new instance of the ArticleDecorator, and check the output of the link_to_edit method. No need to test whole renderd view, searching through the DOM object tree.
+</p>
+
+
+
+
+<p>
+  So far so good, we gain code readablility, code reuse, better testing, and in addition, we even lost a few lines of duplicated code. :)
+</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Vim - The Best Programming Editor for UNIX]]></title>
     <link href="http://geekhmer.github.io/blog/2014/07/24/vim-the-best-programming-editor-for-unix/"/>
     <updated>2014-07-24T12:20:00+07:00</updated>
     <id>http://geekhmer.github.io/blog/2014/07/24/vim-the-best-programming-editor-for-unix</id>
     <content type="html"><![CDATA[<p>
-  <a class="fancybox" href="http://geekhmer.github.io/images/vim.png"><img src="http://geekhmer.github.io/images/vim.png" width="680" /></a><br/>
+  <a class="fancybox" href="http://geekhmer.github.io/images/vim.png"><img src="http://geekhmer.github.io/images/vim.png" width="680" /></a>
 </p>
 
 
 
 
 <p>
-  Vim is an advanced text editor that provide the power of Unix editor &#8216;Vi&#8217;, with a more complete feature set.<br/>
+  Vim is an advanced text editor that provide the power of Unix editor &#8216;Vi&#8217;, with a more complete feature set.
 </p>
 
 
 
 
 <p>
-  Vim is a highly configurable text editor built to enable efficient text editing. It is an improved version of the vi editor distributed with most UNIX systems.<br/>
+  Vim is a highly configurable text editor built to enable efficient text editing. It is an improved version of the vi editor distributed with most UNIX systems.
 </p>
 
 
 
 
 <p>
-  Vim is often called a &#8220;programmer&#8217;s editor,&#8221; and so useful for programming that many consider it an entire IDE. It&#8217;s not just for programmers, Vim is perfect for all kinds of text editing, from composing email to editing configuration files.<br/>
+  Vim is often called a &#8220;programmer&#8217;s editor,&#8221; and so useful for programming that many consider it an entire IDE. It&#8217;s not just for programmers, Vim is perfect for all kinds of text editing, from composing email to editing configuration files.
 </p>
 
 
@@ -64,7 +219,7 @@
 <p>
   <strong>The Good</strong><br/>
   Vim is a professional text editor targeting mainly programmers, but it can be also used by any other type of user.<br/>
-  It received the best text editor award from readers of the Linux Journal magazine in 2001, 2002, 2003 , 2004 and 2005, which I think tells a lot about its efficiency. 
+  It received the best text editor award from readers of the Linux Journal magazine in 2001, 2002, 2003 , 2004 and 2005, which I think tells a lot about its efficiency.
 </p>
 
 
@@ -72,7 +227,7 @@
 
 <p>
   <strong>The Bad</strong><br/>
-  The bad and ugly part about Vim would be for most users the fact that they must do the learning first in order to be able to use it.<br/>
+  The bad and ugly part about Vim would be for most users the fact that they must do the learning first in order to be able to use it.
 </p>
 
 
@@ -99,15 +254,14 @@
     <updated>2014-07-22T20:10:00+07:00</updated>
     <id>http://geekhmer.github.io/blog/2014/07/22/decorator-design-pattern</id>
     <content type="html"><![CDATA[<p>
-  In the object-oriented world, simple applications usually require small classes with static behaviors. Adding, modifying, and sharing those behaviors can be achieved by mixing in modules or inheriting from other classes at compile time.<br/>
-
+  In the object-oriented world, simple applications usually require small classes with static behaviors. Adding, modifying, and sharing those behaviors can be achieved by mixing in modules or inheriting from other classes at compile time.
 </p>
 
 
 
 
 <p>
-  However, more complex applications might require a particular instance of a class to gain additional functionality at runtime. To modify the behavior of an object dynamically, we can utilize the decorator design pattern.<br/>
+  However, more complex applications might require a particular instance of a class to gain additional functionality at runtime. To modify the behavior of an object dynamically, we can utilize the decorator design pattern.
 </p>
 
 
@@ -125,7 +279,7 @@
   <strong>Some practical problems that can be solved by decoration are</strong><br/>
   - applying one or more UI elements to a specific UI widget at runtime.<br/>
   - saving an ActiveRecord model in various ways based on conditionals in a Rails controller.<br/>
-  - adding additional information to data streams by pre/appending with additional stream data.<br/>
+  - adding additional information to data streams by pre/appending with additional stream data.
 </p>
 
 
@@ -137,7 +291,7 @@
   - Class + Method Missing decorator<br/>
   - Module + Extend + Super decorator<br/>
   - Plain Old Ruby Object decorator<br/>
-  - SimpleDelegator + Super + Getobj decorator<br/>
+  - SimpleDelegator + Super + Getobj decorator
 </p>
 
 
@@ -149,7 +303,7 @@
   - can be wrapped infinitely using Ruby instantiation.<br/>
   - delegates through all decorators.<br/>
   - can use the same decorator more than once on the same component.<br/>
-  - transparently uses component&#8217;s original interface.<br/>
+  - transparently uses component&#8217;s original interface.
 </p>
 
 
@@ -158,7 +312,7 @@
 <p>
   The drawbacks of this implementation are:<br/>
   - uses method_missing.<br/>
-  - the class of the decorated object is the decorator.<br/>
+  - the class of the decorated object is the decorator.
 </p>
 
 
@@ -299,7 +453,7 @@
   <strong>Module + Extend + Super Decorator</strong><br/>
   The benefits of this implementation are:<br/>
   - it delegates through all decorators.<br/>
-  - has all of the original interface because it is the original object.<br/>
+  - has all of the original interface because it is the original object.
 </p>
 
 
@@ -308,7 +462,7 @@
 <p>
   The drawbacks of this implementation are:<br/>
   - can not use the same decorator more than once on the same object.<br/>
-  - difficult to tell which decorator added the functionality.<br/>
+  - difficult to tell which decorator added the functionality.
 </p>
 
 
@@ -378,7 +532,7 @@
   The benefits of this implementation are:<br/>
   - can be wrapped infinitely using Ruby instantiation.<br/>
   - delegates through all decorators.<br/>
-  - can use same decorator more than once on component.<br/>
+  - can use same decorator more than once on component.
 </p>
 
 
@@ -386,7 +540,7 @@
 
 <p>
   The drawbacks of this implementation are:<br/>
-  - cannot transparently use component&#8217;s original interface.<br/>
+  - cannot transparently use component&#8217;s original interface.
 </p>
 
 
@@ -482,7 +636,7 @@
   - delegates through all decorators.<br/>
   - can use same decorator more than once on component.<br/>
   - transparently uses component&#8217;s original interface.<br/>
-  - class if the component.<br/>
+  - class if the component.
 </p>
 
 
@@ -490,7 +644,7 @@
 
 <p>
   The drawbacks of this implementation are:<br/>
-  - it redefines class.<br/>
+  - it redefines class.
 </p>
 
 
@@ -576,7 +730,7 @@
 
 <p>
   <strong>1. Installation heroku environment <a href="https://toolbelt.heroku.com/">(www.toolbelt.heroku.com)</a></strong> &#8211; if you not yet have<br/>
-  Open your terminal and type command below:<br/>
+  Open your terminal and type command below:
 </p>
 
 
@@ -585,7 +739,7 @@
 <p>
   1. <code>wget -qO- https://toolbelt.heroku.com/install.sh | sh</code><br/>
   2. <code>gem install heroku foreman</code><br/>
-  3. <code>heroku login</code><br/>
+  3. <code>heroku login</code>
 </p>
 
 
@@ -593,7 +747,7 @@
 
 <p>
   <strong>2. Installation git</strong> &#8211; if you not yet have<br/>
-  Open your terminal and type command below:<br/>
+  Open your terminal and type command below:
 </p>
 
 
@@ -601,7 +755,7 @@
 
 <p>
   1. <code>sudo apt-get install git-core</code><br/>
-  2. <code>sudo apt-get install expat openssl zlib1g zlib1g-dev</code><br/>
+  2. <code>sudo apt-get install expat openssl zlib1g zlib1g-dev</code>
 </p>
 
 
@@ -609,28 +763,28 @@
 
 <p>
   <strong>3. Create Ruby on Rails project<br/></strong>
-  Open your terminal and type command below:<br/>
+  Open your terminal and type command below:
 </p>
 
 
 
 
 <p>
-  <code>rails new app_name -d postgresql</code><br/>
+  <code>rails new app_name -d postgresql</code>
 </p>
 
 
 
 
 <p>
-  Go into you project, Open your terminal and type command below:<br/>
+  Go into you project, Open your terminal and type command below:
 </p>
 
 
 
 
 <p>
-  <code>cd app_name</code><br/>
+  <code>cd app_name</code>
 </p>
 
 
@@ -644,14 +798,14 @@
 
 
 <p>
-  <code>rails generate controller welcome</code><br/>
+  <code>rails generate controller welcome</code>
 </p>
 
 
 
 
 <p>
-   Next then add an index page in directory app/views/welcome/index.html.erb<br/>
+   Next then add an index page in directory app/views/welcome/index.html.erb
 </p>
 
 
@@ -674,7 +828,7 @@
 
 
 <p>
-  We need to have Rails route to index action. We’ll edit config/routes.rb<br/>
+  We need to have Rails route to index action. We’ll edit config/routes.rb
 </p>
 
 
@@ -696,14 +850,14 @@
 
 
 <p>
-  <code>rails server</code><br/>
+  <code>rails server</code>
 </p>
 
 
 
 
 <p>
-  Then open Gemfile and add gems below at the end:<br/>
+  Then open Gemfile and add gems below at the end:
 </p>
 
 
@@ -712,14 +866,14 @@
 <p>
   <code>gem 'heroku'</code><br/>
   <code>gem 'thin'</code><br/>
-  <code>gem 'rails_12factor', group: :production</code></code>
+  <code>gem 'rails_12factor', group: :production</code>
 </p>
 
 
 
 
 <p>
-  Then open your terminal and type command below:<br/>
+  Then open your terminal and type command below:
 </p>
 
 
@@ -740,7 +894,7 @@
 
 
 <p>
-  <code>ruby "2.1.1"</code><br/>
+  <code>ruby "2.1.1"</code>
 </p>
 
 
@@ -748,7 +902,7 @@
 
 <p>
   <strong>4. Deploy to heroku<br/></strong>
-  Open your terminal and type command below:<br/>
+  Open your terminal and type command below:
 </p>
 
 
@@ -761,7 +915,7 @@
   4. <code>git commit -m “my first commit”</code><br/>
   5. <code>heroku create heroku_app_name</code><br/>
   6. <code>heroku git:remote -a heroku_app_name</code><br/>
-  7. <code>git push heroku master</code><br/>
+  7. <code>git push heroku master</code>
 </p>
 
 
@@ -769,7 +923,7 @@
 
 <p>
   <strong>Each time you wish to deploy to Heroku<br/></strong>
-  Open your terminal and type command below:<br/>
+  Open your terminal and type command below:
 </p>
 
 
@@ -778,7 +932,7 @@
 <p>
   1. <code>git add -A</code><br/>
   2. <code>git commit -m “commit for deploy to heroku”</code><br/>
-  3. <code>git push -f heroku</code><br/><br/>
+  3. <code>git push -f heroku</code>
 </p>
 
 
@@ -916,14 +1070,14 @@
 
 <p>
   <strong>Virtual Attributes</strong><br/>
-  If you find that you’re manipulating data before passing it to a model (for example, converting the type of an object), it’s likely time you started structuring your code to take advantage of virtual attributes.<br/>
+  If you find that you’re manipulating data before passing it to a model (for example, converting the type of an object), it’s likely time you started structuring your code to take advantage of virtual attributes.
 </p>
 
 
 
 
 <p>
-  Virtual attributes are a very simple idea—essentially, all you’re doing is defining your own getter and setter methods.<br/>
+  Virtual attributes are a very simple idea—essentially, all you’re doing is defining your own getter and setter methods.
 </p>
 
 
@@ -971,6 +1125,8 @@
 </p>
 
 
+
+
 <p>
   By implementing these standard type conversions—in addition to to_s, there’s also to_i for integers, let have a look at the following string interpolation:
 </p>
@@ -1011,7 +1167,7 @@
 <p>
   <strong>Package Your Code into Gems</strong><br/>
   I you&#8217;ve used Ruby on Rails, you&#8217;ve noticed the wealth of rubygems available to Rails developers.
-  When you write code you think is general enough—which usually just means you’ve written it more than once before in another application, let extract it into a gem suitable for a wider range of purposes.<br/>
+  When you write code you think is general enough—which usually just means you’ve written it more than once before in another application, let extract it into a gem suitable for a wider range of purposes.
 </p>
 
 
@@ -1288,7 +1444,7 @@
 
 
 <p>
-  <strong>Ruby is free</strong><br/>
+  <strong>Ruby is free</strong>
 </p>
 
 
@@ -1530,7 +1686,7 @@
 
 
 <p>
-  Mixins also support arguments:<br/>
+  Mixins also support arguments:
 </p>
 
 
@@ -1573,7 +1729,7 @@
 
 
 <p>
-  In combination:<br/>
+  In combination:
 </p>
 
 
@@ -1683,7 +1839,7 @@
   - Mark up should be Dry (Because Too much repetition in HTML and template engines like ERB).<br/>
   - Mark up should be well-indented.<br/>
   - Mark up structure should be clear.<br/>
-  - Haml to the rescue:<br/>
+  - Haml to the rescue:
 </p>
 
 
@@ -1797,7 +1953,7 @@
   <strong>Dynamic HAML</strong><br/>
   &ndash; We use the &ldquo; = &rdquo; sign to evaluate dynamic code and assign the value to the desired tag.<br/>
   &ndash; We use the &ldquo; &ndash; &rdquo; sign to run code without appending a value to any tag.<br/>
-  &ndash; We use Ruby interpolation to mix static and dynamic strings.<br/>
+  &ndash; We use Ruby interpolation to mix static and dynamic strings.
 </p></p>
 
 <p><figure class='code'><figcaption><span>In HAML </span></figcaption>
@@ -1844,7 +2000,7 @@
   <strong>High Availability/Reliability</strong><br/>
   - Simple and consistent error recovery and supervision hierarchiess.<br/>
   - Built-in fault tolerance.<br/>
-  - Software upgrade (hot code loading) during runtime.<br/>
+  - Software upgrade (hot code loading) during runtime.
 </p>
 
 
@@ -1854,7 +2010,7 @@
   <strong>Scalability/Heterogeneity</strong><br/>
   - Run on a variety of platforms, supports heterogeneous networks.<br/>
   - Network aware runtime, out-of-the-box distributed architectures.<br/>
-  - Lightweight processes, highly scalable transparent or explicit concurrency.<br/>
+  - Lightweight processes, highly scalable transparent or explicit concurrency.
 </p>
 
 
@@ -1865,7 +2021,7 @@
   - Functional programming language, high abstraction level, concise readable programs.<br/>
   - 4–20 times less code compared to C/C++/Java.<br/>
   - Suitable for rapid prototyping.<br/>
-  - Powerful middleware and libraries (OTP).<br/>
+  - Powerful middleware and libraries (OTP).
 </p>
 
 
@@ -1898,7 +2054,7 @@
 
 
 <p>
-  <strong>Practice</strong><br/>
+  <strong>Practice</strong>
 </p>
 
 
@@ -2117,7 +2273,7 @@
 
 
 <p>
-  <strong>Practice</strong><br/>
+  <strong>Practice</strong>
 </p>
 
 
@@ -2265,7 +2421,7 @@
 
 
 <p>
-  <strong>Practice</strong><br/>
+  <strong>Practice</strong>
 </p>
 
 
@@ -2445,14 +2601,14 @@
     <id>http://geekhmer.github.io/blog/2014/03/22/reduce-duplication-in-database-dot-yml-configuration-in-ruby-on-rails-project</id>
     <content type="html"><![CDATA[<p>
   By default rails generate database.yml that have the same attributes in each environment. So to reduce duplication we use aliasing to essentially perform a hash merge on the fly in the code.<br/>
-  So far so good please take a look the below code.<br/>
+  So far so good please take a look the below code.
 </p>
 
 
 
 
 <p>
-  <strong>Before refactor</strong><br/>
+  <strong>Before refactor</strong>
 </p>
 
 
@@ -2535,7 +2691,7 @@
 
 
 <p>
-  <strong>After refactor</strong><br/>
+  <strong>After refactor</strong>
 </p>
 
 
@@ -2612,14 +2768,14 @@
 
 
 <p>
-  Ruby is a very popular programming language that has Ruby on Rails or RoR is a popular development framework that allows you to easily get your application up and running with minimal hassle.<br/>
+  Ruby is a very popular programming language that has Ruby on Rails or RoR is a popular development framework that allows you to easily get your application up and running with minimal hassle.
 </p>
 
 
 
 
 <p>
-  Developing applications often times requires that you emulate different environments. Different versions of Ruby may be necessary for different projects. With conventional installations, this would impede your ability to be flexible.<br/>
+  Developing applications often times requires that you emulate different environments. Different versions of Ruby may be necessary for different projects. With conventional installations, this would impede your ability to be flexible.
 </p>
 
 
@@ -2662,7 +2818,7 @@
 <p><p>
   <strong>Installing Rails</strong><br/>
   To install the latest Rails:<br/>
-  <code>gem install rails</code><br/>
+  <code>gem install rails</code>
 </p></p>
 
 <p><p>
@@ -2676,7 +2832,7 @@
   <code>rvm gemset list_all</code><br/><br/>
   By default, you should have two gemsets configured:<br/>
   &ndash; default: the gemset that is applied if no other gemset is specified.<br/>
-  &ndash; global: this gemset is inherited by every other gemset that is used. This set generally does not need to be selected because it will be included automatically. You should install shared gems here.<br/>
+  &ndash; global: this gemset is inherited by every other gemset that is used. This set generally does not need to be selected because it will be included automatically. You should install shared gems here.
 </p></p>
 
 <p><p>
@@ -2716,7 +2872,7 @@
   In the part we focus on server part. In ruby we use eventmachine, em-websocket gem to install websocket server.<br/>
   To install eventmachine run <code>gem install eventmachine</code><br/>
   To install em-websocket run <code>gem install em-websocket</code><br/>
-  Make a file server.rb and implement codes below:<br/>
+  Make a file server.rb and implement codes below:
 </p>
 
 
@@ -2777,7 +2933,7 @@
 <p>
   <strong>Websocket Client</strong><br/>
   So far, so good. But the main purpose of a websocket server is to get the message from client and relay data to the client. How do we do that? Turns out that is pretty simple too.<br/>
-  Make a file index.html and implement codes below:<br/>
+  Make a file index.html and implement codes below:
 </p>
 
 
@@ -2960,147 +3116,7 @@
 
 <p>
   <strong>Processing</strong><br/><br/>
-  <a class="fancybox" href="http://geekhmer.github.io/images/websocket_processing.png"><img src="http://geekhmer.github.io/images/websocket_processing.png" width="680" /></a><br/>
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[assets_helper gem]]></title>
-    <link href="http://geekhmer.github.io/blog/2013/12/19/assets-helper-gem/"/>
-    <updated>2013-12-19T21:27:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2013/12/19/assets-helper-gem</id>
-    <content type="html"><![CDATA[<p>
-  <a href="http://rubygems.org/gems/assets_helper" target="_blank">assets_helper</a> is the gem that use to include css and javascript by controller name automatically, it mean that include only css and javascript file in the controller that you are running.
-</p>
-
-
-
-
-<p>
-  <strong>Installation</strong><br/>
-  Add this line to your application&#8217;s Gemfile:<br/>
-  <code>gem 'assets_helper'</code>
-</p>
-
-
-
-
-<p>
-  And then execute:<br/>
-  <code>$ bundle</code>
-</p>
-
-
-
-
-<p>
-  Or install it yourself as:<br/>
-  <code>$ gem install assets_helper</code>
-</p>
-
-
-
-
-<p>
-  <strong>Usage</strong><br/>
-  1. Add <code>before_filter :include_css, :include_javascript</code> in application_controller.rb:<br/>
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>application_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="ss">ActionController</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">protect_from_forgery</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">before_filter</span> <span class="ss">:include_css</span><span class="p">,</span> <span class="ss">:include_javascript</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  2. Add <code>= yield :asset</code> n your layout file (exp: application.html.haml):<br/>
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>application.html.haml </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">!!!</span>
-</span><span class='line'><span class="o">%</span><span class="n">html</span>
-</span><span class='line'>  <span class="o">%</span><span class="n">head</span>
-</span><span class='line'>    <span class="o">%</span><span class="n">title</span> <span class="no">JongEat</span>
-</span><span class='line'>    <span class="o">=</span> <span class="n">stylesheet_link_tag</span>    <span class="s2">&quot;application&quot;</span><span class="p">,</span> <span class="ss">:media</span> <span class="o">=&gt;</span> <span class="s2">&quot;all&quot;</span>
-</span><span class='line'>    <span class="o">=</span> <span class="n">javascript_include_tag</span> <span class="s2">&quot;application&quot;</span>
-</span><span class='line'>    <span class="o">=</span> <span class="k">yield</span> <span class="ss">:asset</span>
-</span><span class='line'>    <span class="o">=</span> <span class="n">csrf_meta_tags</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  3. Example if you create a controller name homes:<br/>
-  <code>$ rails generate controller homes</code>
-</p>
-
-
-
-
-<p>
-  4. Go to app/assets/javascripts and create a folder name homes like your controller (homes) you create below. And input javascript file that you use for controller homes in this folder ( app/assets/javascripts/homes ), and no need to include in application.js file.<br/>
-</p>
-
-
-
-
-<p>
-  <a class="fancybox" href="http://geekhmer.github.io/images/javascript_homes.png"><img src="http://geekhmer.github.io/images/javascript_homes.png" alt="" width="680" /></a>
-</p>
-
-
-
-
-<p>
-  5. Go to app/assets/stylesheets and create a folder name homes like your controller(homes) you create below. And input css file that you use for controller homes in this folder(app/assets/stylesheets), and no need to include or import in application.css file.<br/>
-</p>
-
-
-
-
-<p>
-  <a class="fancybox" href="http://geekhmer.github.io/images/css_homes.png"><img src="http://geekhmer.github.io/images/css_homes.png" width="680" /></a><br/>
-</p>
-
-
-
-
-<p>
-  So whenever you run homes controller, it include only css and javascript file that you use for homes controller, and can make your project run fast.<br/>
-</p>
-
-
-
-
-<p>
-  <a class="fancybox" href="http://geekhmer.github.io/images/browser_homes_controller.png"><img src="http://geekhmer.github.io/images/browser_homes_controller.png" width="680" /></a><br/>
+  <a class="fancybox" href="http://geekhmer.github.io/images/websocket_processing.png"><img src="http://geekhmer.github.io/images/websocket_processing.png" width="680" /></a>
 </p>
 
 ]]></content>
