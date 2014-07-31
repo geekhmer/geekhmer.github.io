@@ -28,7 +28,7 @@ end
 {% endcodeblock %}
 
 {% codeblock show.html.haml lang:ruby %}
-- if can? :update, @article %>
+- if can? :update, @article
   = link_to "Edit", edit_article_path(@article)
 {% endcodeblock %}
 
