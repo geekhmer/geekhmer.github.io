@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2014-07-30T08:42:49+07:00</updated>
+  <updated>2014-07-31T08:08:42+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,220 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Test Routes with RSpec in Ruby on Rails]]></title>
+    <link href="http://geekhmer.github.io/blog/2014/07/30/test-routes-with-rspec-in-ruby-on-rails/"/>
+    <updated>2014-07-30T22:47:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2014/07/30/test-routes-with-rspec-in-ruby-on-rails</id>
+    <content type="html"><![CDATA[<p>
+  Most Ruby on Rails developers don’t test their routes, they focus on Model testing, Controller testing, Features or View testing, Helper testing, and try to catch every possible scenarios.<br/>I would like to show how to test route separately. 
+</p>
+
+
+
+
+<p>
+  Sample routes.rb:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">resources</span> <span class="ss">:products</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Here is routes lists thats have been created:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>     <span class="n">root</span>        <span class="o">/</span>                            <span class="n">products</span><span class="c1">#index</span>
+</span><span class='line'>    <span class="n">posts</span> <span class="no">GET</span>    <span class="sr">/products(.:format)          products#index</span>
+</span><span class='line'><span class="sr">          POST   /</span><span class="n">products</span><span class="p">(</span><span class="o">.</span><span class="ss">:format</span><span class="p">)</span>          <span class="n">products</span><span class="c1">#create</span>
+</span><span class='line'> <span class="n">new_post</span> <span class="no">GET</span>    <span class="sr">/products/ne</span><span class="n">w</span><span class="p">(</span><span class="o">.</span><span class="ss">:format</span><span class="p">)</span>      <span class="n">products</span><span class="c1">#new</span>
+</span><span class='line'><span class="n">edit_post</span> <span class="no">GET</span>    <span class="sr">/products/</span><span class="ss">:id</span><span class="o">/</span><span class="n">edit</span><span class="p">(</span><span class="o">.</span><span class="ss">:format</span><span class="p">)</span> <span class="n">products</span><span class="c1">#edit</span>
+</span><span class='line'>     <span class="n">post</span> <span class="no">GET</span>    <span class="sr">/products/</span><span class="ss">:id</span><span class="p">(</span><span class="o">.</span><span class="ss">:format</span><span class="p">)</span>      <span class="n">products</span><span class="c1">#show</span>
+</span><span class='line'>          <span class="no">PUT</span>    <span class="sr">/products/</span><span class="ss">:id</span><span class="p">(</span><span class="o">.</span><span class="ss">:format</span><span class="p">)</span>      <span class="n">products</span><span class="c1">#update</span>
+</span><span class='line'>          <span class="no">DELETE</span> <span class="sr">/products/</span><span class="ss">:id</span><span class="p">(</span><span class="o">.</span><span class="ss">:format</span><span class="p">)</span>      <span class="n">products</span><span class="c1">#destroy</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Testing for each routes in routing/products_routing_spec.rb:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>products_routing_spec.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;spec_helper&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">describe</span> <span class="s2">&quot;routing to products&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;routes /products to products#index&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="ss">get</span><span class="p">:</span> <span class="s2">&quot;/products&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">route_to</span><span class="p">(</span>
+</span><span class='line'>      <span class="ss">controller</span><span class="p">:</span> <span class="s2">&quot;products&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">action</span><span class="p">:</span> <span class="s2">&quot;index&quot;</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;routes /products/1 to products#show&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="ss">get</span><span class="p">:</span> <span class="s2">&quot;/products/1&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">route_to</span><span class="p">(</span>
+</span><span class='line'>      <span class="ss">controller</span><span class="p">:</span> <span class="s2">&quot;products&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">action</span><span class="p">:</span> <span class="s2">&quot;show&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="nb">id</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;routes /products/new to products#new&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="ss">get</span><span class="p">:</span> <span class="s2">&quot;/products/new&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">route_to</span><span class="p">(</span>
+</span><span class='line'>      <span class="ss">controller</span><span class="p">:</span> <span class="s2">&quot;products&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">action</span><span class="p">:</span> <span class="s2">&quot;new&quot;</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;routes /products to products#create&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="ss">post</span><span class="p">:</span> <span class="s2">&quot;/products&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">route_to</span><span class="p">(</span>
+</span><span class='line'>      <span class="ss">controller</span><span class="p">:</span> <span class="s2">&quot;products&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">action</span><span class="p">:</span> <span class="s2">&quot;create&quot;</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;routes /products/1/edit to products#edit&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="ss">get</span><span class="p">:</span> <span class="s2">&quot;/products/1/edit&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">route_to</span><span class="p">(</span>
+</span><span class='line'>      <span class="ss">controller</span><span class="p">:</span> <span class="s2">&quot;products&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">action</span><span class="p">:</span> <span class="s2">&quot;edit&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="nb">id</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;routes /products/1 to products#update&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="ss">put</span><span class="p">:</span> <span class="s2">&quot;/products/1&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">route_to</span><span class="p">(</span>
+</span><span class='line'>      <span class="ss">controller</span><span class="p">:</span> <span class="s2">&quot;products&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">action</span><span class="p">:</span> <span class="s2">&quot;update&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="nb">id</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;routes /products/1 to products#destroy&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="ss">delete</span><span class="p">:</span> <span class="s2">&quot;/products/1&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">route_to</span><span class="p">(</span>
+</span><span class='line'>      <span class="ss">controller</span><span class="p">:</span> <span class="s2">&quot;products&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">action</span><span class="p">:</span> <span class="s2">&quot;destroy&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="nb">id</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Testing unroutable:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">resources</span> <span class="ss">:products</span><span class="p">,</span> <span class="ss">except</span><span class="p">:</span> <span class="o">[</span><span class="ss">:show</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>products_routing_spec.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="s2">&quot;does not routes /products/1 to products#show&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">expect</span><span class="p">(</span><span class="ss">:get</span> <span class="o">=&gt;</span> <span class="s2">&quot;posts/1&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span> <span class="n">be_routable</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, Let enjoy the routes testing in your Ruby on Rails application. :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[RailsPanel]]></title>
@@ -111,7 +325,7 @@
 <figure class='code'><figcaption><span>show.html.haml </span></figcaption>
  <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">-</span> <span class="k">if</span> <span class="n">can?</span> <span class="ss">:update</span><span class="p">,</span> <span class="vi">@article</span> <span class="o">%&gt;</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">-</span> <span class="k">if</span> <span class="n">can?</span> <span class="ss">:update</span><span class="p">,</span> <span class="vi">@article</span>
 </span><span class='line'>  <span class="o">=</span> <span class="n">link_to</span> <span class="s2">&quot;Edit&quot;</span><span class="p">,</span> <span class="n">edit_article_path</span><span class="p">(</span><span class="vi">@article</span><span class="p">)</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -3064,52 +3278,6 @@
 
 <p>
   Feel free to provide your suggestions and to point out errors.
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Top Three Front-End MVC Framework]]></title>
-    <link href="http://geekhmer.github.io/blog/2014/02/01/top-three-front-end-mvc-framework/"/>
-    <updated>2014-02-01T21:00:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2014/02/01/top-three-front-end-mvc-framework</id>
-    <content type="html"><![CDATA[<p>
-  As more and more logic are executed in the browser, JavaScript front-end codebases grow larger and more difficult to maintain. As a way to solve this issue developers have been turning to MVC frameworks which maked productivity and maintainable code. 
-</p>
-
-
-
-
-<p>
-  JavaScript MVC Frameworks are a big topic nowadays that we use JS to bind data, send it back between server and client and actually implement lots of logic, so we want to structure our code in the MVC or similar patterns. In this article I want to show the most front-end MVC framework:
-</p>
-
-
-
-
-<p>
-  <strong>AngularJS</strong><br/>
-  A toolset based on extending the HTML vocabulary for your application. Let try <a href="http://angularjs.org/" target="_blank">AngularJS</a><br/><br/>
-  <img src="http://geekhmer.github.io/images/angularjs.png" />
-</p>
-
-
-
-
-<p>
-  <strong>Ember</strong><br/>
-  Provides template written in the Handlebars templating language, views, controllers, models and a router. Let try <a href="http://emberjs.com/" target="_blank">EmberJS</a><br/><br/>
-  <img src="http://geekhmer.github.io/images/ember.png" />
-</p>
-
-
-
-
-<p>
-  <strong>Backbone</strong><br/>
-  Provides models with key-value binding and custom events, collections, and connects it all to your existing API over a RESTful JSON interface. Let try <a href="http://backbonejs.org/" target="_blank">Backbone</a><br/><br/>
-  <img src="http://geekhmer.github.io/images/backbone.png" />
 </p>
 
 ]]></content>
