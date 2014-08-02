@@ -77,6 +77,114 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2013/11/30/method-missing/">Method_missing</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-30T11:15:00+07:00" pubdate data-updated="true">Nov 30<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  method_missing use for creating dynamic methods.
+</p>
+
+
+
+
+<p>
+  <strong>example</strong>
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>example </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Klass</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">method_missing</span><span class="p">(</span><span class="n">method_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">method_name</span><span class="o">.</span><span class="n">to_s</span> <span class="o">=~</span> <span class="sr">/^find_by_(.+)$/</span>
+</span><span class='line'>      <span class="n">run_find_by_method</span><span class="p">(</span><span class="vg">$1</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="k">super</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">run_find_by_method</span><span class="p">(</span><span class="n">attrs</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">attrs</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_and_&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">attrs_with_args</span> <span class="o">=</span> <span class="o">[</span><span class="n">attrs</span><span class="p">,</span> <span class="n">args</span><span class="o">].</span><span class="n">transpose</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">conditions</span> <span class="o">=</span> <span class="no">Hash</span><span class="o">[</span><span class="n">attrs_with_args</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+</span><span class='line'>    <span class="n">conditions</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">str</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">key</span><span class="si">}</span><span class="s2"> = &#39;</span><span class="si">#{</span><span class="n">value</span><span class="si">}</span><span class="s2">&#39; and &quot;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nb">p</span> <span class="s2">&quot;select * from tbl where </span><span class="si">#{</span><span class="n">str</span><span class="o">[</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="o">-</span><span class="mi">6</span><span class="o">]</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">k</span> <span class="o">=</span> <span class="no">Klass</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">k</span><span class="o">.</span><span class="n">find_by_name</span><span class="p">(</span><span class="s2">&quot;Bunlong&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">k</span><span class="o">.</span><span class="n">find_by_name_and_email</span><span class="p">(</span><span class="s2">&quot;Bunlong&quot;</span><span class="p">,</span> <span class="s2">&quot;bunlong.van@gmail.com&quot;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2013/11/30/include-vs-extend/">Include_vs_extend</a></h1>
     
     
@@ -1540,6 +1648,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/08/02/keyword-arguments-feature-in-ruby-2-dot-0/">Keyword Arguments Feature in Ruby 2.0</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/07/31/ruby-unless-goes-mainstream/">Ruby &#8216;Unless&#8217; Goes Mainstream</a>
       </li>
     
@@ -1555,10 +1667,6 @@
         <a href="/blog/2014/07/26/implement-decorator-design-pattern-in-rails-with-draper-to-cleanup-views/">Implement Decorator Design Pattern in Rails With Draper to Cleanup Views</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2014/07/24/vim-the-best-programming-editor-for-unix/">Vim - the Best Programming Editor for UNIX</a>
-      </li>
-    
   </ul>
 </section>
 <section>
@@ -1570,7 +1678,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby/">Ruby [ 18 ]</a>
+        <a href="/blog/categories/ruby/">Ruby [ 19 ]</a>
       </li>
     
       <li>
