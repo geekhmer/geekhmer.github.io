@@ -8,6 +8,10 @@ keywords: what we should test with rspec in rails, rspec, test with rspec
 ---
 
 <p>
+  <img src="/images/ruby_on_rails.png" width="400" />
+</p>
+
+<p>
   Well, what is takes to begin testing Rails applications. The hardest part of being a beginner is that you often don't know what you should test with RSpec in Rails.
 </p>
 
