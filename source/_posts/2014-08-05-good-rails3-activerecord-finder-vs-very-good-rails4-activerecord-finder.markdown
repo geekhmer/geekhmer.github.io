@@ -81,8 +81,8 @@ Post.find_by_title('Rails 4', conditions: { author: 'admin' }) # Dynamic find_by
 </p>
 
 {% codeblock Rails4 lang:ruby %}
-Post.find_by_title('Rails 4')
-Post.find_by_title('Rails 4', conditions: { author: 'admin' })
+Post.find_by(title: 'Rails 4')
+Post.find_by(title: 'Rails 4', author: 'admin')
 {% endcodeblock %}
 
 <p>
