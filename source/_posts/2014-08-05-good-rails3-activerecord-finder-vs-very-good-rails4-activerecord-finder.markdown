@@ -12,7 +12,7 @@ keywords: Rails3 ActiveRecord Finder, Rails4 ActiveRecord Finder, Very Good Rail
 </p>
 
 <p>
-  Well, previouse article I had talked about "Keyword Arguments Feature in Ruby 2.0" now we can apply it with Rails4.
+  Well, previouse article I had talked about <a href="http://geekhmer.github.io/blog/2014/08/02/keyword-arguments-feature-in-ruby-2-dot-0/">Keyword Arguments Feature in Ruby 2.0</a>. now we can apply keyword arguments in Rails4.
 </p>
 
 <p>
