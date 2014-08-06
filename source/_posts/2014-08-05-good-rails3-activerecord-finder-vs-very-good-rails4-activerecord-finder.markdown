@@ -8,7 +8,7 @@ keywords: Rails3 ActiveRecord Finder, Rails4 ActiveRecord Finder, Very Good Rail
 ---
 
 <p>
-  <img src="/images/ruby_on_rails.png" width="400" />
+  <img src="/images/what_is_new_in_rails4.png" width="500" />
 </p>
 
 <p>
