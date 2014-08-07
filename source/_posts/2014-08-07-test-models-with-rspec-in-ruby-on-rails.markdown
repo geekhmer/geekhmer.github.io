@@ -8,6 +8,10 @@ keywords: models test, models testing, model test, model testing, test models wi
 ---
 
 <p>
+  <img src="/images/ruby_on_rails.png" width="400" />
+</p>
+
+<p>
   Testing is a good pratice. You should be doing it. It will make you a better programmer and save you a great deal of headache as your web app grows up. It is especially important when working alongside other programmers. Testing is not perfect though so don't try to be perfect. Just get started, and you will improve as time goes on.
 </p>
 
