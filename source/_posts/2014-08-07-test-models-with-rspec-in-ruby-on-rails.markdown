@@ -17,8 +17,8 @@ keywords: models test, models testing, model test, model testing, test models wi
 
 <p>
   <strong>How should I be testing?</strong><br/>
-  - Using RSpec & factorygirl<br/>
-  - Testing your Models
+  - Using RSpec & factorygirl.<br/>
+  - Testing the Model.
 </p>
 
 <p>
@@ -34,7 +34,7 @@ end
 {% endcodeblock %}
 
 <p>
-  Download and install by running:<br>
+  Download and install by running command:<br>
 </p>
 
 {% codeblock lang:ruby %}
@@ -58,7 +58,7 @@ rails generate rspec:install
 
 <p>
   <strong>Generators</strong><br/>
-  Once installed, RSpec and factorygirl will generate spec files instead of Test::Unit test files when commands like: <code>rails generate model</code> and <code>rails generate controller</code> are used.
+  Once installed, RSpec and factorygirl will generate spec files instead of Test::Unit test files when run commands like: <code>rails generate model</code> and <code>rails generate controller</code> are used.
 </p>
 
 <p>
@@ -76,7 +76,7 @@ rails generate model Post
 </p>
 
 <p>
-  <strong>Let's get started Model testing</strong>
+  <strong>Let's get started the Model testing</strong>
 </p>
 
 <p>
@@ -119,7 +119,7 @@ end
 {% endcodeblock %}
 
 <p>
-  Next, we define default factorygirl object for each models in spec/factories/:
+  Next, we define default factorygirl object for each Models in spec/factories/:
 </p>
 
 {% codeblock posts.rb lang:ruby %}
@@ -154,7 +154,7 @@ end
 {% endcodeblock %}
 
 <p>
-  Here, how we test each models in spec/models/:
+  Here, how we test each Models in spec/models/:
 </p>
 
 {% codeblock post.rb lang:ruby %}
@@ -260,7 +260,7 @@ end
 {% endcodeblock %}
 
 <p>
-  To run models specs use the following command:
+  To run Models specs use the following command:
 </p>
 
 {% codeblock lang:ruby %}
@@ -272,7 +272,7 @@ rspec spec/models
 </p>
 
 <p>
-  <a class="fancybox" href="/images/model_testing.png" width="500"><img src="/images/model_testing.png" /></a>
+  <img src="/images/model_testing.png" width="600"/>
 </p>
 
 <p>
