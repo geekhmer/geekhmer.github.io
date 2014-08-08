@@ -93,7 +93,7 @@ class Post < ActiveRecord::Base
   has_many :categorizations
   has_many :categories, through: :categorizations
 
-  scope :search_by_title, lambda { |title| where("(title like ?) OR title in (?)", "%#{title}%", title.split) }
+  scope :search_by_title, -> (title) { where("(title like ?) OR title in (?)", "%#{title}%", title.split) }
 end
 {% endcodeblock %}
 
