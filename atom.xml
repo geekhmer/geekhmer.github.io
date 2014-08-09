@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2014-08-08T15:22:35+07:00</updated>
+  <updated>2014-08-09T08:40:22+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,452 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[What's New in Rails4 ActiveModel?]]></title>
+    <link href="http://geekhmer.github.io/blog/2014/08/09/whats-new-in-rails4-activemodel/"/>
+    <updated>2014-08-09T00:16:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2014/08/09/whats-new-in-rails4-activemodel</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/what_is_new_in_rails4.png" width="500" />
+</p>
+
+
+
+
+<p>
+  Well, previouse article I had shown about <a href="http://geekhmer.github.io/blog/2014/08/05/good-rails3-activerecord-finder-vs-very-good-rails4-activerecord-finder/">What&#8217;s New in Rails4 ActiveRecord Finder?</a>.
+  Today please keep going to take a look &#8220;What&#8217;s New in Rails4 ActiveModel?&#8221;:
+</p>
+
+
+
+
+<p>
+  <strong>SCOPES</strong><br/>
+</p>
+
+
+<p>
+  <strong>eager-evaluated scopes are deprecated</strong><br/>
+  - Rails3:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Rails3 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">scope</span> <span class="ss">:sold</span><span class="p">,</span> <span class="n">where</span><span class="p">(</span><span class="ss">state</span><span class="p">:</span> <span class="s1">&#39;sold&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="n">default_scope</span> <span class="n">where</span><span class="p">(</span><span class="ss">state</span><span class="p">:</span> <span class="s1">&#39;available&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Warning:<br/>
+  - Useing #scope without passing a callable object is deprecated.<br/>
+  - Calling #default_scope without a block is deprecated.
+</p>
+
+
+
+
+<p>
+  - Rails4:<br/>
+   Scopes should take a proc object:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Rails4 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">scope</span> <span class="ss">:sold</span><span class="p">,</span> <span class="o">-&gt;</span><span class="p">{</span> <span class="n">where</span><span class="p">(</span><span class="ss">state</span><span class="p">:</span> <span class="s1">&#39;sold&#39;</span><span class="p">)</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Defaults scopes should take proc object or a block:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Rails4 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">default_scope</span> <span class="p">{</span> <span class="n">where</span><span class="p">(</span><span class="ss">state</span><span class="p">:</span> <span class="s1">&#39;available&#39;</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="n">default_schop</span> <span class="o">-&gt;</span><span class="p">{</span> <span class="n">where</span><span class="p">(</span><span class="ss">state</span><span class="p">:</span> <span class="s1">&#39;available&#39;</span><span class="p">)</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>RELATION#NONE</strong><br/>
+</p>
+
+
+
+
+<p>
+  - Rails3:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Rails3 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">visible_posts</span>
+</span><span class='line'>    <span class="k">case</span> <span class="n">role</span>
+</span><span class='line'>    <span class="k">when</span> <span class="s1">&#39;Country Manager&#39;</span>
+</span><span class='line'>      <span class="no">Post</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">country</span><span class="p">:</span> <span class="n">country</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">when</span> <span class="s1">&#39;Reviewer&#39;</span>
+</span><span class='line'>      <span class="no">Post</span><span class="o">.</span><span class="n">published</span>
+</span><span class='line'>    <span class="k">when</span> <span class="s1">&#39;Bad User&#39;</span>
+</span><span class='line'>      <span class="o">[]</span> <span class="c1">#represents empty collection</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="vi">@posts</span> <span class="o">=</span> <span class="n">current_user</span><span class="o">.</span><span class="n">visible_posts</span>
+</span><span class='line'>  <span class="vi">@posts</span><span class="o">.</span><span class="n">recent</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  @posts.recent error when &#8216;Bad User&#8217; because NoMethodError: undefined method &#8216;recent&#8217; for []:Array.<br/>
+  One way we can fix this:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@posts</span> <span class="o">=</span> <span class="n">current_user</span><span class="o">.</span><span class="n">visible_posts</span>
+</span><span class='line'><span class="k">if</span> <span class="vi">@posts</span><span class="o">.</span><span class="n">any?</span> <span class="c1"># must check for presence</span>
+</span><span class='line'>  <span class="vi">@posts</span><span class="o">.</span><span class="n">recent</span>
+</span><span class='line'><span class="k">else</span>
+</span><span class='line'>  <span class="o">[]</span> <span class="c1"># must return empty collection to caller</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Rails4:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Rails4 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">visible_posts</span>
+</span><span class='line'>    <span class="k">case</span> <span class="n">role</span>
+</span><span class='line'>    <span class="k">when</span> <span class="s1">&#39;Country Manager&#39;</span>
+</span><span class='line'>      <span class="no">Post</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">country</span><span class="p">:</span> <span class="n">country</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">when</span> <span class="s1">&#39;Reviewer&#39;</span>
+</span><span class='line'>      <span class="no">Post</span><span class="o">.</span><span class="n">published</span>
+</span><span class='line'>    <span class="k">when</span> <span class="s1">&#39;Bad User&#39;</span>
+</span><span class='line'>      <span class="no">Post</span><span class="o">.</span><span class="n">none</span> <span class="c1"># returns ActiveRecord:Relation and never hits the database</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@posts</span> <span class="o">=</span> <span class="n">current_user</span><span class="o">.</span><span class="n">visible_posts</span>
+</span><span class='line'><span class="vi">@posts</span><span class="o">.</span><span class="n">recent</span> <span class="c1"># no need to check for presence</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+Post.none returns ActiveRecord:Relation and never hits the database and @posts.recent no need to check for presence.
+</p>
+
+
+
+
+<p>
+  <strong>RELATION#NOT</strong>
+</p>
+
+
+
+
+<p>
+  Rails3: 
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Rails3 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">&#39;author != ?&#39;</span><span class="p">,</span> <span class="n">author</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  When author is nil it&#8217;s going to generate incorrect SQL syntax: <code>SELECT "posts".* FROM "posts" WHERE (author != NULL)</code><br/>
+  One way we can fix this:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Rails3 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">if</span> <span class="n">author</span>
+</span><span class='line'>  <span class="no">Post</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">&#39;author != ?&#39;</span><span class="p">,</span> <span class="n">author</span><span class="p">)</span>
+</span><span class='line'><span class="k">else</span>
+</span><span class='line'>  <span class="no">Post</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">&#39;author IS NOT NULL&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Rails4: 
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Rails4 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">where</span><span class="o">.</span><span class="n">not</span><span class="p">(</span><span class="ss">author</span><span class="p">:</span> <span class="n">author</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  When author is nill it&#8217;s goint to generate correct SQL syntax: <code>SELECT "posts".* FROM "posts" WHERE (author IS NOT NULL)</code>
+</p>
+
+
+
+
+<p>
+  <strong>RELATION#ORDER</strong>
+</p>
+
+
+
+
+<p>
+  <strong>case1</strong>
+</p>
+
+
+
+
+<p>
+  Rails3:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Rails3 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">default_scope</span> <span class="p">{</span> <span class="n">order</span><span class="p">(</span><span class="ss">:name</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="s2">&quot;created_at DESC&quot;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  It&#8217;s going to generate SQL: <code>SELECT * FROM users ORDER BY name asc, created_at desc</code>, new calls to order are appended.
+</p>
+
+
+
+
+<p>
+  Rails4:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Rails4 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">default_scope</span> <span class="o">-&gt;</span><span class="p">{</span> <span class="n">order</span><span class="p">(</span><span class="ss">:name</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="n">created_at</span><span class="p">:</span> <span class="ss">:desc</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  It&#8217;s going to generate SQL: <code>SELECT * FROM users ORDER BY created_at desc</code>, name asc New calls to order are prepend.
+</p>
+
+
+
+
+<p>
+  <strong>case2</strong>
+</p>
+
+
+
+
+<p>
+  Rails3:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Rails3 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span> <span class="s1">&#39;created_at DESC&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Rails4:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Rails4 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span> <span class="n">created_at</span><span class="p">:</span> <span class="ss">:desc</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+It&#8217;s going to generate SQL: <code>SELECT * FROM users ORDER BY name asc, created_at desc</code>
+</p>
+
+
+
+
+<p>
+  Rails3:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Rails3 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="s1">&#39;created_at DESC&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Rails4:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Rails4 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="n">created_at</span><span class="p">:</span> <span class="ss">:desc</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+It&#8217;s going to generate SQL: <code>SELECT * FROM users ORDER BY created_at desc</code>
+</p>
+
+
+
+
+<p>
+  So far so good, ActiveModel in Rails4 is better. :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Test Models With RSpec in Ruby on Rails]]></title>
@@ -167,7 +613,7 @@
 </span><span class='line'>  <span class="n">has_many</span> <span class="ss">:categorizations</span>
 </span><span class='line'>  <span class="n">has_many</span> <span class="ss">:categories</span><span class="p">,</span> <span class="ss">through</span><span class="p">:</span> <span class="ss">:categorizations</span>
 </span><span class='line'>
-</span><span class='line'>  <span class="n">scope</span> <span class="ss">:search_by_title</span><span class="p">,</span> <span class="nb">lambda</span> <span class="p">{</span> <span class="o">|</span><span class="n">title</span><span class="o">|</span> <span class="n">where</span><span class="p">(</span><span class="s2">&quot;(title like ?) OR title in (?)&quot;</span><span class="p">,</span> <span class="s2">&quot;%</span><span class="si">#{</span><span class="n">title</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">.</span><span class="n">split</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">scope</span> <span class="ss">:search_by_title</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">title</span><span class="p">)</span> <span class="p">{</span> <span class="n">where</span><span class="p">(</span><span class="s2">&quot;(title like ?) OR title in (?)&quot;</span><span class="p">,</span> <span class="s2">&quot;%</span><span class="si">#{</span><span class="n">title</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">.</span><span class="n">split</span><span class="p">)</span> <span class="p">}</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -3574,155 +4020,6 @@
 
 <p>
   You can download the <a href="https://github.com/Bunlong/google_map_draggable_maker" target="_blank">source code</a> and try it out.
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[JSRender]]></title>
-    <link href="http://geekhmer.github.io/blog/2014/06/02/jsrender/"/>
-    <updated>2014-06-02T17:08:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2014/06/02/jsrender</id>
-    <content type="html"><![CDATA[<p>
-  <strong>What is JsRender?</strong><br/>
-  Many development platforms use templates to reduce code and simplify maintenance, and HTML5 and JavaScript are no exception. JsRender is a JavaScript library that allows you to define a boilerplate structure once and reuse it to generate HTML dynamically. JsRender brings a new templating library to HTML5 development that has a codeless tag syntax and high performance, has no dependency on jQuery nor on the Document Object Model (DOM), supports creating custom functions and uses pure string-based rendering.
-</p>
-
-
-
-
-<p>
-  <strong>Why Templates?</strong><br/>
-  Using templates with JavaScript reduces and simplifies code. Without templates, adding a series of list items and other HTML elements for a set of data might require manipulating a browser’s DOM. This is where templating using a plug-in such as JsRender can be quite useful to do the heavy lifting.
-</p>
-
-
-
-
-<p>
-  <strong>Practice</strong>
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>demo.html </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;js/jquery.min.js&quot;</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;js/jsrender.js&quot;</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">link</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;css/bootstrap.min.css&quot;</span> <span class="nx">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="o">/&gt;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;book_template&quot;</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/x-jsrender&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">tr</span><span class="o">&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="nx">td</span><span class="o">&gt;</span><span class="p">{</span> <span class="p">{</span><span class="o">:</span><span class="err">#</span><span class="nx">index</span><span class="o">+</span><span class="mi">1</span><span class="p">}</span> <span class="p">}</span> <span class="o">&lt;</span><span class="err">/td&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="nx">td</span><span class="o">&gt;</span><span class="p">{</span> <span class="p">{</span><span class="o">&gt;</span><span class="nx">name</span><span class="p">}</span> <span class="p">}</span><span class="o">&lt;</span><span class="err">/td&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="nx">td</span><span class="o">&gt;</span><span class="p">{</span> <span class="p">{</span><span class="o">&gt;</span><span class="nx">releaseYear</span><span class="p">}</span> <span class="p">}</span><span class="o">&lt;</span><span class="err">/td&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="err">/tr&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>      <span class="kd">var</span> <span class="nx">books</span> <span class="o">=</span> <span class="p">[</span>
-</span><span class='line'>        <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="s2">&quot;Erlang&quot;</span><span class="p">,</span> <span class="nx">releaseYear</span><span class="o">:</span> <span class="s2">&quot;1986&quot;</span> <span class="p">},</span>
-</span><span class='line'>        <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="s2">&quot;Ruby&quot;</span><span class="p">,</span> <span class="nx">releaseYear</span><span class="o">:</span> <span class="s2">&quot;1998&quot;</span> <span class="p">},</span>
-</span><span class='line'>        <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="s2">&quot;Ruby on Rails&quot;</span><span class="p">,</span> <span class="nx">releaseYear</span><span class="o">:</span> <span class="s2">&quot;1999&quot;</span> <span class="p">},</span>
-</span><span class='line'>        <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="s2">&quot;Javascript&quot;</span><span class="p">,</span> <span class="nx">releaseYear</span><span class="o">:</span> <span class="s2">&quot;1976&quot;</span> <span class="p">}</span>
-</span><span class='line'>      <span class="p">];</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;#book_list&quot;</span><span class="p">).</span><span class="nx">html</span><span class="p">(</span>
-</span><span class='line'>        <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;#book_template&quot;</span><span class="p">).</span><span class="nx">render</span><span class="p">(</span><span class="nx">books</span><span class="p">)</span>
-</span><span class='line'>      <span class="p">);</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/head&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">div</span> <span class="kr">class</span><span class="o">=</span><span class="s2">&quot;container&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">section</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;fluidGridSystem&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="nx">div</span> <span class="kr">class</span><span class="o">=</span><span class="s2">&quot;page-header&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">h3</span><span class="o">&gt;</span><span class="nx">Render</span> <span class="nx">template</span> <span class="nx">against</span> <span class="nx">local</span> <span class="nx">data</span><span class="o">&lt;</span><span class="err">/h3&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="err">/div&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="nx">div</span> <span class="kr">class</span><span class="o">=</span><span class="s2">&quot;row-fluid show-grid&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">table</span> <span class="kr">class</span><span class="o">=</span><span class="s2">&quot;table table-bordered&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="nx">thead</span><span class="o">&gt;</span>
-</span><span class='line'>            <span class="o">&lt;</span><span class="nx">tr</span><span class="o">&gt;</span>
-</span><span class='line'>              <span class="o">&lt;</span><span class="nx">th</span><span class="o">&gt;</span><span class="nx">No</span><span class="o">&lt;</span><span class="err">/th&gt;</span>
-</span><span class='line'>              <span class="o">&lt;</span><span class="nx">th</span><span class="o">&gt;</span><span class="nx">Name</span><span class="o">&lt;</span><span class="err">/th&gt;</span>
-</span><span class='line'>              <span class="o">&lt;</span><span class="nx">th</span><span class="o">&gt;</span><span class="nx">Release</span> <span class="nx">Year</span><span class="o">&lt;</span><span class="err">/th&gt;</span>
-</span><span class='line'>            <span class="o">&lt;</span><span class="err">/tr&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="err">/thead&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="nx">tbody</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;book_list&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="err">/tbody&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="err">/table&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="err">/div&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="err">/section&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="err">/div&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/body&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/html&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You can download the <a href="https://github.com/Bunlong/jsrender" target="_blank">source code</a> and try it out.
 </p>
 
 ]]></content>
