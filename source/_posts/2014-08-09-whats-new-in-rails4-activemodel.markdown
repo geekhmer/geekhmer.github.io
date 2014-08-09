@@ -12,7 +12,7 @@ keywords: ActiveModel, Rails4 ActiveModel, What's New in Rails4 ActiveModel?, Wh
 </p>
 
 <p>
-  Well, previouse article I had shown about <a href="http://geekhmer.github.io/blog/2014/08/05/good-rails3-activerecord-finder-vs-very-good-rails4-activerecord-finder/">What's New in Rails4 ActiveRecord Finder?</a>.
+  Well, previouse article I had talked about <a href="http://geekhmer.github.io/blog/2014/08/05/good-rails3-activerecord-finder-vs-very-good-rails4-activerecord-finder/">What's New in Rails4 ActiveRecord Finder?</a>.
   Today please keep going to take a look "What's New in Rails4 ActiveModel?":
 </p>
 
