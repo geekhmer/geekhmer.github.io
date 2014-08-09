@@ -13,7 +13,7 @@ keywords: ActiveModel, Rails4 ActiveModel, What's New in Rails4 ActiveModel?, Wh
 
 <p>
   Well, previouse article I had shown about <a href="http://geekhmer.github.io/blog/2014/08/05/good-rails3-activerecord-finder-vs-very-good-rails4-activerecord-finder/">What's New in Rails4 ActiveRecord Finder?</a>.
-  Today please keep going to take a look "What's New in Rails4 ActiveModel?:
+  Today please keep going to take a look "What's New in Rails4 ActiveModel?":
 </p>
 
 <p>
@@ -37,7 +37,7 @@ default_scope where(state: 'available')
 
 <p>
   - Rails4:<br/>
-   scopes should take a proc object:
+   Scopes should take a proc object:
 </p>
 
 {% codeblock Rails4 lang:ruby %}
@@ -45,7 +45,7 @@ scope :sold, ->{ where(state: 'sold') }
 {% endcodeblock %}
 
 <p>
-  defaults scopes should take proc object or a block:
+  Defaults scopes should take proc object or a block:
 </p>
 
 {% codeblock Rails4 lang:ruby %}
@@ -136,7 +136,7 @@ Post.where('author != ?', author)
 {% endcodeblock %}
 
 <p>
-  when author is nil it's going to generate incorrect SQL syntax: <code>SELECT "posts".* FROM "posts" WHERE (author != NULL)</code><br/>
+  When author is nil it's going to generate incorrect SQL syntax: <code>SELECT "posts".* FROM "posts" WHERE (author != NULL)</code><br/>
   One way we can fix this:
 </p>
 
@@ -157,7 +157,7 @@ Post.where.not(author: author)
 {% endcodeblock %}
 
 <p>
-  when author is nill it's goint to generate correct SQL syntax: <code>SELECT "posts".* FROM "posts" WHERE (author IS NOT NULL)</code>
+  When author is nill it's goint to generate correct SQL syntax: <code>SELECT "posts".* FROM "posts" WHERE (author IS NOT NULL)</code>
 </p>
 
 <p>
@@ -181,7 +181,7 @@ User.order("created_at DESC")
 {% endcodeblock %}
 
 <p>
-  it's going to generate SQL: <code>SELECT * FROM users ORDER BY name asc, created_at desc</code>, new calls to order are appended.
+  It's going to generate SQL: <code>SELECT * FROM users ORDER BY name asc, created_at desc</code>, new calls to order are appended.
 </p>
 
 <p>
@@ -197,7 +197,7 @@ User.order(created_at: :desc)
 {% endcodeblock %}
 
 <p>
-  it's going to generate SQL: <code>SELECT * FROM users ORDER BY created_at desc</code>, name asc New calls to order are prepend.
+  It's going to generate SQL: <code>SELECT * FROM users ORDER BY created_at desc</code>, name asc New calls to order are prepend.
 </p>
 
 <p>
@@ -221,7 +221,7 @@ User.order(:name, created_at: :desc)
 {% endcodeblock %}
 
 <p>
-it's going to generate SQL: <code>SELECT * FROM users ORDER BY name asc, created_at desc</code>
+It's going to generate SQL: <code>SELECT * FROM users ORDER BY name asc, created_at desc</code>
 </p>
 
 <p>
@@ -241,7 +241,7 @@ User.order(created_at: :desc)
 {% endcodeblock %}
 
 <p>
-it's going to generate SQL: <code>SELECT * FROM users ORDER BY created_at desc</code>
+It's going to generate SQL: <code>SELECT * FROM users ORDER BY created_at desc</code>
 </p>
 
 <p>
