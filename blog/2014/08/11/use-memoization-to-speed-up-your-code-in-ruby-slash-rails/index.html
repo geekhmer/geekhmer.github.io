@@ -1,0 +1,649 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Use Memoization to Speed Up Your Code in Ruby/Rails - GeeKhmer</title>
+  <meta name="author" content="Bunlong Van">
+  
+  
+  <meta name="description" content="The website of computer programming Ruby, Ruby and Rails, Javascript and Erlang base in Cambodia.">
+
+  <meta name="keywords" content="Use Memoization to Speed Up Your Code in Ruby/Rails, Memoization Ruby, Ruby Memoization, Memoization Rails, Rails Memoization, Ruby on Rails Memoization, Memoization Ruby on Rails">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://geekhmer.github.io/blog/2014/08/11/use-memoization-to-speed-up-your-code-in-ruby-slash-rails">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="" rel="alternate" title="GeeKhmer" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+<link href="/stylesheets/jquery.fancybox.css" media="screen, projection" rel="stylesheet" type="text/css">
+<script src="/javascripts/libs/jquery.fancybox.pack.js"></script>
+<script src="/javascripts/init_fancybox.js"></script>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1>
+    <!-- <a href="/">GeeKhmer</a> -->
+    <div class="logo" />
+  </h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation">
+  <form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:geekhmer.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+  </form>
+
+<ul class="subscription" data-subscription="rss">
+  
+  
+</ul>
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Use Memoization to Speed Up Your Code in Ruby/Rails</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-11T00:28:00+07:00" pubdate data-updated="true">Aug 11<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>
+  <img src="/images/ruby_on_rails.png" width="400" />
+</p>
+
+
+
+
+<p>
+  Have you ever heard Memoization? In this article you will get an introduction of Memoization. You will learn what it is, how you can use it to speed up your code.
+</p>
+
+
+
+
+<p>
+  <strong>What is Memoization?</strong><br/>
+  Memoization is the process of storing a computed value to avoid duplicated work by future calls.
+</p>
+
+
+
+
+<p>
+  <strong>What are Memoization used for?</strong><br/>
+  - Perform some work<br/>
+  - Store the work result<br/>
+  - Use stored results in future calls
+</p>
+
+
+
+
+<p>
+  <strong>Using</strong><br/>
+  In Ruby the most common pattern for using Memoization is the conditional assignment operator: <code>||=</code>
+</p>
+
+
+
+
+<p>
+  <strong>Example</strong><br/>
+  In Rails if you&#8217;ve ever worked with a user login system, you really family with the pattern of loading the <code>current_user</code> in the <code>application_controller.rb</code>:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>application_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">current_user</span>
+</span><span class='line'>  <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">session</span><span class="o">[</span><span class="ss">:user_id</span><span class="o">]</span><span class="p">)</span> <span class="k">if</span> <span class="n">session</span><span class="o">[</span><span class="ss">:user_id</span><span class="o">]</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Within each request in a Rails application you will usually see multiple calls to <code>current_user</code> that means <code>User.find</code> method is run multiple times.<br/>
+</p>
+
+
+
+
+<p>
+  In this case, we know the problem is because there are multiple calls to <code>current_user</code> occurring. Let&#8217;s fix this code by introducing Memoization into the <code>current_user</code> method and storing the result of <code>User.find</code> method by using conditional assignment to an instance variable:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>application_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">current_user</span>
+</span><span class='line'>  <span class="vi">@current_user</span> <span class="o">||=</span> <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">session</span><span class="o">[</span><span class="ss">:user_id</span><span class="o">]</span><span class="p">)</span> <span class="k">if</span> <span class="n">session</span><span class="o">[</span><span class="ss">:user_id</span><span class="o">]</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Well, there are no more calls to rebuild the <code>User</code> object each time <code>current_user</code> method is called.
+</p>
+
+
+
+
+<p>
+  <strong>When should you memoize?</strong><br/>
+  - When you&#8217;ve got duplicated database<br/>
+  - When you&#8217;ve got expensive calculations<br/>
+  - When you&#8217;ve got repeated calculations that don&#8217;t change<br/>
+</p>
+
+
+
+
+<p>
+  <strong>When shouldn&#8217;t you memoize</strong><br/>
+  - Memoization shouldn&#8217;t be used with methods that take parameters:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#incorrect</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">full_name</span>
+</span><span class='line'>  <span class="vi">@full_name</span> <span class="o">||=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">first_name</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">last_name</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="n">full_name</span><span class="p">(</span><span class="s1">&#39;Bunlong&#39;</span><span class="p">,</span> <span class="s1">&#39;Van&#39;</span><span class="p">)</span> <span class="c1">#=&gt; &quot;Bunlong Van&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="n">full_name</span><span class="p">(</span><span class="s1">&#39;Ryan&#39;</span><span class="p">,</span> <span class="s1">&#39;Van&#39;</span><span class="p">)</span> <span class="c1">#=&gt; &quot;Bunlong Van&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  - Memoization shouldn&#8217;t be used with methods that use instance variables:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#incorrect</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">full_name</span>
+</span><span class='line'>  <span class="vi">@full_name</span> <span class="o">||=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">first_name</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">last_name</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="vi">@first_name</span> <span class="o">=</span> <span class="s1">&#39;Bunlong&#39;</span>
+</span><span class='line'><span class="vi">@last_name</span> <span class="o">=</span> <span class="s1">&#39;Van&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="n">full_name</span> <span class="c1">#=&gt; &quot;Bunlong Van&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="vi">@first_name</span> <span class="o">=</span> <span class="s1">&#39;Ryan&#39;</span>
+</span><span class='line'><span class="vi">@last_name</span> <span class="o">=</span> <span class="s1">&#39;Van&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="n">full_name</span> <span class="c1">#=&gt; &quot;Bunlong Van&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Memoization conditional assignment have problem when return nil or false in Ruby</strong><br/>
+  If you are not clear in using conditional assignment it can bite you, let try code below:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">print</span>
+</span><span class='line'>  <span class="vi">@print</span> <span class="o">||</span> <span class="o">=</span> <span class="k">begin</span>
+</span><span class='line'>                <span class="nb">puts</span> <span class="s2">&quot;printing&quot;</span>
+</span><span class='line'>                <span class="nb">sleep</span> <span class="mi">2</span>
+</span><span class='line'>                <span class="kp">false</span>
+</span><span class='line'>              <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">print</span> <span class="c1">#=&gt; &quot;printing&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">print</span> <span class="c1">#=&gt; &quot;printing&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Suprised that &#8220;printing&#8221; was printed twice? Conditional assignment is always going to run if the instance variable <code>@print</code> is false or nil.<br/>
+</p>
+
+
+
+
+<p>
+  Well, we can solve the problem by using <code>defined?</code>:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">print</span>
+</span><span class='line'>  <span class="k">return</span> <span class="vi">@print</span> <span class="k">if</span> <span class="n">defined?</span><span class="p">(</span><span class="vi">@print</span><span class="p">)</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;printing&quot;</span>
+</span><span class='line'>  <span class="nb">sleep</span> <span class="mi">2</span>
+</span><span class='line'>  <span class="vi">@print</span> <span class="o">=</span> <span class="kp">false</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">print</span> <span class="c1">#=&gt; &quot;printing&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">print</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Memoization conditional assignment have problem when return nil or false in Rails</strong><br/>
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">current_user</span>
+</span><span class='line'>  <span class="vi">@current_user</span> <span class="o">||=</span> <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">session</span><span class="o">[</span><span class="ss">:user_id</span><span class="o">]</span><span class="p">)</span> <span class="k">if</span> <span class="n">session</span><span class="o">[</span><span class="ss">:user_id</span><span class="o">]</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  What&#8217;s happen if <code>User.find</code> return nil? Conditional assignment is always going to run and current_user method is always going to call if the instance variable <code>@print</code> is false or nil.
+</p>
+
+
+
+
+<p>
+  Well, we can fix the problem by using the Memoizable API in Rails:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># somewhere inside the class</span>
+</span><span class='line'><span class="kp">extend</span> <span class="ss">ActiveSupport</span><span class="p">:</span><span class="ss">:Memoizable</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">current_user</span>
+</span><span class='line'>  <span class="vi">@current_user</span> <span class="o">||=</span> <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">session</span><span class="o">[</span><span class="ss">:user_id</span><span class="o">]</span><span class="p">)</span> <span class="k">if</span> <span class="n">session</span><span class="o">[</span><span class="ss">:user_id</span><span class="o">]</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="n">memoize</span> <span class="ss">:current_user</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p><p>
+  Or we can use <a href="https://github.com/dkubb/memoizable" target="_blank">Memoizable</a> to fix this problem
+<p></p>
+
+<p><p>
+  So far so good, I hope this article comes in handy for some of you who haven’t heard of memoization yet or who just didn’t really understand what’s going on there. :)
+</p></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Bunlong Van</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-11T00:28:00+07:00" pubdate data-updated="true">Aug 11<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ruby/'>Ruby</a>, <a class='category' href='/blog/categories/ruby-on-rails/'>Ruby on Rails</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2014/08/11/use-memoization-to-speed-up-your-code-in-ruby-slash-rails/" data-via="" data-counturl="http://geekhmer.github.io/blog/2014/08/11/use-memoization-to-speed-up-your-code-in-ruby-slash-rails/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/08/09/whats-new-in-rails4-activemodel/" title="Previous Post: What's New in Rails4 ActiveModel?">&laquo; What's New in Rails4 ActiveModel?</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>I am ...</h1>
+  <ul>
+    <li style="height: 100px; font-size: 13px;">
+      <img src="/images/about.jpg" width="85" height="85" class="left" />
+      Bunlong Van is a Software Craftsman, Freelancer, Rubyist, Javascripter and Erlanger.<br/>
+    </li>
+    <li>
+      Say hi to <a href="https://twitter.com/intent/follow?original_referer=http%3A%2F%2Frebuild.fm%2F53%2F&region=follow_link&screen_name=bunlongvan&tw_p=followbutton&variant=2.0">@bunlongvan</a>
+    </li>
+  </ul>
+</section><section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/08/11/use-memoization-to-speed-up-your-code-in-ruby-slash-rails/">Use Memoization to Speed Up Your Code in Ruby/Rails</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/09/whats-new-in-rails4-activemodel/">What's New in Rails4 ActiveModel?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/07/test-models-with-rspec-in-ruby-on-rails/">Test Models With RSpec in Ruby on Rails</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/05/good-rails3-activerecord-finder-vs-very-good-rails4-activerecord-finder/">Good Rails3 ActiveRecord Finder vs Very Good Rails4 ActiveRecord Finder</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/04/what-we-should-test-with-rspec-in-rails/">What We Should Test With RSpec in Rails</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Category</h1>
+  <ul id="recent_posts">
+    
+      <li>
+        <a href="/blog/categories/facebook/">Facebook [ 4 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby/">Ruby [ 24 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/heroku/">Heroku [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 14 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/testing/">Testing [ 4 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/layout/">Layout [ 3 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby-metaprogramming/">Ruby metaprogramming [ 4 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/websocket/">Websocket [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/front-end-mvc-framework/">Front-end mvc framework [ 1 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/javascript/">Javascript [ 3 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/erlang/">Erlang [ 1 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/design-pattern/">Design pattern [ 1 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/other/">Other [ 2 ]</a>
+      </li>
+    
+  </ul>
+</section><section>
+  <h1>References</h1>
+  <ul id="recent_posts">
+    <li>
+      <a href="http://www.erlang.org/" target="_blank">
+        <img src="/images/logo_erlang.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://www.ruby-lang.org/en/" target="_blank">
+        <img src="/images/logo_ruby.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://guides.rubyonrails.org" target="_blank">
+        <img src="/images/logo_rails_guides.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://railscasts.com" target="_blank">
+        <img src="/images/logo_rails_casts.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://github.com" target="_blank">
+        <img src="/images/logo_github.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://www.linode.com" target="_blank">
+        <img src="/images/logo_linode.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://newrelic.com" target="_blank">
+        <img src="/images/logo_newrelic.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://developers.facebook.com/" target="_blank">
+        <img src="/images/logo_facebook.png" />
+      </a>
+    </li>
+  </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 GeeKhmer by <a href="http://www.linkedin.com/in/bunlongvan" target="_blank" style="text-decoration: none;">Bunlong Van</a> in Phnom Penh, Cambodia.
+</p>
+
+</footer>
+  
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=1451301955117043&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
