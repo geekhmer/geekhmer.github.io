@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2014-08-13T16:16:55+07:00</updated>
+  <updated>2014-08-14T09:43:02+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,158 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[What's New in Rails4 View?]]></title>
+    <link href="http://geekhmer.github.io/blog/2014/08/14/whats-new-in-rails4-view/"/>
+    <updated>2014-08-14T08:37:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2014/08/14/whats-new-in-rails4-view</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" />
+</p>
+
+
+
+
+<p>
+  Well, previouse article I had talked about <a href="http://geekhmer.github.io/blog/2014/08/09/whats-new-in-rails4-activemodel/">What's New in Rails4 ActiveModel?</a>.
+  Today We are looking at view:
+</p>
+
+
+
+
+<p>
+  Assume we have an owner class which has many items and each items are usualy belongs to an owner:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Owner</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:items</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Item</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:owner</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>Select box</strong><br/>
+  - Rails3 & 4<br/>
+  In Rails3 & 4 if we want to build a select box with owner we could do it with a single method called:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">collection_select</span><span class="p">(</span><span class="ss">:item</span><span class="p">,</span> <span class="ss">:owner_id</span><span class="p">,</span> <span class="no">Owner</span><span class="o">.</span><span class="n">all</span><span class="p">,</span> <span class="ss">:id</span><span class="p">,</span> <span class="ss">:name</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>Radio button & checkbox</strong><br/>
+  - Rails3
+  In Rails3 we need do with the loops and builds each of the elements:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%</span> <span class="vi">@owners</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">owner</span><span class="o">|</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &amp;lt;%= radio_button_tag :owner_id, owner.id %&gt;</span>
+</span><span class='line'>  <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%=</span> <span class="n">owner</span><span class="o">.</span><span class="n">name</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">&amp;lt;% end %&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  HTML output: 
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">input</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;owner_id&quot;</span> <span class="nb">name</span><span class="o">=</span><span class="s2">&quot;owner_id&quot;</span> <span class="n">type</span><span class="o">=</span><span class="s2">&quot;radio&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;1&quot;</span> <span class="sr">/&gt; Slow-draw</span>
+</span><span class='line'><span class="sr">&lt;input id=&quot;owner_id&quot; name=&quot;owner_id&quot; type=&quot;radio&quot; value=&quot;2&quot; /</span><span class="o">&gt;</span> <span class="no">Sheriff</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  - Now in Rails4 we have <code>collection_radio_buttons & collection_check_boxes</code> method which builds all elements from a collection:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">collection_radio_buttons</span><span class="p">(</span><span class="ss">:item</span><span class="p">,</span> <span class="ss">:owner_id</span><span class="p">,</span> <span class="no">Owner</span><span class="o">.</span><span class="n">all</span><span class="p">,</span> <span class="ss">:id</span><span class="p">,</span> <span class="ss">:name</span><span class="p">)</span>
+</span><span class='line'><span class="n">collection_check_boxes</span><span class="p">(</span><span class="ss">:item</span><span class="p">,</span> <span class="ss">:owner_id</span><span class="p">,</span> <span class="no">Owner</span><span class="o">.</span><span class="n">all</span><span class="p">,</span> <span class="ss">:id</span><span class="p">,</span> <span class="ss">:name</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>Date field</strong><br/>
+  - Rails3<br/>
+  At some points we must use <code>date_select</code> form helper:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%=</span> <span class="n">f</span><span class="o">.</span><span class="n">date_select</span> <span class="ss">:return_date</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  HTML output:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="nb">select</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;item_return_date_1i&quot;</span> <span class="nb">name</span><span class="o">=</span><span class="s2">&quot;item[return_date(1i)]&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">option</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;2008&quot;</span><span class="o">&gt;</span><span class="mi">2008</span><span class="o">&lt;</span><span class="sr">/option&gt;</span>
+</span><span class='line'><span class="sr">  &amp;hellip;</span>
+</span><span class='line'><span class="sr">&lt;/se</span><span class="n">lect</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">select</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;item_return_date_2li&quot;</span> <span class="nb">name</span> <span class="o">=</span><span class="s2">&quot;item[return_date(2i)]&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">option</span> <span class="n">selected</span><span class="o">=</span><span class="s2">&quot;selected&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="o">&gt;</span><span class="no">January</span><span class="o">&lt;</span><span class="sr">/option&gt;</span>
+</span><span class='line'><span class="sr">  &amp;hellip;</span>
+</span><span class='line'><span class="sr">&lt;/se</span><span class="n">lect</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">select</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;item_return_date_3i&quot;</span> <span class="nb">name</span><span class="o">=</span><span class="s2">&quot;item[return_date(3i)]&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&amp;</span><span class="n">hellip</span><span class="p">;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/select&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  - Rails4<br/>
+  Rails4 now there is a date_field:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%=</span> <span class="n">f</span><span class="o">.</span><span class="n">date_field</span> <span class="ss">:return_date</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  HTML output:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">input</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;item_return_date&quot;</span> <span class="nb">name</span><span class="o">=</span><span class="s2">&quot;item[return_date]&quot;</span> <span class="n">type</span><span class="o">=</span><span class="s2">&quot;date&quot;</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Use Memoization to Speed Up Your Code in Ruby/Rails]]></title>
@@ -1378,82 +1530,6 @@ It's going to generate SQL: <code>SELECT * FROM users ORDER BY created_at desc</
 
 <p>
   So far so good, let upgrade to Rails4 then refactor ActiveRecord Finder together. :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[What We Should Test with RSpec in Rails]]></title>
-    <link href="http://geekhmer.github.io/blog/2014/08/04/what-we-should-test-with-rspec-in-rails/"/>
-    <updated>2014-08-04T22:27:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2014/08/04/what-we-should-test-with-rspec-in-rails</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" />
-</p>
-
-
-
-
-<p>
-  Well, what is takes to begin testing Rails applications. The hardest part of being a beginner is that you often don't know what you should test with RSpec in Rails.
-</p>
-
-
-
-
-<p>
-  Here is the most important thing is that you are testing: Feature specs, Model specs, Controller specs, View specs, Route specs.
-</p>
-
-
-
-
-<p>
-  <strong>Feature specs</strong><br/>
-  Feature specs is a kind of acceptance test, the tests that walk through your entire application ensuring that each of the components work together.<br/>
-  They are written from the perspective of a user clicking around the application and filling in forms on the page.<br/>
-  While Feature specs are great for testing high level functionality, keep in mind that feature specs is slow to run.
-</p>
-
-
-
-
-<p>
-  <strong>Model specs</strong><br/>
-  Model specs are similar to unit tests in that they are used to test smaller parts of the system, such as classes or methods, and they interact with the database too.
-</p>
-
-
-
-
-<p>
-  <strong>Controller specs</strong><br/>
-  When testing multiple paths through a controller is necessary, we favor using controller specs over feature specs, as they are faster to run and often easier to write.
-</p>
-
-
-
-
-<p>
-  <strong>View specs</strong><br/>
-  View specs is great for testing the conditional display of information in the templates. Most developers forget about these tests and use feature specs instead.<br/>
-  While you can cover each view conditional with a feature specs, I prefer to user view specs.
-</p>
-
-
-
-
-<p>
-  <strong>Route specs</strong><br/>
-  Most Ruby on Rails developers don’t test their routes, If you ever need to test an abstract base controller independently from any subclass, you will like need to add route specs for your testing.
-</p>
-
-
-
-
-<p>
-  So far so good, this was just an overview of what we should get started testing Rails. :)
 </p>
 
 ]]></content>
