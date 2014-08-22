@@ -3,7 +3,7 @@ layout: post
 title: "Test Models With RSpec in Ruby on Rails"
 date: 2014-08-07 09:40
 comments: true
-categories: [Ruby on Rails, Ruby]
+categories: [Ruby on Rails, Ruby, testing]
 keywords: models test, models testing, model test, model testing, test models with rspec in ruby on rails, test model with rspec in ruby on rails, test models with rspec in rails, test model with rspec in rails
 ---
 
