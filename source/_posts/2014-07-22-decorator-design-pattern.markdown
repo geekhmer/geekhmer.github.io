@@ -4,7 +4,9 @@ title: "Decorator Design Pattern"
 date: 2014-07-22 20:10
 comments: true
 categories: [Ruby, Design Pattern]
+
 keywords: ruby, design pattern, decorator design pattern
+description: Decorator Design Pattern
 ---
 
 <p>

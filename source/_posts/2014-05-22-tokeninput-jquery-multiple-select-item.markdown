@@ -4,7 +4,9 @@ title: "Tokeninput Jquery Multiple Select Item"
 date: 2014-05-22 16:46
 comments: true
 categories: Javascript
+
 keywords: javascript, jquery, tokeninput jquery multiple select item
+description: Tokeninput Jquery Multiple Select Item
 ---
 
 <p>

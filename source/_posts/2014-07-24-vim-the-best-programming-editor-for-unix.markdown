@@ -4,7 +4,9 @@ title: "Vim - The Best Programming Editor for UNIX"
 date: 2014-07-24 12:20
 comments: true
 categories: [Other]
+
 keywords: vim, editor, vim editor
+description: Vim - The Best Programming Editor for UNIX
 ---
 
 <p>

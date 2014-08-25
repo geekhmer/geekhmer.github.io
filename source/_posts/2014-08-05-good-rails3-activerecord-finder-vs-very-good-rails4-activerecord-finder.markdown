@@ -4,7 +4,9 @@ title: "Good Rails3 ActiveRecord Finder Vs Very Good Rails4 ActiveRecord Finder"
 date: 2014-08-05 23:39
 comments: true
 categories: [Ruby on Rails, Ruby]
+
 keywords: Rails3 ActiveRecord Finder, Rails4 ActiveRecord Finder, Very Good Rails4 ActiveRecord Finder, Good Rails3 ActiveRecord Finder Vs Very Good Rails4 ActiveRecord Finder
+description: Good Rails3 ActiveRecord Finder Vs Very Good Rails4 ActiveRecord Finder
 ---
 
 <p>

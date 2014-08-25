@@ -4,7 +4,9 @@ title: "Useful Best Coding in Ruby on Rails Project"
 date: 2014-07-17 22:24
 comments: true
 categories: [Ruby on Rails]
+
 keywords: Useful Best Coding in Ruby on Rails Project
+description: Useful Best Coding in Ruby on Rails Project
 ---
 
 <p>

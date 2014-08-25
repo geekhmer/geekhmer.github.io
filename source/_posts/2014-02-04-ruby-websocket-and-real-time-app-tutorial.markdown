@@ -4,7 +4,9 @@ title: "ruby websocket and real-time app tutorial"
 date: 2014-02-04 21:12
 comments: true
 categories: [Websocket, Ruby]
+
 keywords: websocket, ruby websocket, ruby websocket tutorial, ruby websocket real time app
+description: ruby websocket and real-time app tutorial
 ---
 
 <p>

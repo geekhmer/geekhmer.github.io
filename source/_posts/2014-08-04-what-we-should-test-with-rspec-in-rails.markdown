@@ -4,7 +4,9 @@ title: "What We Should Test with RSpec in Rails"
 date: 2014-08-04 22:27
 comments: true
 categories: [Ruby on Rails, Ruby, testing]
+
 keywords: what we should test with rspec in rails, rspec, test with rspec
+description: What We Should Test with RSpec in Rails
 ---
 
 <p>

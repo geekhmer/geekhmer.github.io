@@ -4,7 +4,9 @@ title: "Reduce duplication in database.yml configuration in Ruby on Rails Projec
 date: 2014-03-22 00:03
 comments: true
 categories: [Ruby on Rails]
+
 keywords: Reduce duplication in database.yml, database.yml, Reduce duplication in database.yml configuration in Ruby on Rails Project
+description: Reduce duplication in database.yml configuration in Ruby on Rails Project
 ---
 
 <p>

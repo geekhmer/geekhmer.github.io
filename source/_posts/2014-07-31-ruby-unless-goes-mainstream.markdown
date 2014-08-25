@@ -4,7 +4,9 @@ title: "Ruby 'unless' Goes Mainstream"
 date: 2014-07-31 23:44
 comments: true
 categories: [Ruby]
+
 keywords: ruby unless, unless, ruby's unless goes mainstream, ruby unless goes mainstream
+description: Ruby 'unless' Goes Mainstream
 ---
 
 <p>

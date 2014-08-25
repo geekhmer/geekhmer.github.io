@@ -4,7 +4,9 @@ title: "What's New in Rails4 ActiveModel?"
 date: 2014-08-09 00:16
 comments: true
 categories: [Ruby on Rails, Ruby]
+
 keywords: ActiveModel, Rails4 ActiveModel, What's New in Rails4 ActiveModel?, What's New in Rails4?
+description: What's New in Rails4 ActiveModel?
 ---
 
 <p>

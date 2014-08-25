@@ -4,7 +4,9 @@ title: "Test Routes with RSpec in Ruby on Rails"
 date: 2014-07-30 22:47
 comments: true
 categories: [testing, Ruby on Rails]
+
 keywords: test routes, testing routes, test routes with rspec in ruby on rails, rails
+description: Test Routes with RSpec in Ruby on Rails
 ---
 
 <p>

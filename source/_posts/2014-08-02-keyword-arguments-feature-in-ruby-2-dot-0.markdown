@@ -4,7 +4,9 @@ title: "Keyword Arguments Feature in Ruby 2.0"
 date: 2014-08-02 09:27
 comments: true
 categories: [Ruby]
+
 keywords: keyword arguments feature in ruby 2.0, keyword arguments ruby, keyword arguments in ruby, keyword argument ruby, keyword argument in ruby
+description: Keyword Arguments Feature in Ruby 2.0
 ---
 
 <p>

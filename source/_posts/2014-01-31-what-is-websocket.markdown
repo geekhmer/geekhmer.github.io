@@ -4,7 +4,9 @@ title: "What is Websocket?"
 date: 2014-01-31 13:05
 comments: true
 categories: [Websocket]
+
 keywords: websocket, what is websocket?, benefit from webSocket, websocket benefit, benefit of websocket
+description: What is Websocket?
 ---
 
 <p>

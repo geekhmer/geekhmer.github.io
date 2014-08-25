@@ -3,7 +3,9 @@ layout: post
 title: "Google Map Draggable Maker"
 date: 2014-06-06 12:05
 categories: Javascript
+
 keywords: Google map, Google map draggable maker
+description: Google Map Draggable Maker
 ---
 
 <p>

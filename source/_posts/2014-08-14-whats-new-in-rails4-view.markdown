@@ -4,7 +4,9 @@ title: "What's New in Rails4 View?"
 date: 2014-08-14 08:37
 comments: true
 categories: [Ruby on Rails, Ruby]
+
 keywords: What's New in Rails4 View?, Rails4 View, What's New in Rails4?
+description: What's New in Rails4 View?
 ---
 
 <p>

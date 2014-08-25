@@ -4,7 +4,9 @@ title: "Using Strong Parameters With Fields For &amp; Nested Forms in Rails 4"
 date: 2014-06-28 11:48
 comments: true
 categories: [Ruby on Rails]
+
 keywords: Using Strong Parameters With Fields For &amp; Nested Forms in Rails 4, Rails
+description: Using Strong Parameters With Fields For &amp; Nested Forms in Rails 4
 ---
 
 <p>

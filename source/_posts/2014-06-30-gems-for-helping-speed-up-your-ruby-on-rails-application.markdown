@@ -4,7 +4,9 @@ title: "Gems for Helping Speed Up Your Ruby on Rails Application"
 date: 2014-06-30 10:55
 comments: true
 categories: [Ruby, Ruby on Rails]
+
 keywords: gem, gems for helping speed up your Ruby on Rails application, speed up Ruby on Rails application
+description: Gems for Helping Speed Up Your Ruby on Rails Application
 ---
 
 <p>

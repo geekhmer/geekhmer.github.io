@@ -4,7 +4,9 @@ title: "Use Memoization to Speed Up Your Code in Ruby/Rails"
 date: 2014-08-11 00:28
 comments: true
 categories: [Ruby on Rails, Ruby]
+
 keywords: Use Memoization to Speed Up Your Code in Ruby/Rails, Memoization Ruby, Ruby Memoization, Memoization Rails, Rails Memoization, Ruby on Rails Memoization, Memoization Ruby on Rails
+description: Use Memoization to Speed Up Your Code in Ruby/Rails
 ---
 
 <p>

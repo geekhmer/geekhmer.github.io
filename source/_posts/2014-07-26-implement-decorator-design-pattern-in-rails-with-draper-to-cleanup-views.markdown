@@ -4,7 +4,9 @@ title: "Implement Decorator Design Pattern in Rails with Draper to Cleanup Views
 date: 2014-07-26 21:29
 comments: true
 categories: [Ruby, Ruby on Rails]
+
 keywords: decorator pattern, decorator design pattern, draper, implement decorator design pattern in rails with draper to cleanup views
+description: Implement Decorator Design Pattern in Rails with Draper to Cleanup Views
 ---
 
 <p>

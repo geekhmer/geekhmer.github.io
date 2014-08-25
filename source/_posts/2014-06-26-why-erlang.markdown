@@ -4,7 +4,9 @@ title: "Why Erlang?"
 date: 2014-06-26 20:51
 comments: true
 categories: Erlang
+
 keywords: Why Erlang?, Why Erlang, Erlang, Erlang programming language
+description: Why Erlang?
 ---
 
 <p>
