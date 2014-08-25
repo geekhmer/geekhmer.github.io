@@ -4,7 +4,9 @@ title: "AbstractClass"
 date: 2013-12-07 22:31
 comments: true
 categories: [Ruby, Ruby Metaprogramming]
+
 keywords: abstractclass, abstract class, ruby metaprogramming
+description: AbstractClass
 ---
 
 {% codeblock example lang:ruby %}

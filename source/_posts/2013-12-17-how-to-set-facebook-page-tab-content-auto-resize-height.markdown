@@ -4,7 +4,9 @@ title: "How to set Facebook Page Tab content auto resize height?"
 date: 2013-12-17 16:02
 comments: true
 categories: [Facebook]
+
 keywords: facebook, javascript, facebook fan page, how to develop facebook page tab?, how to set facebook page tab content auto resize height?
+description: How to set Facebook Page Tab content auto resize height?
 ---
 
 <p>

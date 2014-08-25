@@ -4,7 +4,9 @@ title: "Facebook signed request lose session in Ruby on Rails"
 date: 2013-09-28 22:03
 comments: true
 categories: [Ruby, Facebook]
+
 keywords: facebook, facebook-signed-request, facebook signed request, ruby, ruby on rails, rails, facebook signed request lose session in ruby on rails
+description: Facebook signed request lose session in Ruby on Rails
 ---
 
 <p>

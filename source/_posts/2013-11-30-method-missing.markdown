@@ -4,7 +4,9 @@ title: "method_missing"
 date: 2013-11-30 11:15
 comments: true
 categories: [Ruby, Ruby Metaprogramming]
+
 keywords: method_missing, method missing, ruby
+description: method_missing
 ---
 
 <p>

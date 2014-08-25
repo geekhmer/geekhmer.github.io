@@ -4,6 +4,7 @@ title: "assets_helper gem"
 date: 2013-12-19 21:27
 comments: true
 categories: [Ruby]
+
 keywords: assets_helper gem, assets helper gem, ruby, ruby gem
 description: assets_helper is the gem that use to include css and javascript by controller name automatically, it mean that include only css and javascript file in the controller that you are running.
 ---

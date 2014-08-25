@@ -4,7 +4,9 @@ title: "Dynamic Grid Layout with Masonry"
 date: 2013-10-21 00:35
 comments: true
 categories: [Layout]
+
 keywords: layout, grid layout, dynamic grid layout, masonry, dynamic grid layout with masonry
+description: Dynamic Grid Layout with Masonry
 ---
 
 <p>

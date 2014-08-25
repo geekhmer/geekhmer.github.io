@@ -4,7 +4,9 @@ title: "What is Block?"
 date: 2013-12-08 10:29
 comments: true
 categories: [Ruby]
+
 keywords: block, what is block
+description: What is Block?
 ---
 
 <p>

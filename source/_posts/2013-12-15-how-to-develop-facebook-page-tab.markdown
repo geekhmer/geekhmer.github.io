@@ -4,7 +4,9 @@ title: "How to develop Facebook Page Tab?"
 date: 2013-12-15 11:01
 comments: true
 categories: [Facebook]
+
 keywords: facebook, javascript, facebook fan page, how to develop facebook page tab?
+description: How to develop Facebook Page Tab?
 ---
 
 <p>

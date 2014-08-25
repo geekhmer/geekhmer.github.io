@@ -4,7 +4,9 @@ title: "define_singleton_method"
 date: 2013-11-30 09:16
 comments: true
 categories: [Ruby, Ruby Metaprogramming]
+
 keywords: define_singleton_method, define singleton method, ruby metaprogramming
+description: define_singleton_method
 ---
 
 <p>

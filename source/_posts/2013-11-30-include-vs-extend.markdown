@@ -4,7 +4,9 @@ title: "include_vs_extend"
 date: 2013-11-30 10:56
 comments: true
 categories: [Ruby, Ruby Metaprogramming]
+
 keywords: include, extend, include_vs_extend, ruby
+description: include_vs_extend
 ---
 
 <p>

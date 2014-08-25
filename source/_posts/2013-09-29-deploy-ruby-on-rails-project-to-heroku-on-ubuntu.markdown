@@ -4,7 +4,9 @@ title: "Deploy Ruby on Rails Project to Heroku on Ubuntu"
 date: 2013-09-29 09:23
 comments: true
 categories: [Ruby, Heroku, Ruby on Rails]
+
 keywords: deploy, heroku, ubuntu, ruby, ruby on rails, rails, deploy ruby on rails project to heroku on ubuntu
+description: Deploy Ruby on Rails Project to Heroku on Ubuntu
 ---
 
 <p>
