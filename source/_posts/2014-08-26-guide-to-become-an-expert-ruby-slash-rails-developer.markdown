@@ -10,6 +10,10 @@ description: Guide to Become An Expert Ruby/Rails Developer
 ---
 
 <p>
+  <img src="/images/guide_ruby_rails_developer.png" width="170" />
+</p>
+
+<p>
   This guide is meant to help you acquire the fundamental skills you need to become a Ruby Developer. Using books, video courses, and projects, you’ll learn how to develop web applications using Ruby, HTML & CSS, jQuery, and Rails. Additionally, you will learn about best practices, design patterns and principles, and the fundamentals of visual design. The goal is to build a solid foundation that you can expand on to become an expert Ruby Developer.
 </p>
 
