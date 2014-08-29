@@ -67,7 +67,7 @@ categories: [Other]
 <h3>What to prepare?</h3>
 
 <p>
-  - Completed exercises on tryruby.org.
+  - Completed exercises on tryruby.org.<br/>
   - Your laptop to be installed with Ruby 2.1 and Rails 4 (we'll get this done on Friday).
 </p>
 
