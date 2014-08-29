@@ -107,5 +107,5 @@ categories: [Other]
 </p>
 
 <p>
-  Place and Date will inform later. Thank!!!
+  Place and Date will inform later. Note: <strong>Completed exercises on tryruby.org</strong>... Thank!!!
 </p>
