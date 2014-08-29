@@ -43,7 +43,7 @@ categories: [Other]
 </p>
 
 <p>
-  <strong>Ruby on Rails</strong><br/>
+  <strong>4. Ruby on Rails</strong><br/>
   Learn fundamentals of Ruby on Rails and be wowed by its magic and simplicity.
 </p>
 
@@ -68,7 +68,7 @@ categories: [Other]
 
 <p>
   - Completed exercises on tryruby.org.<br/>
-  - Your laptop to be installed with Ruby 2.1 and Rails 4 (we'll get this done on Friday).
+  - Your laptop to be installed with Ruby 2.1 and Rails 4 (we'll get this done on Saturday).
 </p>
 
 <h3>Schedule</h3>
