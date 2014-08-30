@@ -10,6 +10,10 @@ description: Ruby Readable Booleans
 ---
 
 <p>
+  <img src="/images/rights_and_wrongsof_ruby.jpg" width="400" />
+</p>
+
+<p>
   There's a great little trick you can do to improve the readability of your code. A common problem is dealing with methods that have a boolean flag arguments. Here's an example I ran into just today in a Rails application:
 </p>
 
