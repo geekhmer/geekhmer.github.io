@@ -107,5 +107,5 @@ http {
 </p>
 
 <p>
-  So far so good, next article I will show you about Reverse Proxy and Load Balancer. See you!
+  So far so good, next article I will show you how to work with Nginx. :)
 </p>
