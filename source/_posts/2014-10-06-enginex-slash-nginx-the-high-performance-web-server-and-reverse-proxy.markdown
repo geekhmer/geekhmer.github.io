@@ -45,5 +45,5 @@ keywords: EngineX/Nginx the High-Performance Web Server and Reverse Proxy, Nginx
 </p>
 
 <p>
-  So far so good, next article I will show you how to install & use it.
+  So far so good, next article I will show you how to install & use it. See you!
 </p>
