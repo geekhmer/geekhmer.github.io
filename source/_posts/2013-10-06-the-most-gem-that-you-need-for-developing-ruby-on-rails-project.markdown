@@ -206,3 +206,15 @@ description: The most gem that you need for developing Ruby on Rails project
   Description:  is the gem that use to include css and javascript by controller name automatically, it mean that include only css and javascript file in the controller that you are running.<br/>
   Source: <a href="https://github.com/Bunlong/assets_helper" target="_blank">https://github.com/Bunlong/assets_helper</a>
 </p>
+
+<p>
+  <strong>34. activenavbar</strong><br/>
+  Description: is the gem that use to set the active navbar link, a link becomes active when you click on it.<br/>
+  Source: <a href="https://github.com/Bunlong/activenavbar" target="_blank">https://github.com/Bunlong/activenavbar</a>
+</p>
+
+<p>
+  <strong>35. olive</strong><br/>
+  Description: is the rails helper​ gem that enables to use content_for in controllers.<br/>
+  Source: <a href="https://github.com/Bunlong/olive" target="_blank">https://github.com/Bunlong/olive</a>
+</p>
