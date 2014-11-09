@@ -8,6 +8,10 @@ keywords: gem, ruby, ruby on rails, rails, the most gem, the most gem that I use
 description: the most gem that I use for developing ruby on rails project
 ---
 
+<p>
+  <img src="/images/the_most_gem_i_use.jpg" alt="The most gem that I use for developing ruby on rails project" />
+</p>
+
 <h3>activerecord</h3>
 
 <p>
