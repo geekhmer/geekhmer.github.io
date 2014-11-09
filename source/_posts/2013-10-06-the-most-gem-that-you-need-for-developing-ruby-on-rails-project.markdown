@@ -218,3 +218,75 @@ description: The most gem that you need for developing Ruby on Rails project
   Description: is the rails helper​ gem that enables to use content_for in controllers.<br/>
   Source: <a href="https://github.com/Bunlong/olive" target="_blank">https://github.com/Bunlong/olive</a>
 </p>
+
+<p>
+  <strong>36. Slim</strong><br/>
+  Description: Slim is a template language whose goal is to reduce the view syntax to the essential parts without becoming cryptic.<br/>
+  Source: <a href="https://github.com/slim-template/slim" target="_blank">https://github.com/slim-template/slim</a>
+</p>
+
+<p>
+  <strong>37. font-awesome-rails</strong><br/>
+  Description: font-awesome-rails provides the Font-Awesome web fonts and stylesheets as a Rails engine for use with the asset pipeline.<br/>
+  Source: <a href="https://github.com/bokmann/font-awesome-rails" target="_blank">https://github.com/bokmann/font-awesome-rails</a>
+</p>
+
+<p>
+  <strong>38. minimagick</strong><br/>
+  Description: Using MiniMagick the ruby processes memory remains small (it spawns ImageMagick's command line program mogrify which takes up some memory as well, but is much smaller compared to RMagick).<br/>
+  Source: <a href="https://github.com/minimagick/minimagick" target="_blank">https://github.com/minimagick/minimagick</a>
+</p>
+
+<p>
+  <strong>39. byebug</strong><br/>
+  Description: It allows you to see what is going on inside a Ruby program while it executes and offers many of the traditional debugging features.<br/>
+  Source: <a href="https://github.com/deivid-rodriguez/byebug" target="_blank">https://github.com/deivid-rodriguez/byebug</a>
+</p>
+
+<p>
+  <strong>39. byebug</strong><br/>
+  Description: It allows you to see what is going on inside a Ruby program while it executes and offers many of the traditional debugging features.<br/>
+  Source: <a href="https://github.com/deivid-rodriguez/byebug" target="_blank">https://github.com/deivid-rodriguez/byebug</a>
+</p>
+
+<p>
+  <strong>40. awesome_print</strong><br/>
+  Description: Pretty print your Ruby objects with style -- in full color and with proper indentation.<br/>
+  Source: <a href="https://github.com/michaeldv/awesome_print" target="_blank">https://github.com/michaeldv/awesome_print</a>
+</p>
+
+<p>
+  <strong>41. omniauth</strong><br/>
+  Description: OmniAuth is a library that standardizes multi-provider authentication for web applications. It was created to be powerful, flexible, and do as little as possible.<br/>
+  Source: <a href="https://github.com/intridea/omniauth" target="_blank">https://github.com/intridea/omniauth</a>
+</p>
+
+<p>
+  <strong>42. rails_layout</strong><br/>
+  Description: Generates Rails application layout files for various front-end frameworks.<br/>
+  Source: <a href="https://github.com/RailsApps/rails_layout" target="_blank">https://github.com/RailsApps/rails_layout</a>
+</p>
+
+<p>
+  <strong>43. bullet</strong><br/>
+  Description: help to kill N+1 queries and unused eager loading.<br/>
+  Source: <a href="https://github.com/flyerhzm/bullet" target="_blank">https://github.com/flyerhzm/bullet</a>
+</p>
+
+<p>
+  <strong>44. pundit</strong><br/>
+  Description: Minimal authorization through OO design and pure Ruby classes.<br/>
+  Source: <a href="https://github.com/elabs/pundit" target="_blank">https://github.com/elabs/pundit</a>
+</p>
+
+<p>
+  <strong>45. devise_invitable</strong><br/>
+  Description: An invitation strategy for devise.<br/>
+  Source: <a href="https://github.com/scambra/devise_invitable" target="_blank">https://github.com/scambra/devise_invitable</a>
+</p>
+
+<p>
+  <strong>46. draper</strong><br/>
+  Description: Decorators/View-Models for Rails Applications.<br/>
+  Source: <a href="https://github.com/drapergem/draper" target="_blank">https://github.com/drapergem/draper</a>
+</p>

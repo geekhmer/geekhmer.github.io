@@ -1,0 +1,445 @@
+---
+layout: post
+title: "The Most Gem That I Use for Developing Ruby on Rails Project"
+date: 2014-11-07 20:33
+categories: [Ruby]
+
+keywords: gem, ruby, ruby on rails, rails, the most gem, the most gem that I use for developing ruby on rails project
+description: the most gem that I use for developing ruby on rails project
+---
+
+<h3>activerecord</h3>
+
+<p>
+  <strong>1. kaminari</strong><br/>
+  Description: A Scope & Engine based, clean, powerful, customizable and sophisticated paginator for modern web app frameworks and ORMs.<br/>
+  Source: <a href="https://github.com/amatsuda/kaminari" target="_blank">https://github.com/amatsuda/kaminari</a>
+</p>
+
+<p>
+  <strong>2. i18n-active_record</strong><br/>
+  Description: Use to lookup translations in the database.<br/>
+  Source: <a href="https://github.com/svenfuchs/i18n-active_record" target="_blank">https://github.com/svenfuchs/i18n-active_record</a>
+</p>
+
+<p>
+  <strong>3. paperclip</strong><br/>
+  Description: Paperclip is intended as an easy file attachment library for Active Record.<br/>
+  Source: <a href="https://github.com/thoughtbot/paperclip" target="_blank">https://github.com/thoughtbot/paperclip</a>
+</p>
+
+<p>
+  <strong>4. paperclip-meta</strong><br/>
+  Description: Use for adding width, height, and size to paperclip images.<br/>
+  Source: <a href="https://github.com/teeparham/paperclip-meta" target="_blank">https://github.com/teeparham/paperclip-meta</a>
+</p>
+
+<p>
+  <strong>5. swf_file</strong><br/>
+  Description: SWF File is lightweight gem to read swf file headers from within a Ruby application.<br/>
+  Source: <a href="https://github.com/DBA/swf_file" target="_blank">https://github.com/DBA/swf_file</a>
+</p>
+
+<h3>delayed_job</h3>
+
+<p>
+  <strong>1. delayed_job_active_record</strong><br/>
+  Description: delayed_job_active_record encapsulates the common pattern of asynchronously executing longer tasks in the background.<br/>
+  Source: <a href="https://github.com/collectiveidea/delayed_job" target="_blank">https://github.com/collectiveidea/delayed_job</a>
+</p>
+
+<p>
+  <strong>2. delayed_job_web</strong><br/>
+  Description: Resque like web interface for delayed job.<br/>
+  Source: <a href="https://github.com/ejschmitt/delayed_job_web" target="_blank">https://github.com/ejschmitt/delayed_job_web</a>
+</p>
+
+<h3>mongoid</h3>
+
+<p>
+  <strong>1. mongoid</strong><br/>
+  Description: Mongoid is an ODM (Object-Document-Mapper) framework for MongoDB in Ruby.<br/>
+  Source: <a href="https://github.com/mongoid/mongoid" target="_blank">https://github.com/mongoid/mongoid</a>
+</p>
+
+<p>
+  <strong>2. mongoid-rails-instrumentation</strong><br/>
+  Description: Add additional information to rails logs about total time for MongoDB queries in action processing.<br/>
+  Source: <a href="https://github.com/fredjean/mongoid-rails-instrumentation" target="_blank">https://github.com/fredjean/mongoid-rails-instrumentation</a>
+</p>
+
+<h3>solr</h3>
+
+<p>
+  <strong>1. rsolr</strong><br/>
+  Description: A simple, extensible Ruby client for Apache Solr.<br/>
+  Source: <a href="https://github.com/rsolr/rsolr" target="_blank">https://github.com/rsolr/rsolr</a>
+</p>
+
+<h3>views</h3>
+
+<p>
+  <strong>1. haml-rails</strong><br/>
+  Description: Haml-rails provides Haml generators for rails 3.<br/>
+  Source: <a href="https://github.com/indirect/haml-rails" target="_blank">https://github.com/indirect/haml-rails</a>
+</p>
+
+<p>
+  <strong>2. simple_form</strong><br/>
+  Description: simple_form aims to be as flexible as possible while helping you with powerful components to create your form.<br/>
+  Source: <a href="https://github.com/plataformatec/simple_form" target="_blank">https://github.com/plataformatec/simple_form</a>
+</p>
+
+<p>
+  <strong>3. unicode</strong><br/>
+  Description: Unicode string manipulation library for Ruby.<br/>
+  Source: <a href="https://github.com/blackwinter/unicode" target="_blank">https://github.com/blackwinter/unicode</a>
+</p>
+
+<p>
+  <strong>4. wicked_pdf</strong><br/>
+  Description: Wicked PDF uses the shell utility wkhtmltopdf to serve a PDF file to a user from HTML.<br/>
+  Source: <a href="https://github.com/mileszs/wicked_pdf" target="_blank">https://github.com/mileszs/wicked_pdf</a>
+</p>
+
+<p>
+  <strong>5. wkhtmltopdf-binary</strong><br/>
+  Description: Provides binaries for WKHTMLTOPDF project in an easily accessible package.<br/>
+  Source: <a href="https://rubygems.org/gems/wkhtmltopdf-binary" target="_blank">https://rubygems.org/gems/wkhtmltopdf-binary</a>
+</p>
+
+<p>
+  <strong>6. best_in_place</strong><br/>
+  Description: Best in Place is a jQuery based AJAX Inplace-Editor that takes profit of RESTful server-side controllers to allow users to edit stuff with no need of forms.<br/>
+  Source: <a href="https://github.com/bernat/best_in_place" target="_blank">https://github.com/bernat/best_in_place</a>
+</p>
+
+<p>
+  <strong>7. mustache</strong><br/>
+  Description: Mustache is a framework-agnostic way to render logic-free views.<br/>
+  Source: <a href="https://github.com/mustache/mustache" target="_blank">https://github.com/mustache/mustache</a>
+</p>
+
+<p>
+  <strong>8. olive</strong><br/>
+  Description: is the rails helper​ gem that enables to use content_for in controllers.<br/>
+  Source: <a href="https://github.com/Bunlong/olive" target="_blank">https://github.com/Bunlong/olive</a>
+</p>
+
+<p>
+  <strong>9. activenavbar</strong><br/>
+  Description: is the gem that use to set the active navbar link, a link becomes active when you click on it.<br/>
+  Source: <a href="https://github.com/Bunlong/activenavbar" target="_blank">https://github.com/Bunlong/activenavbar</a>
+</p>
+
+<h3>utils</h3>
+
+<p>
+  <strong>1. uuidtools</strong><br/>
+  Description: uuidtools was designed to be a simple library for generating any of the various types of uuids.<br/>
+  Source: <a href="https://github.com/sporkmonger/uuidtools/tree/" target="_blank">https://github.com/sporkmonger/uuidtools/tree</a>
+</p>
+
+<p>
+  <strong>2. geoip</strong><br/>
+  Description: The Ruby gem for querying Maxmind.com's GeoIP database, which returns the geographic location of a server given its IP address.<br/>
+  Source: <a href="https://github.com/cjheath/geoip" target="_blank">https://github.com/cjheath/geoip</a>
+</p>
+
+<p>
+  <strong>3. fakie</strong><br/>
+  Description: Libphonenumber Ruby wrapper.<br/>
+  Source: <a href="https://github.com/seesawco/fakie" target="_blank">https://github.com/seesawco/fakie</a>
+</p>
+
+<h3>auth</h3>
+
+<p>
+  <strong>1. devise</strong><br/>
+  Description: devise is a flexible authentication solution for Rails.<br/>
+  Source: <a href="https://github.com/plataformatec/devise" target="_blank">https://github.com/plataformatec/devise</a>
+</p>
+
+<p>
+  <strong>2. devise-encryptable</strong><br/>
+  Description: Devise encryptable behavior.<br/>
+  Source: <a href="https://github.com/plataformatec/devise-encryptable" target="_blank">https://github.com/plataformatec/devise-encryptable</a>
+</p>
+
+<p>
+  <strong>3. CanCan</strong><br/>
+  Description: CanCan is an authorization library for Ruby on Rails.<br/>
+  Source: <a href="https://github.com/ryanb/cancan" target="_blank">https://github.com/ryanb/cancan</a>
+</p>
+
+<p>
+  <strong>4. rolify</strong><br/>
+  Description: Role management library with resource scoping.<br/>
+  Source: <a href="https://github.com/RolifyCommunity/rolify" target="_blank">https://github.com/RolifyCommunity/rolify</a>
+</p>
+
+<h3>aws</h3>
+
+<p>
+  <strong>1. aws-sdk</strong><br/>
+  Description: The official AWS SDK for Ruby.<br/>
+  Source: <a href="https://github.com/aws/aws-sdk-ruby" target="_blank">https://github.com/aws/aws-sdk-ruby</a>
+</p>
+
+<h3>misc</h3>
+
+<p>
+  <strong>1. passenger</strong><br/>
+  Description: Phusion Passenger™ is a web server and application server, designed to be fast, robust and lightweight.<br/>
+  Source: <a href="https://github.com/phusion/passenger" target="_blank">https://github.com/phusion/passenger</a>
+</p>
+
+<p>
+  <strong>2. whenever</strong><br/>
+  Description: Whenever is a Ruby gem that provides a clear syntax for writing and deploying cron jobs.<br/>
+  Source: <a href="https://github.com/javan/whenever" target="_blank">https://github.com/javan/whenever</a>
+</p>
+
+<p>
+  <strong>3. ruby-graphviz</strong><br/>
+  Description: Ruby interface to the GraphViz graphing tool.<br/>
+  Source: <a href="https://github.com/glejeune/Ruby-Graphviz/" target="_blank">https://github.com/glejeune/Ruby-Graphviz/</a>
+</p>
+
+<h3>rake</h3>
+
+<p>
+  <strong>1. sitemap_generator</strong><br/>
+  Description: SitemapGenerator is the easiest way to generate Sitemaps in Ruby.<br/>
+  Source: <a href="https://github.com/kjvarga/sitemap_generator" target="_blank">https://github.com/kjvarga/sitemap_generator</a>
+</p>
+
+<p>
+  <strong>2. fog</strong><br/>
+  Description: fog is the Ruby cloud services library.<br/>
+  Source: <a href="https://github.com/fog/fog" target="_blank">https://github.com/fog/fog</a>
+</p>
+
+<p>
+  <strong>3. progressbar</strong><br/>
+  Description: Ruby/ProgressBar is a text progress bar library for Ruby.<br/>
+  Source: <a href="https://github.com/peleteiro/progressbar" target="_blank">https://github.com/peleteiro/progressbar</a>
+</p>
+
+<p>
+  <strong>4. parallel</strong><br/>
+  Description: Ruby parallel processing made simple and fast.<br/>
+  Source: <a href="https://github.com/grosser/parallel" target="_blank">https://github.com/grosser/parallel</a>
+</p>
+
+<p>
+  <strong>5. terminal-table</strong><br/>
+  Description: Ruby ASCII Table Generator, simple and feature rich.<br/>
+  Source: <a href="https://github.com/tj/terminal-table" target="_blank">https://github.com/tj/terminal-table</a>
+</p>
+
+<h3>production</h3>
+
+<p>
+  <strong>1. dalli</strong><br/>
+  Description: Dalli is a high performance pure Ruby client for accessing memcached servers.<br/>
+  Source: <a href="https://github.com/mperham/dalli" target="_blank">https://github.com/mperham/dalli</a>
+</p>
+
+<p>
+  <strong>2. exception_notification</strong><br/>
+  Description: The Exception Notification gem provides a set of notifiers for sending notifications when errors occur in a Rack/Rails application. The built-in notifiers can deliver notifications by email, campfire rooms or via webhooks.<br/>
+  Source: <a href="https://github.com/smartinez87/exception_notification" target="_blank">https://github.com/smartinez87/exception_notification</a>
+</p>
+
+<p>
+  <strong>3. newrelic_rpm</strong><br/>
+  Description: New Relic is a performance management system, developed by New Relic, Inc. It provides you with deep information about the performance of your Rails or Ruby application as it runs in production.<br/>
+  Source: <a href="https://github.com/newrelic/rpm" target="_blank">https://github.com/newrelic/rpm</a>
+</p>
+
+<h3>development & test</h3>
+
+<p>
+  <strong>1. brakeman</strong><br/>
+  Description: Brakeman is a static analysis tool which checks Ruby on Rails applications for security vulnerabilities.<br/>
+  Source: <a href="https://github.com/presidentbeef/brakeman" target="_blank">https://github.com/presidentbeef/brakeman</a>
+</p>
+
+<p>
+  <strong>2. ffaker</strong><br/>
+  Description: A library for generating fake data such as names, addresses, and phone numbers.<br/>
+  Source: <a href="https://github.com/EmmanuelOga/ffaker" target="_blank">https://github.com/EmmanuelOga/ffaker</a>
+</p>
+
+<p>
+  <strong>3. binding_of_caller</strong><br/>
+  Description: Retrieve the binding of a method's caller.<br/>
+  Source: <a href="https://github.com/banister/binding_of_caller" target="_blank">https://github.com/banister/binding_of_caller</a>
+</p>
+
+<h4>guard</h4>
+
+<p>
+  <strong>4. rb-inotify</strong><br/>
+  Description: This is a simple wrapper over the inotify Linux kernel subsystem for monitoring changes to files and directories.<br/>
+  Source: <a href="https://github.com/nex3/rb-inotify" target="_blank">https://github.com/nex3/rb-inotify</a>
+</p>
+
+<p>
+  <strong>5. guard-rspec</strong><br/>
+  Description: Guard::RSpec allows to automatically & intelligently launch specs when files are modified.<br/>
+  Source: <a href="https://github.com/guard/guard-rspec" target="_blank">https://github.com/guard/guard-rspec</a>
+</p>
+
+<p>
+  <strong>6. guard-jasmine</strong><br/>
+  Description: Guard::Jasmine automatically tests your Jasmine specs when files are modified.<br/>
+  Source: <a href="https://github.com/guard/guard-jasmine" target="_blank">https://github.com/guard/guard-jasmine</a>
+</p>
+
+<p>
+  <strong>7. guard-jasmine</strong><br/>
+  Description: Zeus preloads your Rails app so that your normal development tasks such as console, server, generate, and specs/tests take less than one second.<br/>
+  Source: <a href="https://github.com/burke/zeus" target="_blank">https://github.com/burke/zeus</a>
+</p>
+
+<h4>javascript</h4>
+
+<p>
+  <strong>8. jasminerice</strong><br/>
+  Description: Pain free coffeescript testing.<br/>
+  Source: <a href="https://github.com/bradphelan/jasminerice" target="_blank">https://github.com/bradphelan/jasminerice</a>
+</p>
+
+<h4>console</h4>
+
+<p>
+  <strong>9. pry</strong><br/>
+  Description: An IRB alternative and runtime developer console.<br/>
+  Source: <a href="https://github.com/pry/pry" target="_blank">https://github.com/pry/pry</a>
+</p>
+
+<p>
+  <strong>10. pry-debugger</strong><br/>
+  Description: Fast execution control in Pry.<br/>
+  Source: <a href="https://github.com/nixme/pry-debugger" target="_blank">https://github.com/nixme/pry-debugger</a>
+</p>
+
+<p>
+  <strong>11 pry-rails</strong><br/>
+  Description: Avoid repeating yourself, use pry-rails instead of copying the initializer to every rails project. This is a small gem which causes rails console to open pry.<br/>
+  Source: <a href="https://github.com/rweng/pry-rails" target="_blank">https://github.com/rweng/pry-rails</a>
+</p>
+
+<h4>web server</h4>
+
+<p>
+  <strong>12. thin</strong><br/>
+  Description: A very fast & simple Ruby web server.<br/>
+  Source: <a href="https://github.com/macournoyer/thin/" target="_blank">https://github.com/macournoyer/thin/</a>
+</p>
+
+<h4>rspec, capybara and shoulda</h4>
+
+<p>
+  <strong>13. rspec-rails</strong><br/>
+  Description: rspec-rails is a testing framework for Rails.<br/>
+  Source: <a href="https://github.com/rspec/rspec-rails" target="_blank">https://github.com/rspec/rspec-rails</a>
+</p>
+
+<p>
+  <strong>14. headless</strong><br/>
+  Description: Ruby wrapper for Xvfb, the virtual framebuffer.<br/>
+  Source: <a href="https://github.com/leonid-shevtsov/headless" target="_blank">https://github.com/leonid-shevtsov/headless</a>
+</p>
+
+<p>
+  <strong>15. factory_girl_rails</strong><br/>
+  Description: factory_girl_rails provides Rails integration for factory_girl.<br/>
+  Source: <a href="https://github.com/thoughtbot/factory_girl_rails" target="_blank">https://github.com/thoughtbot/factory_girl_rails</a>
+</p>
+
+<p>
+  <strong>16. capybara</strong><br/>
+  Description: Capybara helps you test web applications by simulating how a real user would interact with your app.<br/>
+  Source: <a href="https://github.com/jnicklas/capybara" target="_blank">https://github.com/jnicklas/capybara</a>
+</p>
+
+<p>
+  <strong>17. shoulda-matchers</strong><br/>
+  Description: shoulda-matchers provides Test::Unit- and RSpec-compatible one-liners that test common Rails functionality.<br/>
+  Source: <a href="https://github.com/thoughtbot/shoulda-matchers" target="_blank">https://github.com/thoughtbot/shoulda-matchers</a>
+</p>
+
+<h3>development</h3>
+
+<p>
+  <strong>1. rails-erd</strong><br/>
+  Description: Generate Entity-Relationship Diagrams for Rails applications.<br/>
+  Source: <a href="https://github.com/voormedia/rails-erd" target="_blank">https://github.com/voormedia/rails-erd</a>
+</p>
+
+<p>
+  <strong>2. better_errors</strong><br/>
+  Description: Better Errors replaces the standard Rails error page with a much better and more useful error page.<br/>
+  Source: <a href="https://github.com/charliesome/better_errors" target="_blank">https://github.com/charliesome/better_errors</a>
+</p>
+
+<p>
+  <strong>3. foreman</strong><br/>
+  Description: Manage Procfile-based applications.<br/>
+  Source: <a href="https://github.com/ddollar/foreman" target="_blank">https://github.com/ddollar/foreman</a>
+</p>
+
+<h3>test</h3>
+
+<p>
+  <strong>1. simplecov</strong><br/>
+  Description: SimpleCov is a code coverage analysis tool for Ruby.<br/>
+  Source: <a href="https://github.com/colszowka/simplecov" target="_blank">https://github.com/colszowka/simplecov</a>
+</p>
+
+<p>
+  <strong>2. json_spec</strong><br/>
+  Description: Easily handle JSON in RSpec and Cucumber.<br/>
+  Source: <a href="https://github.com/collectiveidea/json_spec" target="_blank">https://github.com/collectiveidea/json_spec</a>
+</p>
+
+<p>
+  <strong>3. database_cleaner</strong><br/>
+  Description: Strategies for cleaning databases in Ruby. Can be used to ensure a clean state for testing.<br/>
+  Source: <a href="https://github.com/DatabaseCleaner/database_cleaner" target="_blank">https://github.com/DatabaseCleaner/database_cleaner</a>
+</p>
+
+<h3>assets</h3>
+
+<p>
+  <strong>1. asset_sync</strong><br/>
+  Description: Asset Sync is built to run with the new Rails Asset Pipeline feature introduced in Rails 3.1. After you run bundle exec rake assets:precompile your assets will be synchronised to your S3 bucket, optionally deleting unused files and only uploading the files it needs to.<br/>
+  Source: <a href="https://github.com/rumblelabs/asset_sync" target="_blank">https://github.com/rumblelabs/asset_sync</a>
+</p>
+
+<p>
+  <strong>2. sass-rails</strong><br/>
+  Description: This gem provides official integration for Ruby on Rails projects with the Sass stylesheet language.<br/>
+  Source: <a href="https://github.com/rails/sass-rails" target="_blank">https://github.com/rails/sass-rails</a>
+</p>
+
+<p>
+  <strong>3. bootstrap-sass</strong><br/>
+  Description: Official Sass port of Bootstrap.<br/>
+  Source: <a href="https://github.com/twbs/bootstrap-sass" target="_blank">https://github.com/twbs/bootstrap-sass</a>
+</p>
+
+<p>
+  <strong>4. jquery-fileupload-rails</strong><br/>
+  Description: jQuery File Upload integrated for Rails Asset Pipeline.<br/>
+  Source: <a href="https://github.com/tors/jquery-fileupload-rails" target="_blank">https://github.com/tors/jquery-fileupload-rails</a>
+</p>
+
+<p>
+  <strong>5. bootstrap-wysihtml5-rails</strong><br/>
+  Description: WYSIWYG editor for Bootstrap, integrated in Rails assets pipeline.<br/>
+  Source: <a href="https://github.com/Nerian/bootstrap-wysihtml5-rails" target="_blank">https://github.com/Nerian/bootstrap-wysihtml5-rails</a>
+</p>
