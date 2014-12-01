@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2014-11-29T22:46:36+07:00</updated>
+  <updated>2014-12-01T23:22:35+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,196 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Tips to Improve the Performance of Ruby on Rails Application]]></title>
+    <link href="http://geekhmer.github.io/blog/2014/12/01/tips-to-improve-the-performance-of-ruby-on-rails-application/"/>
+    <updated>2014-12-01T22:06:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2014/12/01/tips-to-improve-the-performance-of-ruby-on-rails-application</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" alt="Tips to Improve the Performance of Ruby on Rails Application" />
+</p>
+
+
+
+
+<p>
+   In this article, I will show you tips to improve performance of Ruby on Rails application. let’s dive into those.
+</p>
+
+
+
+
+<p>
+  <strong>1. Limit Amount of Data in a Controller Method</strong><br/>
+  Thin controllers are easy to test and has a good performance profile because there’s some overhead involved in passing the controller instance variable around. In short, you need to follow &#8220;Thin controller and fat model&#8221;.
+</p>
+
+
+
+
+<p>
+  <strong>2. Split View in Separate Partials</strong><br/>
+  n this way, views will be easier to read and easier to cache.
+</p>
+
+
+
+
+<p>
+  <strong>3. Choose Right Session Storage</strong><br/>
+  Based on your level of need, choose your session storage carefully. Here are what rails provide:<br/>
+  - CookieStore – Stores everything on the client.<br/>
+  - DRbStore – Stores the data on a DRb server.<br/>
+  - MemCacheStore – Stores the data in a memcache.<br/>
+  - ActiveRecordStore – Stores the data in a database using Active Record.
+</p>
+
+
+
+
+<p>
+  <strong>4. DRY (Don&#8217;t Repeat Yourself)</strong><br/>
+  This is the most common things programmers tend to listen and don’t follow. Here is very basic example:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">if</span> <span class="no">Listing</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;Bambo&quot;</span>
+</span><span class='line'>  <span class="k">return</span> <span class="no">Listing</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'><span class="k">else</span>
+</span><span class='line'>  <span class="k">return</span> <span class="kp">nil</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  It should be written by:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">listing</span> <span class="o">=</span> <span class="no">Listing</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'><span class="k">if</span> <span class="n">listing</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;Bambp&quot;</span> <span class="k">then</span> <span class="n">listing</span> <span class="k">else</span> <span class="kp">nil</span> <span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Eager Loading</strong><br/>
+  Eager loading is a way to solve the classic N + 1 query performance problem caused by inefficient use of child objects.
+</p>
+
+
+
+
+<p>
+  Let’s look at the following code. It will fetch zip of 10 users.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">users</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="ss">:limit</span> <span class="o">=&gt;</span> <span class="mi">10</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">users</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">user</span><span class="o">|</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="n">user</span><span class="o">.</span><span class="n">address</span><span class="o">.</span><span class="n">zip</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  11 queries will be executed, 1 for the top and 10. The solution is to rewrite it to eager load address:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">users</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">:address</span><span class="p">)</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">users</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">user</span><span class="o">|</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="n">user</span><span class="o">.</span><span class="n">address</span><span class="o">.</span><span class="n">zip</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Indexing</strong><br/>
+  Database indexing is one of the simplest ways to improve database performance. The insert operation will become slower but will boost up fetching data which is more frequently used in web application.
+</p>
+
+
+
+
+<p>
+  <strong>Avoid Dynamism</strong><br/>
+  Although find_by and find_all_by dynamic methods are really cool, the are also kind of slow because each one needs to run through method_missing and parse the filename against the list of columns in database table.
+</p>
+
+
+
+
+<p>
+  <strong>Caching</strong><br/>
+  This is the purest way to speed up a rails application. Here are a short example of different types of caching:<br/>
+  - Page Caching<br/>
+  - Action Caching<br/>
+  - Fragment Caching<br/>
+  - SQL Caching<br/>
+  - Asset Caching<br/>
+</p>
+
+
+
+
+<p>
+  <strong>Image Spriting</strong><br/>
+  In websites, a significant times are consumed for loading large number of images. One way of minimizing is to sprite your images. This will reduce number of images to be served significantly.
+</p>
+
+
+
+
+<p>
+  <strong>Minify and GZIP Stylesheets and Javascripts</strong><br/>
+  This is the last point, but an important one. You can reduce size of the stylesheets and javascripts significantly by Minifying it and serve as GZip format. It will improve the performance significantly by reducing request/response time.
+</p>
+
+
+
+
+<p>
+  So far so good, these are pretty basic guidelines but surely help you to improve your application. Now, the bounce rate of your site should be less and you are expected to be a happier product owner. :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Tools for Monitoring Performance in Ruby on Rails Application]]></title>
@@ -4021,59 +4211,6 @@ It&#8217;s going to generate SQL: <code>SELECT * FROM users ORDER BY created_at 
 
 <p>
   So far so good, Let enjoy the routes testing in your Ruby on Rails application. :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[RailsPanel]]></title>
-    <link href="http://geekhmer.github.io/blog/2014/07/30/railspanel/"/>
-    <updated>2014-07-30T08:30:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2014/07/30/railspanel</id>
-    <content type="html"><![CDATA[<p>
-  RailsPanel is a Chrome extension for Rails development that will end your tailing of development.log. Have all information about your Rails app requests in the browser - in the Developer Tools panel. Provides insight to db/rendering/total times, parameter list, rendered views and more.
-</p>
-
-
-
-
-<p>
-  <a class="fancybox" href="http://geekhmer.github.io/images/rails_panel.png"><img src="http://geekhmer.github.io/images/rails_panel.png" width="680" /></a>
-</p>
-
-
-
-
-<p>
-  <strong>Installation</strong><br/>
-  To use this extension you need to add meta_request gem to your app&#8217;s Gemfile:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Gemfile </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">group</span> <span class="ss">:development</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">gem</span> <span class="s1">&#39;meta_request&#39;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Install <a href="https://chrome.google.com/webstore/detail/railspanel/gjpfobpafnhjhbajcjgccbbdofdckggg" target="_blank">RailsPanel extension</a> from the Chrome WebStore. This is recommended way of installing extension, since it will auto-update on every new version. Note that you still need to update meta_request gem yourself.
-</p>
-
-
-
-
-<p>
-  So far so good, Let play around with RailsPanel and enjoy your productivity. :)
 </p>
 
 ]]></content>
