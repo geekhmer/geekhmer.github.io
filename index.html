@@ -77,6 +77,173 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2014/12/06/ruby-on-rails-mysql-uuid-primary-key-guide/">Ruby on Rails MySQL UUID Primary Key Guide</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-06T20:42:00+07:00" pubdate data-updated="true">Dec 6<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/ruby_on_rails.png" width="400" alt="Ruby on Rails MySQL UUID Primary Key Guide" />
+</p>
+
+
+
+
+<p>
+  A UUID (universally unique identifier) is an identifier standard used in software construction. A UUID is simply a 128-bit value. The meaning of each bit is defined by any of several variants.
+</p>
+
+
+
+
+<p>
+  For human-readable display, many systems use a canonical format using hexadecimal text with inserted hyphen characters. For example: de305d54-75b4-431b-adb2-eb6b9e546013.
+</p>
+
+
+
+
+<p>
+  The intent of UUIDs is to enable distributed systems to uniquely identify information without significant central coordination.
+</p>
+
+
+
+
+<p>
+  <strong>Installation</strong><br/>
+  To use UUID as Primary Key you need to add uuidtools gem to your app&#8217;s Gemfile:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;uuidtools&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Setting up UUID as Primary Key</strong><br/>
+  To set UUID as Primary Key, you need to set id to false and the new UUID column as Primary Key in migration file:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>*_create_products.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">CreateProducts</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migration</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">change</span>
+</span><span class='line'>    <span class="n">create_table</span> <span class="ss">:products</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="kp">false</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">string</span> <span class="ss">:uuid</span><span class="p">,</span> <span class="ss">limit</span><span class="p">:</span> <span class="mi">36</span><span class="p">,</span> <span class="ss">primary</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">null</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">string</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">limit</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span> <span class="ss">null</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">timestamps</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Inserting UUID Value into UUID Column</strong><br/>
+  Create UUID helper library in app/lib directory:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>uuid_helper.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">UuidHelper</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">included</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">base</span><span class="o">.</span><span class="n">primary_key</span> <span class="o">=</span> <span class="s1">&#39;uuid&#39;</span>
+</span><span class='line'>    <span class="n">base</span><span class="o">.</span><span class="n">before_create</span> <span class="ss">:assign_uuid</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">assign_uuid</span>
+</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">uuid</span> <span class="o">=</span> <span class="ss">UUIDTools</span><span class="p">:</span><span class="ss">:UUID</span><span class="o">.</span><span class="n">timestamp_create</span><span class="p">()</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">upcase</span> <span class="k">if</span> <span class="n">uuid</span><span class="o">.</span><span class="n">blank?</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And then include UuidHelper library in Model file:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>product.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Product</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">UuidHelper</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2014/12/02/ruby-check-for-nil-without-using-an-explicit-if/">Ruby - Check for Nil Without Using an Explicit If</a></h1>
     
     
@@ -2043,123 +2210,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/30/ruby-readable-booleans/">Ruby Readable Booleans</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-30T09:58:00+07:00" pubdate data-updated="true">Aug 30<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/rights_and_wrongsof_ruby.jpg" width="400" />
-</p>
-
-
-
-
-<p>
-  There&#8217;s a great little trick you can do to improve the readability of your code. A common problem is dealing with methods that have a boolean flag arguments. Here&#8217;s an example I ran into just today in a Rails application:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">rating_stars</span><span class="p">(</span><span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="n">,</span> <span class="n">clickable</span> <span class="o">=</span> <span class="kp">false</span><span class="p">)</span>
-</span><span class='line'>  <span class="c1"># ...</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The problem with this is that you typically see calls like this scattered around the application:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">rating_stars</span><span class="p">(</span><span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="n">,</span> <span class="kp">true</span><span class="p">)</span> <span class="o">%&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Would you know what true did there if I hadn&#8217;t shown you the name of the variable first? I didn&#8217;t. I had to go hunting for that method definition.
-</p>
-
-
-
-
-<p>
-  Ironically the opposite problem, a magical dangling false, is much more rare in my experience. That&#8217;s typically the default for these kind of arguments and it just makes more sense and reads better to leave it out.
-</p>
-
-
-
-
-<p>
-  Anyway, the point is that we can typically improve the ease of understanding the common case. Remember that one of the new features of Ruby 2.0 is keyword arguments. keyword arguments make it easier create readable method. For example, after looking up the method and understanding what was needed: 
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">rating_stars</span><span class="p">(</span><span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="n">,</span> <span class="ss">clickable</span><span class="p">:</span> <span class="kp">false</span><span class="p">)</span>
-</span><span class='line'>  <span class="c1"># ...</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">rating_stars</span><span class="p">(</span><span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="n">,</span> <span class="ss">clickable</span><span class="p">:</span> <span class="kp">true</span><span class="p">)</span> <span class="o">%&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, my hope is that might save a future maintainer a trip to the method definition to understand the call.
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -2186,6 +2236,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/12/06/ruby-on-rails-mysql-uuid-primary-key-guide/">Ruby on Rails MySQL UUID Primary Key Guide</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/12/02/ruby-check-for-nil-without-using-an-explicit-if/">Ruby - Check for Nil Without Using an Explicit If</a>
       </li>
     
@@ -2199,10 +2253,6 @@
     
       <li class="post">
         <a href="/blog/2014/11/27/ruby-on-rails-company/">Ruby on Rails Company</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/11/14/add-progress-bar-in-ruby-on-rails-application/">Add Progress Bar in Ruby on Rails Application</a>
       </li>
     
   </ul>
@@ -2224,7 +2274,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 17 ]</a>
+        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 18 ]</a>
       </li>
     
       <li>

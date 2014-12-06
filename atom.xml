@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2014-12-02T00:20:23+07:00</updated>
+  <updated>2014-12-06T22:01:51+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,146 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails MySQL UUID Primary Key Guide]]></title>
+    <link href="http://geekhmer.github.io/blog/2014/12/06/ruby-on-rails-mysql-uuid-primary-key-guide/"/>
+    <updated>2014-12-06T20:42:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2014/12/06/ruby-on-rails-mysql-uuid-primary-key-guide</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="Ruby on Rails MySQL UUID Primary Key Guide" />
+</p>
+
+
+
+
+<p>
+  A UUID (universally unique identifier) is an identifier standard used in software construction. A UUID is simply a 128-bit value. The meaning of each bit is defined by any of several variants.
+</p>
+
+
+
+
+<p>
+  For human-readable display, many systems use a canonical format using hexadecimal text with inserted hyphen characters. For example: de305d54-75b4-431b-adb2-eb6b9e546013.
+</p>
+
+
+
+
+<p>
+  The intent of UUIDs is to enable distributed systems to uniquely identify information without significant central coordination.
+</p>
+
+
+
+
+<p>
+  <strong>Installation</strong><br/>
+  To use UUID as Primary Key you need to add uuidtools gem to your app&#8217;s Gemfile:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;uuidtools&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Setting up UUID as Primary Key</strong><br/>
+  To set UUID as Primary Key, you need to set id to false and the new UUID column as Primary Key in migration file:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>*_create_products.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">CreateProducts</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migration</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">change</span>
+</span><span class='line'>    <span class="n">create_table</span> <span class="ss">:products</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="kp">false</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">string</span> <span class="ss">:uuid</span><span class="p">,</span> <span class="ss">limit</span><span class="p">:</span> <span class="mi">36</span><span class="p">,</span> <span class="ss">primary</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">null</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">string</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">limit</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span> <span class="ss">null</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">timestamps</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Inserting UUID Value into UUID Column</strong><br/>
+  Create UUID helper library in app/lib directory:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>uuid_helper.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">UuidHelper</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">included</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">base</span><span class="o">.</span><span class="n">primary_key</span> <span class="o">=</span> <span class="s1">&#39;uuid&#39;</span>
+</span><span class='line'>    <span class="n">base</span><span class="o">.</span><span class="n">before_create</span> <span class="ss">:assign_uuid</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">assign_uuid</span>
+</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">uuid</span> <span class="o">=</span> <span class="ss">UUIDTools</span><span class="p">:</span><span class="ss">:UUID</span><span class="o">.</span><span class="n">timestamp_create</span><span class="p">()</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">upcase</span> <span class="k">if</span> <span class="n">uuid</span><span class="o">.</span><span class="n">blank?</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And then include UuidHelper library in Model file:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>product.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Product</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">UuidHelper</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby - Check for nil Without Using an Explicit if]]></title>
@@ -4018,83 +4158,6 @@ It&#8217;s going to generate SQL: <code>SELECT * FROM users ORDER BY created_at 
 </span></code></pre></td></tr></table></div></figure>
 
 
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby 'unless' Goes Mainstream]]></title>
-    <link href="http://geekhmer.github.io/blog/2014/07/31/ruby-unless-goes-mainstream/"/>
-    <updated>2014-07-31T23:44:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2014/07/31/ruby-unless-goes-mainstream</id>
-    <content type="html"><![CDATA[<p>
-  I don&#8217;t like or not a fan of Ruby&#8217;s &#8216;unless&#8217; keyword. I mean its nice but it take time to get used to.
-</p>
-
-
-
-
-<p>
-  Sample &#8216;unless&#8217; statements like this:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">puts</span> <span class="n">product</span><span class="o">.</span><span class="n">name</span> <span class="k">unless</span> <span class="n">product</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">nil?</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The code statement above is nice and easy. I&#8217;d say that in english &#8220;Print the product&#8217;s name unless the product doesn&#8217;t have a name&#8221;.
-</p>
-
-
-
-
-<p>
-  Why do we need unless? Let replace it with something else:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Object</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">not_nil?</span>
-</span><span class='line'>    <span class="o">!</span><span class="kp">nil</span><span class="p">?</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Then we can code:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">puts</span> <span class="n">product</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">product</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">not_nil?</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, that&#8217;s much better, &#8216;unless&#8217; never made it into mainstream language.<br/>
-  OO scripting languages like Ruby can make new keyword. :)
-</p>
 
 ]]></content>
   </entry>
