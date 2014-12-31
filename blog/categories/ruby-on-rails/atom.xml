@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby on Rails | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby-on-rails/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2014-12-31T11:15:50+07:00</updated>
+  <updated>2014-12-31T22:52:46+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,286 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Deploy Ruby on Rails Application to a Ubuntu Server]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/01/01/deploy-ruby-on-rails-application-to-a-ubuntu-server/"/>
+    <updated>2015-01-01T00:00:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/01/01/deploy-ruby-on-rails-application-to-a-ubuntu-server</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/move_to_rails.png" alt="Tools for Monitoring Performance in Ruby on Rails Application" />
+</p>
+
+
+
+
+<p>
+  Assumes you have Ruby on Rails application already.
+</p>
+
+
+
+
+<p>
+  <strong>Setup Ruby Version, Unicorn and Capistrano</strong><br/>
+  Specifiy a ruby version for your app by creating a new file in the root of your app called ".ruby-version" that includes:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>.ruby-version </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">4</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Make the following changes to the Gemfile:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">ruby</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">4</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;gem &amp;lsquo;unicorn&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;capistrano-rails&amp;rsquo;, group: :development</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Type command below to install gems:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Type command below to install binstubs for capistrano:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">binstubs</span> <span class="n">capistrano</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>Configure Capistrano</strong><br/>
+  Type command below to initialize capistrano:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bin</span><span class="o">/</span><span class="n">cap</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Add the following below require 'capistrano/deploy' in the Capfile in the root of your app:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Capfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">capistrano</span><span class="o">/</span><span class="n">rails</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Add or Replace this configuration in config/deploy.rb file:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>deploy.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">set</span> <span class="ss">:application</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">myapp</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'><span class="n">set</span> <span class="ss">:repo_url</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">git</span><span class="vi">@github</span><span class="o">.</span><span class="n">com</span><span class="ss">:bunlong</span><span class="o">/</span><span class="n">myapp</span><span class="o">.</span><span class="n">git</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'><span class="n">set</span> <span class="ss">:deploy_to</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">myapp</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'><span class="n">set</span> <span class="ss">:user</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">deploy</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'><span class="n">set</span> <span class="ss">:linked_dirs</span><span class="p">,</span> <span class="sx">%w{log tmp/pids tmp/cache tmp/sockets}</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;namespace :deploy do</span>
+</span><span class='line'><span class="sr">  %w[start stop restart].each do |command|&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">desc</span> <span class="s1">&#39;Manage Unicorn&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">task</span> <span class="n">command</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">on</span> <span class="n">roles</span><span class="p">(</span><span class="ss">:app</span><span class="p">),</span> <span class="k">in</span><span class="p">:</span> <span class="ss">:sequence</span><span class="p">,</span> <span class="ss">wait</span><span class="p">:</span> <span class="mi">1</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">execute</span> <span class="s2">&quot;/etc/init.d/unicorn_</span><span class="si">#{</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:application</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">command</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  after :publishing, :restart</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  After the configuration in /config/deploy/production.rb with your server ip or domain name:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>production.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">role</span> <span class="ss">:app</span><span class="p">,</span> <span class="sx">%w{&lt;a href=&quot;&amp;#x6d;&amp;#x61;&amp;#x69;&amp;#108;&amp;#116;&amp;#x6f;&amp;#58;&amp;#100;&amp;#x65;&amp;#112;&amp;#108;&amp;#111;&amp;#121;&amp;#64;&amp;#48;&amp;#46;&amp;#48;&amp;#46;&amp;#48;&amp;#46;&amp;#48;&quot;&gt;&amp;#x64;&amp;#x65;&amp;#112;&amp;#x6c;&amp;#x6f;&amp;#x79;&amp;#x40;&amp;#x30;&amp;#46;&amp;#48;&amp;#46;&amp;#48;&amp;#46;&amp;#48;&lt;/a&gt;}</span>
+</span><span class='line'><span class="n">role</span> <span class="ss">:web</span><span class="p">,</span> <span class="sx">%w{&lt;a href=&quot;&amp;#109;&amp;#x61;&amp;#105;&amp;#x6c;&amp;#116;&amp;#x6f;&amp;#x3a;&amp;#100;&amp;#x65;&amp;#112;&amp;#108;&amp;#111;&amp;#121;&amp;#x40;&amp;#48;&amp;#46;&amp;#x30;&amp;#x2e;&amp;#48;&amp;#x2e;&amp;#48;&quot;&gt;&amp;#x64;&amp;#101;&amp;#x70;&amp;#108;&amp;#x6f;&amp;#121;&amp;#64;&amp;#x30;&amp;#46;&amp;#x30;&amp;#x2e;&amp;#x30;&amp;#x2e;&amp;#48;&lt;/a&gt;}</span>
+</span><span class='line'><span class="n">role</span> <span class="ss">:db</span><span class="p">,</span>  <span class="sx">%w{&lt;a href=&quot;&amp;#109;&amp;#97;&amp;#105;&amp;#108;&amp;#116;&amp;#111;&amp;#x3a;&amp;#100;&amp;#101;&amp;#112;&amp;#108;&amp;#x6f;&amp;#x79;&amp;#x40;&amp;#x30;&amp;#46;&amp;#48;&amp;#46;&amp;#x30;&amp;#x2e;&amp;#x30;&quot;&gt;&amp;#100;&amp;#x65;&amp;#x70;&amp;#x6c;&amp;#x6f;&amp;#121;&amp;#64;&amp;#x30;&amp;#46;&amp;#x30;&amp;#x2e;&amp;#48;&amp;#x2e;&amp;#x30;&lt;/a&gt;}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>Configure Unicorn</strong><br/>
+  Create a new file config/unicorn.rb with the following contents:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>unicorn.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">root</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">myapp</span><span class="o">/</span><span class="n">current</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'><span class="n">working_directory</span> <span class="n">root</span>
+</span><span class='line'><span class="n">pid</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="c1">#{root}/tmp/pids/unicorn.pid&amp;rdquo;</span>
+</span><span class='line'><span class="n">stderr_path</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="c1">#{root}/log/unicorn.log&amp;rdquo;</span>
+</span><span class='line'><span class="n">stdout_path</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="c1">#{root}/log/unicorn.log&amp;rdquo;&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">listen</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">unicorn</span><span class="o">.</span><span class="n">myapp</span><span class="o">.</span><span class="n">sock</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'><span class="n">worker_processes</span> <span class="mi">1</span>
+</span><span class='line'><span class="n">timeout</span> <span class="mi">30</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Comment out production username and password from config/database.yml:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>database.yml </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">production</span><span class="p">:</span>
+</span><span class='line'>  <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;:</span> <span class="o">*</span><span class="n">default</span>
+</span><span class='line'>  <span class="ss">database</span><span class="p">:</span> <span class="n">myapp_production</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Type command below to push changes to git:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">add</span> <span class="o">.</span>
+</span><span class='line'><span class="n">git</span> <span class="n">commit</span> <span class="o">-</span><span class="n">m</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">Added</span> <span class="n">settings</span> <span class="n">to</span> <span class="n">deploy</span> <span class="n">app</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'><span class="n">git</span> <span class="n">push</span> <span class="n">origin</span> <span class="n">master</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Type command below to create a secret to be used on the server:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bin</span><span class="o">/</span><span class="n">rake</span> <span class="n">secret</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  On the server setup the secret by modify /home/deploy/.bashrc with the following contents:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>.bashrc </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">export</span> <span class="no">SECRET_KEY_BASE</span><span class="o">=[</span><span class="no">REPLACE</span> <span class="no">WITH</span> <span class="no">YOUR</span> <span class="no">SECRET</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  On the server restart nginx, type command below:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">service</span> <span class="n">nginx</span> <span class="n">restart</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>Deploy</strong><br/>
+  Type command below to make sure capistrano is connected to the server:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bin</span><span class="o">/</span><span class="n">cap</span> <span class="n">production</span> <span class="ss">git</span><span class="p">:</span><span class="n">check</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Type command below to make sure can deploy or not:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bin</span><span class="o">/</span><span class="n">cap</span> <span class="n">production</span> <span class="ss">deploy</span><span class="p">:</span><span class="n">check</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Type command below for deploying:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bin</span><span class="o">/</span><span class="n">cap</span> <span class="n">production</span> <span class="n">deploy</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  If you need to run db:seed, log into server as the deploy user and run following:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">cd</span> <span class="sr">/opt/</span><span class="n">www</span><span class="o">/</span><span class="n">myapp</span><span class="o">/</span><span class="n">current</span> <span class="p">;</span> <span class="n">bin</span><span class="o">/</span><span class="n">rake</span> <span class="no">RAILS_ENV</span><span class="o">=</span><span class="n">production</span> <span class="ss">db</span><span class="p">:</span><span class="n">seed</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  If you are having problems, try running a console on the server, log in as deploy user and run the following:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">cd</span> <span class="sr">/opt/</span><span class="n">www</span><span class="o">/</span><span class="n">myapp</span><span class="o">/</span><span class="n">current</span> <span class="p">;</span> <span class="n">bin</span><span class="o">/</span><span class="n">rails</span> <span class="n">c</span> <span class="n">production</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Using UUID as Primary Key in Ruby on Rails with MySQL Guide]]></title>
@@ -458,302 +738,6 @@
 <p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">input</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;item_return_date&quot;</span> <span class="nb">name</span><span class="o">=</span><span class="s2">&quot;item[return_date]&quot;</span> <span class="n">type</span><span class="o">=</span><span class="s2">&quot;date&quot;</span><span class="o">&gt;</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Use Memoization to Speed Up Your Code in Ruby/Rails]]></title>
-    <link href="http://geekhmer.github.io/blog/2014/08/11/use-memoization-to-speed-up-your-code-in-ruby-slash-rails/"/>
-    <updated>2014-08-11T00:28:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2014/08/11/use-memoization-to-speed-up-your-code-in-ruby-slash-rails</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" />
-</p>
-
-
-
-
-<p>
-  Have you ever heard Memoization? In this article you will get an introduction of Memoization. You will learn what it is, how you can use it to speed up your code.
-</p>
-
-
-
-
-<p>
-  <strong>What is Memoization?</strong><br/>
-  Memoization is the process of storing a computed value to avoid duplicated work by future calls.
-</p>
-
-
-
-
-<p>
-  <strong>What are Memoization used for?</strong><br/>
-  - Perform some work<br/>
-  - Store the work result<br/>
-  - Use stored results in future calls
-</p>
-
-
-
-
-<p>
-  <strong>Using</strong><br/>
-  In Ruby the most common pattern for using Memoization is the conditional assignment operator: <code>||=</code>.
-</p>
-
-
-
-
-<p>
-  <strong>Example</strong><br/>
-  In Rails if you've ever worked with a user login system, you really family with the pattern of loading the <code>current_user</code> in the <code>application_controller.rb</code>:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>application_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">current_user</span>
-</span><span class='line'>  <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">session</span><span class="o">[</span><span class="ss">:user_id</span><span class="o">]</span><span class="p">)</span> <span class="k">if</span> <span class="n">session</span><span class="o">[</span><span class="ss">:user_id</span><span class="o">]</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Within each request in a Rails application you will usually see multiple calls to <code>current_user</code> that means <code>User.find</code> method is run multiple times.<br/>
-</p>
-
-
-
-
-<p>
-  In this case, we know the problem is because there are multiple calls to <code>current_user</code> occurring. Let's fix this code by introducing Memoization into the <code>current_user</code> method and storing the result of <code>User.find</code> method by using conditional assignment to an instance variable:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>application_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">current_user</span>
-</span><span class='line'>  <span class="vi">@current_user</span> <span class="o">||=</span> <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">session</span><span class="o">[</span><span class="ss">:user_id</span><span class="o">]</span><span class="p">)</span> <span class="k">if</span> <span class="n">session</span><span class="o">[</span><span class="ss">:user_id</span><span class="o">]</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Well, there are no more calls to rebuild the <code>User</code> object each time <code>current_user</code> method is called.
-</p>
-
-
-
-
-<p>
-  <strong>When should you memoize?</strong><br/>
-  - When you've got duplicated database<br/>
-  - When you've got expensive calculations<br/>
-  - When you've got repeated calculations that don't change<br/>
-</p>
-
-
-
-
-<p>
-  <strong>When shouldn't you memoize</strong><br/>
-  - Memoization shouldn't be used with methods that take parameters:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;incorrect&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="k">def</span> <span class="nf">full_name</span>
-</span><span class='line'>  <span class="vi">@full_name</span> <span class="o">||=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="c1">#{first_name} #{last_name}&amp;rdquo;</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;puts full_name(&amp;lsquo;Bunlong&amp;rsquo;, &amp;lsquo;Van&amp;rsquo;) #=&gt; &amp;ldquo;Bunlong Van&amp;rdquo;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="nb">puts</span> <span class="n">full_name</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">Ryan</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">Van</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;)</span> <span class="c1">#=&gt; &amp;ldquo;Bunlong Van&amp;rdquo;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  - Memoization shouldn't be used with methods that use instance variables:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;incorrect&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="k">def</span> <span class="nf">full_name</span>
-</span><span class='line'>  <span class="vi">@full_name</span> <span class="o">||=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="c1">#{first_name} #{last_name}&amp;rdquo;</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;@first_name = &amp;lsquo;Bunlong&amp;rsquo;</span>
-</span><span class='line'><span class="sr">@last_name = &amp;lsquo;Van&amp;rsquo;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="nb">puts</span> <span class="n">full_name</span> <span class="c1">#=&gt; &amp;ldquo;Bunlong Van&amp;rdquo;&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="vi">@first_name</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">Ryan</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
-</span><span class='line'><span class="vi">@last_name</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">Van</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;puts full_name #=&gt; &amp;ldquo;Bunlong Van&amp;rdquo;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>Memoization conditional assignment have problem when return nil or false in Ruby</strong><br/>
-  If you are not clear in using conditional assignment it can bite you, let try code below:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">print</span>
-</span><span class='line'>  <span class="vi">@print</span> <span class="o">||</span> <span class="o">=</span> <span class="k">begin</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;            puts &quot;printing&quot;</span>
-</span><span class='line'><span class="sr">            sleep 2</span>
-</span><span class='line'><span class="sr">            false</span>
-</span><span class='line'><span class="sr">          end</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="nb">print</span> <span class="c1">#=&gt; &amp;ldquo;printing&amp;rdquo;&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="nb">print</span> <span class="c1">#=&gt; &amp;ldquo;printing&amp;rdquo;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Suprised that "printing" was printed twice? Conditional assignment is always going to run if the instance variable <code>@print</code> is false or nil.<br/>
-</p>
-
-
-
-
-<p>
-  Well, we can solve the problem by using <code>defined?</code>:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">print</span>
-</span><span class='line'>  <span class="k">return</span> <span class="vi">@print</span> <span class="k">if</span> <span class="n">defined?</span><span class="p">(</span><span class="vi">@print</span><span class="p">)</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">printing</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
-</span><span class='line'>  <span class="nb">sleep</span> <span class="mi">2</span>
-</span><span class='line'>  <span class="vi">@print</span> <span class="o">=</span> <span class="kp">false</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;print #=&gt; &amp;ldquo;printing&amp;rdquo;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="nb">print</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>Memoization conditional assignment have problem when return nil or false in Rails</strong><br/>
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">current_user</span>
-</span><span class='line'>  <span class="vi">@current_user</span> <span class="o">||=</span> <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">session</span><span class="o">[</span><span class="ss">:user_id</span><span class="o">]</span><span class="p">)</span> <span class="k">if</span> <span class="n">session</span><span class="o">[</span><span class="ss">:user_id</span><span class="o">]</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  What's happen if <code>User.find</code> return nil? Conditional assignment is always going to run and current_user method is always going to call if the instance variable <code>@print</code> is false or nil.
-</p>
-
-
-
-
-<p>
-  Well, we can fix the problem by using the Memoizable API in Rails:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;somewhere inside the class&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="kp">extend</span> <span class="ss">ActiveSupport</span><span class="p">:</span><span class="ss">:Memoizable</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;def current_user</span>
-</span><span class='line'><span class="sr">  @current_user ||= User.find(session[:user_id]) if session[:user_id]</span>
-</span><span class='line'><span class="sr">end</span>
-</span><span class='line'><span class="sr">memoize :current_user</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><p>
-  Or we can use <a href="https://github.com/dkubb/memoizable" target="_blank">Memoizable</a> to fix this problem
-<p></p>
-
-<p><p>
-  So far so good, I hope this article comes in handy for some of you who haven’t heard of memoization yet or who just didn’t really understand what’s going on there. :)
-</p></p>
 ]]></content>
   </entry>
   

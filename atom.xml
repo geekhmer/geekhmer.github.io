@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2014-12-31T11:15:50+07:00</updated>
+  <updated>2014-12-31T22:52:46+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,375 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Deploy Ruby on Rails Application to a Ubuntu Server]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/01/01/deploy-ruby-on-rails-application-to-a-ubuntu-server/"/>
+    <updated>2015-01-01T00:00:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/01/01/deploy-ruby-on-rails-application-to-a-ubuntu-server</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/move_to_rails.png" alt="Tools for Monitoring Performance in Ruby on Rails Application" />
+</p>
+
+
+
+
+<p>
+  Assumes you have Ruby on Rails application already.
+</p>
+
+
+
+
+<p>
+  <strong>Setup Ruby Version, Unicorn and Capistrano</strong><br/>
+  Specifiy a ruby version for your app by creating a new file in the root of your app called &#8220;.ruby-version&#8221; that includes:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>.ruby-version </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">4</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Make the following changes to the Gemfile:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">ruby</span> <span class="s1">&#39;2.1.4&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;unicorn&#39;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;capistrano-rails&#39;</span><span class="p">,</span> <span class="ss">group</span><span class="p">:</span> <span class="ss">:development</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Type command below to install gems:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Type command below to install binstubs for capistrano:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">binstubs</span> <span class="n">capistrano</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Configure Capistrano</strong><br/>
+  Type command below to initialize capistrano:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bin</span><span class="o">/</span><span class="n">cap</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Add the following below require &#8216;capistrano/deploy&#8217; in the Capfile in the root of your app:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Capfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;capistrano/rails&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Add or Replace this configuration in config/deploy.rb file:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>deploy.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">set</span> <span class="ss">:application</span><span class="p">,</span> <span class="s1">&#39;myapp&#39;</span>
+</span><span class='line'><span class="n">set</span> <span class="ss">:repo_url</span><span class="p">,</span> <span class="s1">&#39;git@github.com:bunlong/myapp.git&#39;</span>
+</span><span class='line'><span class="n">set</span> <span class="ss">:deploy_to</span><span class="p">,</span> <span class="s1">&#39;/opt/www/myapp&#39;</span>
+</span><span class='line'><span class="n">set</span> <span class="ss">:user</span><span class="p">,</span> <span class="s1">&#39;deploy&#39;</span>
+</span><span class='line'><span class="n">set</span> <span class="ss">:linked_dirs</span><span class="p">,</span> <span class="sx">%w{log tmp/pids tmp/cache tmp/sockets}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">namespace</span> <span class="ss">:deploy</span> <span class="k">do</span>
+</span><span class='line'>  <span class="sx">%w[start stop restart]</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">command</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">desc</span> <span class="s1">&#39;Manage Unicorn&#39;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">task</span> <span class="n">command</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">on</span> <span class="n">roles</span><span class="p">(</span><span class="ss">:app</span><span class="p">),</span> <span class="k">in</span><span class="p">:</span> <span class="ss">:sequence</span><span class="p">,</span> <span class="ss">wait</span><span class="p">:</span> <span class="mi">1</span> <span class="k">do</span>
+</span><span class='line'>        <span class="n">execute</span> <span class="s2">&quot;/etc/init.d/unicorn_</span><span class="si">#{</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:application</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">command</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">after</span> <span class="ss">:publishing</span><span class="p">,</span> <span class="ss">:restart</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  After the configuration in /config/deploy/production.rb with your server ip or domain name:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>production.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">role</span> <span class="ss">:app</span><span class="p">,</span> <span class="sx">%w{deploy@0.0.0.0}</span>
+</span><span class='line'><span class="n">role</span> <span class="ss">:web</span><span class="p">,</span> <span class="sx">%w{deploy@0.0.0.0}</span>
+</span><span class='line'><span class="n">role</span> <span class="ss">:db</span><span class="p">,</span>  <span class="sx">%w{deploy@0.0.0.0}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Configure Unicorn</strong><br/>
+  Create a new file config/unicorn.rb with the following contents:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>unicorn.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">root</span> <span class="o">=</span> <span class="s2">&quot;/opt/www/myapp/current&quot;</span>
+</span><span class='line'><span class="n">working_directory</span> <span class="n">root</span>
+</span><span class='line'><span class="n">pid</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">root</span><span class="si">}</span><span class="s2">/tmp/pids/unicorn.pid&quot;</span>
+</span><span class='line'><span class="n">stderr_path</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">root</span><span class="si">}</span><span class="s2">/log/unicorn.log&quot;</span>
+</span><span class='line'><span class="n">stdout_path</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">root</span><span class="si">}</span><span class="s2">/log/unicorn.log&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">listen</span> <span class="s2">&quot;/tmp/unicorn.myapp.sock&quot;</span>
+</span><span class='line'><span class="n">worker_processes</span> <span class="mi">1</span>
+</span><span class='line'><span class="n">timeout</span> <span class="mi">30</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Comment out production username and password from config/database.yml:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>database.yml </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">production</span><span class="p">:</span>
+</span><span class='line'>  <span class="o">&lt;&lt;</span><span class="p">:</span> <span class="o">*</span><span class="n">default</span>
+</span><span class='line'>  <span class="ss">database</span><span class="p">:</span> <span class="n">myapp_production</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Type command below to push changes to git:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">add</span> <span class="o">.</span>
+</span><span class='line'><span class="n">git</span> <span class="n">commit</span> <span class="o">-</span><span class="n">m</span> <span class="s1">&#39;Added settings to deploy app&#39;</span>
+</span><span class='line'><span class="n">git</span> <span class="n">push</span> <span class="n">origin</span> <span class="n">master</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Type command below to create a secret to be used on the server:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bin</span><span class="o">/</span><span class="n">rake</span> <span class="n">secret</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  On the server setup the secret by modify /home/deploy/.bashrc with the following contents:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>.bashrc </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">export</span> <span class="no">SECRET_KEY_BASE</span><span class="o">=[</span><span class="no">REPLACE</span> <span class="no">WITH</span> <span class="no">YOUR</span> <span class="no">SECRET</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  On the server restart nginx, type command below:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">service</span> <span class="n">nginx</span> <span class="n">restart</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Deploy</strong><br/>
+  Type command below to make sure capistrano is connected to the server:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bin</span><span class="o">/</span><span class="n">cap</span> <span class="n">production</span> <span class="ss">git</span><span class="p">:</span><span class="n">check</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Type command below to make sure can deploy or not:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bin</span><span class="o">/</span><span class="n">cap</span> <span class="n">production</span> <span class="ss">deploy</span><span class="p">:</span><span class="n">check</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Type command below for deploying:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bin</span><span class="o">/</span><span class="n">cap</span> <span class="n">production</span> <span class="n">deploy</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If you need to run db:seed, log into server as the deploy user and run following:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">cd</span> <span class="sr">/opt/</span><span class="n">www</span><span class="o">/</span><span class="n">myapp</span><span class="o">/</span><span class="n">current</span> <span class="p">;</span> <span class="n">bin</span><span class="o">/</span><span class="n">rake</span> <span class="no">RAILS_ENV</span><span class="o">=</span><span class="n">production</span> <span class="ss">db</span><span class="p">:</span><span class="n">seed</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If you are having problems, try running a console on the server, log in as deploy user and run the following:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">cd</span> <span class="sr">/opt/</span><span class="n">www</span><span class="o">/</span><span class="n">myapp</span><span class="o">/</span><span class="n">current</span> <span class="p">;</span> <span class="n">bin</span><span class="o">/</span><span class="n">rails</span> <span class="n">c</span> <span class="n">production</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Private doesn't apply to class method and define method]]></title>
@@ -3947,239 +4316,6 @@ It&#8217;s going to generate SQL: <code>SELECT * FROM users ORDER BY created_at 
 <p>
   For more detail about <a href="https://github.com/rspec/rspec-rails" target="_blank">RSpec</a>, <a href="https://github.com/thoughtbot/factory_girl" target="_blank">FactoryGirl</a>.<br/>
   So far so good, We&#8217;ve already created 40 models specs to test model. :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Good Rails3 ActiveRecord Finder Vs Very Good Rails4 ActiveRecord Finder]]></title>
-    <link href="http://geekhmer.github.io/blog/2014/08/05/good-rails3-activerecord-finder-vs-very-good-rails4-activerecord-finder/"/>
-    <updated>2014-08-05T23:39:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2014/08/05/good-rails3-activerecord-finder-vs-very-good-rails4-activerecord-finder</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/what_is_new_in_rails4.png" width="500" />
-</p>
-
-
-
-
-<p>
-  Well, previouse article I had talked about <a href="http://geekhmer.github.io/blog/2014/08/02/keyword-arguments-feature-in-ruby-2-dot-0/">Keyword Arguments Feature in Ruby 2.0</a>. now we can apply keyword arguments in Rails4.
-</p>
-
-
-
-
-<p>
-  <strong>FINDERS</strong>
-</p>
-
-
-
-
-<p>  
-  <strong>old-style finders are deprecated</strong><br/>
-  - Rails3: 
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Rails3 </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="ss">:all</span><span class="p">,</span> <span class="ss">conditions</span><span class="p">:</span> <span class="p">{</span> <span class="ss">author</span><span class="p">:</span> <span class="s1">&#39;admin&#39;</span><span class="p">})</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Warning: Calling #find(:all) is deprecated. Please call #all directly instead. You have also used finder options. Please build s scope instead of using finder options.
-</p>
-
-
-
-
-<p>
-  - Rails4:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Rails4 </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">author</span><span class="p">:</span> <span class="s1">&#39;admin&#39;</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Dynamic finder that return collections are deprecated</strong><br/>
-  - Rails3:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Rails3 </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find_all_by_title</span><span class="p">(</span><span class="s1">&#39;Rails 4&#39;</span><span class="p">)</span>
-</span><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find_last_by_author</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Warning: This dynamic method is deprecated. Please use e.g Post.where(&#8230;).all instead.
-</p>
-
-
-
-
-<p>
-  - Rails4:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Rails4 </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">title</span><span class="p">:</span> <span class="s1">&#39;Rails 4&#39;</span><span class="p">)</span>
-</span><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">author</span><span class="p">:</span> <span class="s1">&#39;admin&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">last</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>FIND_BY</strong>
-</p>
-
-
-
-
-<p>
-- Rails3:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Rails3 </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find_by_title</span><span class="p">(</span><span class="s1">&#39;Rails 4&#39;</span><span class="p">)</span> <span class="c1"># Dynamic find_by finders that take a single argument are not deprecated.</span>
-</span><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find_by_title</span><span class="p">(</span><span class="s1">&#39;Rails 4&#39;</span><span class="p">,</span> <span class="ss">conditions</span><span class="p">:</span> <span class="p">{</span> <span class="ss">author</span><span class="p">:</span> <span class="s1">&#39;admin&#39;</span> <span class="p">})</span> <span class="c1"># Dynamic find_by finders with conditions are deprecated.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  - Rails4:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Rails4 </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find_by</span><span class="p">(</span><span class="ss">title</span><span class="p">:</span> <span class="s1">&#39;Rails 4&#39;</span><span class="p">)</span>
-</span><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find_by</span><span class="p">(</span><span class="ss">title</span><span class="p">:</span> <span class="s1">&#39;Rails 4&#39;</span><span class="p">,</span> <span class="ss">author</span><span class="p">:</span> <span class="s1">&#39;admin&#39;</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>FIND_BY WITH HASH</strong>
-</p>
-
-
-
-
-<p>
-  <strong>allows dynamic input more easily</strong><br/>
-  - Rails4:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Rails4 </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">post_params</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">title</span><span class="p">:</span> <span class="s1">&#39;Rails 4&#39;</span><span class="p">,</span> <span class="ss">author</span><span class="p">:</span> <span class="s1">&#39;admin&#39;</span> <span class="p">}</span>
-</span><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find_by</span><span class="p">(</span><span class="n">post_params</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find_by</span><span class="p">(</span><span class="s2">&quot;published_on &lt; ?&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="o">.</span><span class="n">weeks</span><span class="o">.</span><span class="n">ago</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>FIND_OR_*</strong>
-</p>
-
-
-
-
-<p>
-  <strong>dynamic finders that create new objects are deprecated</strong><br/>
-  - Rails3:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Rails3 </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find_or_initialize_by_title</span><span class="p">(</span><span class="s1">&#39;Rails 4&#39;</span><span class="p">)</span>
-</span><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find_or_create_by_title</span><span class="p">(</span><span class="s1">&#39;Rails 4&#39;</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Warning: This dinamic method is deprecated. Please use e.g Post.find_or_initialize_by(name: &#8216;foo&#8217;) instead.<br/>
-  Warning: This dinamic method is deprecated. Please use e.g Post.find_or_create_by(name: &#8216;foo&#8217;) instead.
-</p>
-
-
-
-
-<p>
-  - Rails4:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Rails4 </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find_or_initialize_by</span><span class="p">(</span><span class="ss">title</span><span class="p">:</span> <span class="s1">&#39;Rails 4&#39;</span><span class="p">)</span>
-</span><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find_or_create_by</span><span class="p">(</span><span class="ss">title</span><span class="p">:</span> <span class="s1">&#39;Rails 4&#39;</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, let upgrade to Rails4 then refactor ActiveRecord Finder together. :)
 </p>
 
 ]]></content>
