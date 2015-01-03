@@ -3,7 +3,8 @@ layout: post
 title: "Develop Your Own Gem and Gemify Your Own Assets Using Rails Engine"
 date: 2015-01-02 23:32
 comments: true
-categories: 
+categories: [Ruby on Rails, Ruby]
+keywords: Develop Your Own Gem and Gemify Your Own Assets Using Rails Engine, Develop Own Gem, Gemify Your Own Assets
 ---
 
 <p>
@@ -145,7 +146,10 @@ curl http://localhost:3000/assets/timeago.js
 
 <p>
   <strong>Push to GitHub & RubyGems</strong><br/>
-  Create a GitHub repository for the Gem, stage all of your commits, commit, and push the code to GitHub.<br/>
+  Create a GitHub repository for the Gem, stage all of your commits, commit, and push the code to GitHub.
+</p>
+
+<p>
   If you've never published a gem on RubyGems before, you'll need to sign up for an account there. Your account settings will contain an API key that should be copied to ~/.gem/credentials.
 </p>
 
@@ -158,5 +162,5 @@ rake release
 {% endcodeblock %}
 
 <p>
-  So far so good, hope you enjoyed the post. see ya! :)
+  So far so good, hope you enjoyed the article. see ya! :)
 </p>
