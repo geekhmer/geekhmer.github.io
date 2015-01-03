@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-01-03T12:10:32+07:00</updated>
+  <updated>2015-01-03T17:30:03+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,270 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Develop Your Own Gem and Gemify Your Own Assets Using Rails Engine]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/01/02/develop-your-own-gem-and-gemify-your-own-assets-using-rails-engine/"/>
+    <updated>2015-01-02T23:32:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/01/02/develop-your-own-gem-and-gemify-your-own-assets-using-rails-engine</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/rubygems_logo.png" alt="Develop Your Own Gem and Gemify Your Own Assets Using Rails Engine" />
+</p>
+
+
+
+
+<p>
+  The Rails asset pipeline, powered by sprockets, compiles (sass, coffeescript, others), aggregates (combines multiple source files into one file for performance purposes), and post-processes (minimization, gzip’ing) your assets. And which make it easy to include versioned external assets as application dependencies as well.
+</p>
+
+
+
+
+<p>
+  External assets are made available in Rails via Rails engines. When the engine is loaded into your Rails application, the engine's asset paths are added to your application's load paths. This makes them available for require in your manifest files. An asset gem is just an absurdly simple engine.
+</p>
+
+
+
+
+<p>
+  You will find almost any JS or CSS library you want, already Gemified, but, if it is not the case, you can Gemify those libraries by your own, and I can help you with it. So, let's do it!
+</p>
+
+
+
+
+<p>
+  <strong>Create a bare-bones Gem:</strong><br/>
+  Bundler makes it simple to create the files and directories necessary for creating a gem. Run the following command to create and initialize a Git repository along with several template files for the gem:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">gem</span> <span class="n">timeago</span><span class="o">-</span><span class="n">rails</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  This command will create basically the following tree:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">├──</span> <span class="no">Gemfile</span>
+</span><span class='line'><span class="err">├──</span> <span class="n">lib</span>
+</span><span class='line'><span class="err">│</span>   <span class="err">├──</span> <span class="n">timeago</span>
+</span><span class='line'><span class="err">│</span>   <span class="err">│</span>   <span class="err">└──</span> <span class="n">rails</span>
+</span><span class='line'><span class="err">│</span>   <span class="err">│</span>           <span class="err">└──</span> <span class="n">version</span><span class="o">.</span><span class="n">rb</span>
+</span><span class='line'><span class="err">│</span>   <span class="err">└──</span> <span class="n">rails</span><span class="o">.</span><span class="n">rb</span>
+</span><span class='line'><span class="err">├──</span> <span class="no">LICENSE</span><span class="o">.</span><span class="n">txt</span>
+</span><span class='line'><span class="err">├──</span> <span class="no">Rakefile</span>
+</span><span class='line'><span class="err">├──</span> <span class="no">README</span><span class="o">.</span><span class="n">md</span>
+</span><span class='line'><span class="err">└──</span> <span class="n">timeago</span><span class="o">-</span><span class="n">rails</span><span class="o">.</span><span class="n">gemspec</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>Versioning</strong><br/>
+  timeago-rails is a gem packaged version of the timeago.js library. Its version should track the version of JavaScript library. Open /lib/timeago/rails/version.rb and set the version:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>version.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Timeago</span>
+</span><span class='line'>  <span class="k">module</span> <span class="nn">Rails</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;VERSION = &quot;1.4.1&quot;</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>Turn the Gem into an Engine</strong><br/>
+  Bundler created the gem as a standard Ruby module, but we want it to be a Rails Engine.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>rails.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">timeago</span><span class="o">/</span><span class="n">rails</span><span class="o">/</span><span class="n">version</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;module Timeago</span>
+</span><span class='line'><span class="sr">  module Rails&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">class</span> <span class="nc">Engine</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="o">::</span><span class="ss">Rails</span><span class="p">:</span><span class="ss">:Engine</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Well, the module is empty. All we're doing here is declaring the gem as a Rails Engine. This will cause Rails to add its directories to the load path when the Gem is required.
+</p>
+
+
+
+
+<p>
+  <strong>Add the Assets (Javascript library, CSS, Image) in the Gem</strong><br/>
+  We're going to create the directory /vendor/images/, /vendor/javascripts/, vendor/stylesheets/ and place the source for the timeago.js plugin there:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">├──</span> <span class="no">Gemfile</span>
+</span><span class='line'><span class="err">├──</span> <span class="n">lib</span>
+</span><span class='line'><span class="err">│</span>   <span class="err">├──</span> <span class="n">timeago</span>
+</span><span class='line'><span class="err">│</span>   <span class="err">│</span>   <span class="err">└──</span> <span class="n">rails</span>
+</span><span class='line'><span class="err">│</span>   <span class="err">│</span>           <span class="err">└──</span> <span class="n">version</span><span class="o">.</span><span class="n">rb</span>
+</span><span class='line'><span class="err">│</span>   <span class="err">└──</span> <span class="n">rails</span><span class="o">.</span><span class="n">rb</span>
+</span><span class='line'><span class="err">├──</span> <span class="no">LICENSE</span><span class="o">.</span><span class="n">txt</span>
+</span><span class='line'><span class="err">├──</span> <span class="no">Rakefile</span>
+</span><span class='line'><span class="err">├──</span> <span class="no">README</span><span class="o">.</span><span class="n">md</span>
+</span><span class='line'><span class="err">├──</span> <span class="n">timeago</span><span class="o">-</span><span class="n">rails</span><span class="o">.</span><span class="n">gemspec</span>
+</span><span class='line'><span class="err">└──</span> <span class="n">vendor</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;     └── assets</span>
+</span><span class='line'><span class="sr">              ├── images</span>
+</span><span class='line'><span class="sr">              ├── javascripts                </span>
+</span><span class='line'><span class="sr">              │             └── timeago.js</span>
+</span><span class='line'><span class="sr">              └── stylesheets</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>Test</strong><br/>
+  Moving to a sample Rails application, we can include the gem in our host application by adding it to the Gemfile using the path option:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">timeago</span><span class="o">-</span><span class="n">rails</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="ss">path</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">.</span><span class="n">.</span><span class="o">/</span><span class="n">timeago</span><span class="o">-</span><span class="n">rails</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Since we included an asset that needs to be included in the Rails assets, we have to take one more step and instruct the user to add the following to their app/assets/javascripts/application.js file:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>application.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">timeago</span><span class="o">-</span><span class="n">rails</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  This directive actually refers to the app/assets/javascripts/timeago.js file we included in our gem.
+</p>
+
+
+
+
+<p>
+  Type command below to make sure timeago.js is included in sample Rails application:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">curl</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;http://localhost:3000/assets/timeago.js&quot;</span><span class="o">&gt;</span><span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="ss">localhost</span><span class="p">:</span><span class="mi">3000</span><span class="o">/</span><span class="n">assets</span><span class="o">/</span><span class="n">timeago</span><span class="o">.</span><span class="n">js</span><span class="o">&lt;</span><span class="sr">/a&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  The curl command should return the contents of the timeago.js file if everything is correctly.
+</p>
+
+
+
+
+<p>
+  <strong>README.md</strong><br/>
+  Make a simple readme file with the Gem as documentation.
+</p>
+
+
+
+
+<p>
+  <strong>Push to GitHub & RubyGems</strong><br/>
+  Create a GitHub repository for the Gem, stage all of your commits, commit, and push the code to GitHub.
+</p>
+
+
+
+
+<p>
+  If you've never published a gem on RubyGems before, you'll need to sign up for an account there. Your account settings will contain an API key that should be copied to ~/.gem/credentials.
+</p>
+
+
+
+
+<p>
+  Publishing your gem is as simple as:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="n">release</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  So far so good, hope you enjoyed the article. see ya! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Private doesn't apply to class method and define method]]></title>
@@ -1015,78 +1279,6 @@
   <strong>5. bootstrap-wysihtml5-rails</strong><br/>
   Description: WYSIWYG editor for Bootstrap, integrated in Rails assets pipeline.<br/>
   Source: <a href="https://github.com/Nerian/bootstrap-wysihtml5-rails" target="_blank">https://github.com/Nerian/bootstrap-wysihtml5-rails</a>
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby Readable Booleans]]></title>
-    <link href="http://geekhmer.github.io/blog/2014/08/30/ruby-readable-booleans/"/>
-    <updated>2014-08-30T09:58:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2014/08/30/ruby-readable-booleans</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/rights_and_wrongsof_ruby.jpg" width="400" />
-</p>
-
-
-
-
-<p>
-  There's a great little trick you can do to improve the readability of your code. A common problem is dealing with methods that have a boolean flag arguments. Here's an example I ran into just today in a Rails application:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">rating_stars</span><span class="p">(</span><span class="o">&amp;</span><span class="n">hellip</span><span class="p">;,</span> <span class="n">clickable</span> <span class="o">=</span> <span class="kp">false</span><span class="p">)</span>
-</span><span class='line'>  <span class="c1"># &amp;hellip;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  The problem with this is that you typically see calls like this scattered around the application:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%=</span> <span class="n">rating_stars</span><span class="p">(</span><span class="o">&amp;</span><span class="n">hellip</span><span class="p">;,</span> <span class="kp">true</span><span class="p">)</span> <span class="o">%&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Would you know what true did there if I hadn't shown you the name of the variable first? I didn't. I had to go hunting for that method definition.
-</p>
-
-
-
-
-<p>
-  Ironically the opposite problem, a magical dangling false, is much more rare in my experience. That's typically the default for these kind of arguments and it just makes more sense and reads better to leave it out.
-</p>
-
-
-
-
-<p>
-  Anyway, the point is that we can typically improve the ease of understanding the common case. Remember that one of the new features of Ruby 2.0 is keyword arguments. keyword arguments make it easier create readable method. For example, after looking up the method and understanding what was needed: 
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">rating_stars</span><span class="p">(</span><span class="o">&amp;</span><span class="n">hellip</span><span class="p">;,</span> <span class="ss">clickable</span><span class="p">:</span> <span class="kp">false</span><span class="p">)</span>
-</span><span class='line'>  <span class="c1"># &amp;hellip;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%=</span> <span class="n">rating_stars</span><span class="p">(</span><span class="o">&amp;</span><span class="n">hellip</span><span class="p">;,</span> <span class="ss">clickable</span><span class="p">:</span> <span class="kp">true</span><span class="p">)</span> <span class="o">%&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  So far so good, my hope is that might save a future maintainer a trip to the method definition to understand the call.
 </p>
 
 ]]></content>
