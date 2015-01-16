@@ -25,15 +25,16 @@ keywords: The Erlang Learning Sequence, Learning Erlang, Learn Erlang, Study Erl
 
 <p>
   1. Introduction to Erlang & Chicagoboss Framework<br/>
-  2. Datatypes<br/>
-  3. Modules and Compiling<br/>
-  4. Functions<br/>
-  5. Recursion<br/>
-  6. Predefined Module<br/>
-  7. List & List Module<br/>
-  8. List Comprehension<br/>
-  9. Concurrency (Processes)<br/>
-  10. Message Passing<br/>
+  2. Variables<br/>
+  3. Datatypes<br/>
+  4. Modules and Compiling<br/>
+  5. Functions<br/>
+  6. Recursion<br/>
+  7. Predefined Module<br/>
+  8. List & List Module<br/>
+  9. List Comprehension<br/>
+  10. Concurrency (Processes)<br/>
+  11. Message Passing<br/>
 </p>
 
 <p>

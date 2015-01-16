@@ -1,0 +1,51 @@
+---
+layout: post
+title: "Introduction to Erlang and Chicagoboss Framework"
+date: 2015-01-16 08:38
+comments: true
+categories: [Erlang]
+keywords: Introduction to Erlang and Chicagoboss Framework, Introduction to Erlang, Introduction to Chicagoboss Framework, Erlang, Chicagoboss Framework
+---
+
+<p>
+  <img src="/images/logo_erlang.png" alt="Introduction to Erlang and Chicagoboss Framework" />
+</p>
+
+<p>
+  <strong><a href="http://www.erlang.org/" target="_blank">Erlang</a></strong> is a programming language used to build massively scalable soft real-time systems with requirements on high availability. Some of its uses are in telecoms, banking, e-commerce, computer telephony and instant messaging. Erlang's runtime system has built-in support for concurrency, distribution and fault tolerance.
+</p>
+
+<p>
+  <strong>Erlang</strong> is the most advanced open-source server platform in existence, but it seems almost no one knows about it. <strong>Erlang</strong> can handle hundreds of thousands of simultaneous connections, it can spawn millions of simultaneous processes in under a second, server code can be upgraded, in production, without any interruption of service, and errors are handled in such a way that server crashes are extremely uncommon.
+</p>
+
+<p>
+  What is not to like? Why isn't the entire world programming in <strong>Erlang</strong>? Well, <strong>Erlang</strong> is a functional language, which means that to implement any algorithms, you must use recursion instead of familiar “for” and “while” loops. Unlike every major scripting language, there is no built-in syntax for dictionaries or hash maps. And to actually write a functioning server, you must learn an additional layer of magic known as OTP. These barriers, in my opinion, have prevented <strong>Erlang</strong> from gaining much traction outside of Scandinavia.
+</p>
+
+<p>
+  <img src="/images/logo_chicagoboss.svg" alt="Introduction to Erlang and Chicagoboss Framework" />
+</p>
+
+<p>
+  But <strong><a href="http://www.chicagoboss.org/" target="_blank">Chicagoboss Framwork</a></strong> changes all that. It makes <strong>Erlang</strong> accessible to hackers
+  who just want to write a reliable website in a nifty language. Boss uses code generation to get around the historic hash-map quandary, and takes care of all the OTP business so that you can focus on writing the features you need for your website. As for the supposed burdens of functional programming, I find that recursion is rarely necessary in workaday web programming; I would guess that 99% of server application code simply shuttles data to and from a database, so in the course of building a website, the pedestrian procedural programmer will hardly miss his “do/while” loops.
+</p>
+
+<p>
+  If you are an experienced web programmer, you'll probably enjoy all the
+  amenities that CB has to offer: an advanced ORM with support for database associations, sharding, and caching. lightning-fast templates compiled down to <strong>Erlang</strong> bytecode, automatic recompiling and in-browser error reporting, simple directives for reloads and redirects, routes for constructing URLs and handling requests, full frameworks for sending and receiving email, a built-in message queue, a framework for writing and running functional tests, and a first-of-its-kind event system for monitoring the data model.
+</p>
+
+<p>
+  In the end, by combining the <strong>Erlang</strong> platform with its own innovations,
+  <strong>Chicagoboss Framwork</strong> makes websites a delight to develop and a joy to deploy. Boss applications can be written in the same time or less as equivalent Rails applications, and they will almost never crash or leak memory. Since the underlying networking is all asynchronous, you can easily write concurrent services, such as chat, that previously were only possible in callback-based frameworks (such as Nginx, Node.js, Twisted, or Perlbal).
+</p>
+
+<p>
+  The importance of this advancement cannot be overstated. It is now feasible for a very small team to develop and operate a database-driven, highly interactive, heavily trafficked website with very little capital outlay. Although <strong>Chicagoboss Framwork</strong> can’t tell you how to acquire users, the rest of this manual will show you everything you need to do to handle their requests and (with luck) fulfill their desires.
+</p>
+
+<p>
+  Reference: <a href="http://www.erlang.org/" target="_blank">www.erlang.org</a>, <a href="http://www.chicagoboss.org/" target="_blank">www.chicagoboss.org</a>
+</p>
