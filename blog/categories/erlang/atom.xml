@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Erlang | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/erlang/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-01-17T22:02:13+07:00</updated>
+  <updated>2015-01-17T22:44:21+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,252 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Erlang Guards]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/01/17/erlang-guards/"/>
+    <updated>2015-01-17T22:22:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/01/17/erlang-guards</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/logo_erlang.png" alt="Erlang Variables" />
+</p>
+
+
+
+
+<h3>Guard structures</h3>
+
+
+
+
+<p>
+  Guards in Erlang are boolean functions placed after the key word, "when" and before the arrow, "->". Guards may appear as part of a function definition, 'receive', 'if', 'case' and 'try/catch' expressions.
+</p>
+
+
+
+
+<p>
+  We use a guard in a function definition.
+</p>
+
+
+
+
+<p>
+  Example:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>example.erl </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">-</span><span class="n">module</span><span class="p">(</span><span class="n">example</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">-</span><span class="n">compile</span><span class="p">(</span><span class="n">export_all</span><span class="p">)</span><span class="o">.</span><span class="n">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;the_answer_is(N) when N =:= 42 &amp;ndash;&gt; true;</span>
+</span><span class='line'><span class="sr">the_answer_is(N) &amp;ndash;&gt; false.&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="sx">% c(example).</span>
+</span><span class='line'><span class="sx">% </span><span class="n">ok</span>
+</span><span class='line'><span class="o">%</span>
+</span><span class='line'><span class="sx">% example:the_answer_is(42).</span>
+</span><span class='line'><span class="sx">% </span><span class="kp">true</span>
+</span><span class='line'><span class="o">%</span>
+</span><span class='line'><span class="sx">% example:the_answer_is(21).</span>
+</span><span class='line'><span class="sx">% </span><span class="kp">false</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>fun definition</strong>
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">F</span> <span class="o">=</span> <span class="n">fun</span>
+</span><span class='line'>  <span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="k">when</span> <span class="n">N</span> <span class="o">=</span><span class="p">:</span><span class="o">=</span> <span class="mi">42</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">true</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">false</span>
+</span><span class='line'><span class="k">end</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>receive expression</strong>
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">receive</span>
+</span><span class='line'>  <span class="p">{</span><span class="n">answer</span><span class="p">,</span> <span class="n">N</span><span class="p">}</span> <span class="k">when</span> <span class="n">N</span> <span class="o">=</span><span class="p">:</span><span class="o">=</span> <span class="mi">42</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">true</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">{</span><span class="n">answer</span><span class="p">,</span> <span class="n">N</span><span class="p">}</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">false</span>
+</span><span class='line'><span class="k">end</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>if expression</strong>
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">if</span>
+</span><span class='line'>  <span class="n">N</span> <span class="o">=</span><span class="p">:</span><span class="o">=</span> <span class="mi">42</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">true</span><span class="p">;</span>
+</span><span class='line'>  <span class="kp">true</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">false</span>
+</span><span class='line'><span class="k">end</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>case expression</strong>
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">case</span> <span class="n">L</span> <span class="n">of</span>
+</span><span class='line'>  <span class="p">{</span><span class="n">answer</span><span class="p">,</span> <span class="n">N</span><span class="p">}</span> <span class="k">when</span> <span class="n">N</span> <span class="o">=</span><span class="p">:</span><span class="o">=</span> <span class="mi">42</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">true</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">_</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">false</span>
+</span><span class='line'><span class="k">end</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">case</span> <span class="n">L</span> <span class="n">of</span>
+</span><span class='line'>  <span class="p">{</span><span class="n">node</span><span class="p">,</span> <span class="n">N</span><span class="p">}</span> <span class="k">when</span> <span class="n">N</span> <span class="o">=</span><span class="p">:</span><span class="o">=</span> <span class="mi">42</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">true</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">_AnyNode</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">false</span>
+</span><span class='line'><span class="k">end</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>try/catch</strong>
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">try</span> <span class="n">find</span><span class="p">(</span><span class="n">L</span><span class="p">)</span> <span class="n">of</span>
+</span><span class='line'>  <span class="p">{</span><span class="n">answer</span><span class="p">,</span> <span class="n">N</span><span class="p">}</span> <span class="k">when</span> <span class="n">N</span> <span class="o">=</span><span class="p">:</span><span class="o">=</span> <span class="mi">42</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">true</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">_</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">false</span>
+</span><span class='line'><span class="kp">catch</span>
+</span><span class='line'>  <span class="p">{</span><span class="n">notanumber</span><span class="p">,</span> <span class="n">R</span><span class="p">}</span> <span class="k">when</span> <span class="n">is_list</span><span class="o">&amp;</span><span class="n">reg</span><span class="p">;</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="n">alist</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">{</span><span class="n">notanumber</span><span class="p">,</span> <span class="n">R</span><span class="p">}</span> <span class="k">when</span> <span class="n">is_float</span><span class="o">&amp;</span><span class="n">reg</span><span class="p">;</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="n">afloat</span>
+</span><span class='line'>  <span class="n">_</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="n">noidea</span>
+</span><span class='line'><span class="k">end</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <h3>Multiple Guards</h3>
+  It is possible to use multiple guards within the same function definition or expression. When using multiple guards, a semicolon, ";", signifies a boolean "OR", while a comma, ",", signifies boolean "AND".
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">the_answer_is</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="k">when</span> <span class="n">N</span> <span class="o">==</span> <span class="mi">42</span><span class="p">,</span> <span class="n">is_integer</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">true</span><span class="p">;</span>
+</span><span class='line'><span class="n">geq_1_or_leq_2</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="k">when</span> <span class="n">N</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">N</span> <span class="o">=&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="mi">2</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">true</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <h3>Guard Functions</h3>
+  There are several built-in-functions which be used in a guard.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">is_alive</span><span class="o">/</span><span class="mi">0</span>
+</span><span class='line'><span class="n">is_boolean</span><span class="o">/</span><span class="mi">1</span>
+</span><span class='line'><span class="n">is_builtin</span><span class="o">/</span><span class="mi">3</span>
+</span><span class='line'><span class="n">is_constant</span><span class="o">/</span><span class="mi">1</span>
+</span><span class='line'><span class="n">is_float</span><span class="o">/</span><span class="mi">1</span>
+</span><span class='line'><span class="n">is_function</span><span class="o">/</span><span class="mi">2</span>
+</span><span class='line'><span class="n">is_function</span><span class="o">/</span><span class="mi">1</span>
+</span><span class='line'><span class="n">is_integer</span><span class="o">/</span><span class="mi">1</span>
+</span><span class='line'><span class="n">is_list</span><span class="o">/</span><span class="mi">1</span>
+</span><span class='line'><span class="n">is_number</span><span class="o">/</span><span class="mi">1</span>
+</span><span class='line'><span class="n">is_pid</span><span class="o">/</span><span class="mi">1</span>
+</span><span class='line'><span class="n">is_port</span><span class="o">/</span><span class="mi">1</span>                    <span class="o">&lt;</span><span class="n">br</span><span class="o">/&gt;</span>
+</span><span class='line'><span class="n">is_record</span><span class="o">/</span><span class="mi">3</span>
+</span><span class='line'><span class="n">is_record</span><span class="o">/</span><span class="mi">2</span>
+</span><span class='line'><span class="n">is_reference</span><span class="o">/</span><span class="mi">1</span>
+</span><span class='line'><span class="n">is_tuple</span><span class="o">/</span><span class="mi">1</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;tuple_size/</span><span class="mi">1</span>
+</span><span class='line'><span class="n">is_binary</span><span class="o">/</span><span class="mi">1</span>
+</span><span class='line'><span class="n">is_bitstring</span><span class="o">/</span><span class="mi">1</span>
+</span><span class='line'><span class="n">bit_size</span><span class="o">/</span><span class="mi">1</span>
+</span><span class='line'><span class="n">byte_size</span><span class="o">/</span><span class="mi">1</span>
+</span><span class='line'><span class="n">length</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">N</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">A</span> <span class="o">&gt;</span> <span class="n">B</span>
+</span><span class='line'><span class="n">A</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="n">B</span>
+</span><span class='line'><span class="n">A</span> <span class="o">==</span> <span class="n">B</span>
+</span><span class='line'><span class="n">A</span> <span class="o">=&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="n">B</span>
+</span><span class='line'><span class="n">A</span> <span class="o">&gt;=</span> <span class="n">B</span>
+</span><span class='line'><span class="n">A</span> <span class="o">/=</span> <span class="n">B</span>
+</span><span class='line'><span class="n">A</span> <span class="o">=</span><span class="p">:</span><span class="o">=</span> <span class="n">B</span>
+</span><span class='line'><span class="n">A</span> <span class="o">=</span><span class="sr">/= B</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Erlang Functions]]></title>
@@ -704,84 +950,6 @@
 
 <p>
   The problem is that A is bound to the value 10, so Erlang tries to pattern match 10 with the value 11 which is impossible.
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Introduction to Erlang and Chicagoboss Framework]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/01/16/introduction-to-erlang-and-chicagoboss-framework/"/>
-    <updated>2015-01-16T08:38:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/01/16/introduction-to-erlang-and-chicagoboss-framework</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/logo_erlang.png" alt="Introduction to Erlang and Chicagoboss Framework" />
-</p>
-
-
-
-
-<p>
-  <strong><a href="http://www.erlang.org/" target="_blank">Erlang</a></strong> is a programming language used to build massively scalable soft real-time systems with requirements on high availability. Some of its uses are in telecoms, banking, e-commerce, computer telephony and instant messaging. Erlang's runtime system has built-in support for concurrency, distribution and fault tolerance.
-</p>
-
-
-
-
-<p>
-  <strong>Erlang</strong> is the most advanced open-source server platform in existence, but it seems almost no one knows about it. <strong>Erlang</strong> can handle hundreds of thousands of simultaneous connections, it can spawn millions of simultaneous processes in under a second, server code can be upgraded, in production, without any interruption of service, and errors are handled in such a way that server crashes are extremely uncommon.
-</p>
-
-
-
-
-<p>
-  What is not to like? Why isn't the entire world programming in <strong>Erlang</strong>? Well, <strong>Erlang</strong> is a functional language, which means that to implement any algorithms, you must use recursion instead of familiar “for” and “while” loops. Unlike every major scripting language, there is no built-in syntax for dictionaries or hash maps. And to actually write a functioning server, you must learn an additional layer of magic known as OTP. These barriers, in my opinion, have prevented <strong>Erlang</strong> from gaining much traction outside of Scandinavia.
-</p>
-
-
-
-
-<p>
-  <img src="http://geekhmer.github.io/images/logo_chicagoboss.svg" alt="Introduction to Erlang and Chicagoboss Framework" />
-</p>
-
-
-
-
-<p>
-  But <strong><a href="http://www.chicagoboss.org/" target="_blank">Chicagoboss Framwork</a></strong> changes all that. It makes <strong>Erlang</strong> accessible to hackers
-  who just want to write a reliable website in a nifty language. Boss uses code generation to get around the historic hash-map quandary, and takes care of all the OTP business so that you can focus on writing the features you need for your website. As for the supposed burdens of functional programming, I find that recursion is rarely necessary in workaday web programming; I would guess that 99% of server application code simply shuttles data to and from a database, so in the course of building a website, the pedestrian procedural programmer will hardly miss his “do/while” loops.
-</p>
-
-
-
-
-<p>
-  If you are an experienced web programmer, you'll probably enjoy all the
-  amenities that CB has to offer: an advanced ORM with support for database associations, sharding, and caching. lightning-fast templates compiled down to <strong>Erlang</strong> bytecode, automatic recompiling and in-browser error reporting, simple directives for reloads and redirects, routes for constructing URLs and handling requests, full frameworks for sending and receiving email, a built-in message queue, a framework for writing and running functional tests, and a first-of-its-kind event system for monitoring the data model.
-</p>
-
-
-
-
-<p>
-  In the end, by combining the <strong>Erlang</strong> platform with its own innovations,
-  <strong>Chicagoboss Framwork</strong> makes websites a delight to develop and a joy to deploy. Boss applications can be written in the same time or less as equivalent Rails applications, and they will almost never crash or leak memory. Since the underlying networking is all asynchronous, you can easily write concurrent services, such as chat, that previously were only possible in callback-based frameworks (such as Nginx, Node.js, Twisted, or Perlbal).
-</p>
-
-
-
-
-<p>
-  The importance of this advancement cannot be overstated. It is now feasible for a very small team to develop and operate a database-driven, highly interactive, heavily trafficked website with very little capital outlay. Although <strong>Chicagoboss Framwork</strong> can’t tell you how to acquire users, the rest of this manual will show you everything you need to do to handle their requests and (with luck) fulfill their desires.
-</p>
-
-
-
-
-<p>
-  Reference: <a href="http://www.erlang.org/" target="_blank">www.erlang.org</a>, <a href="http://www.chicagoboss.org/" target="_blank">www.chicagoboss.org</a>
 </p>
 
 ]]></content>
