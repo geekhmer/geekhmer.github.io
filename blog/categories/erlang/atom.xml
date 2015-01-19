@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Erlang | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/erlang/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-01-18T16:04:41+07:00</updated>
+  <updated>2015-01-19T21:08:45+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,98 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Erlang Tail Recursion]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/01/18/erlang-tail-recursion/"/>
+    <updated>2015-01-18T21:33:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/01/18/erlang-tail-recursion</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/logo_erlang.png" alt="Erlang Variables" />
+</p>
+
+
+
+
+<p>
+  A function is called tail recursive when the recursive call to itself happens only in the last expression of the body in every clause.
+</p>
+
+
+
+
+<p>
+  Syntax:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">non_tail_recursive</span><span class="p">(</span><span class="o">&amp;</span><span class="n">hellip</span><span class="p">;)</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="n">non_tail_recursive</span><span class="p">(</span><span class="o">&amp;</span><span class="n">hellip</span><span class="p">;),</span>
+</span><span class='line'>  <span class="n">other_expression</span><span class="p">,</span>
+</span><span class='line'>  <span class="o">&amp;</span><span class="n">hellip</span><span class="p">;</span> <span class="o">.</span>
+</span><span class='line'><span class="n">tail_recursive</span><span class="p">(</span><span class="o">&amp;</span><span class="n">hellip</span><span class="p">;)</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="n">other_expression</span><span class="p">,</span>
+</span><span class='line'>  <span class="o">&amp;</span><span class="n">hellip</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">tail_recursive</span><span class="p">(</span><span class="o">&amp;</span><span class="n">hellip</span><span class="p">;)</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  The first function is not the tail recursive as the recursive call is followed by other expression. While the second is, since the recursive call is the last statement.
+</p>
+
+
+
+
+<p>
+  <strong>Tail Recursion & Performance</strong><br/>
+  In many programming languages tails recursion is a good approach performance. But in general, it is not the case in the latest releases of Erlang. Tail recursion is not guaranteed to give you better performance.
+</p>
+
+
+
+
+<p>
+  <strong>Tail Recursion VS Non Tail Recursion</strong><br/>
+</p>
+
+
+
+
+<p>
+  Non Tail Recursive:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">length</span><span class="p">(</span><span class="o">[]</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="n">length</span><span class="p">(</span><span class="o">[</span><span class="n">_</span> <span class="o">|</span> <span class="n">T</span><span class="o">]</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="mi">1</span> <span class="o">+</span> <span class="ss">mlists</span><span class="p">:</span><span class="n">length</span><span class="p">(</span><span class="n">T</span><span class="p">)</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Tail Recursive:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">length</span><span class="p">(</span><span class="no">List</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="n">length</span><span class="p">(</span><span class="no">List</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;length([], Length) &amp;ndash;&gt; Length;</span>
+</span><span class='line'><span class="sr">length([_ | T], Length) &amp;ndash;&gt; length_tr(T, Length + 1).</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Erlang Recursion]]></title>
@@ -672,331 +764,6 @@
 
 <p>
   I promise, from now on the posts will be far more interesting. Next one, or two posts will be about defining functions in Erlang. You can imagine how important functions are for a functional programming language. see ya! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Erlang Datatypes]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/01/16/erlang-datatypes/"/>
-    <updated>2015-01-16T23:37:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/01/16/erlang-datatypes</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/logo_erlang.png" alt="Erlang Variables" />
-</p>
-
-
-
-
-<p>
-  I will introduce the most datatypes that being used in Erlang such as number, atom, function, tuple, map, list, record, and boolean.
-</p>
-
-
-
-
-<p>
-  <strong>Number</strong><br/>
-  There are two datatypes of numeric are integers and floats.
-</p>
-
-
-
-
-<p>
-  Example:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="mi">42</span><span class="o">.</span>
-</span><span class='line'><span class="mi">42</span>
-</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="mi">2</span><span class="o">.</span><span class="mi">3</span><span class="o">.</span>
-</span><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">3</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>Atom</strong><br/>
-  Atom is a literal, a constant with name. Atom should be enclosed in single quotes (') if it does not begin with a lower-case letter or if it contains other characters than alphanumeric characters, underscore (_), or @ sign.
-</p>
-
-
-
-
-<p>
-  Example:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">hi</span>
-</span><span class='line'><span class="n">phone_number</span>
-</span><span class='line'><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">Sunday</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
-</span><span class='line'><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">phone</span> <span class="n">number</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>Fun</strong><br/>
-  Fun is a functional object. Funs make it possible to create an anonymous function and pass the function itself.
-</p>
-
-
-
-
-<p>
-  Example:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="no">Fun1</span> <span class="o">=</span> <span class="n">fun</span> <span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="n">X</span><span class="o">+</span><span class="mi">1</span> <span class="k">end</span><span class="o">.</span><span class="n">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;Fun&amp;lt;erl_eval.6.39074546&gt;&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="mi">2</span><span class="o">&gt;</span> <span class="no">Fun1</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="mi">7</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>Tuple</strong><br/>
-  Tuple is a compound data type, it consists of elements of any datatypes.
-</p>
-
-
-
-
-<p>
-  Syntax:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">{</span><span class="no">Element1</span><span class="p">,</span> <span class="no">Element2</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">hellip</span><span class="p">;,</span> <span class="no">ElementN</span><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Example:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;blockquote&gt;&lt;p&gt;T = {bunlong, 27, {may, 17}}.</span>
-</span><span class='line'><span class="sr">{bunlong, 27, {may, 17}}</span>
-</span><span class='line'><span class="sr">element(1, T).</span>
-</span><span class='line'><span class="sr">bunlong</span>
-</span><span class='line'><span class="sr">T2 = setelement(2, T, 25).</span>
-</span><span class='line'><span class="sr">{bunlong, 25, {may, 17}}</span>
-</span><span class='line'><span class="sr">tuple_size(T).</span>
-</span><span class='line'><span class="sr">3</span>
-</span><span class='line'><span class="sr">tuple_size({}).</span>
-</span><span class='line'><span class="sr">0</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p></blockquote>
-
-<p>
-  <string>Map</string><br/>
-  Map is a compound data type with a variable number of key-value associations.
-</p>
-
-
-
-
-<p>
-  Syntax:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;{Key1=&gt;Value1,&amp;hellip;,KeyN=&gt;ValueN}&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Example:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="no">M1</span> <span class="o">=</span> <span class="c1">#{name=&gt;bunlong,age=&gt;26,date=&gt;{may,07}}.&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="p">{</span><span class="n">age</span> <span class="o">=&gt;</span> <span class="mi">26</span><span class="p">,</span><span class="n">date</span> <span class="o">=&gt;</span> <span class="p">{</span><span class="n">may</span><span class="p">,</span><span class="mo">07</span><span class="p">},</span><span class="nb">name</span> <span class="o">=&gt;</span> <span class="n">bunlong</span><span class="p">}</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;2&gt; maps:get(name,M1).</span>
-</span><span class='line'><span class="sr">bunlong</span>
-</span><span class='line'><span class="sr">3&gt; maps:get(date,M1).</span>
-</span><span class='line'><span class="sr">{may,07}</span>
-</span><span class='line'><span class="sr">4&gt; M2 = maps:update(age,27,M1).&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="p">{</span><span class="n">age</span> <span class="o">=&gt;</span> <span class="mi">27</span><span class="p">,</span><span class="n">date</span> <span class="o">=&gt;</span> <span class="p">{</span><span class="n">may</span><span class="p">,</span><span class="mo">07</span><span class="p">},</span><span class="nb">name</span> <span class="o">=&gt;</span> <span class="n">bunlong</span><span class="p">}</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;5&gt; map_size(M).</span>
-</span><span class='line'><span class="sr">3</span>
-</span><span class='line'><span class="sr">6&gt; map_size(</span><span class="si">#{}</span><span class="sr">).</span>
-</span><span class='line'><span class="sr">0</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>List</strong><br/>
-  As in all functional programming language, list is one of the most used datatyped. Again, Erlang borrows the list syntax from Prolog. Because of their importance. List is a compound data type with a variable number of terms.
-</p>
-
-
-
-
-<p>
-  Syntax:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="no">Element1</span><span class="p">,</span> <span class="no">Element2</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">hellip</span><span class="p">;,</span> <span class="no">ElementN</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Example:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;blockquote&gt;&lt;p&gt;L = [a, 2, {c, 4}].</span>
-</span><span class='line'><span class="sr">[a, 2, {c, 4}]</span>
-</span><span class='line'><span class="sr">[H|T] = L.</span>
-</span><span class='line'><span class="sr">[a, 2, {c, 4}]</span>
-</span><span class='line'><span class="sr">H.</span>
-</span><span class='line'><span class="sr">a</span>
-</span><span class='line'><span class="sr">T.</span>
-</span><span class='line'><span class="sr">[2, {c, 4}]</span>
-</span><span class='line'><span class="sr">L2 = [d|T].</span>
-</span><span class='line'><span class="sr">[d, 2, {c, 4}]</span>
-</span><span class='line'><span class="sr">length(L).</span>
-</span><span class='line'><span class="sr">3</span>
-</span><span class='line'><span class="sr">length([]).</span>
-</span><span class='line'><span class="sr">0</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p></blockquote>
-
-<p>
-  <strong>Record</strong><br/>
-  A record is a data structure for storing a fixed number of elements. It has named fields and is similar to a struct in C. However, record is not a true data type.
-</p>
-
-
-
-
-<p>
-  Example:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">-</span><span class="n">module</span><span class="p">(</span><span class="n">person</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="o">-</span><span class="n">export</span><span class="p">(</span><span class="o">[</span><span class="kp">new</span><span class="o">/</span><span class="mi">2</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="o">-</span><span class="n">record</span><span class="p">(</span><span class="n">person</span><span class="p">,</span> <span class="p">{</span><span class="nb">name</span><span class="p">,</span> <span class="n">age</span><span class="p">})</span><span class="o">.</span>
-</span><span class='line'><span class="kp">new</span><span class="p">(</span><span class="no">Name</span><span class="p">,</span> <span class="no">Age</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="c1">#person{name=Name, age=Age}.&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="sx">% &gt; </span><span class="ss">person</span><span class="p">:</span><span class="kp">new</span><span class="p">(</span><span class="n">bunlong</span><span class="p">,</span> <span class="mi">27</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="sx">% {person, </span><span class="n">bunlong</span><span class="p">,</span> <span class="mi">27</span><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>Boolean</strong><br/>
-  There is no Boolean data type in Erlang. Instead the atoms true and false are used to denote Boolean values.
-</p>
-
-
-
-
-<p>
-  Example:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;blockquote&gt;&lt;p&gt;2 =&amp;lt; 3.</span>
-</span><span class='line'><span class="sr">true</span>
-</span><span class='line'><span class="sr">true or false.</span>
-</span><span class='line'><span class="sr">true</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p></blockquote>
-
-<p>
-  So are so good, there are some other datatypes, such as binary, reference, Pid, etc. I will explain them when needed. see you in the next articles! :)
 </p>
 
 ]]></content>
