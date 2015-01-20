@@ -77,6 +77,234 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2014/08/14/whats-new-in-rails4-view/">What&#8217;s New in Rails4 View?</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-14T08:37:00+07:00" pubdate data-updated="true">Aug 14<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/what_is_new_in_rails4.png" width="500" />
+</p>
+
+
+
+
+<p>
+  Well, previouse article I had talked about <a href="http://geekhmer.github.io/blog/2014/08/09/whats-new-in-rails4-activemodel/">What&#8217;s New in Rails4 ActiveModel?</a>.
+  Today We are looking at view:
+</p>
+
+
+
+
+<p>
+  Assume we have an owner class which has many items and each items are usualy belongs to an owner:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Owner</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:items</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Item</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:owner</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Select box</strong><br/>
+  - Rails3 & 4<br/>
+  In Rails3 & 4 if we want to build a select box with owner we could do it with a single method called:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">collection_select</span><span class="p">(</span><span class="ss">:item</span><span class="p">,</span> <span class="ss">:owner_id</span><span class="p">,</span> <span class="no">Owner</span><span class="o">.</span><span class="n">all</span><span class="p">,</span> <span class="ss">:id</span><span class="p">,</span> <span class="ss">:name</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Radio button & checkbox</strong><br/>
+  - Rails3<br/>
+  In Rails3 we need do with the loops and builds each of the elements:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">% @owners.each </span><span class="k">do</span> <span class="o">|</span><span class="n">owner</span><span class="o">|</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%= radio_button_tag :owner_id, owner.id %&gt;</span>
+</span><span class='line'>  <span class="o">&lt;%=</span> <span class="n">owner</span><span class="o">.</span><span class="n">name</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">&lt;% end %&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  HTML output: 
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">input</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;owner_id&quot;</span> <span class="nb">name</span><span class="o">=</span><span class="s2">&quot;owner_id&quot;</span> <span class="n">type</span><span class="o">=</span><span class="s2">&quot;radio&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;1&quot;</span> <span class="sr">/&gt; Slow-draw</span>
+</span><span class='line'><span class="sr">&lt;input id=&quot;owner_id&quot; name=&quot;owner_id&quot; type=&quot;radio&quot; value=&quot;2&quot; /</span><span class="o">&gt;</span> <span class="no">Sheriff</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  - Rails4<br/>
+  Now in Rails4 we have <code>collection_radio_buttons & collection_check_boxes</code> method which builds all elements from a collection:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">collection_radio_buttons</span><span class="p">(</span><span class="ss">:item</span><span class="p">,</span> <span class="ss">:owner_id</span><span class="p">,</span> <span class="no">Owner</span><span class="o">.</span><span class="n">all</span><span class="p">,</span> <span class="ss">:id</span><span class="p">,</span> <span class="ss">:name</span><span class="p">)</span>
+</span><span class='line'><span class="n">collection_check_boxes</span><span class="p">(</span><span class="ss">:item</span><span class="p">,</span> <span class="ss">:owner_id</span><span class="p">,</span> <span class="no">Owner</span><span class="o">.</span><span class="n">all</span><span class="p">,</span> <span class="ss">:id</span><span class="p">,</span> <span class="ss">:name</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Date field</strong><br/>
+  - Rails3<br/>
+  At some points we must use <code>date_select</code> form helper:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">date_select</span> <span class="ss">:return_date</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  HTML output:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="nb">select</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;item_return_date_1i&quot;</span> <span class="nb">name</span><span class="o">=</span><span class="s2">&quot;item[return_date(1i)]&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">option</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;2008&quot;</span><span class="o">&gt;</span><span class="mi">2008</span><span class="o">&lt;</span><span class="sr">/option&gt;</span>
+</span><span class='line'><span class="sr">  ...</span>
+</span><span class='line'><span class="sr">&lt;/se</span><span class="n">lect</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">select</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;item_return_date_2li&quot;</span> <span class="nb">name</span> <span class="o">=</span><span class="s2">&quot;item[return_date(2i)]&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">option</span> <span class="n">selected</span><span class="o">=</span><span class="s2">&quot;selected&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="o">&gt;</span><span class="no">January</span><span class="o">&lt;</span><span class="sr">/option&gt;</span>
+</span><span class='line'><span class="sr">  ...</span>
+</span><span class='line'><span class="sr">&lt;/se</span><span class="n">lect</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">select</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;item_return_date_3i&quot;</span> <span class="nb">name</span><span class="o">=</span><span class="s2">&quot;item[return_date(3i)]&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/select&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  - Rails4<br/>
+  Rails4 now there is a date_field:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">date_field</span> <span class="ss">:return_date</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  HTML output:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">input</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;item_return_date&quot;</span> <span class="nb">name</span><span class="o">=</span><span class="s2">&quot;item[return_date]&quot;</span> <span class="n">type</span><span class="o">=</span><span class="s2">&quot;date&quot;</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2014/08/11/use-memoization-to-speed-up-your-code-in-ruby-slash-rails/">Use Memoization to Speed Up Your Code in Ruby/Rails</a></h1>
     
     
@@ -2401,188 +2629,6 @@ It&#8217;s going to generate SQL: <code>SELECT * FROM users ORDER BY created_at 
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/26/implement-decorator-design-pattern-in-rails-with-draper-to-cleanup-views/">Implement Decorator Design Pattern in Rails With Draper to Cleanup Views</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-26T21:29:00+07:00" pubdate data-updated="true">Jul 26<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  Ruby on Rails is an awesome framework to build web application. Rails relies on the MVC pattern, and lots of conventions, code becomes complex to maintain, productivity start to decrease, etc.
-</p>
-
-
-
-
-<p>
-  We can find a lot of reasons to this(too much logic in controllers, fat models, lack of services layers, etc.), but I will just name one: logic in view, logic in view is bug prone, difficult to test, and can be a pain for front-end developers.
-</p>
-
-
-
-
-<p>
-  Sample problem
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>articles_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ArticlesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
-</span><span class='line'>    <span class="vi">@article</span> <span class="o">=</span> <span class="no">Article</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span>show.html.haml </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">-</span> <span class="k">if</span> <span class="n">can?</span> <span class="ss">:update</span><span class="p">,</span> <span class="vi">@article</span>
-</span><span class='line'>  <span class="o">=</span> <span class="n">link_to</span> <span class="s2">&quot;Edit&quot;</span><span class="p">,</span> <span class="n">edit_article_path</span><span class="p">(</span><span class="vi">@article</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Well, you got it, logic in view. And since rails don&#8217;t have view inheritance, this code will have to be copy-pasted over and over, I would rather have something like: <code>= @article.link_to_edit</code>
-</p>
-
-
-
-
-<p>
-  So, how can we remove logic from the view?
-</p>
-
-
-
-
-<p>
-  <strong>Decorator Design Pattern save the views</strong><br/>
-  As usual, we can find a solution with a pattern. the decorator design pattern will help us remove logic from views in our Rails applications.<br/>
-  The idea is to insert an object between the model and the view, well there is a good ruby gem is <a href="https://github.com/drapergem/draper" target="_blank">Draper</a> that work well.
-</p>
-
-
-
-
-<p>
-  Let create a decorator for the Article class
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>article_decorator.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ArticleDecorator</span> <span class="o">&lt;</span> <span class="ss">Draper</span><span class="p">:</span><span class="ss">:Decorator</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">link_to_edit</span>
-</span><span class='line'>    <span class="k">if</span> <span class="n">h</span><span class="o">.</span><span class="n">can?</span> <span class="ss">:update</span><span class="p">,</span> <span class="n">object</span>
-</span><span class='line'>      <span class="n">h</span><span class="o">.</span><span class="n">link_to</span> <span class="s2">&quot;Edit&quot;</span><span class="p">,</span> <span class="n">h</span><span class="o">.</span><span class="n">edit_article_path</span><span class="p">(</span><span class="n">object</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span>articles_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ArticlesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
-</span><span class='line'>    <span class="vi">@article</span> <span class="o">=</span> <span class="no">ArticleDecorator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Article</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">))</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span>show.html.haml </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">=</span> <span class="vi">@article</span><span class="o">.</span><span class="n">link_to_edit</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  A few things to notice here. From the controller, we call the decorate method on a instance of article, this will return a decorated version of the article object.
-</p>
-
-
-
-
-<p>
-  In the ArticleDecorator class, we have access to the decorated object with the object method and to all view helpers through the h object.<br/>
-  We can now call the link_to_edit method on the article object from our view, and the decorator will take care of the logic, and return a formatted link if the user has the right edit this resource, and nothing if he does not.
-</p>
-
-
-
-
-<p>
-  The code is easier to test, we just instantiate a new instance of the ArticleDecorator, and check the output of the link_to_edit method. No need to test whole renderd view, searching through the DOM object tree.
-</p>
-
-
-
-
-<p>
-  So far so good, we gain code readablility, code reuse, better testing, and in addition, we even lost a few lines of duplicated code. :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/5/">&larr; Older</a>
@@ -2611,6 +2657,10 @@ It&#8217;s going to generate SQL: <code>SELECT * FROM users ORDER BY created_at 
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/01/20/erlang-control-flow-statement/">Erlang Control Flow Statement</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/18/erlang-tail-recursion/">Erlang Tail Recursion</a>
       </li>
     
@@ -2624,10 +2674,6 @@ It&#8217;s going to generate SQL: <code>SELECT * FROM users ORDER BY created_at 
     
       <li class="post">
         <a href="/blog/2015/01/17/erlang-functions/">Erlang Functions</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/17/erlang-modules-and-compiling/">Erlang Modules and Compiling</a>
       </li>
     
   </ul>
@@ -2677,7 +2723,7 @@ It&#8217;s going to generate SQL: <code>SELECT * FROM users ORDER BY created_at 
       </li>
     
       <li>
-        <a href="/blog/categories/erlang/">Erlang [ 14 ]</a>
+        <a href="/blog/categories/erlang/">Erlang [ 15 ]</a>
       </li>
     
       <li>
