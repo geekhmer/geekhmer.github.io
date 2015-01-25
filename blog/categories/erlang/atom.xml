@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Erlang | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/erlang/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-01-24T20:51:09+07:00</updated>
+  <updated>2015-01-25T21:24:49+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,317 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Erlang List Comprehension]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/01/24/erlang-list-comprehension/"/>
+    <updated>2015-01-24T21:02:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/01/24/erlang-list-comprehension</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/logo_erlang.png" alt="Erlang List Comprehension" />
+</p>
+
+
+
+
+<p>
+  <h3>Syntax:</h3>
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="no">Expression</span> <span class="o">||</span> <span class="no">Generators1</span><span class="p">,</span> <span class="no">Guards1</span><span class="p">,</span> <span class="n">G</span><span class="o">]</span><span class="n">enerators2</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">hellip</span><span class="p">;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><p>
+  <strong>Expression</strong><br/>
+  The expression specifies the elements of the result. Example: <code>[I || &lt;&ndash; [1, 2, 3]]</code> returns the input list element as is.
+</p></p>
+
+<p><p>
+  <strong>Generators</strong><br/>
+  Generators create the data used in ther filter-map operations. A generator has the &ldquo;Pattern &lt;&ndash; Data&rdquo; format, where &ldquo;Data&rdquo; is a list or an expression that results to a list and Pattern is a pattern used to match with the elements of the list. This pattern can be used to disassembly elements. Example two valid generators are <code>I &lt;&ndash; lists:seq(1, 10)</code> and <code>{X, Y} &lt;&ndash; [{&lsquo;A&rsquo;, &lsquo;Excellent&rsquo;}, {&lsquo;B&rsquo;, &lsquo;Good&rsquo;}, {&lsquo;C&rsquo;, &lsquo;Fair&rsquo;}]</code>.
+</p></p>
+
+<p><p>
+  <strong>Guards</strong><br/>
+  Guards are expression that return either true or false, the same as the guards we have seen in the previous posts. They apply to the variables that are on the left of the guard and the ones that are accessible to the scope where the comprehension runs. Example: <code>I &lt;&ndash; [1, 2, 3, 4], I rem 1 == 0</code> is a valid generator.
+</p></p>
+
+<p><p>
+  <h3>Example:</h3>
+</p></p>
+
+<p><p>
+  I will show some examples that implements some list functions. The most of them already exists in the lists module as I did in the past, I will add these functions to the module called mylists.
+</p></p>
+
+<p><p>
+  <strong>map/2</strong><br/>
+  The results contains the elements of the input list after applied to the input function.
+</p></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sx">% Generator: </span><span class="n">the</span> <span class="n">items</span> <span class="n">of</span> <span class="n">the</span> <span class="n">list</span> <span class="n">provided</span>
+</span><span class='line'><span class="sx">% Guard: </span><span class="n">no</span> <span class="n">guard</span> <span class="n">expression</span><span class="p">,</span> <span class="n">all</span> <span class="n">items</span> <span class="n">are</span> <span class="n">kept</span>
+</span><span class='line'><span class="sx">% Expression: </span><span class="n">the</span> <span class="n">item</span> <span class="n">from</span> <span class="n">the</span> <span class="n">generator</span> <span class="n">after</span> <span class="n">applied</span> <span class="n">to</span> <span class="n">the</span> <span class="no">Function</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;map(Function, List) &amp;ndash;&gt;</span>
+</span><span class='line'><span class="sr">  [Function(I) || I &amp;lt;&amp;ndash; List].&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">map</span><span class="p">(</span><span class="n">fun</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">I</span> <span class="k">end</span><span class="p">,</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">10</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><p>
+  <strong>deleteall/2</strong><br/>
+  Deletes all occurrences of an element from the list.
+</p></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sx">% Generator: </span><span class="n">the</span> <span class="n">items</span> <span class="n">of</span> <span class="n">the</span> <span class="n">list</span> <span class="n">provided</span>
+</span><span class='line'><span class="sx">% Guard: </span><span class="n">the</span> <span class="n">item</span> <span class="n">should</span> <span class="ow">not</span> <span class="n">be</span> <span class="n">equal</span> <span class="p">(</span><span class="n">both</span> <span class="n">value</span> <span class="ow">and</span> <span class="n">type</span><span class="p">)</span> <span class="n">with</span> <span class="n">the</span> <span class="no">Elem</span>
+</span><span class='line'><span class="sx">% Expression: </span><span class="n">keep</span> <span class="n">the</span> <span class="n">elements</span> <span class="n">of</span> <span class="n">the</span> <span class="n">list</span> <span class="n">that</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">pass</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="n">the</span> <span class="n">guard</span> <span class="nb">test</span><span class="p">,</span> <span class="n">as</span> <span class="n">they</span> <span class="n">are</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;deleteall(Elem, List) &amp;ndash;&gt;</span>
+</span><span class='line'><span class="sr">  [I || I &amp;lt;&amp;ndash; List, I =/</span><span class="o">=</span> <span class="no">Elem</span><span class="o">].</span><span class="n">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;1&gt; mylists:deleteall(3, [1, 2, 3, 4, 3, 2, 1]).</span>
+</span><span class='line'><span class="sr">[1,2,4,2,1]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><p>
+  <strong>partition/2</strong><br/>
+  Partition a list into two, according to if the elements satisfy or not a given predicate.
+</p></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">partition</span><span class="p">(</span><span class="no">Pred</span><span class="p">,</span> <span class="no">List</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="p">{</span><span class="o">[</span><span class="n">I</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span> <span class="no">List</span><span class="p">,</span> <span class="no">Pred</span><span class="p">(</span><span class="n">I</span><span class="p">)</span><span class="o">]</span><span class="p">,</span> <span class="o">[</span><span class="n">I</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span> <span class="no">List</span><span class="p">,</span> <span class="ow">not</span><span class="p">(</span><span class="no">Pred</span><span class="p">(</span><span class="n">I</span><span class="p">))</span><span class="o">]</span><span class="p">}</span><span class="o">.</span><span class="n">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;% an alternative implementation</span>
+</span><span class='line'><span class="sr">partition2(Pred, List) &amp;ndash;&gt;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="no">Sat</span> <span class="o">=</span> <span class="n">filter</span><span class="p">(</span><span class="no">Pred</span><span class="p">,</span> <span class="no">List</span><span class="p">),</span>
+</span><span class='line'><span class="p">{</span><span class="no">Sat</span><span class="p">,</span> <span class="no">List</span> <span class="o">--</span> <span class="no">Sat</span><span class="p">}</span><span class="o">.</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">partition</span><span class="p">(</span><span class="n">fun</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="n">is_atom</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="k">end</span><span class="p">,</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="mi">3</span><span class="o">.</span><span class="mi">0</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="p">{</span><span class="o">[</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="o">]</span><span class="p">,</span><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">.</span><span class="mi">0</span><span class="o">]</span><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><p>
+  <strong>replicated/2</strong><br/>
+  Creates a list of Items of length Times.
+</p></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sx">% Generator: </span><span class="n">only</span> <span class="n">used</span> <span class="k">for</span> <span class="n">fixing</span> <span class="n">the</span> <span class="n">length</span>
+</span><span class='line'><span class="sx">% Expression: </span><span class="n">a</span> <span class="n">fixed</span> <span class="n">item</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;replicated(Item, Times) &amp;ndash;&gt;</span>
+</span><span class='line'><span class="sr">  [Item || _ &amp;lt;&amp;ndash; lists:seq(1, Times)].&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">replicated</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="ss">:&amp;</span><span class="n">ndash</span><span class="p">;)</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="mi">10</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="ss">:&amp;</span><span class="n">ndash</span><span class="p">;)</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="ss">:&amp;</span><span class="n">ndash</span><span class="p">;)</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="ss">:&amp;</span><span class="n">ndash</span><span class="p">;)</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="ss">:&amp;</span><span class="n">ndash</span><span class="p">;)</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="ss">:&amp;</span><span class="n">ndash</span><span class="p">;)</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="ss">:&amp;</span><span class="n">ndash</span><span class="p">;)</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="ss">:&amp;</span><span class="n">ndash</span><span class="p">;)</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="ss">:&amp;</span><span class="n">ndash</span><span class="p">;)</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="ss">:&amp;</span><span class="n">ndash</span><span class="p">;)</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="ss">:&amp;</span><span class="n">ndash</span><span class="p">;)</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><p>
+  <strong>replicate_items/2</strong><br/>
+  Replicates each elements of the list Times times.
+</p></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">replicate_items</span><span class="p">(</span><span class="no">Times</span><span class="p">,</span> <span class="no">List</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="ss">mylists</span><span class="p">:</span><span class="n">flatten</span><span class="p">(</span><span class="o">[[</span><span class="no">Item</span> <span class="o">||</span> <span class="n">_</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">seq</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="no">Times</span><span class="p">)</span><span class="o">]</span> <span class="o">||</span> <span class="no">Item</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span> <span class="no">List</span><span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;% same as</span>
+</span><span class='line'><span class="sr">% replicate_items(Times, List) &amp;ndash;&gt;</span>
+</span><span class='line'><span class="sr">%   mylists:flatten([replicated(Item, Times) || Item &amp;lt;&amp;ndash; List]).&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">replicate_items</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="n">a</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">c</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><p>
+  <strong>member/2</strong><br/>
+  Returns true if an element is a member of the list, else returns false.
+</p></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">member</span><span class="p">(</span><span class="no">Elem</span><span class="p">,</span> <span class="no">List</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">[]</span> <span class="o">/=</span> <span class="o">[</span><span class="n">ok</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span> <span class="no">List</span><span class="p">,</span> <span class="n">I</span> <span class="o">==</span> <span class="no">Elem</span><span class="o">].</span><span class="n">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;1&gt; mylists:member(a, [3, 2, 1, a, x, z]).</span>
+</span><span class='line'><span class="sr">true</span>
+</span><span class='line'><span class="sr">2&gt; mylists:member(a, [3, 2, 1, aa, x, z]).</span>
+</span><span class='line'><span class="sr">false</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><p>
+  <strong>member_times/2</strong><br/>
+  Returns the number of occurences of an element in a list.
+</p></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">member_times</span><span class="p">(</span><span class="no">Elem</span><span class="p">,</span> <span class="no">List</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="n">length</span><span class="p">(</span><span class="o">[</span><span class="n">ok</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span> <span class="no">List</span><span class="p">,</span> <span class="n">I</span> <span class="o">==</span> <span class="no">Elem</span><span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;1&gt; mylists:member_times(a, [1, a, 2, 3, b, a, c]).</span>
+</span><span class='line'><span class="sr">2</span>
+</span><span class='line'><span class="sr">2&gt; mylists:member_times(a, [1, a, 2, 3, b, c]). &lt;br/</span><span class="o">&gt;</span>
+</span><span class='line'><span class="mi">1</span>
+</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">member_times</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">]</span><span class="p">)</span><span class="o">.</span> <span class="o">&lt;</span><span class="n">br</span><span class="o">/&gt;</span>
+</span><span class='line'><span class="mi">0</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><p>
+  <strong>quicksort/1</strong><br/>
+  This is the famous Quicksort implementation that is often used to show the power and compactness of Erlang.
+</p></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">qsort</span><span class="p">(</span><span class="o">[]</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">[]</span><span class="p">;</span>
+</span><span class='line'><span class="n">qsort</span><span class="p">(</span><span class="o">[</span><span class="no">Pivot</span> <span class="o">|</span> <span class="no">List</span><span class="o">]</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="n">qsort</span><span class="p">(</span><span class="o">[</span><span class="n">I</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span> <span class="no">List</span><span class="p">,</span> <span class="n">I</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="no">Pivot</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="o">++</span>
+</span><span class='line'>  <span class="o">[</span><span class="no">Pivot</span> <span class="o">|</span> <span class="n">qsort</span><span class="p">(</span><span class="o">[</span><span class="n">I</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span> <span class="no">List</span><span class="p">,</span> <span class="n">I</span> <span class="o">&gt;=</span> <span class="no">Pivot</span><span class="o">]</span><span class="p">)</span><span class="o">].</span><span class="n">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;1&gt; mylists:qsort([7, 1, 3, 9, 1, 2, 0, 4, 6, 5]).</span>
+</span><span class='line'><span class="sr">[0,1,1,2,3,4,5,6,7,9]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><p>
+  <strong>Multiple Generators</strong><br/>
+  Now I will present some examples with multiple generators.
+</p></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="o">[</span><span class="p">{</span><span class="n">I</span><span class="p">,</span> <span class="n">J</span><span class="p">}</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span><span class="p">,</span> <span class="n">J</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">]].</span>
+</span><span class='line'><span class="o">[</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="n">a</span><span class="p">},{</span><span class="mi">1</span><span class="p">,</span><span class="n">b</span><span class="p">},{</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="p">},{</span><span class="mi">2</span><span class="p">,</span><span class="n">a</span><span class="p">},{</span><span class="mi">2</span><span class="p">,</span><span class="n">b</span><span class="p">},{</span><span class="mi">2</span><span class="p">,</span><span class="n">c</span><span class="p">},{</span><span class="mi">3</span><span class="p">,</span><span class="n">a</span><span class="p">},{</span><span class="mi">3</span><span class="p">,</span><span class="n">b</span><span class="p">},{</span><span class="mi">3</span><span class="p">,</span><span class="n">c</span><span class="p">}</span><span class="o">]&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;% duplicate list</span>
+</span><span class='line'><span class="sr">2&gt; [I || _ &amp;lt;&amp;ndash; [a, a], I &amp;lt;&amp;ndash; [1, 2, 3]].</span>
+</span><span class='line'><span class="sr">[1,2,3,1,2,3]&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="sx">% duplicate </span><span class="n">elements</span>
+</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="o">[</span><span class="n">I</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span><span class="p">,</span> <span class="n">J</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="o">]].</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="o">]&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;% discard elements and duplicate the others</span>
+</span><span class='line'><span class="sr">4&gt; Discard = [2, 4].</span>
+</span><span class='line'><span class="sr">[2,4]</span>
+</span><span class='line'><span class="sr">5&gt; [I || I &amp;lt;&amp;ndash; [1, 2, 3, 4, 5, 6], not(lists:member(I, Discard)), _ &amp;lt;&amp;ndash; [a, a]].</span>
+</span><span class='line'><span class="sr">[1,1,3,3,5,5,6,6]&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="sx">% subsequences</span>
+</span><span class='line'><span class="sx">8&gt; </span><span class="o">[[</span><span class="n">I</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">seq</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">J</span><span class="p">)</span><span class="o">]</span> <span class="o">||</span> <span class="n">J</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">seq</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span><span class="o">].</span>
+</span><span class='line'><span class="o">[[</span><span class="mi">1</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="o">]]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Erlang List &amp; List Module]]></title>
@@ -983,259 +1294,6 @@
 </span><span class='line'><span class="sr">list_length([_H|T]) &amp;ndash;&gt; 1 + list_length(T).&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
 </span><span class='line'>
 </span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;%</span><span class="sx">% example:list_length([1, </span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Erlang Guards]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/01/17/erlang-guards/"/>
-    <updated>2015-01-17T22:22:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/01/17/erlang-guards</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/logo_erlang.png" alt="Erlang Variables" />
-</p>
-
-
-
-
-<h3>Guard structures</h3>
-
-
-
-
-<p>
-  Guards in Erlang are boolean functions placed after the key word, "when" and before the arrow, "->". Guards may appear as part of a function definition, 'receive', 'if', 'case' and 'try/catch' expressions.
-</p>
-
-
-
-
-<p>
-  We use a guard in a function definition.
-</p>
-
-
-
-
-<p>
-  Example:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>example.erl </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">-</span><span class="n">module</span><span class="p">(</span><span class="n">example</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="o">-</span><span class="n">compile</span><span class="p">(</span><span class="n">export_all</span><span class="p">)</span><span class="o">.</span><span class="n">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;the_answer_is(N) when N =:= 42 &amp;ndash;&gt; true;</span>
-</span><span class='line'><span class="sr">the_answer_is(N) &amp;ndash;&gt; false.&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="sx">% c(example).</span>
-</span><span class='line'><span class="sx">% </span><span class="n">ok</span>
-</span><span class='line'><span class="o">%</span>
-</span><span class='line'><span class="sx">% example:the_answer_is(42).</span>
-</span><span class='line'><span class="sx">% </span><span class="kp">true</span>
-</span><span class='line'><span class="o">%</span>
-</span><span class='line'><span class="sx">% example:the_answer_is(21).</span>
-</span><span class='line'><span class="sx">% </span><span class="kp">false</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>fun definition</strong>
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">F</span> <span class="o">=</span> <span class="n">fun</span>
-</span><span class='line'>  <span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="k">when</span> <span class="n">N</span> <span class="o">=</span><span class="p">:</span><span class="o">=</span> <span class="mi">42</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">true</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">false</span>
-</span><span class='line'><span class="k">end</span><span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>receive expression</strong>
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">receive</span>
-</span><span class='line'>  <span class="p">{</span><span class="n">answer</span><span class="p">,</span> <span class="n">N</span><span class="p">}</span> <span class="k">when</span> <span class="n">N</span> <span class="o">=</span><span class="p">:</span><span class="o">=</span> <span class="mi">42</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">true</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">{</span><span class="n">answer</span><span class="p">,</span> <span class="n">N</span><span class="p">}</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">false</span>
-</span><span class='line'><span class="k">end</span><span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>if expression</strong>
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">if</span>
-</span><span class='line'>  <span class="n">N</span> <span class="o">=</span><span class="p">:</span><span class="o">=</span> <span class="mi">42</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">true</span><span class="p">;</span>
-</span><span class='line'>  <span class="kp">true</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">false</span>
-</span><span class='line'><span class="k">end</span><span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>case expression</strong>
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">case</span> <span class="n">L</span> <span class="n">of</span>
-</span><span class='line'>  <span class="p">{</span><span class="n">answer</span><span class="p">,</span> <span class="n">N</span><span class="p">}</span> <span class="k">when</span> <span class="n">N</span> <span class="o">=</span><span class="p">:</span><span class="o">=</span> <span class="mi">42</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">true</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">_</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">false</span>
-</span><span class='line'><span class="k">end</span><span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">case</span> <span class="n">L</span> <span class="n">of</span>
-</span><span class='line'>  <span class="p">{</span><span class="n">node</span><span class="p">,</span> <span class="n">N</span><span class="p">}</span> <span class="k">when</span> <span class="n">N</span> <span class="o">=</span><span class="p">:</span><span class="o">=</span> <span class="mi">42</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">true</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">_AnyNode</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">false</span>
-</span><span class='line'><span class="k">end</span><span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>try/catch</strong>
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">try</span> <span class="n">find</span><span class="p">(</span><span class="n">L</span><span class="p">)</span> <span class="n">of</span>
-</span><span class='line'>  <span class="p">{</span><span class="n">answer</span><span class="p">,</span> <span class="n">N</span><span class="p">}</span> <span class="k">when</span> <span class="n">N</span> <span class="o">=</span><span class="p">:</span><span class="o">=</span> <span class="mi">42</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">true</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">_</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">false</span>
-</span><span class='line'><span class="kp">catch</span>
-</span><span class='line'>  <span class="p">{</span><span class="n">notanumber</span><span class="p">,</span> <span class="n">R</span><span class="p">}</span> <span class="k">when</span> <span class="n">is_list</span><span class="o">&amp;</span><span class="n">reg</span><span class="p">;</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="n">alist</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">{</span><span class="n">notanumber</span><span class="p">,</span> <span class="n">R</span><span class="p">}</span> <span class="k">when</span> <span class="n">is_float</span><span class="o">&amp;</span><span class="n">reg</span><span class="p">;</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="n">afloat</span>
-</span><span class='line'>  <span class="n">_</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="n">noidea</span>
-</span><span class='line'><span class="k">end</span><span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <h3>Multiple Guards</h3>
-  It is possible to use multiple guards within the same function definition or expression. When using multiple guards, a semicolon, ";", signifies a boolean "OR", while a comma, ",", signifies boolean "AND".
-</p>
-
-
-
-
-<p>
-  Example:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">the_answer_is</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="k">when</span> <span class="n">N</span> <span class="o">==</span> <span class="mi">42</span><span class="p">,</span> <span class="n">is_integer</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">true</span><span class="p">;</span>
-</span><span class='line'><span class="n">geq_1_or_leq_2</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="k">when</span> <span class="n">N</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">N</span> <span class="o">=&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="mi">2</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&gt;</span> <span class="kp">true</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <h3>Guard Functions</h3>
-  There are several built-in-functions which be used in a guard.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">is_alive</span><span class="o">/</span><span class="mi">0</span>
-</span><span class='line'><span class="n">is_boolean</span><span class="o">/</span><span class="mi">1</span>
-</span><span class='line'><span class="n">is_builtin</span><span class="o">/</span><span class="mi">3</span>
-</span><span class='line'><span class="n">is_constant</span><span class="o">/</span><span class="mi">1</span>
-</span><span class='line'><span class="n">is_float</span><span class="o">/</span><span class="mi">1</span>
-</span><span class='line'><span class="n">is_function</span><span class="o">/</span><span class="mi">2</span>
-</span><span class='line'><span class="n">is_function</span><span class="o">/</span><span class="mi">1</span>
-</span><span class='line'><span class="n">is_integer</span><span class="o">/</span><span class="mi">1</span>
-</span><span class='line'><span class="n">is_list</span><span class="o">/</span><span class="mi">1</span>
-</span><span class='line'><span class="n">is_number</span><span class="o">/</span><span class="mi">1</span>
-</span><span class='line'><span class="n">is_pid</span><span class="o">/</span><span class="mi">1</span>
-</span><span class='line'><span class="n">is_port</span><span class="o">/</span><span class="mi">1</span>                    <span class="o">&lt;</span><span class="n">br</span><span class="o">/&gt;</span>
-</span><span class='line'><span class="n">is_record</span><span class="o">/</span><span class="mi">3</span>
-</span><span class='line'><span class="n">is_record</span><span class="o">/</span><span class="mi">2</span>
-</span><span class='line'><span class="n">is_reference</span><span class="o">/</span><span class="mi">1</span>
-</span><span class='line'><span class="n">is_tuple</span><span class="o">/</span><span class="mi">1</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;tuple_size/</span><span class="mi">1</span>
-</span><span class='line'><span class="n">is_binary</span><span class="o">/</span><span class="mi">1</span>
-</span><span class='line'><span class="n">is_bitstring</span><span class="o">/</span><span class="mi">1</span>
-</span><span class='line'><span class="n">bit_size</span><span class="o">/</span><span class="mi">1</span>
-</span><span class='line'><span class="n">byte_size</span><span class="o">/</span><span class="mi">1</span>
-</span><span class='line'><span class="n">length</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">N</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">A</span> <span class="o">&gt;</span> <span class="n">B</span>
-</span><span class='line'><span class="n">A</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="n">B</span>
-</span><span class='line'><span class="n">A</span> <span class="o">==</span> <span class="n">B</span>
-</span><span class='line'><span class="n">A</span> <span class="o">=&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="n">B</span>
-</span><span class='line'><span class="n">A</span> <span class="o">&gt;=</span> <span class="n">B</span>
-</span><span class='line'><span class="n">A</span> <span class="o">/=</span> <span class="n">B</span>
-</span><span class='line'><span class="n">A</span> <span class="o">=</span><span class="p">:</span><span class="o">=</span> <span class="n">B</span>
-</span><span class='line'><span class="n">A</span> <span class="o">=</span><span class="sr">/= B</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div></p>
 ]]></content>
   </entry>

@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-01-24T20:51:09+07:00</updated>
+  <updated>2015-01-25T21:24:49+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,318 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Erlang List Comprehension]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/01/24/erlang-list-comprehension/"/>
+    <updated>2015-01-24T21:02:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/01/24/erlang-list-comprehension</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/logo_erlang.png" alt="Erlang List Comprehension" />
+</p>
+
+
+
+
+<p>
+  <h3>Syntax:</h3>
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="no">Expression</span> <span class="o">||</span> <span class="no">Generators1</span><span class="p">,</span> <span class="no">Guards1</span><span class="p">,</span> <span class="n">G</span><span class="o">]</span><span class="n">enerators2</span><span class="p">,</span> <span class="o">.</span><span class="n">.</span><span class="o">.]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p><p>
+  <strong>Expression</strong><br/>
+  The expression specifies the elements of the result. Example: <code>[I || &lt;&ndash; [1, 2, 3]]</code> returns the input list element as is.
+</p></p>
+
+<p><p>
+  <strong>Generators</strong><br/>
+  Generators create the data used in ther filter-map operations. A generator has the &ldquo;Pattern &lt;&ndash; Data&rdquo; format, where &ldquo;Data&rdquo; is a list or an expression that results to a list and Pattern is a pattern used to match with the elements of the list. This pattern can be used to disassembly elements. Example two valid generators are <code>I &lt;&ndash; lists:seq(1, 10)</code> and <code>{X, Y} &lt;&ndash; [{&lsquo;A&rsquo;, &lsquo;Excellent&rsquo;}, {&lsquo;B&rsquo;, &lsquo;Good&rsquo;}, {&lsquo;C&rsquo;, &lsquo;Fair&rsquo;}]</code>.
+</p></p>
+
+<p><p>
+  <strong>Guards</strong><br/>
+  Guards are expression that return either true or false, the same as the guards we have seen in the previous posts. They apply to the variables that are on the left of the guard and the ones that are accessible to the scope where the comprehension runs. Example: <code>I &lt;&ndash; [1, 2, 3, 4], I rem 1 == 0</code> is a valid generator.
+</p></p>
+
+<p><p>
+  <h3>Example:</h3>
+</p></p>
+
+<p><p>
+  I will show some examples that implements some list functions. The most of them already exists in the lists module as I did in the past, I will add these functions to the module called mylists.
+</p></p>
+
+<p><p>
+  <strong>map/2</strong><br/>
+  The results contains the elements of the input list after applied to the input function.
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sx">% Generator: </span><span class="n">the</span> <span class="n">items</span> <span class="n">of</span> <span class="n">the</span> <span class="n">list</span> <span class="n">provided</span>
+</span><span class='line'><span class="sx">% Guard: </span><span class="n">no</span> <span class="n">guard</span> <span class="n">expression</span><span class="p">,</span> <span class="n">all</span> <span class="n">items</span> <span class="n">are</span> <span class="n">kept</span>
+</span><span class='line'><span class="sx">% Expression: </span><span class="n">the</span> <span class="n">item</span> <span class="n">from</span> <span class="n">the</span> <span class="n">generator</span> <span class="n">after</span> <span class="n">applied</span> <span class="n">to</span> <span class="n">the</span> <span class="no">Function</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">map</span><span class="p">(</span><span class="no">Function</span><span class="p">,</span> <span class="no">List</span><span class="p">)</span> <span class="o">&ndash;&gt;</span>
+</span><span class='line'>  <span class="o">[</span><span class="no">Function</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="no">List</span><span class="o">].</span>
+</span><span class='line'>
+</span><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">map</span><span class="p">(</span><span class="n">fun</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="o">&ndash;&gt;</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">I</span> <span class="k">end</span><span class="p">,</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">10</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  <strong>deleteall/2</strong><br/>
+  Deletes all occurrences of an element from the list.
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sx">% Generator: </span><span class="n">the</span> <span class="n">items</span> <span class="n">of</span> <span class="n">the</span> <span class="n">list</span> <span class="n">provided</span>
+</span><span class='line'><span class="sx">% Guard: </span><span class="n">the</span> <span class="n">item</span> <span class="n">should</span> <span class="ow">not</span> <span class="n">be</span> <span class="n">equal</span> <span class="p">(</span><span class="n">both</span> <span class="n">value</span> <span class="ow">and</span> <span class="n">type</span><span class="p">)</span> <span class="n">with</span> <span class="n">the</span> <span class="no">Elem</span>
+</span><span class='line'><span class="sx">% Expression: </span><span class="n">keep</span> <span class="n">the</span> <span class="n">elements</span> <span class="n">of</span> <span class="n">the</span> <span class="n">list</span> <span class="n">that</span> <span class="s2">&quot;pass&quot;</span> <span class="n">the</span> <span class="n">guard</span> <span class="nb">test</span><span class="p">,</span> <span class="n">as</span> <span class="n">they</span> <span class="n">are</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">deleteall</span><span class="p">(</span><span class="no">Elem</span><span class="p">,</span> <span class="no">List</span><span class="p">)</span> <span class="o">&ndash;&gt;</span>
+</span><span class='line'>  <span class="o">[</span><span class="n">I</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="no">List</span><span class="p">,</span> <span class="n">I</span> <span class="o">=</span><span class="sr">/= Elem].</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">1&gt; mylists:deleteall(3, [1, 2, 3, 4, 3, 2, 1]).</span>
+</span><span class='line'><span class="sr">[1,2,4,2,1]</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  <strong>partition/2</strong><br/>
+  Partition a list into two, according to if the elements satisfy or not a given predicate.
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">partition</span><span class="p">(</span><span class="no">Pred</span><span class="p">,</span> <span class="no">List</span><span class="p">)</span> <span class="o">&ndash;&gt;</span>
+</span><span class='line'>  <span class="p">{</span><span class="o">[</span><span class="n">I</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="no">List</span><span class="p">,</span> <span class="no">Pred</span><span class="p">(</span><span class="n">I</span><span class="p">)</span><span class="o">]</span><span class="p">,</span> <span class="o">[</span><span class="n">I</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="no">List</span><span class="p">,</span> <span class="ow">not</span><span class="p">(</span><span class="no">Pred</span><span class="p">(</span><span class="n">I</span><span class="p">))</span><span class="o">]</span><span class="p">}</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">% an </span><span class="n">alternative</span> <span class="n">implementation</span>
+</span><span class='line'><span class="n">partition2</span><span class="p">(</span><span class="no">Pred</span><span class="p">,</span> <span class="no">List</span><span class="p">)</span> <span class="o">&ndash;&gt;</span>
+</span><span class='line'>    <span class="no">Sat</span> <span class="o">=</span> <span class="n">filter</span><span class="p">(</span><span class="no">Pred</span><span class="p">,</span> <span class="no">List</span><span class="p">),</span>
+</span><span class='line'>    <span class="p">{</span><span class="no">Sat</span><span class="p">,</span> <span class="no">List</span> <span class="o">&mdash;</span> <span class="no">Sat</span><span class="p">}</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">partition</span><span class="p">(</span><span class="n">fun</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="o">&ndash;&gt;</span> <span class="n">is_atom</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="k">end</span><span class="p">,</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="mi">3</span><span class="o">.</span><span class="mi">0</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="p">{</span><span class="o">[</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="o">]</span><span class="p">,</span><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">.</span><span class="mi">0</span><span class="o">]</span><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  <strong>replicated/2</strong><br/>
+  Creates a list of Items of length Times.
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sx">% Generator: </span><span class="n">only</span> <span class="n">used</span> <span class="k">for</span> <span class="n">fixing</span> <span class="n">the</span> <span class="n">length</span>
+</span><span class='line'><span class="sx">% Expression: </span><span class="n">a</span> <span class="n">fixed</span> <span class="n">item</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">replicated</span><span class="p">(</span><span class="no">Item</span><span class="p">,</span> <span class="no">Times</span><span class="p">)</span> <span class="o">&ndash;&gt;</span>
+</span><span class='line'>  <span class="o">[</span><span class="no">Item</span> <span class="o">||</span> <span class="n">_</span> <span class="o">&lt;&ndash;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">seq</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="no">Times</span><span class="p">)</span><span class="o">].</span>
+</span><span class='line'>
+</span><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">replicated</span><span class="p">(</span><span class="s1">&#39;:&ndash;)&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="s1">&#39;:&ndash;)&#39;</span><span class="p">,</span><span class="s1">&#39;:&ndash;)&#39;</span><span class="p">,</span><span class="s1">&#39;:&ndash;)&#39;</span><span class="p">,</span><span class="s1">&#39;:&ndash;)&#39;</span><span class="p">,</span><span class="s1">&#39;:&ndash;)&#39;</span><span class="p">,</span><span class="s1">&#39;:&ndash;)&#39;</span><span class="p">,</span><span class="s1">&#39;:&ndash;)&#39;</span><span class="p">,</span><span class="s1">&#39;:&ndash;)&#39;</span><span class="p">,</span><span class="s1">&#39;:&ndash;)&#39;</span><span class="p">,</span><span class="s1">&#39;:&ndash;)&#39;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  <strong>replicate_items/2</strong><br/>
+  Replicates each elements of the list Times times.
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">replicate_items</span><span class="p">(</span><span class="no">Times</span><span class="p">,</span> <span class="no">List</span><span class="p">)</span> <span class="o">&ndash;&gt;</span>
+</span><span class='line'>  <span class="ss">mylists</span><span class="p">:</span><span class="n">flatten</span><span class="p">(</span><span class="o">[[</span><span class="no">Item</span> <span class="o">||</span> <span class="n">_</span> <span class="o">&lt;&ndash;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">seq</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="no">Times</span><span class="p">)</span><span class="o">]</span> <span class="o">||</span> <span class="no">Item</span> <span class="o">&lt;&ndash;</span> <span class="no">List</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">% same </span><span class="n">as</span>
+</span><span class='line'><span class="sx">% replicate_items(Times, </span><span class="no">List</span><span class="p">)</span> <span class="o">&ndash;&gt;</span>
+</span><span class='line'><span class="sx">%  </span> <span class="ss">mylists</span><span class="p">:</span><span class="n">flatten</span><span class="p">(</span><span class="o">[</span><span class="n">replicated</span><span class="p">(</span><span class="no">Item</span><span class="p">,</span> <span class="no">Times</span><span class="p">)</span> <span class="o">||</span> <span class="no">Item</span> <span class="o">&lt;&ndash;</span> <span class="no">List</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">replicate_items</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="n">a</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">c</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  <strong>member/2</strong><br/>
+  Returns true if an element is a member of the list, else returns false.
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">member</span><span class="p">(</span><span class="no">Elem</span><span class="p">,</span> <span class="no">List</span><span class="p">)</span> <span class="o">&ndash;&gt;</span>
+</span><span class='line'>  <span class="o">[]</span> <span class="o">/=</span> <span class="o">[</span><span class="n">ok</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="no">List</span><span class="p">,</span> <span class="n">I</span> <span class="o">==</span> <span class="no">Elem</span><span class="o">].</span>
+</span><span class='line'>
+</span><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">member</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="kp">true</span>
+</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">member</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">aa</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="kp">false</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  <strong>member_times/2</strong><br/>
+  Returns the number of occurences of an element in a list.
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">member_times</span><span class="p">(</span><span class="no">Elem</span><span class="p">,</span> <span class="no">List</span><span class="p">)</span> <span class="o">&ndash;&gt;</span>
+</span><span class='line'>  <span class="n">length</span><span class="p">(</span><span class="o">[</span><span class="n">ok</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="no">List</span><span class="p">,</span> <span class="n">I</span> <span class="o">==</span> <span class="no">Elem</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">member_times</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="mi">2</span>
+</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">member_times</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="mi">1</span>
+</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">member_times</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="mi">0</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  <strong>quicksort/1</strong><br/>
+  This is the famous Quicksort implementation that is often used to show the power and compactness of Erlang.
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">qsort</span><span class="p">(</span><span class="o">[]</span><span class="p">)</span> <span class="o">&ndash;&gt;</span>
+</span><span class='line'>  <span class="o">[]</span><span class="p">;</span>
+</span><span class='line'><span class="n">qsort</span><span class="p">(</span><span class="o">[</span><span class="no">Pivot</span> <span class="o">|</span> <span class="no">List</span><span class="o">]</span><span class="p">)</span> <span class="o">&ndash;&gt;</span>
+</span><span class='line'>  <span class="n">qsort</span><span class="p">(</span><span class="o">[</span><span class="n">I</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="no">List</span><span class="p">,</span> <span class="n">I</span> <span class="o">&lt;</span> <span class="no">Pivot</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="o">++</span>
+</span><span class='line'>  <span class="o">[</span><span class="no">Pivot</span> <span class="o">|</span> <span class="n">qsort</span><span class="p">(</span><span class="o">[</span><span class="n">I</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="no">List</span><span class="p">,</span> <span class="n">I</span> <span class="o">&gt;=</span> <span class="no">Pivot</span><span class="o">]</span><span class="p">)</span><span class="o">].</span>
+</span><span class='line'>
+</span><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">qsort</span><span class="p">(</span><span class="o">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">9</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  <strong>Multiple Generators</strong><br/>
+  Now I will present some examples with multiple generators.
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="o">[</span><span class="p">{</span><span class="n">I</span><span class="p">,</span> <span class="n">J</span><span class="p">}</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span><span class="p">,</span> <span class="n">J</span> <span class="o">&lt;&ndash;</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">]].</span>
+</span><span class='line'><span class="o">[</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="n">a</span><span class="p">},{</span><span class="mi">1</span><span class="p">,</span><span class="n">b</span><span class="p">},{</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="p">},{</span><span class="mi">2</span><span class="p">,</span><span class="n">a</span><span class="p">},{</span><span class="mi">2</span><span class="p">,</span><span class="n">b</span><span class="p">},{</span><span class="mi">2</span><span class="p">,</span><span class="n">c</span><span class="p">},{</span><span class="mi">3</span><span class="p">,</span><span class="n">a</span><span class="p">},{</span><span class="mi">3</span><span class="p">,</span><span class="n">b</span><span class="p">},{</span><span class="mi">3</span><span class="p">,</span><span class="n">c</span><span class="p">}</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">% duplicate </span><span class="n">list</span>
+</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="o">[</span><span class="n">I</span> <span class="o">||</span> <span class="n"><em></span> <span class="o">&lt;&ndash;</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="o">]</span><span class="p">,</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]].</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">% duplicate </span><span class="n">elements</span>
+</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="o">[</span><span class="n">I</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span><span class="p">,</span> <span class="n">J</span> <span class="o">&lt;&ndash;</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="o">]].</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">% discard </span><span class="n">elements</span> <span class="ow">and</span> <span class="n">duplicate</span> <span class="n">the</span> <span class="n">others</span>
+</span><span class='line'><span class="mi">4</span><span class="o">&gt;</span> <span class="no">Discard</span> <span class="o">=</span> <span class="o">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="o">].</span>
+</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="o">]</span>
+</span><span class='line'><span class="mi">5</span><span class="o">&gt;</span> <span class="o">[</span><span class="n">I</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="o">]</span><span class="p">,</span> <span class="ow">not</span><span class="p">(</span><span class="ss">lists</span><span class="p">:</span><span class="n">member</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="no">Discard</span><span class="p">)),</span> <span class="n"></em></span> <span class="o">&lt;&ndash;</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="o">]].</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">6</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">% subsequences</span>
+</span><span class='line'><span class="sx">8&gt; </span><span class="o">[[</span><span class="n">I</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">seq</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">J</span><span class="p">)</span><span class="o">]</span> <span class="o">||</span> <span class="n">J</span> <span class="o">&lt;&ndash;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">seq</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span><span class="o">].</span>
+</span><span class='line'><span class="o">[[</span><span class="mi">1</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="o">]]</span>
+</span></code></pre></td></tr></table></div></figure></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Erlang List &amp; List Module]]></title>
@@ -3555,103 +3867,6 @@
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Product</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
 </span><span class='line'>  <span class="kp">include</span> <span class="no">UuidHelper</span>
 </span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby - Check for nil Without Using an Explicit if]]></title>
-    <link href="http://geekhmer.github.io/blog/2014/12/02/ruby-check-for-nil-without-using-an-explicit-if/"/>
-    <updated>2014-12-02T00:06:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2014/12/02/ruby-check-for-nil-without-using-an-explicit-if</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/rights_and_wrongsof_ruby.jpg" width="400" alt="Ruby - Check for nil Without Using an Explicit if" />
-</p>
-
-
-
-
-<p>
-  All checks for nil are a condition, but Ruby provides many ways to check for
-  nil without using an explicit if. Watch out for nil conditional checks behind other syntax:
-</p>
-
-
-
-
-<p>
-  <strong>Explicit if with nil?</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">if</span> <span class="n">listing</span><span class="o">.</span><span class="n">nil?</span>
-</span><span class='line'>  <span class="kp">nil</span>
-</span><span class='line'><span class="k">else</span>
-</span><span class='line'>  <span class="n">listing</span><span class="o">.</span><span class="n">name</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Using other syntax:
-</p>
-
-
-
-
-<p>
-  <strong>Implicit nil check through truthy conditional</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">if</span> <span class="n">listing</span>
-</span><span class='line'>  <span class="n">listing</span><span class="o">.</span><span class="n">name</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Relies on nil being falsey</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">listing</span> <span class="o">&amp;&amp;</span> <span class="n">listing</span><span class="o">.</span><span class="n">name</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Call to try</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">listing</span><span class="o">.</span><span class="n">try</span><span class="p">(</span><span class="ss">:name</span><span class="p">)</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
