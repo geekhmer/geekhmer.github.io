@@ -29,12 +29,15 @@ keywords: The Erlang Learning Sequence, Learning Erlang, Learn Erlang, Study Erl
   3. Datatypes<br/>
   4. Modules and Compiling<br/>
   5. Functions<br/>
-  6. Recursion<br/>
-  7. Predefined Module<br/>
-  8. List & List Module<br/>
-  9. List Comprehension<br/>
-  10. Concurrency (Processes)<br/>
-  11. Message Passing<br/>
+  6. Guard<br/>
+  7. Recursion<br/>
+  8. Tail Recursion<br/>
+  9. Expressions<br/>
+  10. Predefined Module<br/>
+  11. List & List Module<br/>
+  12. List Comprehension<br/>
+  13. Concurrency (Processes)<br/>
+  14. Message Passing
 </p>
 
 <p>
