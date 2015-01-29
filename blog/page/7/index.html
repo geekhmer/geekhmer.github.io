@@ -77,6 +77,194 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2014/03/22/reduce-duplication-in-database-dot-yml-configuration-in-ruby-on-rails-project/">Reduce Duplication in database.yml Configuration in Ruby on Rails Project</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-22T00:03:00+07:00" pubdate data-updated="true">Mar 22<span>nd</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  By default rails generate database.yml that have the same attributes in each environment. So to reduce duplication we use aliasing to essentially perform a hash merge on the fly in the code.<br/>
+  So far so good please take a look the below code.
+</p>
+
+
+
+
+<p>
+  <strong>Before refactor</strong>
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>database.yml </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">development</span><span class="o">:</span>
+</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_development</span>
+</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
+</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
+</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
+</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
+</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
+</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">test</span><span class="o">:</span>
+</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_test</span>
+</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
+</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
+</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
+</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
+</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
+</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">staging</span><span class="o">:</span>
+</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_staging</span>
+</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
+</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
+</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
+</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
+</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
+</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">production</span><span class="o">:</span>
+</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_production</span>
+</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
+</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
+</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
+</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
+</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
+</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>After refactor</strong>
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>database.yml </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">defaults</span><span class="o">:</span> <span class="o">&amp;</span><span class="nx">defaults</span>
+</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
+</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
+</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
+</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
+</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">development</span><span class="o">:</span>
+</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_development</span>
+</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
+</span><span class='line'>  <span class="o">&lt;&lt;:</span> <span class="o">*</span><span class="nx">defaults</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">test</span><span class="o">:</span>
+</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_test</span>
+</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
+</span><span class='line'>  <span class="o">&lt;&lt;:</span> <span class="o">*</span><span class="nx">defaults</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">staging</span><span class="o">:</span>
+</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_staging</span>
+</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
+</span><span class='line'>  <span class="o">&lt;&lt;:</span> <span class="o">*</span><span class="nx">defaults</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">production</span><span class="o">:</span>
+</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_production</span>
+</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
+</span><span class='line'>  <span class="o">&lt;&lt;:</span> <span class="o">*</span><span class="nx">defaults</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2014/03/17/rvm-ruby-version-manager/">RVM - Ruby Version Manager</a></h1>
     
     
@@ -1383,88 +1571,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/12/07/abstractclass/">AbstractClass</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-12-07T22:31:00+07:00" pubdate data-updated="true">Dec 7<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content">
-
-<figure class='code'><figcaption><span>example </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AbstractKlass</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">method_name</span>
-</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">hello</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="nb">name</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">ConcreteKlass</span> <span class="o">&lt;</span> <span class="no">AbstractKlass</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">hello</span><span class="p">;</span> <span class="s2">&quot;Hello&quot;</span><span class="p">;</span> <span class="k">end</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">name</span><span class="p">;</span> <span class="s2">&quot;Rubyist&quot;</span><span class="p">;</span> <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1"># def hello</span>
-</span><span class='line'>  <span class="c1">#   &quot;Hello&quot;</span>
-</span><span class='line'>  <span class="c1"># end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1"># def name</span>
-</span><span class='line'>  <span class="c1">#   &quot;Rubyist&quot;</span>
-</span><span class='line'>  <span class="c1"># end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">ConcreteKlass</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">method_name</span> <span class="c1"># =&gt; &quot;Hello Rubyist&quot;  </span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/8/">&larr; Older</a>
@@ -1493,6 +1599,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/01/28/chicagoboss-installation/">ChicagoBoss Installation</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/27/erlang-message-passing/">Erlang Message Passing</a>
       </li>
     
@@ -1506,10 +1616,6 @@
     
       <li class="post">
         <a href="/blog/2015/01/22/erlang-list-and-list-module/">Erlang List &amp; List Module</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/20/erlang-control-flow-statement/">Erlang Control Flow Statement</a>
       </li>
     
   </ul>
@@ -1559,7 +1665,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/erlang/">Erlang [ 19 ]</a>
+        <a href="/blog/categories/erlang/">Erlang [ 20 ]</a>
       </li>
     
       <li>
