@@ -59,7 +59,7 @@ keywords: Erlang and Chicago Boss framework, Erlang, Chicago Boss framework, Chi
 </p>
 
 <p>
-  In software development, using a framework is almost a rule for fast, clean, easy readable and standardized coding. Chicago Boss (<a href="http://www.chicagoboss.org/">http://www.chicagoboss.org/</a>) is a framework that is heavily inspired by Rails. Set up and use Chicago Boss is easy as falling off a log. Chicago Boss allows you to code with the aforementioned standards in Erlang. Plus, offers conveniences of modern web development, including WebSocket and Comet. Basic features of Chicago Boss listed below:<br/>
+  In software development, using a framework is almost a rule for fast, clean, easy readable and standardized coding. Chicago Boss (<a href="http://www.chicagoboss.org/" target="_blank">http://www.chicagoboss.org/</a>) is a framework that is heavily inspired by Rails. Set up and use Chicago Boss is easy as falling off a log. Chicago Boss allows you to code with the aforementioned standards in Erlang. Plus, offers conveniences of modern web development, including WebSocket and Comet. Basic features of Chicago Boss listed below:<br/>
   - 100% asynchronous I/O<br/>
   - Support for Erlang and Elixir code<br/>
   - BossDB: Database connection layer with an advanced ORM which with built-in support for Mnesia, MongoDB, MySQL, PostgreSQL, Riak and Tokyo Tyrant.<br/>
