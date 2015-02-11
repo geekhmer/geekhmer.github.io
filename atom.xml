@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-02-10T23:24:04+07:00</updated>
+  <updated>2015-02-11T20:41:55+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,133 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails Generate Random Data]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/02/11/ruby-on-rails-generate-random-data/"/>
+    <updated>2015-02-11T19:21:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/02/11/ruby-on-rails-generate-random-data</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="Ruby on Rails Generate Random Data" />
+</p>
+
+
+
+
+<p>
+  Sometimes we need to programmatically generate text in Ruby on Rails. We may not have any data available to play with or we may need text in order to mock up the user interface. In this article I will cover 2 different methods of generating random text. Let’s run through this with me.
+</p>
+
+
+
+
+<p>
+  <strong>Random Letters</strong><br/>
+  If you just need fill text, you can add this helper to your application helper (<code>app/helpers/application_helper.rb</code>):
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>application_helper.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ApplicationHelper</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">random_string</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">include_uppercase</span> <span class="o">=</span> <span class="kp">true</span><span class="p">,</span> <span class="n">include_lowercase</span> <span class="o">=</span> <span class="kp">true</span><span class="p">,</span> <span class="n">include_numbers</span> <span class="o">=</span> <span class="kp">false</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">l</span> <span class="o">=</span> <span class="o">[]</span>
+</span><span class='line'>    <span class="n">l</span><span class="o">.</span><span class="n">push</span> <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="o">.</span><span class="n">.</span><span class="s1">&#39;z&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">include_uppercase</span>
+</span><span class='line'>    <span class="n">l</span><span class="o">.</span><span class="n">push</span> <span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="o">.</span><span class="n">.</span><span class="s1">&#39;Z&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">include_lowercase</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">l</span><span class="o">.</span><span class="n">push</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="mi">9</span><span class="p">)</span> <span class="k">if</span> <span class="n">include_numbers</span>
+</span><span class='line'>    <span class="n">l</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span> <span class="n">i</span><span class="o">.</span><span class="n">to_a</span> <span class="p">}</span><span class="o">.</span><span class="n">flatten</span>
+</span><span class='line'>    <span class="n">string</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="n">length</span><span class="p">)</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="n">l</span><span class="o">[</span><span class="nb">rand</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">length</span><span class="p">)</span><span class="o">]</span> <span class="p">}</span><span class="o">.</span><span class="n">join</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The helper has 1 required argument is length, which determines the length of the string. To generate a random string of 200 characters, call the helper like below:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">random_string</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Forgery Gem</strong><br/>
+  The <a href="https://github.com/sevenwire/forgery" target="_blank">forgery</a> gem provides a great way to generate random data. Not only can forgery generate random words (based off lorem ipsum), but it can also generate random email addresses, and much more. To use forgery, just include the forgery gem in your gemfile:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;forgery&#39;</span><span class="p">,</span> <span class="s1">&#39;0.6.0&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then run <code>bundle install</code> to install the Gem.
+</p>
+
+
+
+
+<p>
+  After installing the Gem, you are ready to go to generate words:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="no">Forgery</span><span class="p">(</span><span class="ss">:lorem_ipsum</span><span class="p">)</span><span class="o">.</span><span class="n">words</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  To generate a random email address:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="no">Forgery</span><span class="p">(</span><span class="s1">&#39;internet&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">email_address</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, I hope all you guys enjoy it. See ya! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby on Rails Uploads Multiple Files with DropzoneJS and Paperclip Gem]]></title>
@@ -4810,73 +4937,6 @@
 
 <p>
   So far so good, I will keep this list updated in case that I come up with new ideas! I hope I will convince you that Erlang worths for every software engineer’s attention. see ya! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Install Emacs Erlang Editor/IDE]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/01/14/install-emacs-erlang-editor-slash-ide/"/>
-    <updated>2015-01-14T23:17:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/01/14/install-emacs-erlang-editor-slash-ide</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/logo_erlang.png" alt="Install Emacs Erlang Editor/IDE" />
-</p>
-
-
-
-
-<p>
-  Currently I personally use Emacs for programming in Erlang. There is an Erlang editing mode in Emacs. Well, I can help you to install Emacs and set Erlang mode in Emacs. So, let&#8217;s do it!
-</p>
-
-
-
-
-<p>
-  <strong>Install Emacs</strong><br/>
-  Run commands below to install Emacs:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">add</span><span class="o">-</span><span class="n">repository</span> <span class="ss">ppa</span><span class="p">:</span><span class="n">cassou</span><span class="o">/</span><span class="n">emacs</span>
-</span><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">emacs24</span> <span class="n">emacs24</span><span class="o">-</span><span class="n">el</span> <span class="n">emacs24</span><span class="o">-</span><span class="n">common</span><span class="o">-</span><span class="n">non</span><span class="o">-</span><span class="n">dfsg</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Set Erlang Mode in Emacs</strong><br/>
-  To set Erlang mode in Emacs add the following codes to file ~/.emacs:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>.emacs </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="n">defun</span> <span class="n">my</span><span class="o">-</span><span class="n">erlang</span><span class="o">-</span><span class="n">mode</span><span class="o">-</span><span class="n">hook</span> <span class="p">()</span>
-</span><span class='line'>  <span class="p">(</span><span class="n">setq</span> <span class="n">inferior</span><span class="o">-</span><span class="n">erlang</span><span class="o">-</span><span class="n">machine</span><span class="o">-</span><span class="n">options</span> <span class="s1">&#39;(&quot;-sname&quot; &quot;emacs&quot;))</span>
-</span><span class='line'><span class="s1">  (imenu-add-to-menubar &quot;imenu&quot;)</span>
-</span><span class='line'><span class="s1">)</span>
-</span><span class='line'><span class="s1">(add-hook &#39;</span><span class="n">erlang</span><span class="o">-</span><span class="n">mode</span><span class="o">-</span><span class="n">hook</span> <span class="err">&#39;</span><span class="n">my</span><span class="o">-</span><span class="n">erlang</span><span class="o">-</span><span class="n">mode</span><span class="o">-</span><span class="n">hook</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, hope the article could helped you. see ya! :)
 </p>
 
 ]]></content>

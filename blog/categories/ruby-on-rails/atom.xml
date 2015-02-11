@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby on Rails | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby-on-rails/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-02-10T23:24:04+07:00</updated>
+  <updated>2015-02-11T20:41:55+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,114 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails Generate Random Data]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/02/11/ruby-on-rails-generate-random-data/"/>
+    <updated>2015-02-11T19:21:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/02/11/ruby-on-rails-generate-random-data</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="Ruby on Rails Generate Random Data" />
+</p>
+
+
+
+
+<p>
+  Sometimes we need to programmatically generate text in Ruby on Rails. We may not have any data available to play with or we may need text in order to mock up the user interface. In this article I will cover 2 different methods of generating random text. Let’s run through this with me.
+</p>
+
+
+
+
+<p>
+  <strong>Random Letters</strong><br/>
+  If you just need fill text, you can add this helper to your application helper (<code>app/helpers/application_helper.rb</code>):
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>application_helper.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ApplicationHelper</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">random_string</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">include_uppercase</span> <span class="o">=</span> <span class="kp">true</span><span class="p">,</span> <span class="n">include_lowercase</span> <span class="o">=</span> <span class="kp">true</span><span class="p">,</span> <span class="n">include_numbers</span> <span class="o">=</span> <span class="kp">false</span><span class="p">)</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;l = []</span>
+</span><span class='line'><span class="sr">l.push (&#39;a&#39;..&#39;z&#39;) if include_uppercase</span>
+</span><span class='line'><span class="sr">l.push (&#39;A&#39;..&#39;Z&#39;) if include_lowercase</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">l.push (0..9) if include_numbers</span>
+</span><span class='line'><span class="sr">l = l.map { |i| i.to_a }.flatten</span>
+</span><span class='line'><span class="sr">string = (0...length).map { l[rand(l.length)] }.join</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  The helper has 1 required argument is length, which determines the length of the string. To generate a random string of 200 characters, call the helper like below:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%=</span> <span class="n">random_string</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>Forgery Gem</strong><br/>
+  The <a href="https://github.com/sevenwire/forgery" target="_blank">forgery</a> gem provides a great way to generate random data. Not only can forgery generate random words (based off lorem ipsum), but it can also generate random email addresses, and much more. To use forgery, just include the forgery gem in your gemfile:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">forgery</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="mi">0</span><span class="o">.</span><span class="mi">6</span><span class="o">.</span><span class="mi">0</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Then run <code>bundle install</code> to install the Gem.
+</p>
+
+
+
+
+<p>
+  After installing the Gem, you are ready to go to generate words:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%=</span> <span class="no">Forgery</span><span class="p">(</span><span class="ss">:lorem_ipsum</span><span class="p">)</span><span class="o">.</span><span class="n">words</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  To generate a random email address:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%=</span> <span class="no">Forgery</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">internet</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;)</span><span class="o">.</span><span class="n">email_address</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  So far so good, I hope all you guys enjoy it. See ya! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby on Rails Uploads Multiple Files with DropzoneJS and Paperclip Gem]]></title>
@@ -1139,9 +1247,9 @@
  <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">role</span> <span class="ss">:app</span><span class="p">,</span> <span class="sx">%w{&lt;a href=&quot;&amp;#109;&amp;#97;&amp;#105;&amp;#108;&amp;#x74;&amp;#111;&amp;#x3a;&amp;#100;&amp;#101;&amp;#112;&amp;#x6c;&amp;#111;&amp;#x79;&amp;#x40;&amp;#x30;&amp;#46;&amp;#48;&amp;#x2e;&amp;#x30;&amp;#46;&amp;#x30;&quot;&gt;&amp;#100;&amp;#x65;&amp;#112;&amp;#108;&amp;#111;&amp;#x79;&amp;#x40;&amp;#48;&amp;#x2e;&amp;#x30;&amp;#46;&amp;#x30;&amp;#x2e;&amp;#48;&lt;/a&gt;}</span>
-</span><span class='line'><span class="n">role</span> <span class="ss">:web</span><span class="p">,</span> <span class="sx">%w{&lt;a href=&quot;&amp;#x6d;&amp;#97;&amp;#x69;&amp;#x6c;&amp;#116;&amp;#x6f;&amp;#58;&amp;#100;&amp;#101;&amp;#x70;&amp;#x6c;&amp;#x6f;&amp;#x79;&amp;#64;&amp;#48;&amp;#46;&amp;#48;&amp;#46;&amp;#x30;&amp;#46;&amp;#x30;&quot;&gt;&amp;#x64;&amp;#x65;&amp;#112;&amp;#x6c;&amp;#111;&amp;#x79;&amp;#64;&amp;#48;&amp;#46;&amp;#48;&amp;#x2e;&amp;#48;&amp;#46;&amp;#48;&lt;/a&gt;}</span>
-</span><span class='line'><span class="n">role</span> <span class="ss">:db</span><span class="p">,</span>  <span class="sx">%w{&lt;a href=&quot;&amp;#109;&amp;#x61;&amp;#105;&amp;#108;&amp;#116;&amp;#x6f;&amp;#x3a;&amp;#x64;&amp;#101;&amp;#112;&amp;#x6c;&amp;#111;&amp;#121;&amp;#64;&amp;#x30;&amp;#46;&amp;#x30;&amp;#46;&amp;#x30;&amp;#x2e;&amp;#48;&quot;&gt;&amp;#x64;&amp;#101;&amp;#112;&amp;#x6c;&amp;#111;&amp;#121;&amp;#64;&amp;#x30;&amp;#46;&amp;#48;&amp;#x2e;&amp;#48;&amp;#46;&amp;#48;&lt;/a&gt;}</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">role</span> <span class="ss">:app</span><span class="p">,</span> <span class="sx">%w{&lt;a href=&quot;&amp;#109;&amp;#x61;&amp;#105;&amp;#x6c;&amp;#116;&amp;#111;&amp;#x3a;&amp;#100;&amp;#x65;&amp;#112;&amp;#x6c;&amp;#x6f;&amp;#x79;&amp;#64;&amp;#x30;&amp;#x2e;&amp;#48;&amp;#46;&amp;#48;&amp;#x2e;&amp;#48;&quot;&gt;&amp;#100;&amp;#x65;&amp;#x70;&amp;#x6c;&amp;#x6f;&amp;#121;&amp;#64;&amp;#48;&amp;#x2e;&amp;#48;&amp;#x2e;&amp;#48;&amp;#46;&amp;#48;&lt;/a&gt;}</span>
+</span><span class='line'><span class="n">role</span> <span class="ss">:web</span><span class="p">,</span> <span class="sx">%w{&lt;a href=&quot;&amp;#109;&amp;#97;&amp;#x69;&amp;#108;&amp;#x74;&amp;#x6f;&amp;#58;&amp;#100;&amp;#101;&amp;#112;&amp;#x6c;&amp;#x6f;&amp;#x79;&amp;#x40;&amp;#x30;&amp;#46;&amp;#48;&amp;#x2e;&amp;#x30;&amp;#x2e;&amp;#48;&quot;&gt;&amp;#100;&amp;#x65;&amp;#112;&amp;#x6c;&amp;#111;&amp;#121;&amp;#64;&amp;#48;&amp;#46;&amp;#48;&amp;#46;&amp;#48;&amp;#x2e;&amp;#48;&lt;/a&gt;}</span>
+</span><span class='line'><span class="n">role</span> <span class="ss">:db</span><span class="p">,</span>  <span class="sx">%w{&lt;a href=&quot;&amp;#x6d;&amp;#x61;&amp;#105;&amp;#x6c;&amp;#x74;&amp;#x6f;&amp;#x3a;&amp;#x64;&amp;#101;&amp;#112;&amp;#108;&amp;#111;&amp;#121;&amp;#64;&amp;#48;&amp;#x2e;&amp;#48;&amp;#46;&amp;#48;&amp;#x2e;&amp;#x30;&quot;&gt;&amp;#100;&amp;#x65;&amp;#x70;&amp;#108;&amp;#111;&amp;#x79;&amp;#64;&amp;#48;&amp;#x2e;&amp;#x30;&amp;#46;&amp;#48;&amp;#x2e;&amp;#x30;&lt;/a&gt;}</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
@@ -1270,144 +1378,6 @@
 
 <p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">cd</span> <span class="sr">/opt/</span><span class="n">www</span><span class="o">/</span><span class="n">myapp</span><span class="o">/</span><span class="n">current</span> <span class="p">;</span> <span class="n">bin</span><span class="o">/</span><span class="n">rails</span> <span class="n">c</span> <span class="n">production</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Using UUID as Primary Key in Ruby on Rails with MySQL Guide]]></title>
-    <link href="http://geekhmer.github.io/blog/2014/12/06/using-uuid-as-primary-key-in-ruby-on-rails-with-mysql-guide/"/>
-    <updated>2014-12-06T22:12:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2014/12/06/using-uuid-as-primary-key-in-ruby-on-rails-with-mysql-guide</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="Ruby on Rails MySQL UUID Primary Key Guide" />
-</p>
-
-
-
-
-<p>
-  A UUID (universally unique identifier) is an identifier standard used in software construction. A UUID is simply a 128-bit value. The meaning of each bit is defined by any of several variants.
-</p>
-
-
-
-
-<p>
-  For human-readable display, many systems use a canonical format using hexadecimal text with inserted hyphen characters. For example: de305d54-75b4-431b-adb2-eb6b9e546013.
-</p>
-
-
-
-
-<p>
-  The intent of UUIDs is to enable distributed systems to uniquely identify information without significant central coordination.
-</p>
-
-
-
-
-<p>
-  <strong>Installation</strong><br/>
-  To use UUID as Primary Key you need to add uuidtools gem to your app's Gemfile:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Gemfile </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">uuidtools</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>Setting up UUID as Primary Key</strong><br/>
-  To set UUID as Primary Key, you need to set id to false and the new UUID column as Primary Key in migration file:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>*_create_products.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">CreateProducts</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migration</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">change</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;create_table :products, id: false do |t|</span>
-</span><span class='line'><span class="sr">  t.string :uuid, limit: 36, primary: true, null: false</span>
-</span><span class='line'><span class="sr">  t.string :name, limit: 50, null: false</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">  t.timestamps</span>
-</span><span class='line'><span class="sr">end</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>Inserting UUID Value into UUID Column</strong><br/>
-  Create UUID helper library in app/lib directory:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>uuid_helper.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">UuidHelper</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">included</span><span class="p">(</span><span class="n">base</span><span class="p">)</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;base.primary_key = &#39;uuid&#39;</span>
-</span><span class='line'><span class="sr">base.before_create :assign_uuid</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="kp">private</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">assign_uuid</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;self.uuid = UUIDTools::UUID.timestamp_create().to_s.upcase if uuid.blank?</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  And then include UuidHelper library in Model file:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>product.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Product</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="kp">include</span> <span class="no">UuidHelper</span>
-</span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div></p>
 ]]></content>
   </entry>
