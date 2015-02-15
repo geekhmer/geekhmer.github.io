@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-02-11T20:41:55+07:00</updated>
+  <updated>2015-02-15T20:30:17+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,315 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails with Endless Scrolling]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/02/12/ruby-on-rails-with-endless-scrolling/"/>
+    <updated>2015-02-12T23:20:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/02/12/ruby-on-rails-with-endless-scrolling</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="Ruby on Rails with Endless Scrolling" />
+</p>
+
+
+
+
+<p>
+  Endless scrolling allows a website to let users avoid having to click page links or pagination in order to load additional pages of content. It is used by a number of sites such as Pinterest in order to enhanced the user experience. This article will show you how to implement endless scrolling in your Rails application. Let’s run through this with me.
+</p>
+
+
+
+
+<p>
+  <strong>Create Rails Project</strong><br/>
+  To create a Rails project; open up your terminal and type commands below:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="kp">new</span> <span class="n">dropzone</span> <span class="o">-</span><span class="n">d</span> <span class="n">mysql</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Setting up</strong><br/>
+  Ruby on Rails endless scrolling uses the will_paginate gem to manage paging. This has a couple of advantages.
+</p>
+
+
+
+
+<p>
+  First, if your endless scrolling code doesn&#8217;t work properly or is disabled, the pagination links themselves will still be present and allow the user to page.
+</p>
+
+
+
+
+<p>
+  Second, the will_paginate gem provides us with the pagination functionality itself so that we do not need to reinvent the wheel.
+</p>
+
+
+
+
+<p>
+  To get started, add the will_paginate gem to your <code>Gemfile</code> file.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;will_paginate&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 3.0.7&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then run a <code>bundle install</code> to install the gem:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  we will create a simple Post model with the fields title, and body. In addition, we will create a simple Posts controller with an index method. Run the commands below to create these items:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Post</span> <span class="n">title</span> <span class="ss">body</span><span class="p">:</span><span class="n">text</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="no">Posts</span> <span class="n">index</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then open up your routes (<code>config/routes.rb</code>) file and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;posts#index&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then we need some seed data to play with. Open up your seeds.rb file and add in the code listed below. This code will create 100 posts for us to play with:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>seeds.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span>
+</span><span class='line'>  <span class="no">Post</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="ss">title</span><span class="p">:</span> <span class="s2">&quot;Lipsum Post </span><span class="si">#{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="sx">%{</span>
+</span><span class='line'><span class="sx">    Lorem ipsum dolor sit amet, consectetur adipiscing elit. In feugiat purus dapibus fermentum sagittis. Fusce in tempus felis. Phasellus a erat ut lorem lacinia bibendum. Vivamus viverra facilisis neque, in scelerisque urna pharetra vel. Donec a est mauris. Integer eget metus quis eros egestas elementum. Integer bibendum risus hendrerit dapibus tempor. Fusce placerat in orci vitae tincidunt.</span>
+</span><span class='line'><span class="sx">  }</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then run rake db:seed to create the seed data:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">seed</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then open up your Posts controller (<code>app/controllers/posts_controller.rb</code>) and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>    <span class="vi">@posts</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">paginate</span><span class="p">(</span><span class="ss">:page</span> <span class="o">=&gt;</span> <span class="n">params</span><span class="o">[</span><span class="ss">:page</span><span class="o">]</span><span class="p">,</span> <span class="ss">:per_page</span> <span class="o">=&gt;</span> <span class="mi">20</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now modify the index view for your Posts controller so that it looks like the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>posts_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>    <span class="vi">@posts</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">paginate</span><span class="p">(</span><span class="ss">:page</span> <span class="o">=&gt;</span> <span class="n">params</span><span class="o">[</span><span class="ss">:page</span><span class="o">]</span><span class="p">,</span> <span class="ss">:per_page</span> <span class="o">=&gt;</span> <span class="mi">20</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then modify the index (<code>app/views/posts/index.html.erb</code>) view for your Posts controller so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>index.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;posts&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Posts</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'><span class="sr">  &lt;%= render @posts %&gt;</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;%=</span> <span class="n">will_paginate</span> <span class="vi">@posts</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then let&#8217;s create the post partial. Create a file called _post.html.erb (<code>app/views/posts/_post.html.erb</code>) for your Posts controller and add in the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>_post.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;post&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">h2</span><span class="o">&gt;&lt;</span><span class="sx">%= post.title %&gt;&lt;/h2&gt;</span>
+</span><span class='line'><span class="sx">  &lt;p&gt;&lt;%=</span> <span class="n">post</span><span class="o">.</span><span class="n">body</span> <span class="sx">%&gt;&lt;/p&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If you were to start a rails server at this point, you&#8217;d see a typical paginated list of posts. Now it&#8217;s time to add in the javascript that will make endless scrolling work. Open up your application.js (<code>app/assets/javascripts/application.js</code>) file and add in the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>application.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span><span class="p">(</span><span class="n">document</span><span class="p">)</span><span class="o">.</span><span class="n">ready</span><span class="p">(</span><span class="n">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="err">$</span><span class="p">(</span><span class="s1">&#39;.pagination&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">length</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="err">$</span><span class="p">(</span><span class="n">window</span><span class="p">)</span><span class="o">.</span><span class="n">scroll</span><span class="p">(</span><span class="n">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">var</span> <span class="n">url</span> <span class="o">=</span> <span class="err">$</span><span class="p">(</span><span class="s1">&#39;.pagination .next_page&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">attr</span><span class="p">(</span><span class="s1">&#39;href&#39;</span><span class="p">);</span>
+</span><span class='line'>      <span class="k">if</span> <span class="p">(</span><span class="n">url</span> <span class="o">&amp;&amp;</span> <span class="err">$</span><span class="p">(</span><span class="n">window</span><span class="p">)</span><span class="o">.</span><span class="n">scrollTop</span><span class="p">()</span> <span class="o">&gt;</span> <span class="err">$</span><span class="p">(</span><span class="n">document</span><span class="p">)</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">-</span> <span class="err">$</span><span class="p">(</span><span class="n">window</span><span class="p">)</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">-</span> <span class="mi">50</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="err">$</span><span class="p">(</span><span class="s1">&#39;.pagination&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">&quot;Please Wait...&quot;</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">return</span> <span class="vg">$.</span><span class="n">getScript</span><span class="p">(</span><span class="n">url</span><span class="p">);</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>    <span class="k">return</span> <span class="err">$</span><span class="p">(</span><span class="n">window</span><span class="p">)</span><span class="o">.</span><span class="n">scroll</span><span class="p">();</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then create a file called index.js.erb (<code>app/views/posts/index.js.erb</code>) for your Posts controller and add in the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>index.js.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span><span class="p">(</span><span class="s1">&#39;#posts&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&lt;%= escape_javascript render(@posts) %&gt;&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="err">$</span><span class="p">(</span><span class="s1">&#39;.pagination&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replaceWith</span><span class="p">(</span><span class="s1">&#39;&lt;%= escape_javascript will_paginate(@posts) %&gt;&#39;</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The code works by watching the window&#8217;s scroll event. When the user scrolls past the specified threshold, more posts are loaded using AJAX. That&#8217;s it, thank you!. See ya! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby on Rails Generate Random Data]]></title>
@@ -4877,66 +5186,6 @@
 
 <p>
   Reference: <a href="http://www.erlang.org/" target="_blank">www.erlang.org</a>, <a href="http://www.chicagoboss.org/" target="_blank">www.chicagoboss.org</a>
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[The Erlang Learning Sequence]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/01/15/the-erlang-learning-sequence/"/>
-    <updated>2015-01-15T09:10:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/01/15/the-erlang-learning-sequence</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/logo_erlang.png" alt="The Erlang Learning Sequence" />
-</p>
-
-
-
-
-<p>
-  While I was writing my first article (<a href="http://geekhmer.github.io/blog/2014/06/26/why-erlang/">Why Erlang?</a>). I realized that since Erlang is not a popular programming language it would be nice to start an introduction to The Erlang Learning Sequence.
-</p>
-
-
-
-
-<p>
-  I consider Erlang as a must-know language for an engineer that works with distributed systems and parallel programming. Believe me! in several cases Erlang is a problem solver.
-</p>
-
-
-
-
-<p>
-  I will keep posting of short and example based. The approximation of the posts that I intend to write is:
-</p>
-
-
-
-
-<p>
-  1. Introduction to Erlang & Chicagoboss Framework<br/>
-  2. Variables<br/>
-  3. Datatypes<br/>
-  4. Modules and Compiling<br/>
-  5. Functions<br/>
-  6. Guard<br/>
-  7. Recursion<br/>
-  8. Tail Recursion<br/>
-  9. Expressions<br/>
-  10. Predefined Module<br/>
-  11. List & List Module<br/>
-  12. List Comprehension<br/>
-  13. Concurrency (Processes)<br/>
-  14. Message Passing
-</p>
-
-
-
-
-<p>
-  So far so good, I will keep this list updated in case that I come up with new ideas! I hope I will convince you that Erlang worths for every software engineer’s attention. see ya! :)
 </p>
 
 ]]></content>

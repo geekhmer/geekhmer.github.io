@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-02-11T20:41:55+07:00</updated>
+  <updated>2015-02-15T20:30:17+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,292 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails with Endless Scrolling]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/02/12/ruby-on-rails-with-endless-scrolling/"/>
+    <updated>2015-02-12T23:20:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/02/12/ruby-on-rails-with-endless-scrolling</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="Ruby on Rails with Endless Scrolling" />
+</p>
+
+
+
+
+<p>
+  Endless scrolling allows a website to let users avoid having to click page links or pagination in order to load additional pages of content. It is used by a number of sites such as Pinterest in order to enhanced the user experience. This article will show you how to implement endless scrolling in your Rails application. Let’s run through this with me.
+</p>
+
+
+
+
+<p>
+  <strong>Create Rails Project</strong><br/>
+  To create a Rails project; open up your terminal and type commands below:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="kp">new</span> <span class="n">dropzone</span> <span class="o">-</span><span class="n">d</span> <span class="n">mysql</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>Setting up</strong><br/>
+  Ruby on Rails endless scrolling uses the will_paginate gem to manage paging. This has a couple of advantages.
+</p>
+
+
+
+
+<p>
+  First, if your endless scrolling code doesn't work properly or is disabled, the pagination links themselves will still be present and allow the user to page.
+</p>
+
+
+
+
+<p>
+  Second, the will_paginate gem provides us with the pagination functionality itself so that we do not need to reinvent the wheel.
+</p>
+
+
+
+
+<p>
+  To get started, add the will_paginate gem to your <code>Gemfile</code> file.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">will_paginate</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">~&gt;</span> <span class="mi">3</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">7</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Then run a <code>bundle install</code> to install the gem:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  we will create a simple Post model with the fields title, and body. In addition, we will create a simple Posts controller with an index method. Run the commands below to create these items:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Post</span> <span class="n">title</span> <span class="ss">body</span><span class="p">:</span><span class="n">text</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="no">Posts</span> <span class="n">index</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Then open up your routes (<code>config/routes.rb</code>) file and modify it so that it looks like the code listed below:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">posts</span><span class="c1">#index&amp;rdquo;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Then we need some seed data to play with. Open up your seeds.rb file and add in the code listed below. This code will create 100 posts for us to play with:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>seeds.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span>
+</span><span class='line'>  <span class="no">Post</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="ss">title</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Lipsum</span> <span class="no">Post</span> <span class="c1">#{i}&amp;rdquo;, body: %{&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="no">Lorem</span> <span class="n">ipsum</span> <span class="n">dolor</span> <span class="n">sit</span> <span class="n">amet</span><span class="p">,</span> <span class="n">consectetur</span> <span class="n">adipiscing</span> <span class="n">elit</span><span class="o">.</span> <span class="no">In</span> <span class="n">feugiat</span> <span class="n">purus</span> <span class="n">dapibus</span> <span class="n">fermentum</span> <span class="n">sagittis</span><span class="o">.</span> <span class="no">Fusce</span> <span class="k">in</span> <span class="n">tempus</span> <span class="n">felis</span><span class="o">.</span> <span class="no">Phasellus</span> <span class="n">a</span> <span class="n">erat</span> <span class="n">ut</span> <span class="n">lorem</span> <span class="n">lacinia</span> <span class="n">bibendum</span><span class="o">.</span> <span class="no">Vivamus</span> <span class="n">viverra</span> <span class="n">facilisis</span> <span class="n">neque</span><span class="p">,</span> <span class="k">in</span> <span class="n">scelerisque</span> <span class="n">urna</span> <span class="n">pharetra</span> <span class="n">vel</span><span class="o">.</span> <span class="no">Donec</span> <span class="n">a</span> <span class="n">est</span> <span class="n">mauris</span><span class="o">.</span> <span class="nb">Integer</span> <span class="n">eget</span> <span class="n">metus</span> <span class="n">quis</span> <span class="n">eros</span> <span class="n">egestas</span> <span class="n">elementum</span><span class="o">.</span> <span class="nb">Integer</span> <span class="n">bibendum</span> <span class="n">risus</span> <span class="n">hendrerit</span> <span class="n">dapibus</span> <span class="n">tempor</span><span class="o">.</span> <span class="no">Fusce</span> <span class="n">placerat</span> <span class="k">in</span> <span class="n">orci</span> <span class="n">vitae</span> <span class="n">tincidunt</span><span class="o">.</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="p">})</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Then run rake db:seed to create the seed data:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">seed</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Then open up your Posts controller (<code>app/controllers/posts_controller.rb</code>) and modify it so that it looks like the code listed below:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostsController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@posts = Post.paginate(:page =&amp;gt; params[:page], :per_page =&amp;gt; 20)</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Now modify the index view for your Posts controller so that it looks like the code listed below.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>posts_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostsController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@posts = Post.paginate(:page =&amp;gt; params[:page], :per_page =&amp;gt; 20)</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Then modify the index (<code>app/views/posts/index.html.erb</code>) view for your Posts controller so that it looks like the code listed below:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>index.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;div id=&quot;posts&quot;&gt;</span>
+</span><span class='line'><span class="sr">  &lt;h1&gt;Posts&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="sx">%= render @posts %&gt;</span>
+</span><span class='line'><span class="sx">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="sx">&lt;p&gt;&amp;lt;%=</span> <span class="n">will_paginate</span> <span class="vi">@posts</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Then let's create the post partial. Create a file called _post.html.erb (<code>app/views/posts/_post.html.erb</code>) for your Posts controller and add in the code listed below:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>_post.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;div class=&quot;post&quot;&gt;</span>
+</span><span class='line'><span class="sr">  &lt;h2&gt;&lt;%= post.title %&gt;&lt;/</span><span class="n">h2</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;&lt;%=</span> <span class="n">post</span><span class="o">.</span><span class="n">body</span> <span class="sx">%&gt;&lt;/p&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  If you were to start a rails server at this point, you'd see a typical paginated list of posts. Now it's time to add in the javascript that will make endless scrolling work. Open up your application.js (<code>app/assets/javascripts/application.js</code>) file and add in the code listed below:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>application.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span><span class="p">(</span><span class="n">document</span><span class="p">)</span><span class="o">.</span><span class="n">ready</span><span class="p">(</span><span class="n">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="err">$</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">.</span><span class="n">pagination</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;)</span><span class="o">.</span><span class="n">length</span><span class="p">)</span> <span class="p">{</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;$(window).scroll(function() {</span>
+</span><span class='line'><span class="sr">  var url = $(&#39;.pagination .next_page&#39;).attr(&#39;href&#39;);</span>
+</span><span class='line'><span class="sr">  if (url &amp;amp;&amp;amp; $(window).scrollTop() &amp;gt; $(document).height() - $(window).height() - 50) {</span>
+</span><span class='line'><span class="sr">    $(&#39;.pagination&#39;).text(&quot;Please Wait...&quot;);</span>
+</span><span class='line'><span class="sr">    return $.getScript(url);</span>
+</span><span class='line'><span class="sr">  }</span>
+</span><span class='line'><span class="sr">});</span>
+</span><span class='line'><span class="sr">return $(window).scroll();</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  }</span>
+</span><span class='line'><span class="sr">});</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Then create a file called index.js.erb (<code>app/views/posts/index.js.erb</code>) for your Posts controller and add in the code listed below:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>index.js.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="c1">#posts&amp;rsquo;).append(&amp;lsquo;&amp;lt;%= escape_javascript render(@posts) %&gt;&amp;rsquo;);</span>
+</span><span class='line'><span class="err">$</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">.</span><span class="n">pagination</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;)</span><span class="o">.</span><span class="n">replaceWith</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%=</span> <span class="n">escape_javascript</span> <span class="n">will_paginate</span><span class="p">(</span><span class="vi">@posts</span><span class="p">)</span> <span class="o">%&gt;&amp;</span><span class="n">rsquo</span><span class="p">;);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  The code works by watching the window's scroll event. When the user scrolls past the specified threshold, more posts are loaded using AJAX. That's it, thank you!. See ya! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby on Rails Generate Random Data]]></title>
@@ -1099,145 +1385,6 @@
   So far so good, hope you enjoyed the article. see ya! :)
 </p>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Private doesn't apply to class method and define method]]></title>
-    <link href="http://geekhmer.github.io/blog/2014/12/31/private-doesnt-apply-to-class-method-and-define-method/"/>
-    <updated>2014-12-31T11:00:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2014/12/31/private-doesnt-apply-to-class-method-and-define-method</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/rights_and_wrongsof_ruby.jpg" width="400" alt="Ruby - Check for nil Without Using an Explicit if" />
-</p>
-
-
-
-
-<p>
-  Ruby's private keyword might do a lot less than you think.
-</p>
-
-
-
-
-<p>
-  <strong>The "private" does not apply to class methods defined on self</strong>
-</p>
-
-
-
-
-<p>
-  This does not make anything private:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Klass</span>
-</span><span class='line'>  <span class="kp">private</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">print</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;&#39;Hello&#39;</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  You need to use private_class_method instead:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Klass</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">print</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;&#39;Hello&#39;</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="nb">private_class_method</span> <span class="ss">:print</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>The "private" does not apply to define_method</strong>
-</p>
-
-
-
-
-<p>
-  This does not make anything private:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Klass</span>
-</span><span class='line'>  <span class="kp">private</span>
-</span><span class='line'>  <span class="n">define_method</span> <span class="ss">:print</span> <span class="k">do</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;&#39;Hello&#39;</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  You need to use private with an argument instead:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Klass</span>
-</span><span class='line'>  <span class="n">define_method</span> <span class="ss">:print</span> <span class="k">do</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;&#39;Hello&#39;</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="kp">private</span> <span class="ss">:print</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 ]]></content>
   </entry>
   
