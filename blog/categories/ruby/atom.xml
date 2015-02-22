@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-02-22T00:15:27+07:00</updated>
+  <updated>2015-02-22T14:09:05+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,137 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Customize the Ruby on Rails Application Generator]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/02/22/customize-the-ruby-on-rails-application-generator/"/>
+    <updated>2015-02-22T13:05:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/02/22/customize-the-ruby-on-rails-application-generator</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="Customize the Ruby on Rails Application Generator" />
+</p>
+
+
+
+
+<p>
+  So far if you create a Rails app, you know that it can quickly to do things like:<br/>
+  - Add RSpec and Cucumber
+  - Disable/turn off Test Unit
+  - Switch the default database engine to PostgreSQL
+  - Add other Gems such as HAML, CoffeeScript, ...
+</p>
+
+
+
+
+<p>
+  Luckily we can customize what the Rails app generator generates. In this article, I will use Rails app templates to customize the default behavior of the Rails application generator. Let’s run through this with me.
+</p>
+
+
+
+
+<p>
+  <strong>Rails App Templates</strong><br/>
+  Rails app templates allow you to run actual commands during the generation process. For example, I want to install rspec and haml, create a readme.md file, and commit the whole thing to git. I can easily do this by creating an Rails application template. Let create a file called app_template.rb and add the codes below:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app_template.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">remove_file</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">README</span><span class="o">.</span><span class="n">doc</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'><span class="n">create_file</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">README</span><span class="o">.</span><span class="n">md</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;gem &amp;lsquo;rspec-rails&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;haml-rails&amp;rsquo;</span>
+</span><span class='line'><span class="sr">run &amp;lsquo;bundle install&amp;rsquo;</span>
+</span><span class='line'><span class="sr">generate &amp;lsquo;rspec:install&amp;rsquo;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">git</span> <span class="ss">:init</span>
+</span><span class='line'><span class="n">git</span> <span class="ss">add</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">&amp;</span><span class="n">mdash</span><span class="p">;</span><span class="n">all</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="ss">commit</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">-</span><span class="n">m</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Initialize</span> <span class="no">Commit</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  If you generate a new app with the parameters <code>-m app_template.rb</code> it will run the instructions you listed in the template. The code listed above will get executed when you run the following command:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="kp">new</span> <span class="n">blog</span> <span class="o">-</span><span class="n">m</span> <span class="n">app_template</span><span class="o">.</span><span class="n">rb</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  If you browse your Rails project you'll see that rspec, haml got installed and the default readme file was removed and a readme.md file was added, and finally everything was committed to git.
+</p>
+
+
+
+
+<p>
+  In addition, you can have the application template prompt the user for more information. The code listed below allows you to do like this:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app_template.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">remove_file</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">README</span><span class="o">.</span><span class="n">doc</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'><span class="n">create_file</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">README</span><span class="o">.</span><span class="n">md</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;gem &amp;lsquo;rspec-rails&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;haml-rails&amp;rsquo;</span>
+</span><span class='line'><span class="sr">run &amp;lsquo;bundle install&amp;rsquo;</span>
+</span><span class='line'><span class="sr">generate &amp;lsquo;rspec:install&amp;rsquo;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="k">if</span> <span class="n">yes?</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">Do</span> <span class="n">you</span> <span class="n">wish</span> <span class="n">to</span> <span class="n">generate</span> <span class="n">a</span> <span class="n">root</span> <span class="n">controller?</span> <span class="p">(</span><span class="n">y</span><span class="o">/</span><span class="n">n</span><span class="p">)</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'>  <span class="nb">name</span> <span class="o">=</span> <span class="n">ask</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">What</span> <span class="k">do</span> <span class="n">you</span> <span class="n">want</span> <span class="n">to</span> <span class="n">call</span> <span class="n">it?</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;)</span><span class="o">.</span><span class="n">underscore</span>
+</span><span class='line'>  <span class="n">generate</span> <span class="ss">:controller</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="c1">#{name} show&amp;rdquo;</span>
+</span><span class='line'>  <span class="n">route</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="c1">#{name}#show&amp;rsquo;&amp;rdquo;</span>
+</span><span class='line'>  <span class="n">route</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">resource</span> <span class="p">:</span><span class="c1">#{name}, only: [:show]&amp;rdquo;</span>
+</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;git :init</span>
+</span><span class='line'><span class="sr">git add: &amp;lsquo;&amp;mdash;all&amp;rsquo;, commit: &amp;lsquo;-m &amp;ldquo;Initial Commit&amp;rdquo;&amp;rsquo;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  In the code above, the yes? function will prompt the user with a yes/no question. The ask function will prompt the user for text input. In this case, we ask the user if they wish to generate a root controller, and if they say yes, we prompt them for a name.
+</p>
+
+
+
+
+<p>
+  So far so good, That's it! See ya!
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Liquid on Rails]]></title>
@@ -765,164 +896,6 @@
 
 <p>
   So far so good, That's it! See ya! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails Model Change Tracking with ActiveModel::Dirty]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/02/19/ruby-on-rails-model-change-tracking-with-activemodel-dirty/"/>
-    <updated>2015-02-19T09:09:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/02/19/ruby-on-rails-model-change-tracking-with-activemodel-dirty</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/move_to_rails.png" alt="Ruby on Rails Model Change Tracking with ActiveModel::Dirty" />
-</p>
-
-
-
-
-<p>
-  ActiveModel::Dirty is a library that is built into Ruby on Rails that allows you to quickly and easily track what attributes on a model have changed. This article will show you how to use it.
-</p>
-
-
-
-
-<p>
-  <strong>Checking Whenever the Model Has Changed</strong><br/>
-  Checking whether the model has changed using the <code>changed?</code> method:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">changed?</span>  <span class="c1"># =&gt; false</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  If you change an attribute on the model, the <code>changed?</code> method will returns true:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Mac</span> <span class="no">Pro</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
-</span><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">changed?</span> <span class="c1"># =&gt; true</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>Tracking the Change</strong><br/>
-  You can track what the change by using the <code>attr_change</code> method:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">name_change</span> <span class="c1"># =&gt; [&amp;ldquo;Mac Pro&amp;rdquo;, &amp;ldquo;IBM ThinkPad&amp;rdquo;]</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  You can get a list of all of the changed attributes on the model as well:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">changed</span> <span class="c1"># =&gt; [&amp;ldquo;name&amp;rdquo;]</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  You can get the original value using the <code>attr_was</code> method as well:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">name_was</span> <span class="c1">#=&gt; &amp;ldquo;IBM ThinkPad&amp;rdquo;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  You can view a list of all of the original values using the <code>changed_attributes</code> method as well:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">changed_attributes</span> <span class="c1"># =&gt; {&amp;ldquo;name&amp;rdquo; =&gt; &amp;ldquo;IBM ThinkPad&amp;rdquo;}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  You can list all of the changes on the model using the <code>changes</code> method as well:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">changes</span> <span class="c1"># =&gt; {&amp;ldquo;name&amp;rdquo; =&gt; [&amp;ldquo;IBM ThinkPad&amp;rdquo;, &amp;ldquo;Mac Pro&amp;rdquo;]}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  You can view changes that were made even after the model was saved using the <code>previous_changes</code> method as well:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre class=&quot;prettyprint&quot;&gt;</span>
-</span><span class='line'><span class="sr">  product.save</span>
-</span><span class='line'><span class="sr">  product.changes # =&gt; {}</span>
-</span><span class='line'><span class="sr">  product.previous_changes # =&gt; {&quot;name&quot; =&gt; [&quot;IBM ThinkPad&quot;, &quot;Mac Pro&quot;]}</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  You can view changes that were made even after the model was saved using the <code>previous_changes</code> method as well:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre class=&quot;prettyprint&quot;&gt;</span>
-</span><span class='line'><span class="sr">  product.save</span>
-</span><span class='line'><span class="sr">  product.changes # =&gt; {}</span>
-</span><span class='line'><span class="sr">  product.previous_changes # =&gt; {&quot;name&quot; =&gt; [&quot;IBM ThinkPad&quot;, &quot;Mac Pro&quot;]}</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  You can reset the model using the reload! method as well:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">reload!</span>
-</span><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">previous_changes</span> <span class="c1"># =&gt; {}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  So far so good, for more detail <a href="http://api.rubyonrails.org/classes/ActiveModel/Dirty.html" target="_blank">Ruby on Rails API</a>. That's it! See ya!
 </p>
 
 ]]></content>
