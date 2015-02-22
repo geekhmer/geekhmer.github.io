@@ -77,6 +77,247 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2014/07/30/test-routes-with-rspec-in-ruby-on-rails/">Test Routes With RSpec in Ruby on Rails</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-30T22:47:00+07:00" pubdate data-updated="true">Jul 30<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  Most Ruby on Rails developers don’t test their routes, they focus on Model testing, Controller testing, Features or View testing, Helper testing, and try to catch every possible scenarios.<br/>I would like to show how to test route separately. 
+</p>
+
+
+
+
+<p>
+  Sample routes.rb:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">resources</span> <span class="ss">:products</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Here is routes lists thats have been created:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>     <span class="n">root</span>        <span class="o">/</span>                            <span class="n">products</span><span class="c1">#index</span>
+</span><span class='line'>    <span class="n">posts</span> <span class="no">GET</span>    <span class="sr">/products(.:format)          products#index</span>
+</span><span class='line'><span class="sr">          POST   /</span><span class="n">products</span><span class="p">(</span><span class="o">.</span><span class="ss">:format</span><span class="p">)</span>          <span class="n">products</span><span class="c1">#create</span>
+</span><span class='line'> <span class="n">new_post</span> <span class="no">GET</span>    <span class="sr">/products/ne</span><span class="n">w</span><span class="p">(</span><span class="o">.</span><span class="ss">:format</span><span class="p">)</span>      <span class="n">products</span><span class="c1">#new</span>
+</span><span class='line'><span class="n">edit_post</span> <span class="no">GET</span>    <span class="sr">/products/</span><span class="ss">:id</span><span class="o">/</span><span class="n">edit</span><span class="p">(</span><span class="o">.</span><span class="ss">:format</span><span class="p">)</span> <span class="n">products</span><span class="c1">#edit</span>
+</span><span class='line'>     <span class="n">post</span> <span class="no">GET</span>    <span class="sr">/products/</span><span class="ss">:id</span><span class="p">(</span><span class="o">.</span><span class="ss">:format</span><span class="p">)</span>      <span class="n">products</span><span class="c1">#show</span>
+</span><span class='line'>          <span class="no">PUT</span>    <span class="sr">/products/</span><span class="ss">:id</span><span class="p">(</span><span class="o">.</span><span class="ss">:format</span><span class="p">)</span>      <span class="n">products</span><span class="c1">#update</span>
+</span><span class='line'>          <span class="no">DELETE</span> <span class="sr">/products/</span><span class="ss">:id</span><span class="p">(</span><span class="o">.</span><span class="ss">:format</span><span class="p">)</span>      <span class="n">products</span><span class="c1">#destroy</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Testing for each routes in routing/products_routing_spec.rb:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>products_routing_spec.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;spec_helper&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">describe</span> <span class="s2">&quot;routing to products&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;routes /products to products#index&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="ss">get</span><span class="p">:</span> <span class="s2">&quot;/products&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">route_to</span><span class="p">(</span>
+</span><span class='line'>      <span class="ss">controller</span><span class="p">:</span> <span class="s2">&quot;products&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">action</span><span class="p">:</span> <span class="s2">&quot;index&quot;</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;routes /products/1 to products#show&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="ss">get</span><span class="p">:</span> <span class="s2">&quot;/products/1&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">route_to</span><span class="p">(</span>
+</span><span class='line'>      <span class="ss">controller</span><span class="p">:</span> <span class="s2">&quot;products&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">action</span><span class="p">:</span> <span class="s2">&quot;show&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="nb">id</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;routes /products/new to products#new&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="ss">get</span><span class="p">:</span> <span class="s2">&quot;/products/new&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">route_to</span><span class="p">(</span>
+</span><span class='line'>      <span class="ss">controller</span><span class="p">:</span> <span class="s2">&quot;products&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">action</span><span class="p">:</span> <span class="s2">&quot;new&quot;</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;routes /products to products#create&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="ss">post</span><span class="p">:</span> <span class="s2">&quot;/products&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">route_to</span><span class="p">(</span>
+</span><span class='line'>      <span class="ss">controller</span><span class="p">:</span> <span class="s2">&quot;products&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">action</span><span class="p">:</span> <span class="s2">&quot;create&quot;</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;routes /products/1/edit to products#edit&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="ss">get</span><span class="p">:</span> <span class="s2">&quot;/products/1/edit&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">route_to</span><span class="p">(</span>
+</span><span class='line'>      <span class="ss">controller</span><span class="p">:</span> <span class="s2">&quot;products&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">action</span><span class="p">:</span> <span class="s2">&quot;edit&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="nb">id</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;routes /products/1 to products#update&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="ss">put</span><span class="p">:</span> <span class="s2">&quot;/products/1&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">route_to</span><span class="p">(</span>
+</span><span class='line'>      <span class="ss">controller</span><span class="p">:</span> <span class="s2">&quot;products&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">action</span><span class="p">:</span> <span class="s2">&quot;update&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="nb">id</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;routes /products/1 to products#destroy&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="ss">delete</span><span class="p">:</span> <span class="s2">&quot;/products/1&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">route_to</span><span class="p">(</span>
+</span><span class='line'>      <span class="ss">controller</span><span class="p">:</span> <span class="s2">&quot;products&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">action</span><span class="p">:</span> <span class="s2">&quot;destroy&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="nb">id</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Testing unroutable:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">resources</span> <span class="ss">:products</span><span class="p">,</span> <span class="ss">except</span><span class="p">:</span> <span class="o">[</span><span class="ss">:show</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>products_routing_spec.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="s2">&quot;does not routes /products/1 to products#show&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">expect</span><span class="p">(</span><span class="ss">:get</span> <span class="o">=&gt;</span> <span class="s2">&quot;posts/1&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span> <span class="n">be_routable</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, Let enjoy the routes testing in your Ruby on Rails application. :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2014/07/30/railspanel/">RailsPanel</a></h1>
     
     
@@ -1814,388 +2055,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/27/why-sass/">Why Sass?</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-27T00:00:00+07:00" pubdate data-updated="true">Jun 27<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/sass.png" />
-</p>
-
-
-
-
-<p>
-  Sass is a Cascading Style Sheets (CSS) meta language. It is a scripting language that is interpreted into CSS. SassScript provides the following mechanisms: variables, nesting, mixins, and selector inheritance.
-</p>
-
-
-
-
-<p>
-  <strong>Variables</strong><br/>
-  - Sass allows variables to be defined.<br/>
-  - Variables begin with a dollar sign ($).<br/>
-  - Variable assignment is done with a colon (:).<br/>
-  - SassScript supports four data types: Numbers, Strings, Colors, Booleans.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>In CSS </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="p">.</span><span class="nx">content</span><span class="o">-</span><span class="nx">navigation</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">border</span><span class="o">-</span><span class="nx">color</span><span class="o">:</span> <span class="err">#</span><span class="mi">3</span><span class="nx">bbfce</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">color</span><span class="o">:</span> <span class="err">#</span><span class="mi">2</span><span class="nx">b9eab</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">.</span><span class="nx">border</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">padding</span><span class="o">:</span> <span class="mi">8</span><span class="nx">px</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">margin</span><span class="o">:</span> <span class="mi">8</span><span class="nx">px</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">border</span><span class="o">-</span><span class="nx">color</span><span class="o">:</span> <span class="err">#</span><span class="mi">3</span><span class="nx">bbfce</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span>In Sass </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">$blue</span><span class="o">:</span> <span class="err">#</span><span class="mi">3</span><span class="nx">bbfce</span><span class="p">;</span>
-</span><span class='line'><span class="nx">$margin</span><span class="o">:</span> <span class="mi">16</span><span class="nx">px</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">.</span><span class="nx">content</span><span class="o">-</span><span class="nx">navigation</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">border</span><span class="o">-</span><span class="nx">color</span><span class="o">:</span> <span class="nx">$blue</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">color</span><span class="o">:</span>
-</span><span class='line'>    <span class="nx">darken</span><span class="p">(</span><span class="nx">$blue</span><span class="p">,</span> <span class="mi">9</span><span class="o">%</span><span class="p">);</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">.</span><span class="nx">border</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">padding</span><span class="o">:</span> <span class="nx">$margin</span> <span class="o">/</span> <span class="mi">2</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">margin</span><span class="o">:</span> <span class="nx">$margin</span> <span class="o">/</span> <span class="mi">2</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">border</span><span class="o">-</span><span class="nx">color</span><span class="o">:</span> <span class="nx">$blue</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Nesting</strong><br/>
-  CSS does support logical nesting, but the code blocks themselves are not nested. Sass allows the nested code to be inserted within each other.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>In CSS </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">table</span><span class="p">.</span><span class="nx">hl</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">margin</span><span class="o">:</span> <span class="mi">2</span><span class="nx">em</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">table</span><span class="p">.</span><span class="nx">hl</span> <span class="nx">td</span><span class="p">.</span><span class="nx">ln</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">text</span><span class="o">-</span><span class="nx">align</span><span class="o">:</span> <span class="nx">right</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">li</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">font</span><span class="o">-</span><span class="nx">family</span><span class="o">:</span> <span class="nx">serif</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">font</span><span class="o">-</span><span class="nx">weight</span><span class="o">:</span> <span class="nx">bold</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">font</span><span class="o">-</span><span class="nx">size</span><span class="o">:</span> <span class="mf">1.2</span><span class="nx">em</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span>In Sass </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">table</span><span class="p">.</span><span class="nx">hl</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">margin</span><span class="o">:</span> <span class="mi">2</span><span class="nx">em</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">td</span><span class="p">.</span><span class="nx">ln</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">text</span><span class="o">-</span><span class="nx">align</span><span class="o">:</span> <span class="nx">right</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">li</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">font</span><span class="o">:</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">family</span><span class="o">:</span> <span class="nx">serif</span><span class="p">;</span>
-</span><span class='line'>    <span class="nx">weight</span><span class="o">:</span> <span class="nx">bold</span><span class="p">;</span>
-</span><span class='line'>    <span class="nx">size</span><span class="o">:</span> <span class="mf">1.2</span><span class="nx">em</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Mixins</strong><br/>
-  - CSS does not support mixins.<br/>
-  - Any repeated code must be repeated in each location.<br/>
-  - A mixin is a section of code that contains any valid Sass code.<br/>
-  - Whenever a mixin is called, the result of translating the mixin is inserted at the calling location.<br/>
-  - Mixins allow for efficient and clean code repetitions, as well as easy alteration of code.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>In CSS </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="err">#</span><span class="nx">data</span> <span class="nx">th</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">text</span><span class="o">-</span><span class="nx">align</span><span class="o">:</span> <span class="nx">center</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">font</span><span class="o">-</span><span class="nx">weight</span><span class="o">:</span> <span class="nx">bold</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">#</span><span class="nx">data</span> <span class="nx">td</span><span class="p">,</span> <span class="err">#</span><span class="nx">data</span> <span class="nx">th</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">padding</span><span class="o">:</span> <span class="mi">2</span><span class="nx">px</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span>In Sass </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="err">@</span><span class="nx">mixin</span> <span class="nx">table</span><span class="o">-</span><span class="nx">base</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">th</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">text</span><span class="o">-</span><span class="nx">align</span><span class="o">:</span> <span class="nx">center</span><span class="p">;</span>
-</span><span class='line'>    <span class="nx">font</span><span class="o">-</span><span class="nx">weight</span><span class="o">:</span> <span class="nx">bold</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="nx">td</span><span class="p">,</span> <span class="nx">th</span> <span class="p">{</span><span class="nx">padding</span><span class="o">:</span> <span class="mi">2</span><span class="nx">px</span><span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">#</span><span class="nx">data</span> <span class="p">{</span>
-</span><span class='line'>  <span class="err">@</span><span class="nx">include</span> <span class="nx">table</span><span class="o">-</span><span class="nx">base</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Mixins also support arguments:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>In CSS </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="err">#</span><span class="nx">data</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kr">float</span><span class="o">:</span> <span class="nx">left</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">margin</span><span class="o">-</span><span class="nx">left</span><span class="o">:</span> <span class="mi">10</span><span class="nx">px</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span>In Sass </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="err">@</span><span class="nx">mixin</span> <span class="nx">left</span><span class="p">(</span><span class="nx">$dist</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kr">float</span><span class="o">:</span> <span class="nx">left</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">margin</span><span class="o">-</span><span class="nx">left</span><span class="o">:</span> <span class="nx">$dist</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">#</span><span class="nx">data</span> <span class="p">{</span>
-</span><span class='line'>  <span class="err">@</span><span class="nx">include</span> <span class="nx">left</span><span class="p">(</span><span class="mi">10</span><span class="nx">px</span><span class="p">);</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  In combination:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>In CSS </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="err">#</span><span class="nx">data</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kr">float</span><span class="o">:</span> <span class="nx">left</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">margin</span><span class="o">-</span><span class="nx">left</span><span class="o">:</span> <span class="mi">10</span><span class="nx">px</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">#</span><span class="nx">data</span> <span class="nx">th</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">text</span><span class="o">-</span><span class="nx">align</span><span class="o">:</span> <span class="nx">center</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">font</span><span class="o">-</span><span class="nx">weight</span><span class="o">:</span> <span class="nx">bold</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">#</span><span class="nx">data</span> <span class="nx">td</span><span class="p">,</span> <span class="err">#</span><span class="nx">data</span> <span class="nx">th</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">padding</span><span class="o">:</span> <span class="mi">2</span><span class="nx">px</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span>In Sass </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="err">@</span><span class="nx">mixin</span> <span class="nx">table</span><span class="o">-</span><span class="nx">base</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">th</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">text</span><span class="o">-</span><span class="nx">align</span><span class="o">:</span> <span class="nx">center</span><span class="p">;</span>
-</span><span class='line'>    <span class="nx">font</span><span class="o">-</span><span class="nx">weight</span><span class="o">:</span> <span class="nx">bold</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="nx">td</span><span class="p">,</span> <span class="nx">th</span> <span class="p">{</span><span class="nx">padding</span><span class="o">:</span> <span class="mi">2</span><span class="nx">px</span><span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">@</span><span class="nx">mixin</span> <span class="nx">left</span><span class="p">(</span><span class="nx">$dist</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kr">float</span><span class="o">:</span> <span class="nx">left</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">margin</span><span class="o">-</span><span class="nx">left</span><span class="o">:</span> <span class="nx">$dist</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">#</span><span class="nx">data</span> <span class="p">{</span>
-</span><span class='line'>  <span class="err">@</span><span class="nx">include</span> <span class="nx">left</span><span class="p">(</span><span class="mi">10</span><span class="nx">px</span><span class="p">);</span>
-</span><span class='line'>  <span class="err">@</span><span class="nx">include</span> <span class="nx">table</span><span class="o">-</span><span class="nx">base</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  For more information <a href="http://sass-lang.com/" target="_blank">sass-lang.com</a>
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/8/">&larr; Older</a>
@@ -2225,6 +2084,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/02/22/slim-template-language/">Slim Template Language</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/02/22/customize-the-ruby-on-rails-application-generator/">Customize the Ruby on Rails Application Generator</a>
       </li>
     
@@ -2240,10 +2103,6 @@
         <a href="/blog/2015/02/21/what-is-difference-between-path-and-url-in-ruby-on-rails/">What Is Difference Between Path and URL in Ruby on Rails?</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2015/02/20/stashing-codes-changes-in-git/">Stashing Codes Changes in Git</a>
-      </li>
-    
   </ul>
 </section>
 <section>
@@ -2255,7 +2114,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby/">Ruby [ 44 ]</a>
+        <a href="/blog/categories/ruby/">Ruby [ 45 ]</a>
       </li>
     
       <li>
@@ -2263,7 +2122,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 32 ]</a>
+        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 33 ]</a>
       </li>
     
       <li>
