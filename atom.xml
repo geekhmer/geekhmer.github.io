@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-02-23T00:29:00+07:00</updated>
+  <updated>2015-02-26T23:50:49+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,342 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ActionPack Variants on Rails]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/02/23/actionpack-variants-on-rails/"/>
+    <updated>2015-02-23T21:48:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/02/23/actionpack-variants-on-rails</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="ActionPack Variants on Rails" />
+</p>
+
+
+
+
+<p>
+  Rails 4.1 released a little while ago and came out with a fantastic new feature I think a lot of responsive web developers are going to flex. It&#8217;s called Variants. ActionPack Variants.
+</p>
+
+
+
+
+<p>
+  <strong>What does it do?</strong><br/>
+  It allows you to create different views for different device formats - such as mobile 
+  phones, tablets and desktops.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># /app/views/home/index.html.erb</span>
+</span><span class='line'><span class="c1"># /app/views/home/index.html+phone.erb</span>
+</span><span class='line'><span class="c1"># /app/views/home/index.html+tablet.erb</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Why is this useful?</strong><br/>
+  This is tremendously useful because you can now serve a much slimmer version of your view to mobile devices, instead of just hiding the elements using CSS using media queries.
+</p>
+
+
+
+
+<p>
+  Hidden elements still load and need to come down &#8216;the wire&#8217; - using Variants it&#8217;s much easier than before to serve up lean and mean views to mobile devices.
+</p>
+
+
+
+
+<p>
+  <strong>Setup</strong><br/>
+  Create a homes controller that will enable you to play around with ActionPack Variants, run the commands below to create the home controller:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="n">homes</span> <span class="n">show</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then apply a few simple routes to your application to finish setting things up. Open up your routes file (<code>config/routes.rb</code>).
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;homes#show&quot;</span>
+</span><span class='line'><span class="n">resource</span> <span class="ss">:home</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:show</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Well, Now we are ready to play around with ActionPack Variants. ActionPack Variants works by using a <code>before_action</code> in your application controller. Open up your Application Controller (<code>app/controllers/application_controller.rb</code>) and modify so that it looks sometings like:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>application_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="ss">ActionController</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="c1"># Prevent CSRF attacks by raising an exception.</span>
+</span><span class='line'>  <span class="c1"># For APIs, you may want to use :null_session instead.</span>
+</span><span class='line'>  <span class="n">protect_from_forgery</span> <span class="ss">with</span><span class="p">:</span> <span class="ss">:exception</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">before_action</span> <span class="ss">:detect_browser</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">detect_browser</span>
+</span><span class='line'>      <span class="k">case</span> <span class="n">request</span><span class="o">.</span><span class="n">user_agent</span>
+</span><span class='line'>        <span class="k">when</span> <span class="sr">/iPad/i</span>
+</span><span class='line'>          <span class="n">request</span><span class="o">.</span><span class="n">variant</span> <span class="o">=</span> <span class="ss">:tablet</span>
+</span><span class='line'>        <span class="k">when</span> <span class="sr">/iPhone/i</span>
+</span><span class='line'>          <span class="n">request</span><span class="o">.</span><span class="n">variant</span> <span class="o">=</span> <span class="ss">:phone</span>
+</span><span class='line'>        <span class="k">when</span> <span class="sr">/Android/i</span> <span class="o">&amp;&amp;</span> <span class="sr">/mobile/i</span>
+</span><span class='line'>          <span class="n">request</span><span class="o">.</span><span class="n">variant</span> <span class="o">=</span> <span class="ss">:phone</span>
+</span><span class='line'>        <span class="k">when</span> <span class="sr">/Android/i</span>
+</span><span class='line'>          <span class="n">request</span><span class="o">.</span><span class="n">variant</span> <span class="o">=</span> <span class="ss">:tablet</span>
+</span><span class='line'>        <span class="k">when</span> <span class="sr">/Windows Phone/i</span>
+</span><span class='line'>          <span class="n">request</span><span class="o">.</span><span class="n">variant</span> <span class="o">=</span> <span class="ss">:phone</span>
+</span><span class='line'>        <span class="k">else</span>
+</span><span class='line'>          <span class="n">request</span><span class="o">.</span><span class="n">variant</span> <span class="o">=</span> <span class="ss">:desktop</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  How does it work? Before an action is called, The <code>detect_browser</code> is called and the <code>request.variant</code> is set to whatever you want it to be. In the above example I use it determine whether we are running a mobile, tablet, or desktop device.
+</p>
+
+
+
+
+<p>
+  Then create a view called show.html+phone.erb (<code>app/views/homes/show.html+phone.erb</code>) for your homes controller and add in the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>show.html+phone.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Phone</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'><span class="sr">&lt;p&gt;</span>
+</span><span class='line'><span class="sr">  You are running on a smart phone.</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then create a view for our tablet users. Create a new view called show.html+tablet.erb (<code>app/views/homes/show.html+tablet.erb</code>) and add in the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>show.html+tablet.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Tablet</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'><span class="sr">&lt;p&gt;</span>
+</span><span class='line'><span class="sr">  You are running on a tablet.  Whoohoo!</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then modify your default show.html.erb (<code>app/views/homes/show.html.erb</code>) view. Open it up now and modify it so that it looks something like:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>show.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Desktop</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'><span class="sr">&lt;p&gt;</span>
+</span><span class='line'><span class="sr">  All other users get redirected here.</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+   There are still a few pieces of the puzzle left. What if you need to detect the device type prior to rendering the view? For example, setting paging size/options for our queries. Fortunately, this is pretty easy. Open up your homes controller (<code>app/views/controllers/homes_controller.rb</code>) and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>homes_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">HomesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>    <span class="vi">@device</span> <span class="o">=</span> <span class="s2">&quot;others&quot;</span>
+</span><span class='line'>    <span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nb">format</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">phone</span> <span class="k">do</span> <span class="c1"># phone variant</span>
+</span><span class='line'>          <span class="c1"># add code here for phones</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nb">format</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">tablet</span> <span class="k">do</span> <span class="c1"># tablet variant</span>
+</span><span class='line'>          <span class="c1"># add code here for tablets</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nb">format</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">desktop</span> <span class="k">do</span>
+</span><span class='line'>          <span class="c1"># add code here for desktops and other devices</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  There is one more thing to do. What happens if you need to detect the variant in your view? Fortunately this is very easy and be shown, open up your application layout (<code>app/views/layouts/application.html.erb</code>) and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>application.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;!</span><span class="no">DOCTYPE</span> <span class="n">html</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">html</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">head</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">title</span><span class="o">&gt;</span><span class="no">ActionPackVariantsExample</span><span class="o">&lt;</span><span class="sr">/title&gt;</span>
+</span><span class='line'><span class="sr">  &lt;%= stylesheet_link_tag    &#39;application&#39;, media: &#39;all&#39;, &#39;data-turbolinks-track&#39; =&gt; true %&gt;</span>
+</span><span class='line'><span class="sr">  &lt;%= javascript_include_tag &#39;application&#39;, &#39;data-turbolinks-track&#39; =&gt; true %&gt;</span>
+</span><span class='line'><span class="sr">  &lt;%= csrf_meta_tags %&gt;</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">head</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">body</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;%=</span> <span class="k">yield</span> <span class="sx">%&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">&lt;% if request.variant.include? :tablet %&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">small</span><span class="o">&gt;</span><span class="no">Welcome</span> <span class="no">Tablet</span> <span class="no">User</span><span class="o">&lt;</span><span class="sr">/small&gt;</span>
+</span><span class='line'><span class="sr">&lt;% elsif request.variant.include? :phone %&gt;</span>
+</span><span class='line'><span class="sr">  &lt;small&gt;Welcome Phone User&lt;/sm</span><span class="n">all</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% end %&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">&lt;/body&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Note the if statement starting with <code>if request.variant.include? :tablet</code>. Why do we use <code>.include?</code> The <code>request.variant</code> is actually an array. Therefore it is necessary to use .include?.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it! See ya! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Slim on Rails]]></title>
@@ -3874,516 +4210,6 @@
 <p>
   So far so good, see you in the next articles. :)
 </p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Erlang Message Passing]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/01/27/erlang-message-passing/"/>
-    <updated>2015-01-27T23:07:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/01/27/erlang-message-passing</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/logo_erlang.png" alt="Erlang Message Passing" />
-</p>
-
-
-
-
-<p>
-  The communication model (among processes) in Erlang is message passing. Erlang processes share no memory. The way that processes communicate is via (asynchronous) message passing. Every process (even the shell) holds a mailbox queue where incoming messages are placed until received by the process. Message passing is asynchronous because the sending process does not block on send. On the other hand, receiving a message in Erlang is a blocking operation.
-</p>
-
-
-
-
-<p>
-  <h3>Characteristics</h3>
-</p>
-
-
-
-
-<p>
-  In this subsection I will describe some of the characteristics of message passing in Erlang.
-</p>
-
-
-
-
-<p>
-  <strong>Asynchronous</strong><br/>
-  Message passing in Erlang is a non-blocking operation.
-</p>
-
-
-
-
-<p>
-  <strong>Data Copy</strong><br/>
-  The message’s data are copied from the sending process to the receiver’s message queue, so the receiver gets a fresh copy of the data.
-</p>
-
-
-
-
-<p>
-  <strong>Ordering</strong><br/>
-  Erlang runtime guarantees that if two messages are sent from node A to node B and both are delivered, then the ordering of these messages is kept (because ordering).
-</p>
-
-
-
-
-<p>
-  <strong>Successful Send</strong><br/>
-  The send operation always succeeds (even if the target is a non-existing process) and evaluates to the data sent. An exception is when trying to send data to a non-existing registered process.
-</p>
-
-
-
-
-<p>
-  <h3>Sending Messages</h3>
-</p>
-
-
-
-
-<p>
-  Erlang uses the exclamation mark (!) as the operator for sending a message.
-</p>
-
-
-
-
-<p>
-  Syntax:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">%</span><span class="nb">send</span> <span class="n">message</span> <span class="no">Message</span> <span class="n">to</span> <span class="n">the</span> <span class="n">process</span> <span class="n">with</span> <span class="n">pid</span> <span class="no">Pid</span>
-</span><span class='line'><span class="no">Pid</span> <span class="o">!</span> <span class="no">Message</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Send multiple messages &#8220;at once&#8221;:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Pid1</span> <span class="o">!</span> <span class="no">Message</span><span class="p">,</span> <span class="no">Pid2</span> <span class="o">!</span> <span class="no">Message</span><span class="p">,</span> <span class="no">Pid3</span> <span class="o">!</span> <span class="no">Message</span>
-</span><span class='line'><span class="no">Pid1</span> <span class="o">!</span> <span class="p">(</span><span class="no">Pid2</span> <span class="o">!</span> <span class="p">(</span><span class="no">Pid3</span> <span class="o">!</span> <span class="no">Message</span><span class="p">))</span>
-</span><span class='line'><span class="no">Pid1</span> <span class="o">!</span> <span class="no">Pid2</span> <span class="o">!</span> <span class="no">Pid3</span> <span class="o">!</span> <span class="no">Message</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Example:
-</p>
-
-
-
-
-<p>
-  As I have mentioned before, the shell is nothing more than a process. As a process, it has a message queue. In order to print and empty the shell’s message queue we can use the flush/0 BIFs.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="nb">self</span><span class="p">()</span> <span class="o">!</span> <span class="n">erlang_term_can_be_sent</span><span class="o">.</span>
-</span><span class='line'><span class="n">erlang_term_can_be_sent</span>
-</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="n">flush</span><span class="p">()</span><span class="o">.</span>
-</span><span class='line'><span class="no">Shell</span> <span class="n">got</span> <span class="n">erlang_term_can_be_sent</span>
-</span><span class='line'><span class="n">ok</span>
-</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="nb">self</span><span class="p">()</span> <span class="o">!</span> <span class="o">[</span><span class="n">this</span><span class="p">,</span> <span class="n">is</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">list</span><span class="p">,</span> <span class="s1">&#39;of&#39;</span><span class="p">,</span> <span class="n">atoms</span><span class="o">].</span>
-</span><span class='line'><span class="o">[</span><span class="n">this</span><span class="p">,</span><span class="n">is</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">list</span><span class="p">,</span><span class="s1">&#39;of&#39;</span><span class="p">,</span><span class="n">atoms</span><span class="o">]</span>
-</span><span class='line'><span class="mi">4</span><span class="o">&gt;</span> <span class="nb">self</span><span class="p">()</span> <span class="o">!</span> <span class="p">{</span><span class="n">this</span><span class="p">,</span> <span class="o">[</span><span class="n">is</span><span class="p">,</span> <span class="n">a</span><span class="o">]</span><span class="p">,</span> <span class="n">tuple</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;!&#39;</span><span class="p">,</span> <span class="s1">&#39;!&#39;</span><span class="p">}}</span><span class="o">.</span>
-</span><span class='line'><span class="p">{</span><span class="n">this</span><span class="p">,</span><span class="o">[</span><span class="n">is</span><span class="p">,</span><span class="n">a</span><span class="o">]</span><span class="p">,</span><span class="n">tuple</span><span class="p">,{</span><span class="s1">&#39;!&#39;</span><span class="p">,</span><span class="s1">&#39;!&#39;</span><span class="p">}}</span>
-</span><span class='line'><span class="mi">5</span><span class="o">&gt;</span> <span class="nb">self</span><span class="p">()</span> <span class="o">!</span> <span class="p">{</span><span class="nb">self</span><span class="p">(),</span> <span class="mi">123</span><span class="p">}</span><span class="o">.</span>
-</span><span class='line'><span class="p">{</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">.</span><span class="mi">35</span><span class="o">.</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">,</span><span class="mi">123</span><span class="p">}</span>
-</span><span class='line'><span class="mi">6</span><span class="o">&gt;</span> <span class="n">flush</span><span class="p">()</span><span class="o">.</span>
-</span><span class='line'><span class="no">Shell</span> <span class="n">got</span> <span class="o">[</span><span class="n">this</span><span class="p">,</span><span class="n">is</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">list</span><span class="p">,</span><span class="s1">&#39;of&#39;</span><span class="p">,</span><span class="n">atoms</span><span class="o">]</span>
-</span><span class='line'><span class="no">Shell</span> <span class="n">got</span> <span class="p">{</span><span class="n">this</span><span class="p">,</span><span class="o">[</span><span class="n">is</span><span class="p">,</span><span class="n">a</span><span class="o">]</span><span class="p">,</span><span class="n">tuple</span><span class="p">,{</span><span class="s1">&#39;!&#39;</span><span class="p">,</span><span class="s1">&#39;!&#39;</span><span class="p">}}</span>
-</span><span class='line'><span class="no">Shell</span> <span class="n">got</span> <span class="p">{</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">.</span><span class="mi">35</span><span class="o">.</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">,</span><span class="mi">123</span><span class="p">}</span>
-</span><span class='line'><span class="n">ok</span>
-</span><span class='line'><span class="mi">7</span><span class="o">&gt;</span> <span class="no">Pid1</span> <span class="o">=</span> <span class="nb">self</span><span class="p">(),</span> <span class="no">Pid2</span> <span class="o">=</span> <span class="nb">self</span><span class="p">(),</span> <span class="no">Pid3</span> <span class="o">=</span> <span class="nb">self</span><span class="p">()</span><span class="o">.</span>
-</span><span class='line'><span class="o">&lt;</span><span class="mi">0</span><span class="o">.</span><span class="mi">35</span><span class="o">.</span><span class="mi">0</span><span class="o">&gt;</span>
-</span><span class='line'><span class="mi">8</span><span class="o">&gt;</span> <span class="no">Pid1</span> <span class="o">!</span> <span class="n">msg</span><span class="p">,</span> <span class="no">Pid2</span> <span class="o">!</span> <span class="n">msg</span><span class="p">,</span> <span class="no">Pid3</span> <span class="o">!</span> <span class="n">msg</span><span class="o">.</span>
-</span><span class='line'><span class="n">msg</span>
-</span><span class='line'><span class="mi">9</span><span class="o">&gt;</span> <span class="n">flush</span><span class="p">()</span><span class="o">.</span>
-</span><span class='line'><span class="no">Shell</span> <span class="n">got</span> <span class="n">msg</span>
-</span><span class='line'><span class="no">Shell</span> <span class="n">got</span> <span class="n">msg</span>
-</span><span class='line'><span class="no">Shell</span> <span class="n">got</span> <span class="n">msg</span>
-</span><span class='line'><span class="n">ok</span>
-</span><span class='line'><span class="mi">10</span><span class="o">&gt;</span> <span class="no">Pid1</span> <span class="o">!</span> <span class="p">(</span><span class="no">Pid2</span> <span class="o">!</span> <span class="p">(</span><span class="no">Pid3</span> <span class="o">!</span> <span class="n">msg</span><span class="p">))</span><span class="o">.</span>
-</span><span class='line'><span class="n">msg</span>
-</span><span class='line'><span class="mi">11</span><span class="o">&gt;</span> <span class="n">flush</span><span class="p">()</span><span class="o">.</span>
-</span><span class='line'><span class="no">Shell</span> <span class="n">got</span> <span class="n">msg</span>
-</span><span class='line'><span class="no">Shell</span> <span class="n">got</span> <span class="n">msg</span>
-</span><span class='line'><span class="no">Shell</span> <span class="n">got</span> <span class="n">msg</span>
-</span><span class='line'><span class="n">ok</span>
-</span><span class='line'><span class="mi">12</span><span class="o">&gt;</span> <span class="no">Pid1</span> <span class="o">!</span> <span class="no">Pid2</span> <span class="o">!</span> <span class="no">Pid3</span> <span class="o">!</span> <span class="n">msg</span><span class="o">.</span>
-</span><span class='line'><span class="n">msg</span>
-</span><span class='line'><span class="mi">13</span><span class="o">&gt;</span> <span class="n">flush</span><span class="p">()</span><span class="o">.</span>
-</span><span class='line'><span class="no">Shell</span> <span class="n">got</span> <span class="n">msg</span>
-</span><span class='line'><span class="no">Shell</span> <span class="n">got</span> <span class="n">msg</span>
-</span><span class='line'><span class="no">Shell</span> <span class="n">got</span> <span class="n">msg</span>
-</span><span class='line'><span class="n">ok</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <h3>Receiving Messages</h3>
-</p>
-
-
-
-
-<p>
-  Erlang uses pattern matching for receiving messages (same as in function clause selection and the case statement). The receive statement is used to deliver messages from the message queue.
-</p>
-
-
-
-
-<p>
-  Syntax:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">receive</span>
-</span><span class='line'>  <span class="no">Pattern1</span> <span class="k">when</span> <span class="no">Guard1</span> <span class="o">-&gt;</span>
-</span><span class='line'>    <span class="no">ToDo1</span><span class="p">;</span>
-</span><span class='line'>  <span class="no">Pattern2</span> <span class="k">when</span> <span class="no">Guard2</span> <span class="o">-&gt;</span>
-</span><span class='line'>    <span class="no">ToDo2</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">_Other</span> <span class="o">-&gt;</span>
-</span><span class='line'>    <span class="no">Catch_all</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Receiving Order</strong><br/>
-  The message processing is done in a FIFS (First In – First Served) order. Every incoming message is placed in the tail of the process’ message queue. When a receive statement is meet the following processing happens:<br/>
-  1. The first message (head of the message queue) is pattern matched against the first receive clause. If match, execute the clause’s body, else go to the next step.<br/>
-  2. The same message is pattern matched against the second (if any) receive clause. If match, execute the clause’s body, else go to the next step.<br/>
-  3. &#8230;
-  4. The same message is pattern matched against the last clause. If match, execute the clause’s body, else go to the next step.
-  5. The same iterative process starts again from step 1, but now with the next message from the message queue.<br/><br/>
-  The message (if any) that is delivered through receive is removed from the message queue.
-</p>
-
-
-
-
-<p>
-  Example:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>pingpong.erl </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">-</span><span class="n">module</span><span class="p">(</span><span class="n">pingpong</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="o">-</span><span class="n">export</span><span class="p">(</span><span class="o">[</span><span class="n">play</span><span class="o">/</span><span class="mi">1</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">play</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="k">when</span> <span class="n">is_integer</span><span class="p">(</span><span class="n">N</span><span class="p">),</span> <span class="n">N</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">-&gt;</span>
-</span><span class='line'>  <span class="no">Pong</span> <span class="o">=</span> <span class="n">spawn</span><span class="p">(</span><span class="n">fun</span> <span class="n">pong</span><span class="o">/</span><span class="mi">0</span><span class="p">),</span>
-</span><span class='line'>  <span class="n">ping</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="no">Pong</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">ping</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="no">Pong</span><span class="p">)</span> <span class="o">-&gt;</span>
-</span><span class='line'>  <span class="no">Pong</span> <span class="o">!</span> <span class="nb">exit</span><span class="p">,</span>
-</span><span class='line'>  <span class="n">ok</span><span class="p">;</span>
-</span><span class='line'><span class="n">ping</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="no">Pong</span><span class="p">)</span> <span class="o">-&gt;</span>
-</span><span class='line'>  <span class="no">Pong</span> <span class="o">!</span> <span class="p">{</span><span class="nb">self</span><span class="p">(),</span> <span class="n">ping</span><span class="p">},</span>
-</span><span class='line'>  <span class="n">receive</span>
-</span><span class='line'>    <span class="n">pong</span> <span class="o">-&gt;</span>
-</span><span class='line'>      <span class="ss">io</span><span class="p">:</span><span class="nb">format</span><span class="p">(</span><span class="s2">&quot;~w : pong [~w]~n&quot;</span><span class="p">,</span> <span class="o">[</span><span class="nb">self</span><span class="p">(),</span> <span class="n">N</span><span class="o">]</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span><span class="p">,</span>
-</span><span class='line'>  <span class="n">ping</span><span class="p">(</span><span class="n">N</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="no">Pong</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">pong</span><span class="p">()</span> <span class="o">-&gt;</span>
-</span><span class='line'>  <span class="n">receive</span>
-</span><span class='line'>    <span class="p">{</span><span class="no">From</span><span class="p">,</span> <span class="n">ping</span><span class="p">}</span> <span class="o">-&gt;</span>
-</span><span class='line'>      <span class="ss">io</span><span class="p">:</span><span class="nb">format</span><span class="p">(</span><span class="s2">&quot;~w : ping~n&quot;</span><span class="p">,</span> <span class="o">[</span><span class="nb">self</span><span class="p">()</span><span class="o">]</span><span class="p">),</span>
-</span><span class='line'>      <span class="no">From</span> <span class="o">!</span> <span class="n">pong</span><span class="p">,</span>
-</span><span class='line'>      <span class="n">pong</span><span class="p">();</span>
-</span><span class='line'>    <span class="nb">exit</span> <span class="o">-&gt;</span>
-</span><span class='line'>      <span class="n">ok</span>
-</span><span class='line'>  <span class="k">end</span><span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Example running:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="n">c</span><span class="p">(</span><span class="n">pingpong</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="p">{</span><span class="n">ok</span><span class="p">,</span><span class="n">pingpong</span><span class="p">}</span>
-</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="ss">pingpong</span><span class="p">:</span><span class="n">play</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="o">&lt;</span><span class="mi">0</span><span class="o">.</span><span class="mi">49</span><span class="o">.</span><span class="mi">0</span><span class="o">&gt;</span> <span class="p">:</span> <span class="n">ping</span>
-</span><span class='line'><span class="o">&lt;</span><span class="mi">0</span><span class="o">.</span><span class="mi">39</span><span class="o">.</span><span class="mi">0</span><span class="o">&gt;</span> <span class="p">:</span> <span class="n">pong</span> <span class="o">[</span><span class="mi">4</span><span class="o">]</span>
-</span><span class='line'><span class="o">&lt;</span><span class="mi">0</span><span class="o">.</span><span class="mi">49</span><span class="o">.</span><span class="mi">0</span><span class="o">&gt;</span> <span class="p">:</span> <span class="n">ping</span>
-</span><span class='line'><span class="o">&lt;</span><span class="mi">0</span><span class="o">.</span><span class="mi">39</span><span class="o">.</span><span class="mi">0</span><span class="o">&gt;</span> <span class="p">:</span> <span class="n">pong</span> <span class="o">[</span><span class="mi">3</span><span class="o">]</span>
-</span><span class='line'><span class="o">&lt;</span><span class="mi">0</span><span class="o">.</span><span class="mi">49</span><span class="o">.</span><span class="mi">0</span><span class="o">&gt;</span> <span class="p">:</span> <span class="n">ping</span>
-</span><span class='line'><span class="o">&lt;</span><span class="mi">0</span><span class="o">.</span><span class="mi">39</span><span class="o">.</span><span class="mi">0</span><span class="o">&gt;</span> <span class="p">:</span> <span class="n">pong</span> <span class="o">[</span><span class="mi">2</span><span class="o">]</span>
-</span><span class='line'><span class="o">&lt;</span><span class="mi">0</span><span class="o">.</span><span class="mi">49</span><span class="o">.</span><span class="mi">0</span><span class="o">&gt;</span> <span class="p">:</span> <span class="n">ping</span>
-</span><span class='line'><span class="o">&lt;</span><span class="mi">0</span><span class="o">.</span><span class="mi">39</span><span class="o">.</span><span class="mi">0</span><span class="o">&gt;</span> <span class="p">:</span> <span class="n">pong</span> <span class="o">[</span><span class="mi">1</span><span class="o">]</span>
-</span><span class='line'><span class="n">ok</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Timeout</strong><br/>
-  Receive is a blocking statement; it blocks until a message that matches one of the clauses is placed in the incoming message queue. Erlang allows the programmer to explicitly unblock the receive statement using a timeout (if a matching message is not delivered until the timeout expires). The complete format of receive statement, including the after construct.
-</p>
-
-
-
-
-<p>
-  Syntax:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">receive</span>
-</span><span class='line'>  <span class="no">Pattern1</span> <span class="k">when</span> <span class="no">Guard1</span> <span class="o">-&gt;</span>
-</span><span class='line'>    <span class="no">ToDo1</span><span class="p">;</span>
-</span><span class='line'>  <span class="no">Pattern2</span> <span class="k">when</span> <span class="no">Guard2</span> <span class="o">-&gt;</span>
-</span><span class='line'>    <span class="no">ToDo2</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">_Other</span> <span class="o">-&gt;</span>
-</span><span class='line'>    <span class="no">Catch_all</span>
-</span><span class='line'><span class="n">after</span> <span class="no">Millisecs</span> <span class="o">-&gt;</span>
-</span><span class='line'>  <span class="no">ToDo_timeout</span><span class="p">;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Example:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>timeout.erl </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">-</span><span class="n">module</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="o">-</span><span class="n">export</span><span class="p">(</span><span class="o">[</span><span class="n">start</span><span class="o">/</span><span class="mi">0</span><span class="p">,</span> <span class="nb">sleep</span><span class="o">/</span><span class="mi">1</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">start</span><span class="p">()</span> <span class="o">-&gt;</span>
-</span><span class='line'>  <span class="n">spawn</span><span class="p">(</span><span class="n">fun</span> <span class="n">timeout</span><span class="o">/</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">timeout</span><span class="p">()</span> <span class="o">-&gt;</span>
-</span><span class='line'>  <span class="n">receive</span>
-</span><span class='line'>    <span class="n">cancel</span> <span class="o">-&gt;</span>
-</span><span class='line'>      <span class="ss">io</span><span class="p">:</span><span class="nb">format</span><span class="p">(</span><span class="s2">&quot;Timeout canceled~n&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">after</span> <span class="mi">2000</span> <span class="o">-&gt;</span> <span class="sx">% 2 </span><span class="n">seconds</span>
-</span><span class='line'>    <span class="ss">io</span><span class="p">:</span><span class="nb">format</span><span class="p">(</span><span class="s2">&quot;Timeout triggered~n&quot;</span><span class="p">),</span>
-</span><span class='line'>    <span class="n">timeout</span><span class="p">()</span>
-</span><span class='line'>  <span class="k">end</span><span class="o">.</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">%</span><span class="n">a</span> <span class="nb">sleep</span> <span class="n">function</span>
-</span><span class='line'><span class="nb">sleep</span><span class="p">(</span><span class="no">Ms</span><span class="p">)</span> <span class="o">-&gt;</span>
-</span><span class='line'>  <span class="ss">io</span><span class="p">:</span><span class="nb">format</span><span class="p">(</span><span class="s2">&quot;Sleeping for ~w ms~n&quot;</span><span class="p">,</span> <span class="o">[</span><span class="no">Ms</span><span class="o">]</span><span class="p">),</span>
-</span><span class='line'>  <span class="n">receive</span>
-</span><span class='line'>  <span class="n">after</span> <span class="no">Ms</span> <span class="o">-&gt;</span>
-</span><span class='line'>    <span class="n">done</span>
-</span><span class='line'>  <span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Example running:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="n">c</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="p">{</span><span class="n">ok</span><span class="p">,</span><span class="n">timeout</span><span class="p">}</span>
-</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="n">P</span> <span class="o">=</span> <span class="ss">timeout</span><span class="p">:</span><span class="n">start</span><span class="p">()</span><span class="o">.</span>
-</span><span class='line'><span class="o">&lt;</span><span class="mi">0</span><span class="o">.</span><span class="mi">42</span><span class="o">.</span><span class="mi">0</span><span class="o">&gt;</span>
-</span><span class='line'><span class="no">Timeout</span> <span class="n">triggered</span>
-</span><span class='line'><span class="no">Timeout</span> <span class="n">triggered</span>
-</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="n">P</span> <span class="o">!</span> <span class="n">cancel</span><span class="o">.</span>
-</span><span class='line'><span class="no">Timeout</span> <span class="n">canceled</span>
-</span><span class='line'><span class="n">cancel</span>
-</span><span class='line'><span class="mi">4</span><span class="o">&gt;</span> <span class="ss">timeout</span><span class="p">:</span><span class="nb">sleep</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="no">Sleeping</span> <span class="k">for</span> <span class="mi">1000</span> <span class="n">ms</span>
-</span><span class='line'><span class="n">done</span>
-</span><span class='line'><span class="mi">5</span><span class="o">&gt;</span> <span class="ss">timeout</span><span class="p">:</span><span class="nb">sleep</span><span class="p">(</span><span class="mi">3000</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="no">Sleeping</span> <span class="k">for</span> <span class="mi">3000</span> <span class="n">ms</span>
-</span><span class='line'><span class="n">done</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
 
 ]]></content>
   </entry>
