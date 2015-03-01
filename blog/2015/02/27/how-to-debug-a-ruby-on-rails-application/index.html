@@ -5,13 +5,13 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Erlang Control Flow Statement - GeeKhmer</title>
+  <title>How to Debug a Ruby on Rails Application - GeeKhmer</title>
   <meta name="author" content="Bunlong Van">
   
   
   <meta name="description" content="The website of computer programming Ruby, Ruby on Rails, Erlang, Chicagoboss and Javascript base in Cambodia.">
 
-  <meta name="keywords" content="The Erlang Learning Sequence, Learning Erlang, Learn Erlang, Study Erlang, Studying Erlang, The Studying Erlang, Chicagoboss Framwork, Erlang Modules and Compiling, Modules and Compiling, Erlang Recursion, Recursion, Erlang Tail Recursion, Tail Recursion, Erlang Control Flow Statement, Erlang Control Flow, Flow Statement">
+  <meta name="keywords" content="How to Debug a Ruby on Rails Application, How to Debug a Rails Application, Debug a Ruby on Rails Application, Debug a Rails Application">
 
   <!-- http://t.co/dKP3o1e -->
   <meta name="HandheldFriendly" content="True">
@@ -19,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://geekhmer.github.io/blog/2015/01/20/erlang-control-flow-statement">
+  <link rel="canonical" href="http://geekhmer.github.io/blog/2015/02/27/how-to-debug-a-ruby-on-rails-application">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="" rel="alternate" title="GeeKhmer" type="application/atom+xml">
@@ -74,7 +74,7 @@
   
   <header>
     
-      <h1 class="entry-title">Erlang Control Flow Statement</h1>
+      <h1 class="entry-title">How to Debug a Ruby on Rails Application</h1>
     
     
       <p class="meta">
@@ -90,7 +90,7 @@
   
 
 
-<time datetime="2015-01-20T23:17:00+07:00" pubdate data-updated="true">Jan 20<span>th</span>, 2015</time>
+<time datetime="2015-02-27T00:35:00+07:00" pubdate data-updated="true">Feb 27<span>th</span>, 2015</time>
         
       </p>
     
@@ -98,34 +98,69 @@
 
 
 <div class="entry-content"><p>
-  <img src="/images/logo_erlang.png" alt="Erlang Control Flow Statement" />
+  <img src="/images/ruby_on_rails.png" width="400" alt="How to Debug a Ruby on Rails Application" />
 </p>
 
 
 
 
 <p>
-  As we saw in the previous post, pattern matching with different function clauses can be used in order to control the execution flow in Erlang. Erlang also provides the if, case, and receive control flow constructs that can be used in a function body. In this post I will only present the if and casestatements since receive is used for message passing and I will write a dedicated post about the subject. Both if and case are similar to the statements of other programming languages.
+  This article I will show you how you can easily debug your Ruby on Rails application.
 </p>
 
 
 
 
 <p>
-  <strong>If Statement</strong>
+  <strong>Setup</strong><br/>
+  If you’re using the default Rails Rack server, Webrick – the best debugging tool I’ve been able to find out there is <code>pry</code>. First you need to add the pry gem to your Gemfile. Since this is used for development purposes. Open up your Gemfile file so that it looks sometings like:
 </p>
 
 
 
 
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">group</span> <span class="ss">:development</span><span class="p">,</span> <span class="ss">:test</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">gem</span> <span class="s1">&#39;pry&#39;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
 <p>
-  Syntax:
+  Then run <code>bundle install</cod> to install it:
 </p>
 
 
 
 
 <figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Basically, Whenever one of your actions crashes and you can’t figure out straight away what caused it to crash. What you need to do is invoke <code>binding.pry</code> somewhere in your code, which will create a Pry session at the point it’s called. This will pretty much open a &#8216;developer console&#8217; where you can play around with all the objects that have been defined up until you called <code>binding.pry. Then you can then easily debug your action, like you’d regularly do in an irb console. When you’re done with the Pry session the program will resume.
+</p>
+
+
+
+
+<p>
+  Here’s how this would work in a regular create action from Users controller:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>users_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
@@ -134,82 +169,20 @@
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
 <span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">if</span>
-</span><span class='line'>  <span class="no">BoolbeanExpression1</span> <span class="o">-&gt;</span>
-</span><span class='line'>    <span class="no">IfBody1</span><span class="p">;</span>
-</span><span class='line'>  <span class="no">BooleanExpression2</span> <span class="o">-&gt;</span>
-</span><span class='line'>    <span class="no">IfBody2</span><span class="p">;</span>
-</span><span class='line'>    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
-</span><span class='line'>  <span class="kp">true</span> <span class="o">-&gt;</span>
-</span><span class='line'>    <span class="no">BodyCathAll</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The different clauses, except the last one are like &#8220;else if&#8221; in other languages, while the last one (true ->) is like the &#8220;else&#8221;; it succeeds when all the previous clauses have failed.
-</p>
-
-
-
-
-<p>
-  Example:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">is_greater_than</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span> <span class="o">-&gt;</span>
-</span><span class='line'>  <span class="k">if</span>
-</span><span class='line'>    <span class="n">X</span> <span class="o">&gt;</span> <span class="n">Y</span> <span class="o">-&gt;</span>
-</span><span class='line'>      <span class="kp">true</span><span class="p">;</span>
-</span><span class='line'>    <span class="kp">true</span> <span class="o">-&gt;</span>
-</span><span class='line'>      <span class="kp">false</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>  <span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">user_params</span><span class="p">)</span>
+</span><span class='line'>  <span class="nb">binding</span><span class="o">.</span><span class="n">pry</span> <span class="c1"># Start a pry session to see if the new user looks the way we want</span>
+</span><span class='line'>  <span class="k">if</span> <span class="n">user</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'>     <span class="n">flash</span><span class="o">.</span><span class="n">now</span><span class="o">[</span><span class="ss">:success</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;User saved successfully&quot;</span>
+</span><span class='line'>     <span class="n">sign_in</span> <span class="n">user</span>
+</span><span class='line'>     <span class="n">redirect_to</span> <span class="n">user</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>     <span class="n">flash</span><span class="o">.</span><span class="n">now</span><span class="o">[</span><span class="ss">:error</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;Something went wrong: </span><span class="si">#{</span><span class="n">user</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">full_messages</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>     <span class="n">render</span> <span class="s1">&#39;new&#39;</span>
 </span><span class='line'>  <span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Case Statement</strong>
-</p>
-
-
-
-
-<p>
-  Syntax:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">case</span> <span class="no">Expression</span> <span class="n">of</span>
-</span><span class='line'>  <span class="no">Value1</span> <span class="o">[</span><span class="k">when</span> <span class="no">Guard1</span><span class="o">]</span> <span class="o">-&gt;</span>
-</span><span class='line'>    <span class="no">CaseBody1</span><span class="p">;</span>
-</span><span class='line'>  <span class="no">Value2</span> <span class="o">[</span><span class="k">when</span> <span class="no">Guard2</span><span class="o">]-&gt;</span>
-</span><span class='line'>    <span class="no">CaseBody2</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">_Other</span> <span class="o">-&gt;</span>
-</span><span class='line'>    <span class="no">CaseBodyCatchAll</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -217,40 +190,15 @@
 
 
 <p>
-  Notice that the last clause (_Other) is like the default clause in other programming languages. The Expression should always return a value (if it is a function call) that will be used to perform the pattern matching.
+  Well, after you run the create action – you should view the Pry session in the console, where your rails server is running.
 </p>
 
 
 
 
 <p>
-  Example:
+  So far so good, That&#8217;s it!!! See yar!!! :)
 </p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">check</span><span class="p">(</span><span class="no">List</span><span class="p">)</span> <span class="k">when</span> <span class="n">is_list</span><span class="p">(</span><span class="no">List</span><span class="p">)</span> <span class="o">-&gt;</span>
-</span><span class='line'>  <span class="k">case</span> <span class="ss">lists</span><span class="p">:</span><span class="n">reverse</span><span class="p">(</span><span class="no">List</span><span class="p">)</span> <span class="n">of</span>
-</span><span class='line'>    <span class="no">List</span> <span class="o">-&gt;</span>
-</span><span class='line'>      <span class="kp">true</span><span class="p">;</span>
-</span><span class='line'>    <span class="n">_</span> <span class="o">-&gt;</span>
-</span><span class='line'>      <span class="kp">false</span>
-</span><span class='line'>    <span class="k">end</span><span class="p">;</span>
-</span><span class='line'><span class="n">check</span><span class="p">(</span><span class="n">_</span><span class="p">)</span> <span class="o">-&gt;</span>
-</span><span class='line'>    <span class="p">{</span><span class="n">error</span><span class="p">,</span> <span class="n">arg_not_list</span><span class="p">}</span><span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
 
 </div>
 
@@ -274,12 +222,12 @@
   
 
 
-<time datetime="2015-01-20T23:17:00+07:00" pubdate data-updated="true">Jan 20<span>th</span>, 2015</time>
+<time datetime="2015-02-27T00:35:00+07:00" pubdate data-updated="true">Feb 27<span>th</span>, 2015</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/erlang/'>Erlang</a>
+    <a class='category' href='/blog/categories/ruby/'>Ruby</a>, <a class='category' href='/blog/categories/ruby-on-rails/'>Ruby on Rails</a>
   
 </span>
 
@@ -288,7 +236,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2015/01/20/erlang-control-flow-statement/" data-via="" data-counturl="http://geekhmer.github.io/blog/2015/01/20/erlang-control-flow-statement/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2015/02/27/how-to-debug-a-ruby-on-rails-application/" data-via="" data-counturl="http://geekhmer.github.io/blog/2015/02/27/how-to-debug-a-ruby-on-rails-application/" >Tweet</a>
   
   
   
@@ -299,10 +247,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2015/01/18/erlang-tail-recursion/" title="Previous Post: Erlang Tail Recursion">&laquo; Erlang Tail Recursion</a>
+        <a class="basic-alignment left" href="/blog/2015/02/23/actionpack-variants-on-rails/" title="Previous Post: ActionPack Variants on Rails">&laquo; ActionPack Variants on Rails</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2015/01/22/erlang-list-and-list-module/" title="Next Post: Erlang List &amp; List Module">Erlang List &amp; List Module &raquo;</a>
       
     </p>
   </footer>

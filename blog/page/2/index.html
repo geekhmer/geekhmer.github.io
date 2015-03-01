@@ -77,6 +77,221 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/02/19/ruby-on-rails-model-change-tracking-with-activemodel-dirty/">Ruby on Rails Model Change Tracking With ActiveModel::Dirty</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-19T09:09:00+07:00" pubdate data-updated="true">Feb 19<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/move_to_rails.png" alt="Ruby on Rails Model Change Tracking with ActiveModel::Dirty" />
+</p>
+
+
+
+
+<p>
+  ActiveModel::Dirty is a library that is built into Ruby on Rails that allows you to quickly and easily track what attributes on a model have changed. This article will show you how to use it.
+</p>
+
+
+
+
+<p>
+  <strong>Checking Whenever the Model Has Changed</strong><br/>
+  Checking whether the model has changed using the <code>changed?</code> method:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">changed?</span>  <span class="c1"># =&gt; false</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If you change an attribute on the model, the <code>changed?</code> method will returns true:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Mac Pro&quot;</span>
+</span><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">changed?</span> <span class="c1"># =&gt; true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Tracking the Change</strong><br/>
+  You can track what the change by using the <code>attr_change</code> method:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">name_change</span> <span class="c1"># =&gt; [&quot;Mac Pro&quot;, &quot;IBM ThinkPad&quot;]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  You can get a list of all of the changed attributes on the model as well:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">changed</span> <span class="c1"># =&gt; [&quot;name&quot;]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  You can get the original value using the <code>attr_was</code> method as well:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">name_was</span> <span class="c1">#=&gt; &quot;IBM ThinkPad&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  You can view a list of all of the original values using the <code>changed_attributes</code> method as well:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">changed_attributes</span> <span class="c1"># =&gt; {&quot;name&quot; =&gt; &quot;IBM ThinkPad&quot;}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  You can list all of the changes on the model using the <code>changes</code> method as well:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">changes</span> <span class="c1"># =&gt; {&quot;name&quot; =&gt; [&quot;IBM ThinkPad&quot;, &quot;Mac Pro&quot;]}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  You can view changes that were made even after the model was saved using the <code>previous_changes</code> method as well:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">pre</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;prettyprint&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="n">product</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'>  <span class="n">product</span><span class="o">.</span><span class="n">changes</span> <span class="c1"># =&gt; {}</span>
+</span><span class='line'>  <span class="n">product</span><span class="o">.</span><span class="n">previous_changes</span> <span class="c1"># =&gt; {&quot;name&quot; =&gt; [&quot;IBM ThinkPad&quot;, &quot;Mac Pro&quot;]}</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/pre&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  You can view changes that were made even after the model was saved using the <code>previous_changes</code> method as well:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">pre</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;prettyprint&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="n">product</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'>  <span class="n">product</span><span class="o">.</span><span class="n">changes</span> <span class="c1"># =&gt; {}</span>
+</span><span class='line'>  <span class="n">product</span><span class="o">.</span><span class="n">previous_changes</span> <span class="c1"># =&gt; {&quot;name&quot; =&gt; [&quot;IBM ThinkPad&quot;, &quot;Mac Pro&quot;]}</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/pre&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  You can reset the model using the reload! method as well:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">reload!</span>
+</span><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">previous_changes</span> <span class="c1"># =&gt; {}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, for more detail <a href="http://api.rubyonrails.org/classes/ActiveModel/Dirty.html" target="_blank">Ruby on Rails API</a>. That&#8217;s it! See ya!
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/02/18/ruby-download-file-via-ftp/">Ruby Download File via FTP</a></h1>
     
     
@@ -2342,186 +2557,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/28/chicagoboss-installation/">ChicagoBoss Installation</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-28T22:52:00+07:00" pubdate data-updated="true">Jan 28<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/logo_chicagoboss.svg" alt="ChicagoBoss Installation" />
-</p>
-
-
-
-
-<p>
-  <h3>Overview</h3>
-</p>
-
-
-
-
-<p>
-  In software development, using a framework is almost a rule for fast, clean, easy readable and standardized coding. Chicago Boss (<a href="http://www.chicagoboss.org/" target="_blank">http://www.chicagoboss.org</a>)is a framework that is heavily inspired by Rails. Set up and use Chicago Boss is easy as falling off a log. Chicago Boss allows you to code with the aforementioned standards in Erlang. Plus, offers conveniences of modern web development, including WebSocket and Comet. Basic features of Chicago Boss listed below:<br/>
-  - 100% asynchronous I/O<br/>
-  - Support for Erlang and Elixir code<br/>
-  - BossDB: Database connection layer with an advanced ORM which with built-in support for Mnesia, MongoDB, MySQL, PostgreSQL, Riak and Tokyo Tyrant<br/>
-  - BossCache: Database caching layer<br/>
-  - BossMQ: Cluster–wide, channel–based message queue<br/>
-  - BossRouter: URL router<br/>
-  - BossSession: Session storage layer<br/>
-  - BossNews: Event listener, model event system<br/>
-  - BossMail: Built-in email server<br/>
-  - Django and Jade template support<br/>
-  - Very clean controllers as result of pattern matching<br/>
-  - Auto document generation for models<br/>
-  - An useful admin interface<br/>
-  - Automatic code reloading
-</p>
-
-
-
-
-<p>
-  <img src="/images/hand_chicagoboss.png" alt="ChicagoBoss Installation" width="200" />
-</p>
-
-
-
-
-<p>
-  <h3>Installation</h3>
-</p>
-
-
-
-
-<p>
-  This short guide will help you get Chicago Boss installed and working on your system. Chicago Boss generally isn’t installed to global system path. Typically, Chicago Boss will be copied to a development directory in your path.
-</p>
-
-
-
-
-<p>
-  <strong>Requirement</strong><br/>
-  Chicago Boss is written in the Erlang programming language, so naturally you will need to install Erlang on your system. You may remember my previous article post about <a href="http://geekhmer.github.io/blog/2015/01/14/install-erlang-using-repository-on-ubuntu/">Install Erlang Using Repository on Ubuntu</a>.
-</p>
-
-
-
-
-<p>
-  <strong>Download a Chicago Boss</strong><br/>
-  Download the Chicago Boss source code from here: <a href="http://www.chicagoboss.org/" target="_blank">http://www.chicagoboss.org</a>.
-</p>
-
-
-
-
-<p>
-  <strong>Open the Archive</strong><br/>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">tar</span> <span class="n">xzf</span> <span class="no">ChicagoBoss</span><span class="o">-*.</span><span class="n">*</span><span class="o">.</span><span class="n">*</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Compile the Code</strong><br/>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">cd</span> <span class="no">ChicagoBoss</span><span class="o">-*.</span><span class="n">*</span><span class="o">.</span><span class="n">*</span>
-</span><span class='line'><span class="n">make</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Create a New Project</strong><br/>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">make</span> <span class="n">app</span> <span class="no">PROJECT</span><span class="o">=</span><span class="n">project_name</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Enter the New Project Dir and Run the Development Server</strong><br/>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">cd</span> <span class="o">.</span><span class="n">.</span><span class="o">/</span><span class="n">project_name</span>
-</span><span class='line'><span class="o">.</span><span class="n">/init</span><span class="o">-</span><span class="n">dev</span><span class="o">.</span><span class="n">sh</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Enjoya</strong><br/>
-  Point your browser to http://localhost:8001<br/>
-  If all is well you will see a forbidding error message about the requested template — not to worry, the new project is empty so there is nothing to serve.
-</p>
-
-
-
-
-<p>
-  So far so good, see you in the next articles. :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -2550,6 +2585,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/02/27/how-to-debug-a-ruby-on-rails-application/">How to Debug a Ruby on Rails Application</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/02/23/actionpack-variants-on-rails/">ActionPack Variants on Rails</a>
       </li>
     
@@ -2565,10 +2604,6 @@
         <a href="/blog/2015/02/22/customize-the-ruby-on-rails-application-generator/">Customize the Ruby on Rails Application Generator</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2015/02/21/liquid-on-rails/">Liquid on Rails</a>
-      </li>
-    
   </ul>
 </section>
 <section>
@@ -2580,7 +2615,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby/">Ruby [ 47 ]</a>
+        <a href="/blog/categories/ruby/">Ruby [ 48 ]</a>
       </li>
     
       <li>
@@ -2588,7 +2623,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 35 ]</a>
+        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 36 ]</a>
       </li>
     
       <li>
