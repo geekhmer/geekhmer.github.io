@@ -5,13 +5,13 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Category: Websocket - GeeKhmer</title>
+  <title>Ruby on Rails Passing Optional Locals to Partials - GeeKhmer</title>
   <meta name="author" content="Bunlong Van">
   
   
-  <meta name="description" content="Category: Websocket">
+  <meta name="description" content="The website of computer programming Ruby, Ruby on Rails, Erlang, Chicagoboss and Javascript base in Cambodia.">
 
-  <meta name="keywords" content="geekhmer,khmer,cambodia,geek khmer,khmer geek,geek cambodia,cambodia geek,hacker,khmer hacker,hacker khmer,hacking,coding,programming,testing,Ruby,Ruby khmer,khmer Ruby,Rubyist,khmer Rubyist,Rubyist khmer,Rubyist cambodia,cambodia Rubyist,Ruby on Rails,Ruby on Rails khmer,khmer Ruby on Rails,Cambodia Ruby,Ruby Cambodia,Cambodia Ruby on Rails,Ruby on Rails Cambodia,RSpec TDD,RSpec BDD,facebook,computer general,networking,Chicagoboss,erlang,Erlang,Khmer Chicagoboss, Chicagoboss Khmer,Cambodia Chicagoboss,Chicagoboss Cambodia,Khmer Erlang,Erlang Khmer,Cambodia Erlang, Erlang Cambodia">
+  <meta name="keywords" content="Ruby on Rails Passing Optional Locals to Partials, Ruby on Rails Passing Optional Locals to Partial">
 
   <!-- http://t.co/dKP3o1e -->
   <meta name="HandheldFriendly" content="True">
@@ -19,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://geekhmer.github.ioblog/categories/websocket">
+  <link rel="canonical" href="http://geekhmer.github.io/blog/2015/03/02/ruby-on-rails-passing-optional-locals-to-partials">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="" rel="alternate" title="GeeKhmer" type="application/atom+xml">
@@ -70,50 +70,177 @@
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
   <header>
-    <h1 class="entry-title">Category: Websocket</h1>
+    
+      <h1 class="entry-title">Ruby on Rails Passing Optional Locals to Partials</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-03-02T23:32:00+07:00" pubdate data-updated="true">Mar 2<span>nd</span>, 2015</time>
+        
+      </p>
     
   </header>
-  
-  <div id="blog-archives" class="category">
+
+
+<div class="entry-content"><p>
+  <img src="/images/ruby_on_rails.png" width="400" alt="Ruby on Rails Passing Optional Locals to Partials" />
+</p>
 
 
 
-  
-  <h2>2014</h2>
 
-<article>
-  
-<h1><a href="/blog/2014/02/04/ruby-websocket-and-real-time-app-tutorial/">ruby websocket and real-time app tutorial</a></h1>
-<time datetime="2014-02-04T21:12:00+07:00" pubdate><span class='month'>Feb</span> <span class='day'>04</span> <span class='year'>2014</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/ruby/'>Ruby</a>, <a class='category' href='/blog/categories/websocket/'>Websocket</a></span>
-</footer>
-
-
-</article>
+<p>
+  When passing locals to Rails partials, you might run into cases where you need to pass optional locals in some places, but don’t want to pass it in every other place where you use the partial.
+</p>
 
 
 
-<article>
-  
-<h1><a href="/blog/2014/01/31/what-is-websocket/">What is Websocket?</a></h1>
-<time datetime="2014-01-31T13:05:00+07:00" pubdate><span class='month'>Jan</span> <span class='day'>31</span> <span class='year'>2014</span></time>
 
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/websocket/'>Websocket</a></span>
-</footer>
+<p>
+  As an example, you have a <code>_post</code> partial which you render like this:
+</p>
 
 
-</article>
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">render</span> <span class="s1">&#39;post&#39;</span><span class="p">,</span> <span class="ss">post</span><span class="p">:</span> <span class="n">post</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And now you want to render the same partial from another view, but this time you want to pass a boolean flag to tell the partial to render the author bio as well:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">render</span> <span class="s1">&#39;post&#39;</span><span class="p">,</span> <span class="ss">post</span><span class="p">:</span> <span class="n">post</span><span class="p">,</span> <span class="n">show_author_bio</span><span class="p">:</span> <span class="kp">true</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If we used the <code>show_author_bio</code> local in the partial, it would break the other view which does not know this local. To use it safely, we can use the <code>local_assigns</code> hash:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;&lt;</span><span class="sx">%= post.title %&gt;&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">&lt;% if local_assigns[:show_author_bio] %&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%=</span> <span class="n">render</span> <span class="s1">&#39;author_bio&#39;</span><span class="p">,</span> <span class="ss">author</span><span class="p">:</span> <span class="n">post</span><span class="o">.</span><span class="n">author</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">&lt;% end %&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;%=</span> <span class="n">post</span><span class="o">.</span><span class="n">body</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We’re using it for passing a boolean value here, we could pass in any other object as well. For instance, we could pass in an optional author object:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">% if </span><span class="n">local_assigns</span><span class="o">.</span><span class="n">has_key?</span><span class="p">(</span><span class="ss">:author</span><span class="p">)</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%= render &#39;author_bio&#39;, author: author %&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% end </span><span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See yar!!! :)
+</p>
 
 </div>
 
+
+  <footer>
+    <p class="meta">
+      
   
+
+<span class="byline author vcard">Posted by <span class="fn">Bunlong Van</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-03-02T23:32:00+07:00" pubdate data-updated="true">Mar 2<span>nd</span>, 2015</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ruby/'>Ruby</a>, <a class='category' href='/blog/categories/ruby-on-rails/'>Ruby on Rails</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2015/03/02/ruby-on-rails-passing-optional-locals-to-partials/" data-via="" data-counturl="http://geekhmer.github.io/blog/2015/03/02/ruby-on-rails-passing-optional-locals-to-partials/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/02/27/how-to-debug-a-ruby-on-rails-application/" title="Previous Post: How to Debug a Ruby on Rails Application">&laquo; How to Debug a Ruby on Rails Application</a>
+      
+      
+    </p>
+  </footer>
 </article>
+
 
 </div>
 

@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-03-02T00:40:55+07:00</updated>
+  <updated>2015-03-02T23:59:13+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,104 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails Passing Optional Locals to Partials]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/03/02/ruby-on-rails-passing-optional-locals-to-partials/"/>
+    <updated>2015-03-02T23:32:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/03/02/ruby-on-rails-passing-optional-locals-to-partials</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="Ruby on Rails Passing Optional Locals to Partials" />
+</p>
+
+
+
+
+<p>
+  When passing locals to Rails partials, you might run into cases where you need to pass optional locals in some places, but don’t want to pass it in every other place where you use the partial.
+</p>
+
+
+
+
+<p>
+  As an example, you have a <code>_post</code> partial which you render like this:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">render</span> <span class="s1">&#39;post&#39;</span><span class="p">,</span> <span class="ss">post</span><span class="p">:</span> <span class="n">post</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And now you want to render the same partial from another view, but this time you want to pass a boolean flag to tell the partial to render the author bio as well:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">render</span> <span class="s1">&#39;post&#39;</span><span class="p">,</span> <span class="ss">post</span><span class="p">:</span> <span class="n">post</span><span class="p">,</span> <span class="n">show_author_bio</span><span class="p">:</span> <span class="kp">true</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If we used the <code>show_author_bio</code> local in the partial, it would break the other view which does not know this local. To use it safely, we can use the <code>local_assigns</code> hash:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;&lt;</span><span class="sx">%= post.title %&gt;&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">&lt;% if local_assigns[:show_author_bio] %&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%=</span> <span class="n">render</span> <span class="s1">&#39;author_bio&#39;</span><span class="p">,</span> <span class="ss">author</span><span class="p">:</span> <span class="n">post</span><span class="o">.</span><span class="n">author</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">&lt;% end %&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;%=</span> <span class="n">post</span><span class="o">.</span><span class="n">body</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We’re using it for passing a boolean value here, we could pass in any other object as well. For instance, we could pass in an optional author object:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">% if </span><span class="n">local_assigns</span><span class="o">.</span><span class="n">has_key?</span><span class="p">(</span><span class="ss">:author</span><span class="p">)</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%= render &#39;author_bio&#39;, author: author %&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% end </span><span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See yar!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[How to Debug a Ruby on Rails Application]]></title>
@@ -3881,293 +3979,6 @@
 
 <p>
   So far so good, now you should have git installed and ready to use on your system. To learn more about how to use Git, check out these: <a href="https://try.github.io/levels/1/challenges/1" target="_blank">www.try.github.io</a>
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails connect to Multiple Databases And Migrations]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/02/07/ruby-on-rails-connect-to-multiple-databases-and-migrations/"/>
-    <updated>2015-02-07T23:32:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/02/07/ruby-on-rails-connect-to-multiple-databases-and-migrations</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="Ruby on Rails connect to Multiple Databases And Migrations" />
-</p>
-
-
-
-
-<p>
-  Ruby on Rails connect to Multiple Databases and using ActiveRecord with multiple databases, it’s really simple take it easy. Let’s run through this.
-</p>
-
-
-
-
-<p>
-  <strong>Rake Tasks</strong><br/>
-   Well, I want to handle migrations for two databases, so I need two separate Rake tasks to handle that:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">desc</span> <span class="s2">&quot;Migrate the database through scripts in db/migrate directory.&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">namespace</span> <span class="ss">:db</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">task</span> <span class="ss">:migrate</span> <span class="k">do</span>
-</span><span class='line'>    <span class="ss">Rake</span><span class="p">:</span><span class="ss">:Task</span><span class="o">[</span><span class="s2">&quot;db:migrate_db1&quot;</span><span class="o">].</span><span class="n">invoke</span>
-</span><span class='line'>    <span class="ss">Rake</span><span class="p">:</span><span class="ss">:Task</span><span class="o">[</span><span class="s2">&quot;db:migrate_db2&quot;</span><span class="o">].</span><span class="n">invoke</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">task</span> <span class="ss">:migrate_db1</span> <span class="k">do</span>
-</span><span class='line'>    <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">establish_connection</span> <span class="no">DB1_CONF</span>
-</span><span class='line'>    <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migrator</span><span class="o">.</span><span class="n">migrate</span><span class="p">(</span><span class="s2">&quot;db/migrate/db1/&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">task</span> <span class="ss">:migrate_db2</span> <span class="k">do</span>
-</span><span class='line'>    <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">establish_connection</span> <span class="no">DB2_CONF</span>
-</span><span class='line'>    <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migrator</span><span class="o">.</span><span class="n">migrate</span><span class="p">(</span><span class="s2">&quot;db/migrate/db2/&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  My first task is <code>db:migrate</code> that delegates out to <code>db:migrate_db1</code> & <code>db:migrate_db2</code>.
-</p>
-
-
-
-
-<p>
-  Each of those establish a connection to the database and then runs the migrations from their own separate folders. This allows you to store migrations in separate folders so you can easily manage them.
-</p>
-
-
-
-
-<p>
-  The migrations are exactly the same as normal.
-</p>
-
-
-
-
-<p>
-  <strong>Database Connections</strong><br/>
-  In order to get those migrations to work, I need to configure the database connections. I&#8217;m going to define everything in the <code>database.yml</code> just like normal, but with a different naming convention:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>database.yml </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">defaults</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">defaults</span>
-</span><span class='line'>  <span class="ss">username</span><span class="p">:</span> <span class="n">root</span>
-</span><span class='line'>  <span class="ss">password</span><span class="p">:</span> <span class="mi">1234567</span>
-</span><span class='line'>  <span class="ss">adapter</span><span class="p">:</span> <span class="n">mysql2</span>
-</span><span class='line'>  <span class="ss">encoding</span><span class="p">:</span> <span class="n">utf8</span>
-</span><span class='line'>  <span class="ss">collation</span><span class="p">:</span> <span class="n">utf8_unicode_ci</span>
-</span><span class='line'>
-</span><span class='line'><span class="ss">db1</span><span class="p">:</span>
-</span><span class='line'>  <span class="ss">development</span><span class="p">:</span>
-</span><span class='line'>    <span class="ss">database</span><span class="p">:</span> <span class="n">db1_development</span>
-</span><span class='line'>    <span class="ss">host</span><span class="p">:</span> <span class="n">localhost</span>
-</span><span class='line'>    <span class="o">&lt;&lt;</span><span class="p">:</span> <span class="o">*</span><span class="n">defaults</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nb">test</span><span class="p">:</span>
-</span><span class='line'>    <span class="ss">database</span><span class="p">:</span> <span class="n">db1_test</span>
-</span><span class='line'>    <span class="ss">host</span><span class="p">:</span> <span class="n">localhost</span>
-</span><span class='line'>    <span class="o">&lt;&lt;</span><span class="p">:</span> <span class="o">*</span><span class="n">defaults</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="ss">staging</span><span class="p">:</span>
-</span><span class='line'>    <span class="ss">database</span><span class="p">:</span> <span class="n">db1_staging</span>
-</span><span class='line'>    <span class="ss">host</span><span class="p">:</span> <span class="n">localhost</span>
-</span><span class='line'>    <span class="o">&lt;&lt;</span><span class="p">:</span> <span class="o">*</span><span class="n">defaults</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="ss">production</span><span class="p">:</span>
-</span><span class='line'>    <span class="ss">database</span><span class="p">:</span> <span class="n">db1_production</span>
-</span><span class='line'>    <span class="ss">host</span><span class="p">:</span> <span class="n">localhost</span>
-</span><span class='line'>    <span class="o">&lt;&lt;</span><span class="p">:</span> <span class="o">*</span><span class="n">defaults</span>
-</span><span class='line'>
-</span><span class='line'><span class="ss">db2</span><span class="p">:</span>
-</span><span class='line'>  <span class="ss">development</span><span class="p">:</span>
-</span><span class='line'>    <span class="ss">database</span><span class="p">:</span> <span class="n">db2_development</span>
-</span><span class='line'>    <span class="ss">host</span><span class="p">:</span> <span class="n">localhost</span>
-</span><span class='line'>    <span class="o">&lt;&lt;</span><span class="p">:</span> <span class="o">*</span><span class="n">defaults</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nb">test</span><span class="p">:</span>
-</span><span class='line'>    <span class="ss">database</span><span class="p">:</span> <span class="n">db2_test</span>
-</span><span class='line'>    <span class="ss">host</span><span class="p">:</span> <span class="n">localhost</span>
-</span><span class='line'>    <span class="o">&lt;&lt;</span><span class="p">:</span> <span class="o">*</span><span class="n">defaults</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="ss">staging</span><span class="p">:</span>
-</span><span class='line'>    <span class="ss">database</span><span class="p">:</span> <span class="n">db2_staging</span>
-</span><span class='line'>    <span class="ss">host</span><span class="p">:</span> <span class="n">localhost</span>
-</span><span class='line'>    <span class="o">&lt;&lt;</span><span class="p">:</span> <span class="o">*</span><span class="n">defaults</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="ss">production</span><span class="p">:</span>
-</span><span class='line'>    <span class="ss">database</span><span class="p">:</span> <span class="n">db2_production</span>
-</span><span class='line'>    <span class="ss">host</span><span class="p">:</span> <span class="n">localhost</span>
-</span><span class='line'>    <span class="o">&lt;&lt;</span><span class="p">:</span> <span class="o">*</span><span class="n">defaults</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  I configure two separate databases db1 & db2.
-</p>
-
-
-
-
-<p>
-  Then I need to configure the app to load these now. I open <code>application.rb</code> or environment file(s):
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>application.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;ENV&#39;</span><span class="o">]</span> <span class="o">||=</span> <span class="s1">&#39;development&#39;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">db_conf</span> <span class="o">=</span> <span class="ss">YAML</span><span class="p">:</span><span class="ss">:load</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="no">APP_PATH</span><span class="p">,</span><span class="s1">&#39;config&#39;</span><span class="p">,</span><span class="s1">&#39;database.yml&#39;</span><span class="p">)))</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">DB1_CONF</span> <span class="o">=</span> <span class="n">db_conf</span><span class="o">[</span><span class="s2">&quot;db1&quot;</span><span class="o">][</span><span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;ENV&#39;</span><span class="o">]]</span>
-</span><span class='line'><span class="no">DB2_CONF</span> <span class="o">=</span> <span class="n">db_conf</span><span class="o">[</span><span class="s2">&quot;db2&quot;</span><span class="o">][</span><span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;ENV&#39;</span><span class="o">]]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Take a look at what&#8217;s going on:<br/>
-  - I set the database configuration to use. You can just use Rails.env here instead of ENV[&#8216;ENV&#8217;].<br/>
-  - I load up the database.yml config and parse it with YAML.<br/>
-  - I grab the configuration from the file for each db and the correct environment that I&#8217;m running in.<br/>
-</p>
-
-
-
-
-<p>
-  <strong>Connecting Models</strong><br/>
-  When I&#8217;m working with multiple databases, I like to explicitly setup the connections inside the models themselves instead of inheriting from ActiveRecord::Base and using subclasses.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>user.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">establish_connection</span> <span class="no">DB1_CONF</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span>product.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Product</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">establish_connection</span> <span class="no">DB2_CONF</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Well, All you really need to do is load the configurations, establish the database connections, and setup the migrations to load from a specific directory for each database.
-</p>
-
-
-
-
-<p>
-  So far so good, See ya! :)
 </p>
 
 ]]></content>
