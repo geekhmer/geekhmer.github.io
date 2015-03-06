@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby on Rails | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby-on-rails/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-03-03T21:12:33+07:00</updated>
+  <updated>2015-03-07T01:07:08+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,727 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Versioning with PaperTrail on Rails]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/03/03/versioning-with-papertrail-on-rails/"/>
+    <updated>2015-03-03T21:28:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/03/03/versioning-with-papertrail-on-rails</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="Versioning with PaperTrail on Rails" />
+</p>
+
+
+
+
+<p>
+  Imagine the situation, You open your website’s admin page to do some clean up, find some old data that hasn’t been viewed by anyone for ages, and delete it. Deletion succeeds and everything is okay, but after a second "No!!! That data contained VERY IMPORTANT INFORMATION that could possibly change the world!", you realize. But, it’s gone and the world remains unchanged (well, there is still a chance for recovery if you have a backup of the Database).
+</p>
+
+
+
+
+<p>
+  Can we prevent this situation in our Rails application? Yes, for sure we can. Well, in this article, we are going to talk about how to implement a "History" page and an "undo" button (as well as "redo") with the help of the <code>paper_trail</code> gem.
+</p>
+
+
+
+
+<p>
+  We are going to build a simple blog that allows to add, update, and destroy posts. And would be able to undo every action related to the posts (for example, undoing an unintentional delete). We will also provide a "History" page displaying a list of actions (and some other info) that users performed while working with posts.
+</p>
+
+
+
+
+<p>
+  <strong>Create Rails Project</strong><br/>
+  Run command below to create a new Rails application:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="kp">new</span> <span class="n">blog</span> <span class="o">-</span><span class="n">d</span> <span class="n">mysql</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>Add Gems</strong><br/>
+  We will add a gems to our Gemfile. paper_trail, it will help us to create both the “History” page and an “undo” button:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">paper_trail</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">~&gt;</span> <span class="mi">3</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  The blog app has one controller (apart from the ApplicationController), PostsController, that will be used to manage our posts. Initially, it has seven default methods: index, new, create, destroy, edit and update, along with a number of views related to them. I will not go into the details on how to create these methods and views, because they are really basic (you can create them using rails g scaffold Posts).
+</p>
+
+
+
+
+<p>
+  The blog contains a model: Post. The posts table have the following columns: id, title, body, created_at, updated_at.
+</p>
+
+
+
+
+<p>
+  And routes file will looks like:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">posts</span><span class="c1">#index&amp;rsquo;</span>
+</span><span class='line'><span class="n">resources</span> <span class="ss">:posts</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  At this point, we are ready to setup paper_trail. First of all, create a special table to store the versions (it’s a cool feature of paper_trail – if we want to clear old versions later, we would need only to access one table).
+</p>
+
+
+
+
+<p>
+  Run command below to generate and migrate paper_trail:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="nb">exec</span> <span class="n">rails</span> <span class="n">generate</span> <span class="n">paper_trail</span><span class="ss">:install</span>
+</span><span class='line'><span class="n">bundle</span> <span class="nb">exec</span> <span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Create and apply the required migration. Add the following line to your Post model (app/models/post.rb):
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>post.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">has_paper_trail</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Well! Now, all changes to the posts table will be audited automatically. How cool is that?
+</p>
+
+
+
+
+<p>
+  You can also specify which changes should not be tracked. For example, if posts had a view_count column in and we did not want to track changes to it, the modification looks like in (app/models/post.rb):
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>post.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">has_paper_trail</span> <span class="ss">ignore</span><span class="p">:</span> <span class="o">[</span><span class="ss">:view_count</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Some fields can be skipped, they will neither be tracked nor included in the serialized version of the object (app/models/post.rb):
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>post.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">has_paper_trail</span> <span class="ss">skip</span><span class="p">:</span> <span class="o">[</span><span class="ss">:view_count</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Or can specified as well (app/models/post.rb):
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>post.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">has_paper_trail</span> <span class="ss">on</span><span class="p">:</span> <span class="o">[</span><span class="ss">:update</span><span class="p">,</span> <span class="ss">:create</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Or provide conditions on whether to track the event:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>post.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">has_paper_trail</span> <span class="k">if</span><span class="p">:</span> <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span> <span class="n">t</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="mi">10</span> <span class="p">},</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;            unless: Proc.new { |t| t.body.blank? }</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>Display the Log</strong><br/>
+  Now, you probably want to display the audited versions, It’s easy, just, add the following route:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">posts</span><span class="c1">#index&amp;rsquo;</span>
+</span><span class='line'><span class="n">resources</span> <span class="ss">:posts</span>
+</span><span class='line'><span class="n">get</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">/</span><span class="n">posts</span><span class="o">/</span><span class="n">history</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="ss">to</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">posts</span><span class="c1">#history&amp;rsquo;, as: :posts_history</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  To the history page for Posts. If your app has many models that are being audited, it’s a good idea to create a separate VersionsController and place all versions-related methods there. However, in our case, only the Post model is being audited, so let’s stick with one controller.
+</p>
+
+
+
+
+<p>
+  Add a history method to the controller (app/controllers/posts_controller.rb):
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>posts_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">history</span>
+</span><span class='line'>  <span class="vi">@versions</span> <span class="o">=</span> <span class="ss">PaperTrail</span><span class="p">:</span><span class="ss">:Version</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">created_at</span> <span class="no">DESC</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Note that we have to use PaperTrail::Version, not just Version. This line of code extracts all the recorded events from the versions table that we have created earlier and sorts them by the creation date. In a real app, paginating these events by using will_paginate or kaminari gem is advisable.
+</p>
+
+
+
+
+<p>
+  Rendering the view history (app/views/posts/history.html.erb):
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>history.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;div class=&quot;container&quot;&gt;</span>
+</span><span class='line'><span class="sr">  &lt;h1&gt;History&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">ul</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="sx">% @versions.each </span><span class="k">do</span> <span class="o">|</span><span class="n">version</span><span class="o">|</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">      &lt;li&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="sx">%= l(version.created_at, format: &quot;%-d.%m.%Y %H:%M:%S %Z&quot;) %&gt;&lt;br/&gt;</span>
+</span><span class='line'><span class="sx">        Event ID: &lt;%=</span> <span class="n">version</span><span class="o">.</span><span class="n">id</span> <span class="sx">%&gt;&lt;br/&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="ss">Target</span><span class="p">:</span><span class="o">&lt;</span><span class="sr">/b&gt; &lt;%= version.item_type %&gt;</span>
+</span><span class='line'><span class="sr">        &lt;small&gt;(id: &lt;%= version.item_id %&gt;)&lt;/sm</span><span class="n">all</span><span class="o">&gt;</span><span class="p">;</span> <span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="n">action</span><span class="o">&lt;</span><span class="sr">/b&gt; &lt;%= version.event %&gt;;&lt;br/</span><span class="o">&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'>          <span class="no">More</span> <span class="ss">info</span><span class="p">:</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;%=</span> <span class="n">version</span><span class="o">.</span><span class="n">object</span> <span class="sx">%&gt;&lt;/pre&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span><span class='line'><span class="sr">      &lt;/</span><span class="n">li</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="sx">% end %&gt;</span>
+</span><span class='line'><span class="sx">  &lt;/ul&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Here is the data being displayed:
+</p>
+
+
+<table>
+<thead>
+<tr>
+<th>Data </th>
+<th> Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>version.created_at </td>
+<td> When this event took place.</td>
+</tr>
+<tr>
+<td>version.id </td>
+<td> ID of this event.</td>
+</tr>
+<tr>
+<td>version.item_type </td>
+<td> Model name for the event. In our case, it’s Post.</td>
+</tr>
+<tr>
+<td>version.item_id </td>
+<td> ID of the resource (Post) that was changed.</td>
+</tr>
+<tr>
+<td>version.event </td>
+<td> The action applied to the resource (create, update, destroy).version.object, Full dump of the resource that was changed.</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>
+  <br/>
+  There are some things that could be improved. For example, which fields were changed (especially for the update action)? Well, that is very easy to implement.
+</p>
+
+
+
+
+<p>
+  Run command below to create and apply migration:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">migration</span> <span class="n">add_object_changes_to_versions</span> <span class="n">object_changes</span><span class="ss">:text</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  This can also be done when setting up paper_trail. You just need to provide an appropriate option to the generator below:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">generate</span> <span class="n">paper_trail</span><span class="ss">:install</span> <span class="o">&amp;</span><span class="n">mdash</span><span class="p">;</span><span class="n">with</span><span class="o">-</span><span class="n">changes</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  No further action is required, paper_trail will automatically diff the versions.
+</p>
+
+
+
+
+<p>
+  Now, we can add a new div with version.changeset block to our view (app/views/posts/history.html.erb):
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>history.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[&amp;</span><span class="n">hellip</span><span class="p">;</span><span class="o">]&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;div&gt;</span>
+</span><span class='line'><span class="sr">  Changeset:</span>
+</span><span class='line'><span class="sr">  &lt;pre&gt;&lt;%= version.changeset %&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;[&amp;hellip;]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  It will display attribute values before and after the event (if an attribute remained unchanged it will not be displayed).
+</p>
+
+
+
+
+<p>
+  <strong>Track User-Specific Information</strong><br/>
+  Okay, now we know when of our precious blog post deletion. But, we don’t know who, High time to fix this issue.
+</p>
+
+
+
+
+<p>
+  Let’s track an IP address of the user responsible for the action. Of course, an IP address can be forged, but the main point here is to explain how to store metadata alongside with the event’s data. Go on and create a new migration below:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">migration</span> <span class="n">add_ip_to_versions</span> <span class="ss">ip</span><span class="p">:</span><span class="n">string</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  paper_trail will not store anything in the ip column, by default, so we need to help it out a bit. Add this method to the ApplicationController (app/controllers/application_controller.rb):
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>application_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">info_for_paper_trail</span>
+</span><span class='line'>  <span class="p">{</span> <span class="ss">ip</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">remote_ip</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  paper_trail will use this method to fetch some additional info and store it as metadata. If you are using Rails 3 or protected_attributes with Rails 4, you will also need to create an initializer (initializers/paper_trail.rb):
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>paper_trail.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">PaperTrail</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">Version</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;attr_accessible :ip</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Metadata can also be provided in the model (app/models/post.rb) like this (presuming we have a timestamp column):
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>post.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">has_paper_trail</span> <span class="ss">meta</span><span class="p">:</span> <span class="p">{</span> <span class="ss">timestamp</span><span class="p">:</span> <span class="no">Time</span><span class="o">.</span><span class="n">now</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  The last thing to do is add a line into view (app/views/posts/history.html.erb):
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>history.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[&amp;</span><span class="n">hellip</span><span class="p">;</span><span class="o">]</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="no">Remote</span> <span class="ss">address</span><span class="p">:</span><span class="o">&lt;</span><span class="sr">/b&gt; &amp;lt;%= version.ip %&gt;&lt;br/</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">[&amp;</span><span class="n">hellip</span><span class="p">;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>Undo an Action</strong><br/>
+  Let’s move on, allowing the user to undo their actions. Create undo method in posts controller (app/controllers/posts_controller.rb) that will undo the requested action:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>posts_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">undo</span>
+</span><span class='line'>  <span class="vi">@post_version</span> <span class="o">=</span> <span class="ss">PaperTrail</span><span class="p">:</span><span class="ss">:Version</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  begin&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">if</span> <span class="vi">@post_version</span><span class="o">.</span><span class="n">reify</span>
+</span><span class='line'>  <span class="vi">@post_version</span><span class="o">.</span><span class="n">reify</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'><span class="k">else</span>
+</span><span class='line'>  <span class="vi">@post_version</span><span class="o">.</span><span class="n">item</span><span class="o">.</span><span class="n">destroy</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="n">flash</span><span class="o">[</span><span class="ss">:success</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;Undid that...&quot;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">rescue</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;flash[:alert] = &quot;Failed undoing the action...&quot;</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  ensure&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">redirect_to</span> <span class="n">root_path</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  The above code, find a version by id and then check if there are previous versions available for the resource using the reify method, this method will return nil if the resource was just created in the current version (obviously, if the resource was just created it does not have any previous versions.) Either rollback to the previous version using @post_version.reify.save or destroy the newly created resource using @post_version.item.destroy (the @post_version.item returns the actual resource).
+</p>
+
+
+
+
+<p>
+  And routes file will looks like:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">posts</span><span class="c1">#index&amp;rsquo;</span>
+</span><span class='line'><span class="n">resources</span> <span class="ss">:posts</span>
+</span><span class='line'><span class="n">get</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">/</span><span class="n">posts</span><span class="o">/</span><span class="n">history</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="ss">to</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">posts</span><span class="c1">#history&amp;rsquo;, as: :posts_history</span>
+</span><span class='line'><span class="n">post</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">/</span><span class="n">posts</span><span class="o">/</span><span class="ss">:id</span><span class="o">/</span><span class="n">undo</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="ss">to</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">posts</span><span class="c1">#undo&amp;rsquo;, as: :undo</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Then put this undo link into the flash message, so make sure to render it somewhere in your layout (app/views/layouts/application.html.erb):
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>application.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;div class=&quot;container&quot;&gt;</span>
+</span><span class='line'><span class="sr">  &lt;% flash.each do |key, value| %&gt;</span>
+</span><span class='line'><span class="sr">    &lt;div class=&quot;alert alert-&lt;%= key %&gt;&quot;&gt;</span>
+</span><span class='line'><span class="sr">      &lt;button type=&quot;button&quot; class=&quot;close&quot; data-dismiss=&quot;alert&quot;&gt;&amp;times;&lt;/</span><span class="n">button</span><span class="o">&gt;</span>
+</span><span class='line'>      <span class="o">&lt;%=</span> <span class="n">value</span><span class="o">.</span><span class="n">html_safe</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">    &lt;/div&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="sx">% end %&gt;</span>
+</span><span class='line'><span class="sx">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Then create a private method in the PostsController that generates an undo link:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>posts_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[&amp;</span><span class="n">hellip</span><span class="p">;</span><span class="o">]</span>
+</span><span class='line'><span class="kp">private</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">make_undo_link</span>
+</span><span class='line'><span class="err">  </span><span class="n">view_context</span><span class="o">.</span><span class="n">link_to</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">Undo</span> <span class="n">that</span> <span class="n">plz!</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="n">undo_path</span><span class="p">(</span><span class="vi">@post</span><span class="o">.</span><span class="n">versions</span><span class="o">.</span><span class="n">last</span><span class="p">),</span> <span class="nb">method</span><span class="p">:</span> <span class="ss">:post</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  We cannot use link_to inside the controller, so the reference to view_context points to the actual view. @post.versions fetches all the versions for the Post resource and @post.versions.last gets the latest one. This method can be used like this in PostsController (app/controllers/posts_controller.rb):
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>posts_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[&amp;</span><span class="n">hellip</span><span class="p">;</span><span class="o">]</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">update</span>
+</span><span class='line'>  <span class="vi">@post</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">if</span> <span class="vi">@post</span><span class="o">.</span><span class="n">update_attributes</span><span class="p">(</span><span class="n">post_params</span><span class="p">)</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;flash[:success] = &quot;Post was updated! </span><span class="si">#{</span><span class="n">make_undo_link</span><span class="si">}</span><span class="sr">&quot;</span>
+</span><span class='line'><span class="sr">redirect_to post_path(@post)</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  else&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">render</span> <span class="s1">&#39;edit&#39;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">[&amp;</span><span class="n">hellip</span><span class="p">;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Make sure to add it to the create and destroy methods as well.
+</p>
+
+
+
+
+<p>
+  Okay, I have undone an action… but now I want to redo it. Here, we should introduce a redo link that reverts the undo. There are only few modifications needed.
+</p>
+
+
+
+
+<p>
+  Then create another private method in PostsController (app/controllers/posts_controller.rb):
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>posts_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[&amp;</span><span class="n">hellip</span><span class="p">;</span><span class="o">]</span>
+</span><span class='line'><span class="kp">private</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">make_redo_link</span>
+</span><span class='line'>  <span class="n">params</span><span class="o">[</span><span class="ss">:redo</span><span class="o">]</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="kp">true</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="p">?</span> <span class="n">link</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Undo</span> <span class="n">that</span> <span class="n">plz!</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="p">:</span> <span class="n">link</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Redo</span> <span class="n">that</span> <span class="n">plz!</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">view_context</span><span class="o">.</span><span class="n">link_to</span> <span class="n">link</span><span class="p">,</span> <span class="n">undo_path</span><span class="p">(</span><span class="vi">@post_version</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="k">redo</span><span class="p">:</span> <span class="o">!</span><span class="n">params</span><span class="o">[</span><span class="ss">:redo</span><span class="o">]</span><span class="p">),</span> <span class="nb">method</span><span class="p">:</span> <span class="ss">:post</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">[&amp;</span><span class="n">hellip</span><span class="p">;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  This method is very similar to make_undo_link. The main difference is the params[:redo] which is true of false. Based on this parameter, change the text of the link – the URL actually remains unchanged. This is because redoing basically means reverting to the previous version, which is absolutely the same as the undo action.
+</p>
+
+
+
+
+<p>
+  Then alter the flash message inside the undo method in PostsController:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>posts_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[&amp;</span><span class="n">hellip</span><span class="p">;</span><span class="o">]</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">undo</span>
+</span><span class='line'><span class="o">[&amp;</span><span class="n">hellip</span><span class="p">;</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">flash</span><span class="o">[</span><span class="ss">:success</span><span class="o">]</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Undid</span> <span class="n">that!</span> <span class="c1">#{make_redo_link}&amp;rdquo;</span>
+</span><span class='line'><span class="o">[&amp;</span><span class="n">hellip</span><span class="p">;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  That’s it, users can undo and redo their actions as many times and they want, every time being recorded by paper_trail.
+</p>
+
+
+
+
+<p>
+  The only one problem is that the versions table can become fat very quickly. This should probably be handled with some background process to remove old entries. The job would use something like:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">PaperTrail</span><span class="p">:</span><span class="ss">:Version</span><span class="o">.</span><span class="n">delete_all</span> <span class="o">[&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">created_at</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="p">?</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="mi">1</span><span class="o">.</span><span class="n">week</span><span class="o">.</span><span class="n">ago</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  You also can limit the number of created versions per object by adding this line into an initializer:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">PaperTrail</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">version_limit</span> <span class="o">=</span> <span class="mi">3</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  So far so good, That's it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby on Rails Passing Optional Locals to Partials]]></title>
@@ -769,280 +1490,6 @@
 </span><span class='line'>
 </span><span class='line'>
 </span><span class='line'><span class="s2">&lt;p&gt;&lt;small&gt;Goodbye!&lt;/small&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  So far so good, That's it! See ya! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Slim Template Language]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/02/22/slim-template-language/"/>
-    <updated>2015-02-22T22:29:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/02/22/slim-template-language</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="Slim Template Language" />
-</p>
-
-
-
-
-<p>
-  Slim is a replacement for ERB, similar to HAML. Slim provides a nice lean syntax that's easy to pick up and learn. In this article we will learn how to use Slim. Let’s run through this with me.
-</p>
-
-
-
-
-<p>
-  <strong>Basic Syntax</strong><br/>
-  Slim is actually really easy to learn. Indentation matters, but the indentation depth can be chosen as you like. If you want to first indent 2 spaces, then 5 spaces, it's your choice.
-</p>
-
-
-
-
-<p>
-  Example: 
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">p</span>
-</span><span class='line'>  <span class="o">|</span> <span class="no">This</span> <span class="n">is</span> <span class="n">a</span> <span class="n">very</span> <span class="n">long</span> <span class="n">paragraph</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Which translates to:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;</span>
-</span><span class='line'><span class="sr">  This is a very long paragraph.</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  In the above example you'll notice two things. First, the pipe (|) character is used to delimit free-form text on a new line. Second, we simply used p to specify the paragraph tag. This works for any tag, for instance you could just as easily have done:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">h1</span>
-</span><span class='line'>  <span class="o">|</span> <span class="no">Large</span> <span class="no">Title</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Or more simply:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">h1</span> <span class="no">Large</span> <span class="no">Title</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  In the above example that we didn't specify the pipe (|) character. The pipe (|) character is only needed if we are entering free-form text on a new line.
-</p>
-
-
-
-
-<p>
-  You can create a div with a default class by using:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Which translates to:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;div class=&quot;class&quot;&gt;&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  You can create a div with an id by using:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;id&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Which translates to:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;div id=&quot;id&quot;&gt;&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  What about html attributes? Well, we specify them similarly to how we would in html:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">meta</span> <span class="nb">name</span><span class="o">=&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">viewport</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="n">content</span><span class="o">=&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">width</span><span class="o">=</span><span class="n">device</span><span class="o">-</span><span class="n">width</span><span class="p">,</span> <span class="n">initial</span><span class="o">-</span><span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">maximum</span><span class="o">-</span><span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">user</span><span class="o">-</span><span class="n">scalable</span><span class="o">=</span><span class="n">no</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Which translates to:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">meta</span> <span class="nb">name</span><span class="o">=</span><span class="s2">&quot;viewport&quot;</span> <span class="n">content</span><span class="o">=</span><span class="s2">&quot;width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no&quot;</span><span class="o">&gt;&lt;</span><span class="sr">/meta&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  To specify a doctype:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">doctype</span> <span class="n">html</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Which translates to:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">!</span><span class="no">DOCTYPE</span> <span class="n">html</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Well, all is great, but what about Ruby code? Inserting Ruby code is pretty easy. Code that doesn't return a result, such as if statements or loops, are prefixed with a dash (-).
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span> <span class="k">if</span> <span class="vi">@products</span><span class="o">.</span><span class="n">nil?</span>
-</span><span class='line'>  <span class="nb">p</span> <span class="no">No</span> <span class="n">results</span> <span class="n">found</span><span class="o">.</span> <span class="no">Please</span> <span class="n">try</span> <span class="n">again</span><span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Which is equivalent to:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">if</span> <span class="vi">@products</span><span class="o">.</span><span class="n">nil?</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;No results found.  Please try again.</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  &lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Slim will auto close your Ruby code as well, so end isn't needed.
-</p>
-
-
-
-
-<p>
-  If you have code that returns output, such as the printing of a variable or property, you can use the equal (=) sign.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">=</span> <span class="n">current_user</span><span class="o">.</span><span class="n">name</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Which is equivalent to:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%=</span> <span class="n">current_user</span><span class="o">.</span><span class="n">name</span> <span class="o">%&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Your strings are Rubyized:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">|</span> <span class="no">Hello</span> <span class="c1">#{user.name}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  You can embed javascript as well:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">javascript</span><span class="p">:</span>
-</span><span class='line'>  <span class="n">alert</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">hello</span> <span class="n">world!</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;)</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
