@@ -77,6 +77,223 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2014/12/01/tips-to-improve-the-performance-of-ruby-on-rails-application/">Tips to Improve the Performance of Ruby on Rails Application</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-01T22:06:00+07:00" pubdate data-updated="true">Dec 1<span>st</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/ruby_on_rails.png" alt="Tips to Improve the Performance of Ruby on Rails Application" />
+</p>
+
+
+
+
+<p>
+   In this article, I will show you tips to improve performance of Ruby on Rails application. let’s dive into those.
+</p>
+
+
+
+
+<p>
+  <strong>1. Limit Amount of Data in a Controller Method</strong><br/>
+  Thin controllers are easy to test and has a good performance profile because there’s some overhead involved in passing the controller instance variable around. In short, you need to follow &#8220;Thin controller and fat model&#8221;.
+</p>
+
+
+
+
+<p>
+  <strong>2. Split View in Separate Partials</strong><br/>
+  n this way, views will be easier to read and easier to cache.
+</p>
+
+
+
+
+<p>
+  <strong>3. Choose Right Session Storage</strong><br/>
+  Based on your level of need, choose your session storage carefully. Here are what rails provide:<br/>
+  - CookieStore – Stores everything on the client.<br/>
+  - DRbStore – Stores the data on a DRb server.<br/>
+  - MemCacheStore – Stores the data in a memcache.<br/>
+  - ActiveRecordStore – Stores the data in a database using Active Record.
+</p>
+
+
+
+
+<p>
+  <strong>4. DRY (Don&#8217;t Repeat Yourself)</strong><br/>
+  This is the most common things programmers tend to listen and don’t follow. Here is very basic example:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">if</span> <span class="no">Listing</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;Bambo&quot;</span>
+</span><span class='line'>  <span class="k">return</span> <span class="no">Listing</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'><span class="k">else</span>
+</span><span class='line'>  <span class="k">return</span> <span class="kp">nil</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  It should be written by:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">listing</span> <span class="o">=</span> <span class="no">Listing</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'><span class="k">if</span> <span class="n">listing</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;Bambp&quot;</span> <span class="k">then</span> <span class="n">listing</span> <span class="k">else</span> <span class="kp">nil</span> <span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>4. Eager Loading</strong><br/>
+  Eager loading is a way to solve the classic N + 1 query performance problem caused by inefficient use of child objects.
+</p>
+
+
+
+
+<p>
+  Let’s look at the following code. It will fetch zip of 10 users.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">users</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="ss">:limit</span> <span class="o">=&gt;</span> <span class="mi">10</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">users</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">user</span><span class="o">|</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="n">user</span><span class="o">.</span><span class="n">address</span><span class="o">.</span><span class="n">zip</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  11 queries will be executed, 1 for the top and 10. The solution is to rewrite it to eager load address:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">users</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">:address</span><span class="p">)</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">users</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">user</span><span class="o">|</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="n">user</span><span class="o">.</span><span class="n">address</span><span class="o">.</span><span class="n">zip</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>5. Indexing</strong><br/>
+  Database indexing is one of the simplest ways to improve database performance. The insert operation will become slower but will boost up fetching data which is more frequently used in web application.
+</p>
+
+
+
+
+<p>
+  <strong>6. Avoid Dynamism</strong><br/>
+  Although find_by and find_all_by dynamic methods are really cool, the are also kind of slow because each one needs to run through method_missing and parse the filename against the list of columns in database table.
+</p>
+
+
+
+
+<p>
+  <strong>7. Caching</strong><br/>
+  This is the purest way to speed up a rails application. Here are a short example of different types of caching:<br/>
+  - Page Caching<br/>
+  - Action Caching<br/>
+  - Fragment Caching<br/>
+  - SQL Caching<br/>
+  - Asset Caching<br/>
+</p>
+
+
+
+
+<p>
+  <strong>8. Image Spriting</strong><br/>
+  In websites, a significant times are consumed for loading large number of images. One way of minimizing is to sprite your images. This will reduce number of images to be served significantly.
+</p>
+
+
+
+
+<p>
+  <strong>9. Minify and GZIP Stylesheets and Javascripts</strong><br/>
+  This is the last point, but an important one. You can reduce size of the stylesheets and javascripts significantly by Minifying it and serve as GZip format. It will improve the performance significantly by reducing request/response time.
+</p>
+
+
+
+
+<p>
+  So far so good, these are pretty basic guidelines but surely help you to improve your application. Now, the bounce rate of your site should be less and you are expected to be a happier product owner. :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2014/11/29/tools-for-monitoring-performance-in-ruby-on-rails-application/">Tools for Monitoring Performance in Ruby on Rails Application</a></h1>
     
     
@@ -2027,100 +2244,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/26/guide-to-become-an-expert-ruby-slash-rails-developer/">Guide to Become an Expert Ruby/Rails Developer</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-26T09:35:00+07:00" pubdate data-updated="true">Aug 26<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/guide_ruby_rails_developer.png" width="170" />
-</p>
-
-
-
-
-<p>
-  This guide is meant to help you acquire the fundamental skills you need to become a Ruby Developer. Using books, video courses, and projects, you’ll learn how to develop web applications using Ruby, HTML & CSS, jQuery, and Rails. Additionally, you will learn about best practices, design patterns and principles, and the fundamentals of visual design. The goal is to build a solid foundation that you can expand on to become an expert Ruby Developer.
-</p>
-
-
-
-
-<p>
-  <strong>Required Reading and Courses</strong><br/>
-  1. The Passionate Programmer by Chad Fowler.<br/>
-  2. Online Ruby Course by Pragmatic Studios.<br/>
-  3. HTML & CSS by Jon Duckett.<br/>
-  4. Smashing CoffeeScript by Alex Hudson.<br/>
-  5. Don’t Make Me Think by Steve Krug.<br/>
-  6. Everyday Rails Testing with RSpec by Aaron Sumner.<br/>
-  7. Online Ruby on Rails Course by Pragmatic Studios.<br/>
-  8. Bootstrapping Design by Jarrod Drysdale.<br/>
-  9. Practical Object-Oriented Design in Ruby by Sandi Metz.
-</p>
-
-
-
-
-<p>
-  <strong>How To Use This Guide</strong><br/>
-  The best way to use this guide is to start from the Ruby section and proceed towards the CoffeeScript and jQuery section. Each section has a Core Activity and an Assessment. The core activities are meant to teach you and the assessments are meant for you to practice solving problems on your own. There are additional readings for each section for the purposes of professional development. These readings can be done in-between study sessions or during your commute to work, but don’t skip them.  I encourage you to read the entire guide before you start doing anything. It’s a good idea to know where you will end up before you invest any time.
-</p>
-
-
-
-
-<p>
-  <strong>Setup Development Environment</strong><br/>
-  Follow these <a href="https://github.com/thoughtbot/laptop" target="_blank">instructions</a> to setup your development environment for either Mac OS X or Linux. Download & install <a href="http://www.sublimetext.com/3" target="_blank">Sublime Text 3</a>
-</p>
-
-
-
-
-<p>
-  <strong>Create a GitHub Account</strong><br/>
-  Make sure you create a <a href="https://github.com/" target="_blank">GitHub account</a> if you don’t have one already. You’ll need a GitHub account in order to store and share your code with the world.
-</p>
-
-
-
-
-<p>
-  So far so good, Continuous Learning to stay marketable.<br/>
-  Take your time, see you in next article. :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/7/">&larr; Older</a>
@@ -2149,6 +2272,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/03/16/why-choose-ruby-on-rails-framework/">Why Choose Ruby on Rails Framework?</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/03/16/reasons-to-bring-ruby-on-rails-development-on-board/">Reasons to Bring Ruby on Rails Development on Board</a>
       </li>
     
@@ -2162,10 +2289,6 @@
     
       <li class="post">
         <a href="/blog/2015/03/03/versioning-with-papertrail-on-rails/">Versioning With PaperTrail on Rails</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/03/02/ruby-on-rails-passing-optional-locals-to-partials/">Ruby on Rails Passing Optional Locals to Partials</a>
       </li>
     
   </ul>
@@ -2187,7 +2310,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 40 ]</a>
+        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 39 ]</a>
       </li>
     
       <li>
@@ -2223,7 +2346,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 14 ]</a>
+        <a href="/blog/categories/other/">Other [ 16 ]</a>
       </li>
     
   </ul>
