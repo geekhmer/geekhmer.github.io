@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby on Rails | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby-on-rails/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-03-16T21:18:21+07:00</updated>
+  <updated>2015-03-17T21:09:13+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,148 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Single Responsibility Principle in Ruby]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/03/17/single-responsibility-principle-in-ruby/"/>
+    <updated>2015-03-17T20:55:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/03/17/single-responsibility-principle-in-ruby</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/rights_and_wrongsof_ruby.jpg" width="400" alt="Single Responsibility Principle in Ruby" />
+</p>
+
+
+
+
+<p>
+  Assume that we already had this code:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AuthenticatesUser</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">authenticate</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;if matches?(email, password)</span>
+</span><span class='line'><span class="sr"> do_some_authentication</span>
+</span><span class='line'><span class="sr">else</span>
+</span><span class='line'><span class="sr">  raise NotAllowedError</span>
+</span><span class='line'><span class="sr">end</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="kp">private</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">matches?</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;user = find_from_db(:user, email)</span>
+</span><span class='line'><span class="sr">user.encrypted_password == encrypt(password)</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  The AuthenticatesUser class is responsible for authenticating the user as well as knowing if the email and password match the ones in the database. It has two responsibilities, and according to the principle it should only have one, let's extract one.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AuthenticatesUser</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">authenticate</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;if MatchesPasswords.new(email, password).matches?</span>
+</span><span class='line'><span class="sr"> do_some_authentication</span>
+</span><span class='line'><span class="sr">else</span>
+</span><span class='line'><span class="sr">  raise NotAllowedError</span>
+</span><span class='line'><span class="sr">end</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="k">class</span> <span class="nc">MatchesPasswords</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt; @email = email</span>
+</span><span class='line'><span class="sr"> @password = password</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">def</span> <span class="nf">matches?</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;user = find_from_db(:user, @email)</span>
+</span><span class='line'><span class="sr">user.encrypted_password == encrypt(@password)</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  I've used a refactoring technique called "Extract Class" and then use it on the class I already had, this is called sharing behaviour through "Composition".
+</p>
+
+
+
+
+<p>
+  So far so good, That's it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby DSL (Domain-Specific Language)]]></title>
@@ -1478,363 +1620,6 @@
 
 <p>
   So far so good, That's it!!! See yar!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[ActionPack Variants on Rails]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/02/23/actionpack-variants-on-rails/"/>
-    <updated>2015-02-23T21:48:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/02/23/actionpack-variants-on-rails</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="ActionPack Variants on Rails" />
-</p>
-
-
-
-
-<p>
-  Rails 4.1 released a little while ago and came out with a fantastic new feature I think a lot of responsive web developers are going to flex. It's called Variants. ActionPack Variants.
-</p>
-
-
-
-
-<p>
-  <strong>What does it do?</strong><br/>
-  It allows you to create different views for different device formats - such as mobile 
-  phones, tablets and desktops.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;/</span><span class="n">app</span><span class="o">/</span><span class="n">views</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">erb</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;/</span><span class="n">app</span><span class="o">/</span><span class="n">views</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">html</span><span class="o">+</span><span class="n">phone</span><span class="o">.</span><span class="n">erb</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;/</span><span class="n">app</span><span class="o">/</span><span class="n">views</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">html</span><span class="o">+</span><span class="n">tablet</span><span class="o">.</span><span class="n">erb</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>Why is this useful?</strong><br/>
-  This is tremendously useful because you can now serve a much slimmer version of your view to mobile devices, instead of just hiding the elements using CSS using media queries.
-</p>
-
-
-
-
-<p>
-  Hidden elements still load and need to come down 'the wire' - using Variants it's much easier than before to serve up lean and mean views to mobile devices.
-</p>
-
-
-
-
-<p>
-  <strong>Setup</strong><br/>
-  Create a homes controller that will enable you to play around with ActionPack Variants, run the commands below to create the home controller:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="n">homes</span> <span class="n">show</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Then apply a few simple routes to your application to finish setting things up. Open up your routes file (<code>config/routes.rb</code>).
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">homes</span><span class="c1">#show&amp;rdquo;</span>
-</span><span class='line'><span class="n">resource</span> <span class="ss">:home</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:show</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Well, Now we are ready to play around with ActionPack Variants. ActionPack Variants works by using a <code>before_action</code> in your application controller. Open up your Application Controller (<code>app/controllers/application_controller.rb</code>) and modify so that it looks sometings like:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>application_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActionController</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="c1"># Prevent CSRF attacks by raising an exception.</span>
-</span><span class='line'>  <span class="c1"># For APIs, you may want to use :null_session instead.</span>
-</span><span class='line'>  <span class="n">protect_from_forgery</span> <span class="ss">with</span><span class="p">:</span> <span class="ss">:exception</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  before_action :detect_browser&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="kp">private</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;def detect_browser</span>
-</span><span class='line'><span class="sr">  case request.user_agent</span>
-</span><span class='line'><span class="sr">    when /i</span><span class="no">Pad</span><span class="o">/</span><span class="n">i</span>
-</span><span class='line'>      <span class="n">request</span><span class="o">.</span><span class="n">variant</span> <span class="o">=</span> <span class="ss">:tablet</span>
-</span><span class='line'>    <span class="k">when</span> <span class="sr">/iPhone/i</span>
-</span><span class='line'>      <span class="n">request</span><span class="o">.</span><span class="n">variant</span> <span class="o">=</span> <span class="ss">:phone</span>
-</span><span class='line'>    <span class="k">when</span> <span class="sr">/Android/i</span> <span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span> <span class="sr">/mobile/i</span>
-</span><span class='line'>      <span class="n">request</span><span class="o">.</span><span class="n">variant</span> <span class="o">=</span> <span class="ss">:phone</span>
-</span><span class='line'>    <span class="k">when</span> <span class="sr">/Android/i</span>
-</span><span class='line'>      <span class="n">request</span><span class="o">.</span><span class="n">variant</span> <span class="o">=</span> <span class="ss">:tablet</span>
-</span><span class='line'>    <span class="k">when</span> <span class="sr">/Windows Phone/i</span>
-</span><span class='line'>      <span class="n">request</span><span class="o">.</span><span class="n">variant</span> <span class="o">=</span> <span class="ss">:phone</span>
-</span><span class='line'>    <span class="k">else</span>
-</span><span class='line'>      <span class="n">request</span><span class="o">.</span><span class="n">variant</span> <span class="o">=</span> <span class="ss">:desktop</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  How does it work? Before an action is called, The <code>detect_browser</code> is called and the <code>request.variant</code> is set to whatever you want it to be. In the above example I use it determine whether we are running a mobile, tablet, or desktop device.
-</p>
-
-
-
-
-<p>
-  Then create a view called show.html+phone.erb (<code>app/views/homes/show.html+phone.erb</code>) for your homes controller and add in the code listed below:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>show.html+phone.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;Phone&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="no">You</span> <span class="n">are</span> <span class="n">running</span> <span class="n">on</span> <span class="n">a</span> <span class="n">smart</span> <span class="n">phone</span><span class="o">.</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Then create a view for our tablet users. Create a new view called show.html+tablet.erb (<code>app/views/homes/show.html+tablet.erb</code>) and add in the code listed below:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>show.html+tablet.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;Tablet&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="no">You</span> <span class="n">are</span> <span class="n">running</span> <span class="n">on</span> <span class="n">a</span> <span class="n">tablet</span><span class="o">.</span>  <span class="no">Whoohoo</span><span class="o">!</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Then modify your default show.html.erb (<code>app/views/homes/show.html.erb</code>) view. Open it up now and modify it so that it looks something like:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>show.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;Desktop&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="no">All</span> <span class="n">other</span> <span class="n">users</span> <span class="n">get</span> <span class="n">redirected</span> <span class="n">here</span><span class="o">.</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-   There are still a few pieces of the puzzle left. What if you need to detect the device type prior to rendering the view? For example, setting paging size/options for our queries. Fortunately, this is pretty easy. Open up your homes controller (<code>app/views/controllers/homes_controller.rb</code>) and modify it so that it looks like the code listed below:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>homes_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">HomesController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="no">ApplicationController</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@device = &quot;others&quot;</span>
-</span><span class='line'><span class="sr">respond_to do |format|</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">    format.html.phone do # phone variant</span>
-</span><span class='line'><span class="sr">      # add code here for phones</span>
-</span><span class='line'><span class="sr">    end</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">    format.html.tablet do # tablet variant</span>
-</span><span class='line'><span class="sr">      # add code here for tablets</span>
-</span><span class='line'><span class="sr">    end</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">    format.html.desktop do </span>
-</span><span class='line'><span class="sr">      # add code here for desktops and other devices</span>
-</span><span class='line'><span class="sr">    end</span>
-</span><span class='line'><span class="sr">end</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  There is one more thing to do. What happens if you need to detect the variant in your view? Fortunately this is very easy and be shown,open up your application layout (<code>app/views/layouts/application.html.erb</code>) and modify it so that it looks like the code listed below:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>application.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">!</span><span class="no">DOCTYPE</span> <span class="n">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="n">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="n">head</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">title</span><span class="o">&gt;</span><span class="no">ActionPackVariantsExample</span><span class="o">&lt;</span><span class="sr">/title&gt;</span>
-</span><span class='line'><span class="sr">  &amp;lt;%= stylesheet_link_tag    &amp;lsquo;application&amp;rsquo;, media: &amp;lsquo;all&amp;rsquo;, &amp;lsquo;data-turbolinks-track&amp;rsquo; =&gt; true %&gt;</span>
-</span><span class='line'><span class="sr">  &amp;lt;%= javascript_include_tag &amp;lsquo;application&amp;rsquo;, &amp;lsquo;data-turbolinks-track&amp;rsquo; =&gt; true %&gt;</span>
-</span><span class='line'><span class="sr">  &amp;lt;%= csrf_meta_tags %&gt;</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">head</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="n">body</span><span class="o">&gt;&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;&amp;lt;%= yield %&gt;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%</span> <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">variant</span><span class="o">.</span><span class="n">include?</span> <span class="ss">:tablet</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">  &lt;small&gt;</span><span class="no">Welcome</span> <span class="no">Tablet</span> <span class="no">User</span><span class="o">&lt;</span><span class="sr">/small&gt;</span>
-</span><span class='line'><span class="sr">&amp;lt;% elsif request.variant.include? :phone %&gt;</span>
-</span><span class='line'><span class="sr">  &lt;small&gt;Welcome Phone User&lt;/sm</span><span class="n">all</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%</span> <span class="k">end</span> <span class="sx">%&gt;&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;&lt;</span><span class="sr">/body&gt;</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">html</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Note the if statement starting with <code>if request.variant.include? :tablet</code>. Why do we use <code>.include?</code> The <code>request.variant</code> is actually an array. Therefore it is necessary to use .include?.
-</p>
-
-
-
-
-<p>
-  So far so good, That's it! See ya! :)
 </p>
 
 ]]></content>

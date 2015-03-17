@@ -5,13 +5,13 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Secrets.yml File in Ruby on Rails - GeeKhmer</title>
+  <title>Single Responsibility Principle in Ruby - GeeKhmer</title>
   <meta name="author" content="Bunlong Van">
   
   
   <meta name="description" content="The website of computer programming Ruby, Ruby on Rails, Erlang, Chicagoboss and Javascript base in Cambodia.">
 
-  <meta name="keywords" content="Secrets.yml File in Ruby on Rails, Secrets.yml File in Rails">
+  <meta name="keywords" content="Single Responsibility Principle in Ruby">
 
   <!-- http://t.co/dKP3o1e -->
   <meta name="HandheldFriendly" content="True">
@@ -19,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://geekhmer.github.io/blog/2015/02/20/secrets-dot-yml-file-in-ruby-on-rails">
+  <link rel="canonical" href="http://geekhmer.github.io/blog/2015/03/17/single-responsibility-principle-in-ruby">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="" rel="alternate" title="GeeKhmer" type="application/atom+xml">
@@ -74,7 +74,7 @@
   
   <header>
     
-      <h1 class="entry-title">Secrets.yml File in Ruby on Rails</h1>
+      <h1 class="entry-title">Single Responsibility Principle in Ruby</h1>
     
     
       <p class="meta">
@@ -90,7 +90,7 @@
   
 
 
-<time datetime="2015-02-20T00:40:00+07:00" pubdate data-updated="true">Feb 20<span>th</span>, 2015</time>
+<time datetime="2015-03-17T20:55:00+07:00" pubdate data-updated="true">Mar 17<span>th</span>, 2015</time>
         
       </p>
     
@@ -98,21 +98,20 @@
 
 
 <div class="entry-content"><p>
-  <img src="/images/move_to_rails.png" alt="Secrets.yml File in Ruby on Rails" />
+  <img src="/images/rights_and_wrongsof_ruby.jpg" width="400" alt="Single Responsibility Principle in Ruby" />
 </p>
 
 
 
 
 <p>
-  You maybe have noticed a file called <code>secrets.yml</code> in the config directory of a Ruby on Rails 4.1 project. This feature was added as part of Rails 4.1 in order to have a common storage location for the keys and credentials for various services. You can use the secrets.yml for everything from AWS credentials to your secret_key_base (the default in Rails 4.1).
+  Assume that we already had this code:
 </p>
 
 
 
 
-<figure class='code'><figcaption><span>secrets.yml </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
@@ -126,62 +125,90 @@
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
 <span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">development</span><span class="p">:</span>
-</span><span class='line'>  <span class="n">secret_key_base</span><span class="p">:</span> <span class="n">super_long_secret_key_for_development</span>
-</span><span class='line'>  <span class="n">active_merchant_login</span><span class="p">:</span> <span class="mi">112233</span>
-</span><span class='line'>  <span class="n">active_merchant_password</span><span class="p">:</span> <span class="n">super_secret_password</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AuthenticatesUser</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">authenticate</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">matches?</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+</span><span class='line'>     <span class="n">do_some_authentication</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="k">raise</span> <span class="no">NotAllowedError</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'><span class="nb">test</span><span class="p">:</span>
-</span><span class='line'>  <span class="n">secret_key_base</span><span class="p">:</span> <span class="n">super_long_secret_key_for_test</span>
-</span><span class='line'>  <span class="n">active_merchant_login</span><span class="p">:</span> <span class="mi">112233</span>
-</span><span class='line'>  <span class="n">active_merchant_password</span><span class="p">:</span> <span class="n">super_secret_password</span>
-</span><span class='line'>
-</span><span class='line'><span class="ss">production</span><span class="p">:</span>
-</span><span class='line'>  <span class="n">secret_key_base</span><span class="p">:</span> <span class="o">&lt;</span><span class="sx">%= ENV[&quot;SECRET_KEY_BASE&quot;] %&gt;</span>
-</span><span class='line'><span class="sx">  active_merchant_login: &lt;%=</span> <span class="no">ENV</span><span class="o">[</span><span class="s2">&quot;AM_LOGIN&quot;</span><span class="o">]</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">  active_merchant_password: &lt;%= ENV[&quot;AM_PASSWORD&quot;] %&gt;</span>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">matches?</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="n">find_from_db</span><span class="p">(</span><span class="ss">:user</span><span class="p">,</span> <span class="n">email</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">user</span><span class="o">.</span><span class="n">encrypted_password</span> <span class="o">==</span> <span class="n">encrypt</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 
 
 <p>
-  You have add this file to your <code>.gitignore</code> file to avoid accidently pushing your keys to git. You can also store your production keys in this file if you wish.
-</p>
-
-
-
-
-<p>
-  To access the various keys in the secrets.yml file:
+  The AuthenticatesUser class is responsible for authenticating the user as well as knowing if the email and password match the ones in the database. It has two responsibilities, and according to the principle it should only have one, let&#8217;s extract one.
 </p>
 
 
 
 
 <figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">secrets</span><span class="o">.</span><span class="n">key_name</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AuthenticatesUser</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">authenticate</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="no">MatchesPasswords</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span><span class="o">.</span><span class="n">matches?</span>
+</span><span class='line'>     <span class="n">do_some_authentication</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="k">raise</span> <span class="no">NotAllowedError</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">MatchesPasswords</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+</span><span class='line'>     <span class="vi">@email</span> <span class="o">=</span> <span class="n">email</span>
+</span><span class='line'>     <span class="vi">@password</span> <span class="o">=</span> <span class="n">password</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">matches?</span>
+</span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="n">find_from_db</span><span class="p">(</span><span class="ss">:user</span><span class="p">,</span> <span class="vi">@email</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">user</span><span class="o">.</span><span class="n">encrypted_password</span> <span class="o">==</span> <span class="n">encrypt</span><span class="p">(</span><span class="vi">@password</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 
 
 <p>
-  Example: The following code will returns the merchant login.
+  I&#8217;ve used a refactoring technique called &#8220;Extract Class&#8221; and then use it on the class I already had, this is called sharing behaviour through &#8220;Composition&#8221;.
 </p>
 
 
 
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">secrets</span><span class="o">.</span><span class="n">active_merchant_login</span> <span class="c1"># returns 112233 on development/test</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
 <p>
-  So far so good, That&#8217;s it! See ya! :)
+  So far so good, That&#8217;s it!!! See ya!!! :)
 </p>
 
 </div>
@@ -206,7 +233,7 @@
   
 
 
-<time datetime="2015-02-20T00:40:00+07:00" pubdate data-updated="true">Feb 20<span>th</span>, 2015</time>
+<time datetime="2015-03-17T20:55:00+07:00" pubdate data-updated="true">Mar 17<span>th</span>, 2015</time>
       
 
 <span class="categories">
@@ -220,7 +247,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2015/02/20/secrets-dot-yml-file-in-ruby-on-rails/" data-via="" data-counturl="http://geekhmer.github.io/blog/2015/02/20/secrets-dot-yml-file-in-ruby-on-rails/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2015/03/17/single-responsibility-principle-in-ruby/" data-via="" data-counturl="http://geekhmer.github.io/blog/2015/03/17/single-responsibility-principle-in-ruby/" >Tweet</a>
   
   
   
@@ -231,10 +258,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2015/02/19/ruby-on-rails-model-change-tracking-with-activemodel-dirty/" title="Previous Post: Ruby on Rails Model Change Tracking with ActiveModel::Dirty">&laquo; Ruby on Rails Model Change Tracking with ActiveModel::Dirty</a>
+        <a class="basic-alignment left" href="/blog/2015/03/16/push-to-multiple-git-repositories/" title="Previous Post: Push to Multiple Git Repositories">&laquo; Push to Multiple Git Repositories</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2015/02/20/stashing-codes-changes-in-git/" title="Next Post: Stashing Codes Changes in Git">Stashing Codes Changes in Git &raquo;</a>
       
     </p>
   </footer>
