@@ -5,13 +5,13 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Chicagoboss Publish/Subscribe - GeeKhmer</title>
+  <title>Open/Closed Principle in Ruby - GeeKhmer</title>
   <meta name="author" content="Bunlong Van">
   
   
   <meta name="description" content="The website of computer programming Ruby, Ruby on Rails, Erlang, Chicagoboss and Javascript base in Cambodia.">
 
-  <meta name="keywords" content="Chicagoboss Publish/Subscribe, Chicagoboss Publish Subscribe, Chicagoboss Publish and Subscribe, Chicagoboss Pub/Sub, Chicagoboss Pub and Sub, Chicagoboss Publish/Subscribe Pattern, Chicagoboss Pub/Sub Pattern">
+  <meta name="keywords" content="Open/Closed Principle in Ruby">
 
   <!-- http://t.co/dKP3o1e -->
   <meta name="HandheldFriendly" content="True">
@@ -19,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://geekhmer.github.io/blog/2015/01/10/chicagoboss-publish-slash-subscribe">
+  <link rel="canonical" href="http://geekhmer.github.io/blog/2015/03/17/open-slash-closed-principle-in-ruby">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="" rel="alternate" title="GeeKhmer" type="application/atom+xml">
@@ -74,7 +74,7 @@
   
   <header>
     
-      <h1 class="entry-title">Chicagoboss Publish/Subscribe</h1>
+      <h1 class="entry-title">Open/Closed Principle in Ruby</h1>
     
     
       <p class="meta">
@@ -90,50 +90,93 @@
   
 
 
-<time datetime="2015-01-10T23:08:00+07:00" pubdate data-updated="true">Jan 10<span>th</span>, 2015</time>
+<time datetime="2015-03-17T22:32:00+07:00" pubdate data-updated="true">Mar 17<span>th</span>, 2015</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>
-  <img src="/images/logo_erlang.png" alt="Chicagoboss Publish/Subscribe" />
+<div class="entry-content"><p><img src="/images/rights_and_wrongsof_ruby.jpg" width="400" alt="Open/Closed Principle in Ruby" /></p>
+
+<p>
+  Assume that we already had this code:
 </p>
 
 
 
 
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Report</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">body</span>
+</span><span class='line'>    <span class="n">generate_reporty_stuff</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">print</span>
+</span><span class='line'>    <span class="n">body</span><span class="o">.</span><span class="n">to_json</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
 <p>
-  In software architecture, publish–subscribe is a messaging pattern where senders of messages, called publishers, do not program the messages to be sent directly to specific receivers, called subscribers. Instead, published messages are characterized into classes, without knowledge of what, if any, subscribers there may be. Similarly, subscribers express interest in one or more classes, and only receive messages that are of interest, without knowledge of what, if any, publishers there are.
+  The code above violates Open/Closed Principle as if we want to change the format the report gets printed, we need to change the code of the class. Let make it be better then:
 </p>
 
 
 
 
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Report</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">body</span>
+</span><span class='line'>    <span class="n">generate_reporty_stuff</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">print</span><span class="p">(</span><span class="ss">formatter</span><span class="p">:</span> <span class="no">JSONFormatter</span><span class="o">.</span><span class="n">new</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">formatter</span><span class="o">.</span><span class="n">format</span> <span class="n">body</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
 <p>
-  Pub/sub is a sibling of the message queue paradigm, and is typically one part of a larger message-oriented middleware system. Most messaging systems support both the pub/sub and message queue models in their API.
+  This way changing the formatter is as easy as:
 </p>
 
 
 
 
-<p>
-  Actually Chicagoboss ships with a message queue service called <strong>BossMQ</strong>. The service consists of named channels which follow a <strong>publish/subscribe</strong> architecture; any Erlang process can publish or subscribe to any channel, and Erlang term can be sent as a message. Channels need not be explicitly created or destroyed; they are created on demand for publishers or subscribers, and automatically destroyed after a certain (configurable) amount of time. <strong>BossMQ</strong> runs in clustered configurations just as well as a single-machine setup.
-</p>
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">report</span> <span class="o">=</span> <span class="no">Report</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">report</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="ss">formatter</span><span class="p">:</span> <span class="no">XMLFormatter</span><span class="o">.</span><span class="n">new</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 
 
 <p>
-  <strong>Process</strong>
-</p>
-
-
-
-
-<p>
-  <a class="fancybox" href="/images/chicagoboss_publish_subscribe.png"><img src="/images/chicagoboss_publish_subscribe.png" width="680" /></a>
+  So far so good, I have extended the functionality without modifying the code. In this example, I have used a technique called &#8220;Dependency Injection&#8221;. That&#8217;s it!!! See ya!!! :)
 </p>
 
 </div>
@@ -158,12 +201,12 @@
   
 
 
-<time datetime="2015-01-10T23:08:00+07:00" pubdate data-updated="true">Jan 10<span>th</span>, 2015</time>
+<time datetime="2015-03-17T22:32:00+07:00" pubdate data-updated="true">Mar 17<span>th</span>, 2015</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/erlang/'>Erlang</a>
+    <a class='category' href='/blog/categories/ruby/'>Ruby</a>, <a class='category' href='/blog/categories/ruby-on-rails/'>Ruby on Rails</a>
   
 </span>
 
@@ -172,7 +215,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2015/01/10/chicagoboss-publish-slash-subscribe/" data-via="" data-counturl="http://geekhmer.github.io/blog/2015/01/10/chicagoboss-publish-slash-subscribe/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2015/03/17/open-slash-closed-principle-in-ruby/" data-via="" data-counturl="http://geekhmer.github.io/blog/2015/03/17/open-slash-closed-principle-in-ruby/" >Tweet</a>
   
   
   
@@ -183,10 +226,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2015/01/02/develop-your-own-gem-and-gemify-your-own-assets-using-rails-engine/" title="Previous Post: Develop Your Own Gem and Gemify Your Own Assets Using Rails Engine">&laquo; Develop Your Own Gem and Gemify Your Own Assets Using Rails Engine</a>
+        <a class="basic-alignment left" href="/blog/2015/03/17/single-responsibility-principle-in-ruby/" title="Previous Post: Single Responsibility Principle in Ruby">&laquo; Single Responsibility Principle in Ruby</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2015/01/14/install-erlang-using-repository-on-ubuntu/" title="Next Post: Install Erlang Using Repository on Ubuntu">Install Erlang Using Repository on Ubuntu &raquo;</a>
       
     </p>
   </footer>
