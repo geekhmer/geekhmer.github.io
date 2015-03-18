@@ -77,6 +77,552 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2014/08/07/test-models-with-rspec-in-ruby-on-rails/">Test Models With RSpec in Ruby on Rails</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-07T09:40:00+07:00" pubdate data-updated="true">Aug 7<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/ruby_on_rails.png" width="400" />
+</p>
+
+
+
+
+<p>
+  Testing is a good pratice. You should be doing it. It will make you a better programmer and save you a great deal of headache as your web app grows up. It is especially important when working alongside other programmers. Testing is not perfect though so don&#8217;t try to be perfect. Just get started, and you will improve as time goes on.
+</p>
+
+
+
+
+<p>
+  <strong>How should I be testing?</strong><br/>
+  - Using RSpec & factorygirl.<br/>
+  - Testing the Model.
+</p>
+
+
+
+
+<p>
+  <strong>Installation</strong><br/>
+  Add rspec-rails and factorygirl to both the :development and :test groups in the Gemfile:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">group</span> <span class="ss">:development</span><span class="p">,</span> <span class="ss">:test</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">gem</span> <span class="s1">&#39;factory_girl_rails&#39;</span><span class="p">,</span> <span class="s1">&#39;4.2.1&#39;</span>
+</span><span class='line'>  <span class="n">gem</span> <span class="s1">&#39;rspec-rails&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 3.0.0&#39;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Download and install by running command:<br>
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Initialize the spec/ directory (where specs will reside) with:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">generate</span> <span class="ss">rspec</span><span class="p">:</span><span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  This adds the following files which are used for configuration:<br/>
+  - .rspec<br/>
+  - spec/spec_helper.rb<br/>
+  - spec/rails_helper.rb
+</p>
+
+
+
+
+<p>
+  <strong>Generators</strong><br/>
+  Once installed, RSpec and factorygirl will generate spec files instead of Test::Unit test files when run commands like: <code>rails generate model</code> and <code>rails generate controller</code> are used.
+</p>
+
+
+
+
+<p>
+  Example:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">generate</span> <span class="n">model</span> <span class="no">Post</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  After you run the command above this adds the following directory and file:<br/>
+  - spec/models/posts.rb<br/>
+  - spec/factories/posts.rb
+</p>
+
+
+
+
+<p>
+  <strong>Let&#8217;s get started the Model testing</strong>
+</p>
+
+
+
+
+<p>
+  Assume we have three Models such as post.rb, category.rb, categorization.rb:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>post.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">validates</span> <span class="ss">:title</span><span class="p">,</span> <span class="ss">length</span><span class="p">:</span> <span class="p">{</span> <span class="ss">minimum</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="ss">maximum</span><span class="p">:</span> <span class="mi">100</span> <span class="p">},</span> <span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">uniqueness</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'>  <span class="n">validates</span> <span class="ss">:body</span><span class="p">,</span> <span class="ss">length</span><span class="p">:</span> <span class="p">{</span> <span class="ss">minimum</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="ss">maximum</span><span class="p">:</span> <span class="mi">200</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">validates</span> <span class="ss">:status</span><span class="p">,</span> <span class="ss">length</span><span class="p">:</span> <span class="p">{</span> <span class="ss">minimum</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="ss">maximum</span><span class="p">:</span> <span class="mi">20</span> <span class="p">},</span> <span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'>  <span class="n">validates</span> <span class="ss">:category_id</span><span class="p">,</span> <span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:categorizations</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:categories</span><span class="p">,</span> <span class="ss">through</span><span class="p">:</span> <span class="ss">:categorizations</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">scope</span> <span class="ss">:search_by_title</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">title</span><span class="p">)</span> <span class="p">{</span> <span class="n">where</span><span class="p">(</span><span class="s2">&quot;(title like ?) OR title in (?)&quot;</span><span class="p">,</span> <span class="s2">&quot;%</span><span class="si">#{</span><span class="n">title</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">.</span><span class="n">split</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>category.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Category</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">validates</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">length</span><span class="p">:</span> <span class="p">{</span> <span class="ss">minimum</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="ss">maximum</span><span class="p">:</span> <span class="mi">50</span> <span class="p">},</span> <span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">uniqueness</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'>  <span class="n">validates</span> <span class="ss">:short_name</span><span class="p">,</span> <span class="ss">length</span><span class="p">:</span> <span class="p">{</span> <span class="ss">minimum</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="ss">maximum</span><span class="p">:</span> <span class="mi">50</span> <span class="p">},</span> <span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">uniqueness</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'>  <span class="n">validates</span> <span class="ss">:description</span><span class="p">,</span> <span class="ss">length</span><span class="p">:</span> <span class="p">{</span> <span class="ss">maximum</span><span class="p">:</span> <span class="mi">200</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:categorizations</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:posts</span><span class="p">,</span> <span class="ss">through</span><span class="p">:</span> <span class="ss">:categorizations</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>categorization.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Categorization</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">validates</span> <span class="ss">:category_id</span><span class="p">,</span> <span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'>  <span class="n">validates</span> <span class="ss">:post_id</span><span class="p">,</span> <span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:category</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:post</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Next, we define default factorygirl object for each Models in spec/factories/:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>posts.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">FactoryGirl</span><span class="o">.</span><span class="n">define</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">factory</span> <span class="ss">:post</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">title</span> <span class="s1">&#39;Ruby on Rails&#39;</span>
+</span><span class='line'>    <span class="n">body</span> <span class="s1">&#39;Ruby on Rails is good&#39;</span>
+</span><span class='line'>    <span class="n">status</span> <span class="s1">&#39;open&#39;</span>
+</span><span class='line'>    <span class="n">category_id</span> <span class="mi">1</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>categories.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">FactoryGirl</span><span class="o">.</span><span class="n">define</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">factory</span> <span class="ss">:category</span> <span class="k">do</span>
+</span><span class='line'>    <span class="nb">id</span> <span class="mi">1</span>
+</span><span class='line'>    <span class="nb">name</span> <span class="s1">&#39;programming&#39;</span>
+</span><span class='line'>    <span class="n">short_name</span> <span class="s1">&#39;programming&#39;</span>
+</span><span class='line'>    <span class="n">description</span> <span class="s1">&#39;computer programming&#39;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>categorizations.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">FactoryGirl</span><span class="o">.</span><span class="n">define</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">factory</span> <span class="ss">:categorization</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">category_id</span> <span class="s1">&#39;1&#39;</span>
+</span><span class='line'>    <span class="n">post_id</span> <span class="s1">&#39;1&#39;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Here, how we test each Models in spec/models/:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>post.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;spec_helper&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">describe</span> <span class="no">Post</span><span class="p">,</span> <span class="s1">&#39;validation&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">ensure_length_of</span><span class="p">(</span><span class="ss">:title</span><span class="p">)</span><span class="o">.</span><span class="n">is_at_least</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">ensure_length_of</span><span class="p">(</span><span class="ss">:title</span><span class="p">)</span><span class="o">.</span><span class="n">is_at_most</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">validate_presence_of</span><span class="p">(</span><span class="ss">:title</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">validate_uniqueness_of</span><span class="p">(</span><span class="ss">:title</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">ensure_length_of</span><span class="p">(</span><span class="ss">:body</span><span class="p">)</span><span class="o">.</span><span class="n">is_at_least</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">ensure_length_of</span><span class="p">(</span><span class="ss">:body</span><span class="p">)</span><span class="o">.</span><span class="n">is_at_most</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">ensure_length_of</span><span class="p">(</span><span class="ss">:status</span><span class="p">)</span><span class="o">.</span><span class="n">is_at_least</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">ensure_length_of</span><span class="p">(</span><span class="ss">:status</span><span class="p">)</span><span class="o">.</span><span class="n">is_at_most</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">validate_presence_of</span><span class="p">(</span><span class="ss">:status</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">validate_presence_of</span><span class="p">(</span><span class="ss">:category_id</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">describe</span> <span class="no">Post</span><span class="p">,</span> <span class="s1">&#39;association&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">have_many</span><span class="p">(</span><span class="ss">:categorizations</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">have_many</span><span class="p">(</span><span class="ss">:categories</span><span class="p">)</span><span class="o">.</span><span class="n">through</span><span class="p">(</span><span class="ss">:categorizations</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">describe</span> <span class="no">Post</span><span class="p">,</span> <span class="s1">&#39;column_specification&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">have_db_column</span><span class="p">(</span><span class="ss">:title</span><span class="p">)</span><span class="o">.</span><span class="n">of_type</span><span class="p">(</span><span class="ss">:string</span><span class="p">)</span><span class="o">.</span><span class="n">with_options</span><span class="p">(</span><span class="ss">length</span><span class="p">:</span> <span class="p">{</span> <span class="ss">minimum</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="ss">maximum</span><span class="p">:</span> <span class="mi">100</span> <span class="p">},</span> <span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">uniqueness</span><span class="p">:</span> <span class="kp">true</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">have_db_column</span><span class="p">(</span><span class="ss">:body</span><span class="p">)</span><span class="o">.</span><span class="n">of_type</span><span class="p">(</span><span class="ss">:text</span><span class="p">)</span><span class="o">.</span><span class="n">with_options</span><span class="p">(</span><span class="ss">length</span><span class="p">:</span> <span class="p">{</span> <span class="ss">minimum</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="ss">maximum</span><span class="p">:</span> <span class="mi">200</span> <span class="p">})</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">have_db_column</span><span class="p">(</span><span class="ss">:status</span><span class="p">)</span><span class="o">.</span><span class="n">of_type</span><span class="p">(</span><span class="ss">:string</span><span class="p">)</span><span class="o">.</span><span class="n">with_options</span><span class="p">(</span><span class="ss">length</span><span class="p">:</span> <span class="p">{</span> <span class="ss">minimum</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="ss">maximum</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span> <span class="p">})</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">have_db_column</span><span class="p">(</span><span class="ss">:category_id</span><span class="p">)</span><span class="o">.</span><span class="n">of_type</span><span class="p">(</span><span class="ss">:integer</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">have_db_index</span><span class="p">(</span><span class="ss">:title</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="kp">true</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">describe</span> <span class="no">Post</span><span class="p">,</span> <span class="s1">&#39;.search_by_name&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">before</span><span class="p">(</span><span class="ss">:each</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>    <span class="no">FactoryGirl</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="ss">:post</span><span class="p">,</span> <span class="ss">title</span><span class="p">:</span> <span class="s1">&#39;Ruby on Rails&#39;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s1">&#39;returns post that match with title&#39;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="no">Post</span><span class="o">.</span><span class="n">search_by_title</span><span class="p">(</span><span class="s1">&#39;Ruby on Rails&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="o">.</span><span class="n">should</span> <span class="n">eql</span> <span class="mi">1</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s1">&#39;returns post that like title&#39;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="no">Post</span><span class="o">.</span><span class="n">search_by_title</span><span class="p">(</span><span class="s1">&#39;ruby on rails&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="o">.</span><span class="n">should</span> <span class="n">eql</span> <span class="mi">1</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s1">&#39;returns post when title is blank&#39;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="no">Post</span><span class="o">.</span><span class="n">search_by_title</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="o">.</span><span class="n">should</span> <span class="n">eql</span> <span class="mi">1</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s1">&#39;returns empty when title is not match&#39;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="no">Post</span><span class="o">.</span><span class="n">search_by_title</span><span class="p">(</span><span class="s1">&#39;not match&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="o">.</span><span class="n">should</span> <span class="n">eql</span> <span class="mi">0</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>category.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;spec_helper&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">describe</span> <span class="no">Category</span><span class="p">,</span> <span class="s1">&#39;validation&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">ensure_length_of</span><span class="p">(</span><span class="ss">:name</span><span class="p">)</span><span class="o">.</span><span class="n">is_at_least</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">ensure_length_of</span><span class="p">(</span><span class="ss">:name</span><span class="p">)</span><span class="o">.</span><span class="n">is_at_most</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">validate_presence_of</span><span class="p">(</span><span class="ss">:name</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">validate_uniqueness_of</span><span class="p">(</span><span class="ss">:name</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">ensure_length_of</span><span class="p">(</span><span class="ss">:short_name</span><span class="p">)</span><span class="o">.</span><span class="n">is_at_least</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">ensure_length_of</span><span class="p">(</span><span class="ss">:short_name</span><span class="p">)</span><span class="o">.</span><span class="n">is_at_most</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">validate_presence_of</span><span class="p">(</span><span class="ss">:short_name</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">validate_uniqueness_of</span><span class="p">(</span><span class="ss">:short_name</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">describe</span> <span class="no">Category</span><span class="p">,</span> <span class="s1">&#39;association&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">have_many</span><span class="p">(</span><span class="ss">:categorizations</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">have_many</span><span class="p">(</span><span class="ss">:posts</span><span class="p">)</span><span class="o">.</span><span class="n">through</span><span class="p">(</span><span class="ss">:categorizations</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">describe</span> <span class="no">Category</span><span class="p">,</span> <span class="s1">&#39;column_specification&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">have_db_column</span><span class="p">(</span><span class="ss">:name</span><span class="p">)</span><span class="o">.</span><span class="n">of_type</span><span class="p">(</span><span class="ss">:string</span><span class="p">)</span><span class="o">.</span><span class="n">with_options</span><span class="p">(</span><span class="ss">length</span><span class="p">:</span> <span class="p">{</span> <span class="ss">minimum</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="ss">maximum</span><span class="p">:</span> <span class="mi">50</span> <span class="p">},</span> <span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">uniqueness</span><span class="p">:</span> <span class="kp">true</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">have_db_column</span><span class="p">(</span><span class="ss">:short_name</span><span class="p">)</span><span class="o">.</span><span class="n">of_type</span><span class="p">(</span><span class="ss">:string</span><span class="p">)</span><span class="o">.</span><span class="n">with_options</span><span class="p">(</span><span class="ss">length</span><span class="p">:</span> <span class="p">{</span> <span class="ss">minimum</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="ss">maximum</span><span class="p">:</span> <span class="mi">50</span> <span class="p">},</span> <span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">uniqueness</span><span class="p">:</span> <span class="kp">true</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">have_db_column</span><span class="p">(</span><span class="ss">:description</span><span class="p">)</span><span class="o">.</span><span class="n">of_type</span><span class="p">(</span><span class="ss">:text</span><span class="p">)</span><span class="o">.</span><span class="n">with_options</span><span class="p">(</span><span class="ss">length</span><span class="p">:</span> <span class="p">{</span> <span class="ss">maximum</span><span class="p">:</span> <span class="mi">200</span> <span class="p">})</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>categorization.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;spec_helper&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">describe</span> <span class="no">Categorization</span><span class="p">,</span> <span class="s1">&#39;validation&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">validate_presence_of</span><span class="p">(</span><span class="ss">:category_id</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">validate_presence_of</span><span class="p">(</span><span class="ss">:post_id</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">describe</span> <span class="no">Categorization</span><span class="p">,</span> <span class="s1">&#39;association&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">belong_to</span><span class="p">(</span><span class="ss">:category</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">belong_to</span><span class="p">(</span><span class="ss">:post</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">describe</span> <span class="no">Categorization</span><span class="p">,</span> <span class="s1">&#39;column_specification&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">have_db_column</span><span class="p">(</span><span class="ss">:category_id</span><span class="p">)</span><span class="o">.</span><span class="n">of_type</span><span class="p">(</span><span class="ss">:integer</span><span class="p">)</span><span class="o">.</span><span class="n">with_options</span><span class="p">(</span><span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">should</span> <span class="n">have_db_column</span><span class="p">(</span><span class="ss">:post_id</span><span class="p">)</span><span class="o">.</span><span class="n">of_type</span><span class="p">(</span><span class="ss">:integer</span><span class="p">)</span><span class="o">.</span><span class="n">with_options</span><span class="p">(</span><span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  To run Models specs use the following command:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rspec</span> <span class="n">spec</span><span class="o">/</span><span class="n">models</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  You should get back the response something like:
+</p>
+
+
+
+
+<p>
+  <img src="/images/model_testing.png" width="600"/>
+</p>
+
+
+
+
+<p>
+  For more detail about <a href="https://github.com/rspec/rspec-rails" target="_blank">RSpec</a>, <a href="https://github.com/thoughtbot/factory_girl" target="_blank">FactoryGirl</a>.<br/>
+  So far so good, We&#8217;ve already created 40 models specs to test model. :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2014/08/05/good-rails3-activerecord-finder-vs-very-good-rails4-activerecord-finder/">Good Rails3 ActiveRecord Finder vs Very Good Rails4 ActiveRecord Finder</a></h1>
     
     
@@ -1827,262 +2373,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/21/deploy-ruby-on-rails-4-to-heroku-on-ubuntu/">Deploy Ruby on Rails 4 to Heroku on Ubuntu</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-21T21:20:00+07:00" pubdate data-updated="true">Jul 21<span>st</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  Ruby on Rails is a popular web framework written in Ruby. In this artical covers using Rails 4 on Heroku. The many step for deploying Rails 4 to Heroku below:
-</p>
-
-
-
-
-<p>
-  <strong>1. Installation heroku environment <a href="https://toolbelt.heroku.com/">(www.toolbelt.heroku.com)</a></strong> &#8211; if you not yet have<br/>
-  Open your terminal and type command below:
-</p>
-
-
-
-
-<p>
-  1. <code>wget -qO- https://toolbelt.heroku.com/install.sh | sh</code><br/>
-  2. <code>gem install heroku foreman</code><br/>
-  3. <code>heroku login</code>
-</p>
-
-
-
-
-<p>
-  <strong>2. Installation git</strong> &#8211; if you not yet have<br/>
-  Open your terminal and type command below:
-</p>
-
-
-
-
-<p>
-  1. <code>sudo apt-get install git-core</code><br/>
-  2. <code>sudo apt-get install expat openssl zlib1g zlib1g-dev</code>
-</p>
-
-
-
-
-<p>
-  <strong>3. Create Ruby on Rails project<br/></strong>
-  Open your terminal and type command below:
-</p>
-
-
-
-
-<p>
-  <code>rails new app_name -d postgresql</code>
-</p>
-
-
-
-
-<p>
-  Go into you project, Open your terminal and type command below:
-</p>
-
-
-
-
-<p>
-  <code>cd app_name</code>
-</p>
-
-
-
-
-<p>
-  We will first create a controller called welcome for our home page to live, Open your terminal and type command below:
-</p>
-
-
-
-
-<p>
-  <code>rails generate controller welcome</code>
-</p>
-
-
-
-
-<p>
-   Next then add an index page in directory app/views/welcome/index.html.erb
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>index.html.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;h2&gt;</span>Hello World<span class="nt">&lt;/h2&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="nt">&lt;p&gt;</span>
-</span><span class='line'>  The time is now: <span class="err">&lt;</span>%= Time.now %&gt;
-</span><span class='line'><span class="nt">&lt;/p&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  We need to have Rails route to index action. We’ll edit config/routes.rb
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>routes.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">root</span> <span class="s1">&#39;welcome#index&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Let run the rails app and visiting http://localhost:3000 in your browser, Open your terminal and type command below:
-</p>
-
-
-
-
-<p>
-  <code>rails server</code>
-</p>
-
-
-
-
-<p>
-  Then open Gemfile and add gems below at the end:
-</p>
-
-
-
-
-<p>
-  <code>gem 'heroku'</code><br/>
-  <code>gem 'thin'</code><br/>
-  <code>gem 'rails_12factor', group: :production</code>
-</p>
-
-
-
-
-<p>
-  Then open your terminal and type command below:
-</p>
-
-
-
-
-<p>
-  <code>bundle install</code>
-</p>
-
-
-
-
-<p>
-  Rails 4 requires Ruby 1.9.3 or above. Heroku has a recent version of Ruby installed, however you can specify an exact version by using the ruby DSL in your Gemfile by adding ruby &#8220;2.1.1&#8221; at the end of Gemfile. 
-</p>
-
-
-
-
-<p>
-  <code>ruby "2.1.1"</code>
-</p>
-
-
-
-
-<p>
-  <strong>4. Deploy to heroku<br/></strong>
-  Open your terminal and type command below:
-</p>
-
-
-
-
-<p>
-  1. <code>cd project_name</code><br/>
-  2. <code>git init</code><br/>
-  3. <code>git add .</code><br/>
-  4. <code>git commit -m “my first commit”</code><br/>
-  5. <code>heroku create heroku_app_name</code><br/>
-  6. <code>heroku git:remote -a heroku_app_name</code><br/>
-  7. <code>git push heroku master</code>
-</p>
-
-
-
-
-<p>
-  <strong>Each time you wish to deploy to Heroku<br/></strong>
-  Open your terminal and type command below:
-</p>
-
-
-
-
-<p>
-  1. <code>git add -A</code><br/>
-  2. <code>git commit -m “commit for deploy to heroku”</code><br/>
-  3. <code>git push -f heroku</code>
-</p>
-
-
-
-
-<p>
-  So far so good, You now have your first application deployed to Heroku. The next step is to deploy your own application. :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/9/">&larr; Older</a>
@@ -2111,6 +2401,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/03/18/dependency-inversion-principle-in-ruby/">Dependency Inversion Principle in Ruby</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/03/18/interface-segregation-principle-in-ruby/">Interface Segregation Principle in Ruby</a>
       </li>
     
@@ -2126,10 +2420,6 @@
         <a href="/blog/2015/03/17/single-responsibility-principle-in-ruby/">Single Responsibility Principle in Ruby</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2015/03/16/push-to-multiple-git-repositories/">Push to Multiple Git Repositories</a>
-      </li>
-    
   </ul>
 </section>
 <section>
@@ -2141,7 +2431,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby/">Ruby [ 55 ]</a>
+        <a href="/blog/categories/ruby/">Ruby [ 56 ]</a>
       </li>
     
       <li>
@@ -2149,7 +2439,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 43 ]</a>
+        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 44 ]</a>
       </li>
     
       <li>

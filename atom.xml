@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-03-18T23:41:54+07:00</updated>
+  <updated>2015-03-19T00:28:37+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,111 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Dependency Inversion Principle in Ruby]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/03/18/dependency-inversion-principle-in-ruby/"/>
+    <updated>2015-03-18T23:54:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/03/18/dependency-inversion-principle-in-ruby</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/rights_and_wrongsof_ruby.jpg" width="400" alt="Dependency Inversion Principle in Ruby" />
+</p>
+
+
+
+
+<p>
+  Simply Dependency Inversion Principle states that: Abstractions should not depend upon details. Details should depend upon abstractions.
+</p>
+
+
+
+
+<p>
+  Let&#8217;s go back to the first example on the Open/Closed Principle and change it a bit:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Report</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">body</span>
+</span><span class='line'>    <span class="n">generate_reporty_stuff</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">print</span>
+</span><span class='line'>    <span class="no">JSONFormatter</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">JSONFormatter</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now there is a formatter class, but I&#8217;ve hardcoded it on the Report class, thus creating a dependency from the Report to the JSONFormatter. Since the Report is a more abstract (high-level) concept than the JSONFormatter, we&#8217;re effectively breaking the DIP.
+</p>
+
+
+
+
+<p>
+  We can solve it the exact same way with solved it on the Open/Closed Principle problem, with dependency injection:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Report</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">body</span>
+</span><span class='line'>    <span class="n">generate_reporty_stuff</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">print</span><span class="p">(</span><span class="ss">formatter</span><span class="p">:</span> <span class="no">JSONFormatter</span><span class="o">.</span><span class="n">new</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">formatter</span><span class="o">.</span><span class="n">format</span> <span class="n">body</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, this way the Report does not depend on the JSONFormatter and can use any type of formatter that has a method called format (this is known as duck typing). That&#8217;s it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Interface Segregation Principle in Ruby]]></title>
@@ -3957,91 +4062,6 @@
 <p>
   You should always use <code>_url</code> for redirects and <code>_path</code> for hyperlinks unless you have a good reason not to do so.
 </p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it! See ya! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Stashing Codes Changes in Git]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/02/20/stashing-codes-changes-in-git/"/>
-    <updated>2015-02-20T19:53:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/02/20/stashing-codes-changes-in-git</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/logo_git.png" alt="Stashing Codes Changes in Git" />
-</p>
-
-
-
-
-<p>
-  Using version control, is best to commit your code in small, discrete chunks rather than making large commits. However, What happens when you are working on a large change, and your boss comes to you and tells you they need an urgent bug fixed? With the git stash command you can quickly and easily store your code away and recall it for later use. Let’s run through this with me.
-</p>
-
-
-
-
-<p>
-  <strong>Stash the Code</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">stash</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Reapply the Changes You Sent to the Stash Type</strong><br/>
-  What if you want to reapply your changes? Use <code>git stash apply</code> to reapply all the changes you stashed away with git stash.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">stash</span> <span class="n">apply</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>List All of the Stashes You&#8217;ve Made Type</strong><br/>
-  Git stash supports stashing multiple times. To see a list of all the code you&#8217;ve stashed, use <code>git stash list</code>. The git stash list will show you a list of all the stashes you&#8217;ve made.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">stash</span> <span class="n">list</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Stash Apply From the Earlier List</strong><br/>
-  If the first stash is named stash@{1}, you can type <code>git stash apply stash@{1}</code> to apply the changes from that stash.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">stash</span> <span class="n">apply</span> <span class="n">stash</span><span class="err">@</span><span class="p">{</span><span class="mi">1</span><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
 
 
 
