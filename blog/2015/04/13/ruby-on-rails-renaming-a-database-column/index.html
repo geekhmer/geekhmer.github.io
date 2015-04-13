@@ -5,13 +5,13 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Using Strong Parameters With Fields For &amp; Nested Forms in Rails 4 - GeeKhmer</title>
+  <title>Ruby on Rails Renaming a Database Column - GeeKhmer</title>
   <meta name="author" content="Bunlong Van">
   
   
-  <meta name="description" content="Using Strong Parameters With Fields For &amp; Nested Forms in Rails 4">
+  <meta name="description" content="The website of computer programming Ruby, Ruby on Rails, Erlang, Chicagoboss and Javascript base in Cambodia.">
 
-  <meta name="keywords" content="Using Strong Parameters With Fields For &amp; Nested Forms in Rails 4, Rails">
+  <meta name="keywords" content="Ruby on Rails Renaming a Database Column">
 
   <!-- http://t.co/dKP3o1e -->
   <meta name="HandheldFriendly" content="True">
@@ -19,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://geekhmer.github.io/blog/2014/06/28/using-strong-parameters-with-fields-for-and-nested-forms-in-rails-4">
+  <link rel="canonical" href="http://geekhmer.github.io/blog/2015/04/13/ruby-on-rails-renaming-a-database-column">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="" rel="alternate" title="GeeKhmer" type="application/atom+xml">
@@ -74,7 +74,7 @@
   
   <header>
     
-      <h1 class="entry-title">Using Strong Parameters With Fields for &amp; Nested Forms in Rails 4</h1>
+      <h1 class="entry-title">Ruby on Rails Renaming a Database Column</h1>
     
     
       <p class="meta">
@@ -90,7 +90,7 @@
   
 
 
-<time datetime="2014-06-28T11:48:00+07:00" pubdate data-updated="true">Jun 28<span>th</span>, 2014</time>
+<time datetime="2015-04-13T13:01:00+07:00" pubdate data-updated="true">Apr 13<span>th</span>, 2015</time>
         
       </p>
     
@@ -98,81 +98,57 @@
 
 
 <div class="entry-content"><p>
-  With strong_parameters becoming the standard way of handling security in Rails 4, I played around with it. It works great except the documentation isn’t clear on how to handle nested forms inside Rails, specifically with the accepts_nested_attributes_for in the model and fields_for in views.<br/>
-  So far so good, let take a look a short example below.
+  <img src="/images/ruby_on_rails.png" width="400" alt="Ruby on Rails Renaming a Database Column" />
 </p>
 
 
 
 
-<figure class='code'><figcaption><span>account.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Account</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:people</span>
-</span><span class='line'>  <span class="n">accepts_nested_attributes_for</span> <span class="ss">:people</span>
-</span><span class='line'><span class="k">end</span>
+<p>
+  To rename a database column, first you need to create a migration:
+</p>
+
+
+
+
+<p>
+  Terminal commands line:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">migration</span> <span class="no">RenameColumnXinTableYtoZ</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 
 
-<figure class='code'><figcaption><span>person.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Person</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:account</span>
-</span><span class='line'><span class="k">end</span>
+<p>
+  Next you need to edit the migration and add the following line:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rename_column</span> <span class="ss">:table</span><span class="p">,</span> <span class="ss">:old_column</span><span class="p">,</span> <span class="ss">:new_column</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 
 
-<figure class='code'><figcaption><span>accounts_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AccountsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">new</span>
-</span><span class='line'>    <span class="vi">@account</span> <span class="o">=</span> <span class="no">Account</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'>    <span class="vi">@account</span><span class="o">.</span><span class="n">people</span><span class="o">.</span><span class="n">build</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
-</span><span class='line'>    <span class="vi">@account</span> <span class="o">=</span> <span class="no">Account</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">new_account_params</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">if</span> <span class="vi">@account</span><span class="o">.</span><span class="n">save</span>
-</span><span class='line'>      <span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
-</span><span class='line'>        <span class="nb">format</span><span class="o">.</span><span class="n">html</span> <span class="p">{</span><span class="n">redirect_to</span> <span class="n">root_path</span><span class="p">,</span> <span class="ss">notice</span><span class="p">:</span> <span class="s2">&quot;Account created successfully.&quot;</span><span class="p">}</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kp">private</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">new_account_params</span>
-</span><span class='line'>    <span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:account</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:id</span><span class="p">,</span> <span class="ss">:name</span><span class="p">,</span> <span class="n">people_attributes</span><span class="p">:</span> <span class="o">[</span><span class="ss">:id</span><span class="p">,</span> <span class="ss">:email</span><span class="p">,</span> <span class="ss">:password</span><span class="p">,</span> <span class="ss">:password_confirmation</span><span class="o">]</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
+<p>
+  Finally, please run a <code>rake db:migrate</code> and you are all set.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
 
 </div>
 
@@ -196,12 +172,12 @@
   
 
 
-<time datetime="2014-06-28T11:48:00+07:00" pubdate data-updated="true">Jun 28<span>th</span>, 2014</time>
+<time datetime="2015-04-13T13:01:00+07:00" pubdate data-updated="true">Apr 13<span>th</span>, 2015</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/ruby-on-rails/'>Ruby on Rails</a>
+    <a class='category' href='/blog/categories/ruby/'>Ruby</a>, <a class='category' href='/blog/categories/ruby-on-rails/'>Ruby on Rails</a>
   
 </span>
 
@@ -210,7 +186,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2014/06/28/using-strong-parameters-with-fields-for-and-nested-forms-in-rails-4/" data-via="" data-counturl="http://geekhmer.github.io/blog/2014/06/28/using-strong-parameters-with-fields-for-and-nested-forms-in-rails-4/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2015/04/13/ruby-on-rails-renaming-a-database-column/" data-via="" data-counturl="http://geekhmer.github.io/blog/2015/04/13/ruby-on-rails-renaming-a-database-column/" >Tweet</a>
   
   
   
@@ -221,10 +197,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/06/28/why-ruby/" title="Previous Post: Why Ruby?">&laquo; Why Ruby?</a>
+        <a class="basic-alignment left" href="/blog/2015/04/12/how-to-uninstall-rvm/" title="Previous Post: How to uninstall RVM?">&laquo; How to uninstall RVM?</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2014/06/30/gems-for-helping-speed-up-your-ruby-on-rails-application/" title="Next Post: Gems for Helping Speed Up Your Ruby on Rails Application">Gems for Helping Speed Up Your Ruby on Rails Application &raquo;</a>
       
     </p>
   </footer>
