@@ -77,6 +77,239 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2013/12/08/what-is-closure/">What Is Closure, Proc and Lambda?</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-12-08T17:02:00+07:00" pubdate data-updated="true">Dec 8<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <strong>1. Closure</strong><br/>
+  <strong>Closure</strong> is block of code/function/method that has two properties:<br/>
+  - It can be passed around like an object (to be called later).<br/>
+  - It remembers the values of all the variables that were in scope when the function was created, then it is able to access those variables when it is called.<br/><br/>
+  <strong>Proc & Lambda</strong> are closure.
+</p>
+
+
+
+
+<p>
+  <strong>2. Proc (Procedure)</strong><br/>
+  Proc is a closure and an object that can be bound to a variable and reused.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>default proc </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">p</span> <span class="o">=</span> <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="nb">puts</span> <span class="s2">&quot;Hello Rubyist&quot;</span> <span class="p">}</span>
+</span><span class='line'><span class="nb">p</span><span class="o">.</span><span class="n">call</span> <span class="c1"># prints Hello Rubyist</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>proc with parameter </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">p</span> <span class="o">=</span> <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="o">|</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="o">|</span> <span class="nb">puts</span> <span class="s2">&quot;x: </span><span class="si">#{</span><span class="n">a</span><span class="si">}</span><span class="s2">, y: </span><span class="si">#{</span><span class="n">b</span><span class="si">}</span><span class="s2">&quot;</span> <span class="p">}</span>
+</span><span class='line'><span class="nb">p</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="c1"># prints x: 1, y: 2</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>proc as closure </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">proc_maker</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+</span><span class='line'>  <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="o">|</span><span class="n">a</span><span class="o">|</span> <span class="n">a</span> <span class="o">+</span> <span class="n">arg</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">p</span> <span class="o">=</span> <span class="n">proc_maker</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</span><span class='line'><span class="nb">p</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span> <span class="c1"># return =&gt; 35</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>proc as closure </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">to_do</span><span class="p">(</span><span class="nb">p</span><span class="p">)</span>
+</span><span class='line'>  <span class="nb">p</span><span class="o">.</span><span class="n">call</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">p</span> <span class="o">=</span> <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="nb">puts</span> <span class="s2">&quot;proc&quot;</span> <span class="p">}</span>
+</span><span class='line'><span class="n">to_do</span><span class="p">(</span><span class="nb">p</span><span class="p">)</span> <span class="c1"># prints proc</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>proc as closure </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">to_do</span><span class="p">(</span><span class="n">proc1</span><span class="p">,</span> <span class="n">proc2</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">proc1</span><span class="o">.</span><span class="n">call</span>
+</span><span class='line'>  <span class="n">proc2</span><span class="o">.</span><span class="n">call</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="nb">puts</span> <span class="s2">&quot;first proc&quot;</span> <span class="p">}</span>
+</span><span class='line'><span class="n">b</span> <span class="o">=</span> <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="nb">puts</span> <span class="s2">&quot;second proc&quot;</span> <span class="p">}</span>
+</span><span class='line'><span class="n">to_do</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># prints</span>
+</span><span class='line'><span class="c1"># first proc</span>
+</span><span class='line'><span class="c1"># second proc</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>3. Lambda</strong><br/>
+  Lambdas are a more strict form of Proc, something like:<br/>
+  - Lambda are more strict with regard to argument checking.<br/>
+  - Lambdas can return a value with the return keyword.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>default lambda </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">l</span> <span class="o">=</span> <span class="nb">lambda</span> <span class="p">{</span> <span class="nb">puts</span> <span class="s2">&quot;Hello Rubyist&quot;</span> <span class="p">}</span>
+</span><span class='line'><span class="n">l</span><span class="o">.</span><span class="n">call</span> <span class="c1"># prints &quot;Hello Rubyist&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>lambda with parameter </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">l</span> <span class="o">=</span> <span class="nb">lambda</span> <span class="p">{</span> <span class="o">|</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="o">|</span> <span class="nb">puts</span> <span class="s2">&quot;x: </span><span class="si">#{</span><span class="n">a</span><span class="si">}</span><span class="s2">, y: </span><span class="si">#{</span><span class="n">b</span><span class="si">}</span><span class="s2">&quot;</span> <span class="p">}</span>
+</span><span class='line'><span class="n">l</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="c1"># prints x: 1, y: 2</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>lambda as closure </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">lambda_maker</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+</span><span class='line'>  <span class="nb">lambda</span> <span class="p">{</span> <span class="o">|</span><span class="n">a</span><span class="o">|</span> <span class="n">a</span> <span class="o">+</span> <span class="n">arg</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">l</span> <span class="o">=</span> <span class="n">lambda_maker</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</span><span class='line'><span class="n">l</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span> <span class="c1"># return 35</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>lambda as closure </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">to_do</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">l</span><span class="o">.</span><span class="n">call</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">l</span> <span class="o">=</span> <span class="nb">lambda</span> <span class="p">{</span> <span class="nb">puts</span> <span class="s2">&quot;lambda&quot;</span> <span class="p">}</span>
+</span><span class='line'><span class="n">to_do</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="c1"># prints lambda</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>lambda as closure </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">to_do</span><span class="p">(</span><span class="n">lambda1</span><span class="p">,</span> <span class="n">lambda2</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">lambda1</span><span class="o">.</span><span class="n">call</span>
+</span><span class='line'>  <span class="n">lambda2</span><span class="o">.</span><span class="n">call</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="nb">lambda</span> <span class="p">{</span> <span class="nb">puts</span> <span class="s2">&quot;first proc&quot;</span> <span class="p">}</span>
+</span><span class='line'><span class="n">b</span> <span class="o">=</span> <span class="nb">lambda</span> <span class="p">{</span> <span class="nb">puts</span> <span class="s2">&quot;second proc&quot;</span> <span class="p">}</span>
+</span><span class='line'><span class="n">to_do</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># prints</span>
+</span><span class='line'><span class="c1"># first proc</span>
+</span><span class='line'><span class="c1"># second proc</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2013/12/08/what-is-block/">What Is Block?</a></h1>
     
     
@@ -1652,186 +1885,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/10/02/facebook-fan-page-auto-like/">Facebook Fan Page Auto Like</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-10-02T18:24:00+07:00" pubdate data-updated="true">Oct 2<span>nd</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  When someone click anywhere on your site they will automatically like your page, no need to put like button.
-</p>
-
-
-
-
-<p>
-  <strong>1. Put the below code in head tag:</strong>
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Check the body are clicked yet </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;jquery-1.9.1.js&quot;</span> <span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
-</span><span class='line'><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">interval</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kd">function</span> <span class="nx">updateActiveElement</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">activeElement</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;fb-iframe&quot;</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">clearInterval</span><span class="p">(</span><span class="nx">interval</span><span class="p">);</span>
-</span><span class='line'>      <span class="nx">bodyClicked</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">$</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">interval</span> <span class="o">=</span> <span class="nx">setInterval</span><span class="p">(</span><span class="s2">&quot;updateActiveElement();&quot;</span><span class="p">,</span> <span class="mi">50</span><span class="p">);</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="nt">&lt;/script&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>2. Put the below code in body tag:</strong>
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Load facebook fan page like button & hide it </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">&quot;overflow: hidden; width: 10px; height: 12px; position: absolute; filter:alpha(opacity=0); -moz-opacity:0.0; -khtml-opacity: 0.0; opacity: 0.0;&quot;</span> <span class="na">id=</span><span class="s">&quot;iframe-wrapper&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;iframe</span> <span class="na">src=</span><span class="s">&quot;http://www.facebook.com/plugins/like.php?href=YOUR_PAGE_URL[/COLOR]&amp;amp;layout=standard&amp;amp;show_faces=false&amp;amp;width=450&amp;amp;action=like&amp;amp;font=tahoma&amp;amp;colorscheme=light&amp;amp;height=80&quot;</span> <span class="na">scrolling=</span><span class="s">&quot;no&quot;</span> <span class="na">frameborder=</span><span class="s">&quot;0&quot;</span> <span class="na">style=</span><span class="s">&quot;border:none; overflow:hidden; width:50px; height:23px;&quot;</span> <span class="na">allowTransparency=</span><span class="s">&quot;true&quot;</span> <span class="na">id=</span><span class="s">&quot;fb-iframe&quot;</span> <span class="na">name=</span><span class="s">&quot;fb-iframe&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;/iframe&gt;</span>
-</span><span class='line'><span class="nt">&lt;/div&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  And then find YOUR_PAGE_URL in src iframe and replace it with your facebook fan page url (ex: <a href="http://www.facebook.com/GeeKhmer" target="_blank">http://www.facebook.com/GeeKhmer</a>).
-</p>
-
-
-
-
-<p>
-  <strong>3. Put the below code anywhere in html tag:</strong>
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Set mousemove event to body & when body are clicked, it auto click on facebook like button </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">bodyClicked</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">iframeWrapper</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;iframe-wrapper&#39;</span><span class="p">);</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">standardBody</span> <span class="o">=</span> <span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">compatMode</span> <span class="o">==</span> <span class="s2">&quot;CSS1Compat&quot;</span><span class="p">)</span> <span class="o">?</span> <span class="nb">document</span><span class="p">.</span><span class="nx">documentElement</span> <span class="o">:</span> <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>  <span class="kd">function</span> <span class="nx">mouseFollower</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c1">// for internet explorer</span>
-</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">iframeWrapper</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">top</span> <span class="o">=</span> <span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">y</span> <span class="o">-</span> <span class="mi">5</span><span class="p">)</span> <span class="o">+</span> <span class="nx">standardBody</span><span class="p">.</span><span class="nx">scrollTop</span> <span class="o">+</span> <span class="s1">&#39;px&#39;</span><span class="p">;</span>
-</span><span class='line'>      <span class="nx">iframeWrapper</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">left</span> <span class="o">=</span> <span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">x</span> <span class="o">-</span> <span class="mi">5</span><span class="p">)</span> <span class="o">+</span> <span class="nx">standardBody</span><span class="p">.</span><span class="nx">scrollLeft</span> <span class="o">+</span> <span class="s1">&#39;px&#39;</span><span class="p">;</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>    <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">iframeWrapper</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">top</span> <span class="o">=</span> <span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">pageY</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;px&#39;</span><span class="p">;</span>
-</span><span class='line'>      <span class="nx">iframeWrapper</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">left</span> <span class="o">=</span> <span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">pageX</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;px&#39;</span><span class="p">;</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nb">document</span><span class="p">.</span><span class="nx">onmousemove</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="nx">bodyClicked</span> <span class="o">==</span> <span class="kc">false</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">mouseFollower</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="nt">&lt;/script&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You can download the <a href="https://github.com/Bunlong/facebook_auto_like" target="_blank">source code</a> and try it out.
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/13/">&larr; Older</a>
@@ -1865,6 +1918,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/04/13/ruby-on-rails-model-generator-useful-shortcuts/">Ruby on Rails Model Generator Useful Shortcuts</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/04/13/ruby-on-rails-renaming-a-database-column/">Ruby on Rails Renaming a Database Column</a>
       </li>
     
@@ -1880,10 +1937,6 @@
         <a href="/blog/2015/03/31/rails-5-timestamps-will-be-changed/">Rails 5 Timestamps Will Be Changed</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2015/03/29/where-should-i-put-my-code-in-ruby-on-rails-application/">Where Should I Put My Code in Ruby on Rails Application?</a>
-      </li>
-    
   </ul>
 </section>
 <section>
@@ -1895,7 +1948,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby/">Ruby [ 62 ]</a>
+        <a href="/blog/categories/ruby/">Ruby [ 63 ]</a>
       </li>
     
       <li>
@@ -1903,7 +1956,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 52 ]</a>
+        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 53 ]</a>
       </li>
     
       <li>
