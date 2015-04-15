@@ -77,6 +77,255 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/04/15/respond-with-json-in-ruby-on-rails-application/">Respond With JSON in Ruby on Rails Application</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-15T15:06:00+07:00" pubdate data-updated="true">Apr 15<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/ruby_on_rails.png" width="400" alt="Translate Your Ruby on Rails Application" />
+</p>
+
+
+
+
+<p>
+  When building a RESTful API in Rails application, there are many different options and gems you can use to format your JSON responses. This isn&#8217;t a post about how to build an API, but rather about some of the different popular options on how to define and structure JSON.
+</p>
+
+
+
+
+<p>
+  <strong>RABL</strong><br/>
+  <a href="http://www.leighhalliday.com/responding-with-json-in-rails" target="_blank">RABL</a> is a DSL for generating both JSON and XML. In my mind it has a similar feel to Jbuilder, which I&#8217;ll discuss below. It&#8217;s works by creating a view with the extension .rabl, and defining which attributes, nodes, and relations you wish to include in the JSON response.
+</p>
+
+
+
+
+<p>
+  Here&#8217;s an example:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/posts/index.rabl </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">collection</span> <span class="vi">@posts</span>
+</span><span class='line'><span class="n">attributes</span> <span class="ss">:id</span><span class="p">,</span> <span class="ss">:title</span><span class="p">,</span> <span class="ss">:subject</span>
+</span><span class='line'><span class="n">child</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="p">{</span> <span class="n">attributes</span> <span class="ss">:full_name</span> <span class="p">}</span>
+</span><span class='line'><span class="n">node</span><span class="p">(</span><span class="ss">:read</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">post</span><span class="o">|</span> <span class="n">post</span><span class="o">.</span><span class="n">read_by?</span><span class="p">(</span><span class="vi">@user</span><span class="p">)</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Active Model Serializer</strong><br/>
+  <a href="https://github.com/rails-api/active_model_serializers" target="_blank">Active Model Serializer</a> is a great way to build JSON responses using an object oriented approach. The objects have a very similar feel to how your ActiveModel object is set up in terms of attributes and relationships. It also allows you to choose your adapter-to decide what type of JSON structure is produced-or to build your own. Popular supported formats are JSON-API and JSON-HAL.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostSerializer</span> <span class="o">&lt;</span> <span class="ss">ActiveModel</span><span class="p">:</span><span class="ss">:Serializer</span>
+</span><span class='line'>  <span class="n">attributes</span> <span class="ss">:title</span><span class="p">,</span> <span class="ss">:body</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:comments</span>
+</span><span class='line'>  <span class="n">url</span> <span class="ss">:post</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Jbuilder</strong><br/>
+  <a href="https://github.com/rails/jbuilder" target="_blank">jbuilder</a> provides a very similar DSL to RABL. Jbuilder is included with Rails, so it is used quite a bit. Rails Casts has a free episode which goes into greater detail about Jbuilder. It&#8217;s very easy to use and provides a lot of flexibility in defining exactly what attributes are included in and how the response is formatted and nested.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/message/show.json.jbuilder </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">json</span><span class="o">.</span><span class="n">content</span> <span class="n">format_content</span><span class="p">(</span><span class="vi">@message</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'><span class="n">json</span><span class="o">.</span><span class="p">(</span><span class="vi">@message</span><span class="p">,</span> <span class="ss">:created_at</span><span class="p">,</span> <span class="ss">:updated_at</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">json</span><span class="o">.</span><span class="n">author</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">json</span><span class="o">.</span><span class="n">name</span> <span class="vi">@message</span><span class="o">.</span><span class="n">creator</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">familiar</span>
+</span><span class='line'>  <span class="n">json</span><span class="o">.</span><span class="n">email_address</span> <span class="vi">@message</span><span class="o">.</span><span class="n">creator</span><span class="o">.</span><span class="n">email_address_with_name</span>
+</span><span class='line'>  <span class="n">json</span><span class="o">.</span><span class="n">url</span> <span class="n">url_for</span><span class="p">(</span><span class="vi">@message</span><span class="o">.</span><span class="n">creator</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="ss">:json</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Grape Entity</strong><br/>
+  <a href="https://github.com/intridea/grape-entity" target="_blank">Grape Entity</a> was extracted from Grape, which is a popular gem used for building RESTful APIs. Similarly to RABL and Jbuilder, it provides a DSL for defining entities which are the structure of your JSON response.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">API</span>
+</span><span class='line'>  <span class="k">module</span> <span class="nn">Entities</span>
+</span><span class='line'>    <span class="k">class</span> <span class="nc">Status</span> <span class="o">&lt;</span> <span class="ss">Grape</span><span class="p">:</span><span class="ss">:Entity</span>
+</span><span class='line'>      <span class="n">expose</span> <span class="ss">:user_name</span>
+</span><span class='line'>      <span class="n">expose</span> <span class="ss">:text</span><span class="p">,</span> <span class="ss">documentation</span><span class="p">:</span> <span class="p">{</span> <span class="ss">type</span><span class="p">:</span> <span class="s2">&quot;String&quot;</span><span class="p">,</span> <span class="ss">desc</span><span class="p">:</span> <span class="s2">&quot;Status update text.&quot;</span> <span class="p">}</span>
+</span><span class='line'>      <span class="n">expose</span> <span class="ss">:ip</span><span class="p">,</span> <span class="k">if</span><span class="p">:</span> <span class="p">{</span> <span class="ss">type</span><span class="p">:</span> <span class="ss">:full</span> <span class="p">}</span>
+</span><span class='line'>      <span class="n">expose</span> <span class="ss">:user_type</span><span class="p">,</span> <span class="ss">:user_id</span><span class="p">,</span> <span class="k">if</span><span class="p">:</span> <span class="nb">lambda</span> <span class="p">{</span> <span class="o">|</span><span class="n">status</span><span class="p">,</span> <span class="n">options</span><span class="o">|</span> <span class="n">status</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">public?</span> <span class="p">}</span>
+</span><span class='line'>      <span class="n">expose</span> <span class="ss">:contact_info</span> <span class="k">do</span>
+</span><span class='line'>        <span class="n">expose</span> <span class="ss">:phone</span>
+</span><span class='line'>        <span class="n">expose</span> <span class="ss">:address</span><span class="p">,</span> <span class="ss">using</span><span class="p">:</span> <span class="ss">API</span><span class="p">:</span><span class="ss">:Address</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>ROAR</strong><br/>
+  <a href="https://github.com/apotonick/roar" target="_blank">ROAR</a> allows you to build presenter classes to represent your data. It comes with support for JSON, JSON-HAL, JSON-API, and XML.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;roar/json&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">module</span> <span class="nn">SongRepresenter</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="ss">Roar</span><span class="p">:</span><span class="ss">:JSON</span>
+</span><span class='line'>  <span class="n">property</span> <span class="ss">:title</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>ActiveModel or Hash</strong><br/>
+  This may seem like a strange thing to point out, but for very simple cases, you can simply call the to_json method on either an ActiveModel object or a native Ruby Hash.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Using an @organization model</span>
+</span><span class='line'><span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+</span><span class='line'>  <span class="nb">format</span><span class="o">.</span><span class="n">json</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="vi">@organization</span><span class="o">.</span><span class="n">to_json</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Using a plain Ruby Hash</span>
+</span><span class='line'><span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+</span><span class='line'>  <span class="nb">format</span><span class="o">.</span><span class="n">json</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nb">name</span><span class="p">:</span> <span class="vi">@user</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">email</span><span class="p">:</span> <span class="vi">@user</span><span class="o">.</span><span class="n">email</span>
+</span><span class='line'>    <span class="p">}</span><span class="o">.</span><span class="n">to_json</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/04/15/create-qr-codes-in-ruby-on-rails-application/">Create QR Codes in Ruby on Rails Application</a></h1>
     
     
@@ -1486,136 +1735,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/03/22/ruby-hooks-for-metaprogramming/">Ruby Hooks for Metaprogramming</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-03-22T10:45:00+07:00" pubdate data-updated="true">Mar 22<span>nd</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/rights_and_wrongsof_ruby.jpg" width="400" alt="Ruby Hooks for Metaprogramming" />
-</p>
-
-
-
-
-<h3>
-  Overview
-</h3>
-
-
-
-
-<p>
-  <strong>What is a Hook?</strong><br/>
-   In programming, a hook is a place and usually an interface provided in packaged code that allows a programmer to insert customized programming. For example, a programmer might want to provide code that analyzed how often a particular logic path was taken within a program.
-</p>
-
-
-
-
-<h3>
-  Ruby Hooks
-</h3>
-
-
-
-
-<p>
-  Ruby lets you hook in and change a lot of behavior of the core language. Methods, constants, classes, variables… etc. Ruby lets you query them all, and change a lot about them.
-</p>
-
-
-
-
-<p>
-  Here’s summaries and links for all the hooks I could find:
-</p>
-
-
-
-
-<p>
-  <strong>Methods</strong><br/>
-  - <code>respond_to_missing?</code> - A way to make sure your dynamic methods defined with method_missing also handle respond_to?<br/>
-  - <code>method_missing</code> - Called when a method cannot be found, potentially to allow dynamically defining one instead.<br/>
-  - <code>method_added</code> - Called whenever a method is added which can be used to modify the method.<br/>
-  - <code>method_removed</code> - Called whenever a method is removed.<br/>
-  - <code>singleton_method_added</code> - Method added to the singleton class of the object, to be callable just on this one instance.<br/>
-  - <code>singleton_method_removed</code> - Method removed from singleton class.<br/>
-  - <code>method_undefined</code> - A method has been undefined, with undef_method. Undef_method is different from remove_method because remove_method may still allow superclasses to define the method – undef_method means it’s gone entirely.<br/>
-  - <code>singleton_method_undefined</code> - Called when a singleton method is undefined entirely.<br/>
-  - <code>initialize_copy</code> - An optional callback when cloning any Object.
-</p>
-
-
-
-
-<p>
-  <strong>Classes</strong><br/>
-  - <code>inherited</code> - A Ruby class is subclassed.
-</p>
-
-
-
-
-<p>
-  <strong>Modules</strong><br/>
-  - <code>append_features</code> - A Module is included, and its constants, methods and variables used.<br/>
-  - <code>included</code> - A Module is included, which usually obsoletes &#8220;append_features&#8221;.<br/>
-  - <code>extend_object</code> - A Module extends an Object.<br/>
-  - <code>extended</code> - An Object is extended by a module, which mostly obsoletes extend_object.<br/>
-  - <code>const_missing</code> - A constant isn’t already present.
-</p>
-
-
-
-
-<p>
-  <strong>Marshalling</strong><br/>
-  - <code>marshal_dump</code> - Called on an object to have it dump itself in Ruby Marshal format.<br/>
-  - <code>marshal_load</code> - Called on an object to have it load itself in Ruby Mashal format.
-</p>
-
-
-
-
-<p>
-  <strong>Coercion</strong><br/>
-  - <code>coerce</code> - Called by the first type in a two-argument operator on the second argument, to make it turn into something the first argument can recognize.<br/>
-  - <code>induced_from</code> - Deprecated, please don’t use.<br/>
-  - <code>to_i</code>, <code>to_f</code>, <code>to_s</code>, <code>to_a</code>, <code>to_hash</code>, <code>to_proc</code> and others - Conversions, indicating that the object is being used as a type and should try to convert itself to that type.
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1647,6 +1766,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/04/15/respond-with-json-in-ruby-on-rails-application/">Respond With JSON in Ruby on Rails Application</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/04/15/create-qr-codes-in-ruby-on-rails-application/">Create QR Codes in Ruby on Rails Application</a>
       </li>
     
@@ -1662,10 +1785,6 @@
         <a href="/blog/2015/04/13/ruby-on-rails-renaming-a-database-column/">Ruby on Rails Renaming a Database Column</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2015/04/12/how-to-uninstall-rvm/">How to Uninstall RVM?</a>
-      </li>
-    
   </ul>
 </section>
 <section>
@@ -1677,7 +1796,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby/">Ruby [ 65 ]</a>
+        <a href="/blog/categories/ruby/">Ruby [ 66 ]</a>
       </li>
     
       <li>
@@ -1685,7 +1804,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 55 ]</a>
+        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 56 ]</a>
       </li>
     
       <li>
