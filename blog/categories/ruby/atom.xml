@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-04-16T15:26:56+07:00</updated>
+  <updated>2015-04-16T16:20:16+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,121 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[What New with Foreign Keys in Rails 4.2?]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/04/16/what-new-with-foreign-keys-in-rails-4-dot-2/"/>
+    <updated>2015-04-16T15:43:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/04/16/what-new-with-foreign-keys-in-rails-4-dot-2</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="What New with Foreign Keys in Rails 4.2?" />
+</p>
+
+
+
+
+<p>
+  Previous versions of Rails did not have the ability to create foreign keys without resorting to executing SQL statements directly. This lead to messy, database dependent solutions that weren't very nice. 
+</p>
+
+
+
+
+<p>
+  Luckily, Rails 4.2 rectifies this with new features to add and remove foreign keys. In this article we will discuss what foreign keys are, and how to add them to your database.
+</p>
+
+
+
+
+<p>
+  If you don't know what a foreign key is, well, quite simply, a foreign key links one table to another's primary key. For example, if I have an authors table and a books table, I could create a foreign key that points from books back to authors, linking the two tables together. Then, these two tables become linked. It means that I cannot add or update the record with invalid data for the author_id field in the books table.  I can also tell the database server what to do when I update or delete the record. For example, I can tell rails to automatically delete child records when the parent is deleted (delete an author from the authors table and all the author's books are deleted). I could also tell Rails to set the author_id column to null or to simply not let me delete the author while child records exist.
+</p>
+
+
+
+
+<p>
+  <strong>Add Foreign Keys</strong><br/>
+  To add a foreign key to the books table:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">add_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:authors</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  We can also give the foreign key a custom name:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">add_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:authors</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="ss">:my_foreign_key</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  If we are using a non Rails friendly database, we can specify the column names we wish to use for the foreign key. For example, let's say the primary key of the authors table is author_id and the key in the books table is auid. We could simply use the following code to create the foreign key:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">add_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:authors</span><span class="p">,</span> <span class="ss">column</span><span class="p">:</span> <span class="ss">:auid</span><span class="p">,</span> <span class="n">primary_key</span><span class="p">:</span> <span class="ss">:author_id</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  We can control the behavior of the foreign key as well. A list of the available behaviors are below. Independent behaviors can be set for both update as well as delete.<br/>
+  - :restrict (default) - Prevents changes from being made.<br/>
+  - :nullify - Sets the child columns to null.<br/>
+  - :cascade - Cascades down to the child records. For instance, deleting an author deletes the author's books.
+</p>
+
+
+
+
+<p>
+  To specify behaviors, you simply use the <code>on_delete</code> or <code>on_update</code> parameters. For example, the following code would cascade deletes so that the books get deleted when the parent gets deleted.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">add_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:authors</span><span class="p">,</span> <span class="n">on_delete</span><span class="p">:</span> <span class="n">cascade</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>Delete Foreign Keys</strong><br/>
+  It is just as easy to delete foreign keys:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">remove_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:authors</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  You can optionally specify the name of the foreign key to delete:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">remove_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="ss">:my_foreign_key</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  If you have non Rails friendly column names, you can specify the column name that contains the foreign key you wish to remove:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">remove_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">column</span><span class="p">:</span> <span class="ss">:auid</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  So far so good, That's it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby on Rails _filter vs _action]]></title>
@@ -624,177 +739,6 @@
 
 <p>
   So far so good, That's it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails Model Generator Useful Shortcuts]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/04/13/ruby-on-rails-model-generator-useful-shortcuts/"/>
-    <updated>2015-04-13T13:11:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/04/13/ruby-on-rails-model-generator-useful-shortcuts</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="Ruby on Rails Renaming a Database Column" />
-</p>
-
-
-
-
-<p>
-  <code>rails generate</code> command provides a lot of useful functionality, however some of it may not be immediately known to you as a developer. In this article we will explore a number of useful shortcuts available in the rails model generator.
-</p>
-
-
-
-
-<h3>Basics</h3>
-
-
-
-
-<p>
-  Let's start with the basic command line usage.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">User</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <code>rails g</code> is the same thing as rails generate. Both commands do the same thing. We will use this shortcut throughout this article.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Product</span> <span class="nb">name</span> <span class="ss">quantity</span><span class="p">:</span><span class="n">integer</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  This command generates a model named product with 2 fields, name, which is a string, and quantity, which is an integer. By not specifying the type for name, rails defaults to using string. Below is a complete list of types that you can use with the modal generator.
-</p>
-
-
-
-
-<p>
-  <strong>Field Type Lists</strong><br/>
-  - integer<br/>
-  - primary_key<br/>
-  - decimal<br/>
-  - float<br/>
-  - boolean<br/>
-  - binary<br/>
-  - string<br/>
-  - text<br/>
-  - date<br/>
-  - time<br/>
-  - datetime<br/>
-  - timestamp
-</p>
-
-
-
-
-<p>
-  You can also specify the size of a field as seen below.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Client</span> <span class="nb">name</span><span class="ss">:string</span><span class="p">{</span> <span class="mi">100</span> <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  This will create a name field with a limit of 100 characters. For the decimal type, you can specify a precision and scale value as well.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Product</span> <span class="nb">name</span> <span class="ss">price</span><span class="p">:</span><span class="n">decimal</span><span class="p">{</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">2</span> <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>Namespaced Models</strong><br/>
-  You can create namespaced models as well. This is useful for example, in creating a special set of administrative users that are separate from your regular users. Running the command below will place the user model in the Admin namespace, which will have a prefixed table name of admin_ in the database.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="n">admin</span><span class="o">/</span><span class="n">user</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  As you can see from the code listed below, the user belongs to the admin namespace like mentioned earlier.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/models/admin/user.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Admin</span><span class="o">::</span><span class="no">User</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>Adding an Index</strong><br/>
-  You can also add a database index right from the command line.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Site</span> <span class="nb">name</span><span class="ss">:string:index</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  In addition, you can make the index unique.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Client</span> <span class="nb">name</span><span class="ss">:string:uniq</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<h3>Model Relationships</h3>
-
-
-
-
-<p>
-  You can specify a basic relationship between models.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">User</span> <span class="ss">client</span><span class="p">:</span><span class="n">references</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  This will create a user with a column named client_id, add an index, and automatically add a belongs_to relationship to the User model.
-</p>
-
-
-
-
-<p>
-  You can also make the relationship polymorphic.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="n">picture</span> <span class="ss">imageable</span><span class="p">:</span><span class="n">references</span><span class="p">{</span> <span class="n">polymorphic</span> <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  This will set up a polymorphic relationship for pictures. Polymorphic relationships allow you to 'share' a table between many different models. For instance, Products and People can both have pictures.
-</p>
-
-
-
-
-<p>
-  The rails model generator exposes a lot of useful functionality that can save time if used properly. Thanks for reading!
 </p>
 
 ]]></content>

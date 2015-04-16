@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-04-16T15:26:56+07:00</updated>
+  <updated>2015-04-16T16:20:16+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,156 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[What New with Foreign Keys in Rails 4.2?]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/04/16/what-new-with-foreign-keys-in-rails-4-dot-2/"/>
+    <updated>2015-04-16T15:43:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/04/16/what-new-with-foreign-keys-in-rails-4-dot-2</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="What New with Foreign Keys in Rails 4.2?" />
+</p>
+
+
+
+
+<p>
+  Previous versions of Rails did not have the ability to create foreign keys without resorting to executing SQL statements directly. This lead to messy, database dependent solutions that weren&#8217;t very nice. 
+</p>
+
+
+
+
+<p>
+  Luckily, Rails 4.2 rectifies this with new features to add and remove foreign keys. In this article we will discuss what foreign keys are, and how to add them to your database.
+</p>
+
+
+
+
+<p>
+  If you don&#8217;t know what a foreign key is, well, quite simply, a foreign key links one table to another&#8217;s primary key. For example, if I have an authors table and a books table, I could create a foreign key that points from books back to authors, linking the two tables together. Then, these two tables become linked. It means that I cannot add or update the record with invalid data for the author_id field in the books table.  I can also tell the database server what to do when I update or delete the record. For example, I can tell rails to automatically delete child records when the parent is deleted (delete an author from the authors table and all the author&#8217;s books are deleted). I could also tell Rails to set the author_id column to null or to simply not let me delete the author while child records exist.
+</p>
+
+
+
+
+<p>
+  <strong>Add Foreign Keys</strong><br/>
+  To add a foreign key to the books table:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">add_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:authors</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We can also give the foreign key a custom name:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">add_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:authors</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="ss">:my_foreign_key</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If we are using a non Rails friendly database, we can specify the column names we wish to use for the foreign key. For example, let&#8217;s say the primary key of the authors table is author_id and the key in the books table is auid. We could simply use the following code to create the foreign key:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">add_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:authors</span><span class="p">,</span> <span class="ss">column</span><span class="p">:</span> <span class="ss">:auid</span><span class="p">,</span> <span class="n">primary_key</span><span class="p">:</span> <span class="ss">:author_id</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We can control the behavior of the foreign key as well. A list of the available behaviors are below. Independent behaviors can be set for both update as well as delete.<br/>
+  - :restrict (default) - Prevents changes from being made.<br/>
+  - :nullify - Sets the child columns to null.<br/>
+  - :cascade - Cascades down to the child records. For instance, deleting an author deletes the author&#8217;s books.
+</p>
+
+
+
+
+<p>
+  To specify behaviors, you simply use the <code>on_delete</code> or <code>on_update</code> parameters. For example, the following code would cascade deletes so that the books get deleted when the parent gets deleted.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">add_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:authors</span><span class="p">,</span> <span class="n">on_delete</span><span class="p">:</span> <span class="n">cascade</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Delete Foreign Keys</strong><br/>
+  It is just as easy to delete foreign keys:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">remove_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:authors</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  You can optionally specify the name of the foreign key to delete:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">remove_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="ss">:my_foreign_key</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If you have non Rails friendly column names, you can specify the column name that contains the foreign key you wish to remove:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">remove_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">column</span><span class="p">:</span> <span class="ss">:auid</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby on Rails _filter vs _action]]></title>
@@ -2284,128 +2434,6 @@
 
 <p>
   So far so good, I have extended the functionality without modifying the code. In this example, I have used a technique called &#8220;Dependency Injection&#8221;. That&#8217;s it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Single Responsibility Principle in Ruby]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/03/17/single-responsibility-principle-in-ruby/"/>
-    <updated>2015-03-17T20:55:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/03/17/single-responsibility-principle-in-ruby</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/rights_and_wrongsof_ruby.jpg" width="400" alt="Single Responsibility Principle in Ruby" />
-</p>
-
-
-
-
-<p>
-  Assume that we already had the code:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AuthenticatesUser</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">authenticate</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">if</span> <span class="n">matches?</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
-</span><span class='line'>     <span class="n">do_some_authentication</span>
-</span><span class='line'>    <span class="k">else</span>
-</span><span class='line'>      <span class="k">raise</span> <span class="no">NotAllowedError</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kp">private</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">matches?</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="n">find_from_db</span><span class="p">(</span><span class="ss">:user</span><span class="p">,</span> <span class="n">email</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">user</span><span class="o">.</span><span class="n">encrypted_password</span> <span class="o">==</span> <span class="n">encrypt</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The AuthenticatesUser class is responsible for authenticating the user as well as knowing if the email and password match the ones in the database. It has two responsibilities, and according to the principle it should only have one, let&#8217;s extract one.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AuthenticatesUser</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">authenticate</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">if</span> <span class="no">MatchesPasswords</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span><span class="o">.</span><span class="n">matches?</span>
-</span><span class='line'>     <span class="n">do_some_authentication</span>
-</span><span class='line'>    <span class="k">else</span>
-</span><span class='line'>      <span class="k">raise</span> <span class="no">NotAllowedError</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">MatchesPasswords</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
-</span><span class='line'>     <span class="vi">@email</span> <span class="o">=</span> <span class="n">email</span>
-</span><span class='line'>     <span class="vi">@password</span> <span class="o">=</span> <span class="n">password</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">matches?</span>
-</span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="n">find_from_db</span><span class="p">(</span><span class="ss">:user</span><span class="p">,</span> <span class="vi">@email</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">user</span><span class="o">.</span><span class="n">encrypted_password</span> <span class="o">==</span> <span class="n">encrypt</span><span class="p">(</span><span class="vi">@password</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  I&#8217;ve used a refactoring technique called &#8220;Extract Class&#8221; and then use it on the class I already had, this is called sharing behaviour through &#8220;Composition&#8221;.
-</p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
 </p>
 
 ]]></content>
