@@ -78,6 +78,679 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/01/22/erlang-list-and-list-module/">Erlang List &amp; List Module</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-22T23:01:00+07:00" pubdate data-updated="true">Jan 22<span>nd</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/logo_erlang.png" alt="Erlang Control Flow Statement" />
+</p>
+
+
+
+
+<p>
+  List is the the most important data type in Erlang, as in every functional programming language. In this article, I will present the Erlang’s lists module and its most important functions.
+</p>
+
+
+
+
+<p>
+  <h3>Syntax</h3>
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="no">Element1</span><span class="p">,</span> <span class="no">Element2</span><span class="p">,</span> <span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="n">,</span> <span class="no">ElementN</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  N is called the length of the list. So, [] is the empty list.
+</p>
+
+
+
+
+<p>
+  <h3>Decomposing & Pattern Matching</h3>
+</p>
+
+
+
+
+<p>
+  An empty list pattern matches with [].
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="no">Empty</span> <span class="o">=</span> <span class="o">[].</span>
+</span><span class='line'><span class="o">[]</span>
+</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="no">Empty</span> <span class="o">==</span> <span class="o">[].</span>
+</span><span class='line'><span class="kp">true</span>
+</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="no">Empty</span> <span class="o">=</span> <span class="o">[].</span>
+</span><span class='line'><span class="o">[]</span>
+</span><span class='line'><span class="mi">4</span><span class="o">&gt;</span> <span class="no">NotEmpty</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="o">].</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="o">]</span>
+</span><span class='line'><span class="mi">5</span><span class="o">&gt;</span> <span class="no">Empty</span> <span class="o">==</span> <span class="no">NotEmpty</span><span class="o">.</span>
+</span><span class='line'><span class="kp">false</span>
+</span><span class='line'><span class="mi">6</span><span class="o">&gt;</span> <span class="no">Empty</span> <span class="o">=</span> <span class="no">NotEmpty</span><span class="o">.</span>
+</span><span class='line'><span class="o">**</span> <span class="n">exception</span> <span class="ss">error</span><span class="p">:</span> <span class="n">no</span> <span class="n">match</span> <span class="n">of</span> <span class="n">right</span> <span class="n">hand</span> <span class="n">side</span> <span class="n">value</span> <span class="o">[</span><span class="mi">1</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  A non-empty list pattern matches with [Head | Tail].
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="o">[</span><span class="no">Head</span> <span class="o">|</span> <span class="no">Tail</span><span class="o">]</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="o">].</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="o">]</span>
+</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="no">Head</span><span class="o">.</span>
+</span><span class='line'><span class="mi">1</span>
+</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="no">Tail</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="o">]</span>
+</span><span class='line'><span class="mi">4</span><span class="o">&gt;</span> <span class="o">[</span><span class="no">Head1</span> <span class="o">|</span> <span class="no">Tail1</span><span class="o">]</span> <span class="o">=</span> <span class="no">Tail</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="o">]</span>
+</span><span class='line'><span class="mi">5</span><span class="o">&gt;</span> <span class="no">Head1</span><span class="o">.</span>
+</span><span class='line'><span class="mi">2</span>
+</span><span class='line'><span class="mi">6</span><span class="o">&gt;</span> <span class="no">Tail1</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="o">]</span>
+</span><span class='line'><span class="mi">7</span><span class="o">&gt;</span> <span class="o">[</span><span class="no">Head2</span> <span class="o">|</span> <span class="no">Tail2</span><span class="o">]</span> <span class="o">=</span> <span class="o">[].</span>
+</span><span class='line'><span class="o">**</span> <span class="n">exception</span> <span class="ss">error</span><span class="p">:</span> <span class="n">no</span> <span class="n">match</span> <span class="n">of</span> <span class="n">right</span> <span class="n">hand</span> <span class="n">side</span> <span class="n">value</span> <span class="o">[]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Normal Representation</strong><br/>
+  The format [Element1, Element2, &#8230;, ElementN] is a shorthand of [Element1 | [Element2 | &#8230; | [ElementN | []] &#8230; ] representation.<br/>
+  Example: the list [1, 2, 3] is a shorthand of [1 | [2 | 3 | []]], that is the normal representation of a list.
+</p>
+
+
+
+
+<p>
+  Decomposing:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="o">[</span><span class="n">A</span> <span class="o">|</span> <span class="o">[</span><span class="n">B</span> <span class="o">|[</span><span class="n">C</span> <span class="o">|</span> <span class="n">D</span><span class="o">]]]</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
+</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="n">A</span><span class="o">.</span>
+</span><span class='line'><span class="mi">1</span>
+</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="n">B</span><span class="o">.</span>
+</span><span class='line'><span class="mi">2</span>
+</span><span class='line'><span class="mi">4</span><span class="o">&gt;</span> <span class="n">C</span><span class="o">.</span>
+</span><span class='line'><span class="mi">3</span>
+</span><span class='line'><span class="mi">5</span><span class="o">&gt;</span> <span class="n">D</span><span class="o">.</span>
+</span><span class='line'><span class="o">[]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Composing:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="no">List</span> <span class="o">=</span> <span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">].</span>
+</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
+</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="no">List1</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span> <span class="o">|</span> <span class="no">List</span><span class="o">].</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
+</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="no">List2</span> <span class="o">=</span> <span class="o">[-</span><span class="mi">1</span> <span class="o">|</span> <span class="o">[</span><span class="mi">0</span> <span class="o">|</span> <span class="no">List1</span><span class="o">]].</span>
+</span><span class='line'><span class="o">[-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
+</span><span class='line'><span class="mi">4</span><span class="o">&gt;</span> <span class="no">List3</span> <span class="o">=</span> <span class="o">[[-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="o">]</span> <span class="o">|</span> <span class="no">List2</span><span class="o">].</span>
+</span><span class='line'><span class="o">[[-</span><span class="mi">3</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="o">]</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span> <span class="o">%</span> <span class="n">the</span> <span class="n">head</span> <span class="n">is</span> <span class="n">just</span> <span class="mi">1</span> <span class="n">element</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Of course, since it is more readable and easier to write, the shorthand representation is usually used: 
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="o">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="o">]</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
+</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="o">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="o">]</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span> <span class="o">%</span> <span class="n">does</span> <span class="ow">not</span> <span class="n">match</span> <span class="n">cause</span>
+</span><span class='line'><span class="sx">% the </span><span class="n">left</span><span class="o">-</span><span class="n">hand</span> <span class="n">side</span> <span class="n">matches</span> <span class="n">a</span> <span class="mi">4</span><span class="o">-</span><span class="n">elements</span> <span class="n">list</span>
+</span><span class='line'><span class="o">**</span> <span class="n">exception</span> <span class="ss">error</span><span class="p">:</span> <span class="n">no</span> <span class="n">match</span> <span class="n">of</span> <span class="n">right</span> <span class="n">hand</span> <span class="n">side</span> <span class="n">value</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
+</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="o">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span> <span class="o">|</span> <span class="n">D</span><span class="o">]</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
+</span><span class='line'><span class="mi">4</span><span class="o">&gt;</span> <span class="n">D</span><span class="o">.</span>
+</span><span class='line'><span class="o">[]</span>
+</span><span class='line'><span class="mi">5</span><span class="o">&gt;</span> <span class="o">[-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span> <span class="o">|</span> <span class="o">[-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span> <span class="o">|</span> <span class="o">[</span><span class="mi">1</span> <span class="o">|</span> <span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]]]].</span>
+</span><span class='line'><span class="o">[-</span><span class="mi">3</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>List Parsing</strong><br/>
+  The pattern matching you saw before can be used in a function in order to parse the list:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">parse</span><span class="p">(</span><span class="o">[]</span><span class="p">)</span> <span class="o">-&gt;</span>
+</span><span class='line'>  <span class="n">parsed</span><span class="o">.</span>
+</span><span class='line'><span class="n">parse</span><span class="p">(</span><span class="o">[</span><span class="no">Head</span> <span class="o">|</span> <span class="no">Tail</span><span class="o">]</span><span class="p">)</span> <span class="o">-&gt;</span>
+</span><span class='line'>  <span class="n">parse</span><span class="p">(</span><span class="no">Tail</span><span class="p">)</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Concatenation</strong><br/>
+  Two lists can be concatenated using ++:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="no">L1</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">]</span><span class="p">,</span> <span class="no">L2</span> <span class="o">=</span> <span class="o">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="o">].</span>
+</span><span class='line'><span class="o">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="o">]</span>
+</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="no">L1</span> <span class="o">++</span> <span class="no">L2</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="o">]</span>
+</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="no">L1</span> <span class="o">++</span> <span class="no">L2</span> <span class="o">++</span> <span class="no">L1</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="o">]</span>
+</span><span class='line'><span class="mi">4</span><span class="o">&gt;</span> <span class="no">Mirror</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="no">List</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="no">List</span> <span class="o">++</span> <span class="ss">lists</span><span class="p">:</span><span class="n">reverse</span><span class="p">(</span><span class="no">List</span><span class="p">)</span> <span class="k">end</span><span class="o">.</span>
+</span><span class='line'><span class="c1">#Fun&lt;erl_eval .6.13229925&gt;</span>
+</span><span class='line'><span class="mi">5</span><span class="o">&gt;</span> <span class="no">Mirror</span><span class="p">(</span><span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="p">{</span><span class="n">c</span><span class="p">}</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,{</span><span class="n">c</span><span class="p">},{</span><span class="n">c</span><span class="p">},</span><span class="n">b</span><span class="p">,</span><span class="n">a</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Difference</strong><br/>
+  You can take the difference of two lists (the left-hand side one without the element of the right-hand side) using the &#8211; operator:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span> <span class="o">--</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span>
+</span><span class='line'><span class="o">[]</span>
+</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span> <span class="o">--</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span>
+</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="o">]</span>
+</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span> <span class="o">--</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span>
+</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="o">]</span>
+</span><span class='line'><span class="mi">4</span><span class="o">&gt;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span> <span class="o">--</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span>
+</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="o">]</span>
+</span><span class='line'><span class="mi">5</span><span class="o">&gt;</span> <span class="o">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span> <span class="o">--</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span>
+</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
+</span><span class='line'><span class="mi">6</span><span class="o">&gt;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span> <span class="o">--</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="o">].</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
+</span><span class='line'><span class="mi">7</span><span class="o">&gt;</span> <span class="no">Delete</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="no">List</span><span class="p">,</span> <span class="no">Element</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="no">List</span> <span class="o">--</span> <span class="o">[</span><span class="no">Element</span><span class="o">]</span> <span class="k">end</span><span class="o">.</span>
+</span><span class='line'><span class="c1">#Fun&lt;erl_eval .12.113037538&gt;</span>
+</span><span class='line'><span class="mi">8</span><span class="o">&gt;</span> <span class="no">Delete</span><span class="p">(</span><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="o">]</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <h3>Module Lists</h3>
+</p>
+
+
+
+
+<p>
+  The lists module defines some commonly used list processing functions. This module is extremely useful, so it is a good idea to “remember” what functions it provides.
+</p>
+
+
+
+
+<p>
+  <strong>all/2</strong><br/>
+  Called as all(Pred, List). Returns true if Pred(Element) returns true for all lists’ elements.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="n">L</span> <span class="o">=</span> <span class="o">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="n">F</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">X</span> <span class="n">rem</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">end</span><span class="p">,</span>
+</span><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">all</span><span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="n">L</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="kp">true</span>
+</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="n">f</span><span class="p">()</span><span class="o">.</span>
+</span><span class='line'><span class="n">ok</span>
+</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="n">L</span> <span class="o">=</span> <span class="o">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="n">F</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">X</span> <span class="n">rem</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">end</span><span class="p">,</span>
+</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">all</span><span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="n">L</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="kp">false</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>append/1|2</strong><br/>
+  Concatenates the lists to one.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">append</span><span class="p">(</span><span class="o">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">]</span><span class="p">,</span> <span class="o">[</span><span class="mi">3</span><span class="o">]</span><span class="p">,</span> <span class="o">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="o">]]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="o">]</span>
+</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">append</span><span class="p">(</span><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">]</span><span class="p">,</span> <span class="o">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Notice that the operator ++ and the function append/2 are the same.
+</p>
+
+
+
+
+<p>
+  <strong>delete/2</strong><br/>
+  Deletes an element from the list (first occurrence, if any).
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">delete</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">[</span><span class="n">d</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">d</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="n">d</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">d</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>concat/1</strong><br/>
+  Accepts a list of items (atom, integer, float, string) and returns the concatenation of their textual representation as a list.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">concat</span><span class="p">(</span><span class="o">[</span><span class="s2">&quot;ab&quot;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="s2">&quot;ab.1&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>filter/2</strong><br/>
+  Called as filter(Pred, List). Returns a list containing only the elements that return true for the Pred.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="no">Gt10</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">X</span> <span class="o">&gt;</span> <span class="mi">10</span> <span class="k">end</span><span class="p">,</span> <span class="ss">lists</span><span class="p">:</span><span class="n">filter</span><span class="p">(</span><span class="no">Gt10</span><span class="p">,</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">44</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">66</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="mi">22</span><span class="p">,</span><span class="mi">44</span><span class="p">,</span><span class="mi">66</span><span class="o">]</span>
+</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="n">L</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="mi">3</span><span class="o">.</span><span class="mi">0</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="p">{</span><span class="mi">4</span><span class="p">}</span><span class="o">].</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="mi">3</span><span class="o">.</span><span class="mi">0</span><span class="p">,</span><span class="n">d</span><span class="p">,{</span><span class="mi">4</span><span class="p">}</span><span class="o">]</span>
+</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">filter</span><span class="p">(</span><span class="n">fun</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">is_number</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="k">end</span><span class="p">,</span> <span class="n">L</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">.</span><span class="mi">0</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>flatten/1</strong><br/>
+  Returns a flattened (no element is a list) version of the input list.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">flatten</span><span class="p">(</span><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">[</span><span class="mi">2</span><span class="o">]</span><span class="p">,</span> <span class="o">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="o">[</span><span class="mi">5</span><span class="p">,</span> <span class="o">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="o">]]]</span><span class="p">,</span> <span class="o">[[[[</span><span class="mi">8</span><span class="o">]]]]]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>key*** functions</strong><br/>
+  There are several functions which their name starts with the word &#8220;key&#8221;. They are all used to process lists of tuples.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="no">Kl</span> <span class="o">=</span> <span class="o">[</span><span class="p">{</span><span class="n">a</span><span class="p">,</span> <span class="n">k1</span><span class="p">,</span> <span class="n">a</span><span class="p">},</span> <span class="p">{</span><span class="n">b</span><span class="p">,</span> <span class="n">k2</span><span class="p">,</span> <span class="n">b</span><span class="p">},</span> <span class="p">{</span><span class="n">c</span><span class="p">,</span> <span class="n">k3</span><span class="p">,</span> <span class="n">c</span><span class="p">},</span> <span class="p">{</span><span class="n">e</span><span class="p">,</span> <span class="n">k5</span><span class="p">,</span> <span class="n">e</span><span class="p">}</span><span class="o">].</span>
+</span><span class='line'><span class="o">[</span><span class="p">{</span><span class="n">a</span><span class="p">,</span><span class="n">k1</span><span class="p">,</span><span class="n">a</span><span class="p">},{</span><span class="n">b</span><span class="p">,</span><span class="n">k2</span><span class="p">,</span><span class="n">b</span><span class="p">},{</span><span class="n">c</span><span class="p">,</span><span class="n">k3</span><span class="p">,</span><span class="n">c</span><span class="p">},{</span><span class="n">e</span><span class="p">,</span><span class="n">k5</span><span class="p">,</span><span class="n">e</span><span class="p">}</span><span class="o">]</span>
+</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">keydelete</span><span class="p">(</span><span class="n">k3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="no">Kl</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="p">{</span><span class="n">a</span><span class="p">,</span><span class="n">k1</span><span class="p">,</span><span class="n">a</span><span class="p">},{</span><span class="n">b</span><span class="p">,</span><span class="n">k2</span><span class="p">,</span><span class="n">b</span><span class="p">},{</span><span class="n">e</span><span class="p">,</span><span class="n">k5</span><span class="p">,</span><span class="n">e</span><span class="p">}</span><span class="o">]</span>
+</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">keysearch</span><span class="p">(</span><span class="n">k3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="no">Kl</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="p">{</span><span class="n">value</span><span class="p">,{</span><span class="n">c</span><span class="p">,</span><span class="n">k3</span><span class="p">,</span><span class="n">c</span><span class="p">}}</span>
+</span><span class='line'><span class="mi">4</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">keysearch</span><span class="p">(</span><span class="n">k4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="no">Kl</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="kp">false</span>
+</span><span class='line'><span class="mi">5</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">keyreplace</span><span class="p">(</span><span class="n">k3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="no">Kl</span><span class="p">,</span> <span class="p">{</span><span class="kp">new</span><span class="p">,</span> <span class="n">tuple</span><span class="p">})</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="p">{</span><span class="n">a</span><span class="p">,</span><span class="n">k1</span><span class="p">,</span><span class="n">a</span><span class="p">},{</span><span class="n">b</span><span class="p">,</span><span class="n">k2</span><span class="p">,</span><span class="n">b</span><span class="p">},{</span><span class="kp">new</span><span class="p">,</span><span class="n">tuple</span><span class="p">},{</span><span class="n">e</span><span class="p">,</span><span class="n">k5</span><span class="p">,</span><span class="n">e</span><span class="p">}</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>last/1</strong><br/>
+  Returns the last element of the list.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">last</span><span class="p">(</span><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="mi">3</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>map/2</strong><br/>
+  Called as map(Fun, List). Applies function Fun to every item of the list and returns the resulting list.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">map</span><span class="p">(</span><span class="n">fun</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">I</span> <span class="k">end</span><span class="p">,</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>partition/2</strong><br/>
+  Partitions a list to two according to if the elements satisfy or not a given predicate.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">map</span><span class="p">(</span><span class="n">fun</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">I</span> <span class="k">end</span><span class="p">,</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>reverse/1|2</strong><br/>
+  Returns the reverse of a list.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">reverse</span><span class="p">(</span><span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="n">d</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">a</span><span class="o">]</span>
+</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">reverse</span><span class="p">(</span><span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="o">]</span><span class="p">,</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="n">d</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>sort/1|2</strong><br/>
+  Sorts a list to increasing order or according to a given function.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="n">L</span> <span class="o">=</span> <span class="o">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="o">].</span>
+</span><span class='line'><span class="o">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">4</span><span class="o">]</span>
+</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">sort</span><span class="p">(</span><span class="n">L</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="o">]</span>
+</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="no">Gt</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">J</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">I</span> <span class="o">&gt;</span> <span class="n">J</span> <span class="k">end</span><span class="o">.</span>
+</span><span class='line'><span class="c1">#Fun&lt;erl_eval .12.113037538&gt;</span>
+</span><span class='line'><span class="mi">4</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">sort</span><span class="p">(</span><span class="no">Gt</span><span class="p">,</span> <span class="n">L</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="mi">5</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>sum/1</strong><br/>
+  Returns the sum of the elements of a list containing numbers.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">sum</span><span class="p">(</span><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">.</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="mi">6</span><span class="o">.</span><span class="mi">2</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>u*** functions</strong><br/>
+  There are several function which their name starts with &#8220;u&#8221; and the results they return contain no duplicates.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">usort</span><span class="p">(</span><span class="o">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/01/20/erlang-control-flow-statement/">Erlang Control Flow Statement</a></h1>
     
     
@@ -1904,93 +2577,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/15/the-erlang-learning-sequence/">The Erlang Learning Sequence</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-15T09:10:00+07:00" pubdate data-updated="true">Jan 15<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/logo_erlang.png" alt="The Erlang Learning Sequence" />
-</p>
-
-
-
-
-<p>
-  While I was writing my first article (<a href="http://geekhmer.github.io/blog/2014/06/26/why-erlang/">Why Erlang?</a>). I realized that since Erlang is not a popular programming language it would be nice to start an introduction to The Erlang Learning Sequence.
-</p>
-
-
-
-
-<p>
-  I consider Erlang as a must-know language for an engineer that works with distributed systems and parallel programming. Believe me! in several cases Erlang is a problem solver.
-</p>
-
-
-
-
-<p>
-  I will keep posting of short and example based. The approximation of the posts that I intend to write is:
-</p>
-
-
-
-
-<p>
-  1. Introduction to Erlang & Chicagoboss Framework<br/>
-  2. Variables<br/>
-  3. Datatypes<br/>
-  4. Modules and Compiling<br/>
-  5. Functions<br/>
-  6. Guard<br/>
-  7. Recursion<br/>
-  8. Tail Recursion<br/>
-  9. Expressions<br/>
-  10. Predefined Module<br/>
-  11. List & List Module<br/>
-  12. List Comprehension<br/>
-  13. Concurrency (Processes)<br/>
-  14. Message Passing
-</p>
-
-
-
-
-<p>
-  So far so good, I will keep this list updated in case that I come up with new ideas! I hope I will convince you that Erlang worths for every software engineer’s attention. see ya! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/7/">&larr; Older</a>
@@ -2006,6 +2592,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/04/16/quickly-add-bootstrap-to-your-project/">Quickly Add Bootstrap to Your Project</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/04/15/respond-with-json-in-ruby-on-rails-application/">Respond With JSON in Ruby on Rails Application</a>
@@ -2029,10 +2619,6 @@
     
       <li class="post">
         <a href="/blog/2015/04/12/how-to-uninstall-rvm/">How to Uninstall RVM?</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/01/ruby-on-rails-better-errors-gem/">Ruby on Rails Better Errors Gem</a>
       </li>
     
   </ul>
@@ -2090,7 +2676,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 17 ]</a>
+        <a href="/blog/categories/other/">Other [ 18 ]</a>
       </li>
     
   </ul>
