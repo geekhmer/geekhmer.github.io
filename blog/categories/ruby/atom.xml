@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-04-16T16:20:16+07:00</updated>
+  <updated>2015-04-17T09:44:40+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,378 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[How to Build a Sitemap for Your Ruby on Rails Application]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/04/16/how-to-build-a-sitemap-for-your-ruby-on-rails-application/"/>
+    <updated>2015-04-16T21:40:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/04/16/how-to-build-a-sitemap-for-your-ruby-on-rails-application</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="How to Build a Sitemap for Your Ruby on Rails Application" />
+</p>
+
+
+
+
+<p>
+  Sitemaps are a valuable tool for telling search engines about the structure of your website. Creating a sitemap and submitting it to the search engines can let Google or Bing know about the pages they have missed when they crawled your site. In addition, submitting a sitemap can speed up crawl times significantly.
+</p>
+
+
+
+
+<p>
+  In this article we will show you how to build your own sitemap which you can then submit to the various search engines.
+</p>
+
+
+
+
+<p>
+  <strong>Rails Application Setup</strong><br/>
+  We are going to build a very simple blog. First we will build the blog itself, then we will add the functionality needed for the sitemap. Don't worry, this won't take long.
+</p>
+
+
+
+
+<p>
+  First let's create our models. We only need one model for this example, Post. The Post model is simply an instance of a blog entry. Run the commands below to create the Post model now:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Post</span> <span class="n">title</span> <span class="ss">body</span><span class="p">:</span><span class="n">text</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Great, now let's create our controllers. In this example we will have two controllers. The Posts controller lists our posts and lets us view individual posts, and the Sitemap controller actually generates the sitemap. Run the commands below to create these controllers now:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="no">Posts</span> <span class="n">index</span> <span class="n">show</span>
+</span><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="no">Sitemap</span> <span class="n">index</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Now let's add our routes. Open up your routes file and modify it to look like the code listed below. Be sure not to overwrite line 1 of your routes file with line 1 of the example code listed:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">SitemapExample</span><span class="p">:</span><span class="ss">:Application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">resources</span> <span class="ss">:posts</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:index</span><span class="p">,</span> <span class="ss">:show</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">resources</span> <span class="ss">:sitemap</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:index</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">posts</span><span class="c1">#index&amp;rdquo;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Now let's add code to our controllers. First let's add the code necessary to list and display posts to the Posts controller. Open up your Posts controller and modify it so that it looks like the code listed below:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/controllers/posts_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostsController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@posts = Post.order(&quot;created_at DESC&quot;)</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">def</span> <span class="nf">show</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@post = Post.find(params[:id])</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Now lets add code to our Sitemap controller. The only code we need here is code to list the posts. Open up your Sitemap controller and modify it so that it looks like the code listed below.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/controllers/sitemap_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">SitemapController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="n">respond_to</span> <span class="ss">:xml</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@posts = Post.order(&quot;created_at DESC&quot;)</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Now let's create the views. First lets create the index view for the Posts controller. Open up the index view and modify it so that i looks like the code listed below.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/views/posts/index.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;My Blog&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%</span>  <span class="vi">@posts</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">post</span><span class="o">|</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;h3&gt;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="sx">%= link_to post.title, post %&gt;&lt;/h3&gt;</span>
+</span><span class='line'><span class="sx">  &lt;p&gt;&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">&lt;pre&gt;&lt;code&gt;&amp;lt;%=</span> <span class="n">post</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">html_safe</span> <span class="sx">%&amp;gt;</span>
+</span><span class='line'><span class="sx">&lt;/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">&lt;p&gt;  &lt;/p&gt;</span>
+</span><span class='line'><span class="sx">  &amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%</span> <span class="k">if</span> <span class="n">post</span> <span class="o">!=</span> <span class="vi">@posts</span><span class="o">.</span><span class="n">last</span> <span class="sx">%&gt;&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">hr</span> <span class="sr">/&amp;gt;</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  &amp;lt;% end %&gt;</span>
+</span><span class='line'><span class="sr">&amp;lt;% end %&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Now let's create the show view. Open up the show view for the Posts controller and modify it so that it looks like the code listed below.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/views/posts/show.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;&lt;%= @post.title %&gt;&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%=</span> <span class="vi">@post</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">html_safe</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">&lt;/p&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><p>
+  Now it&rsquo;s time for the sitemap. A sitemap is an XML file that typically consists of a number of url xml elements encapsulated by a urlset xml element. Each url typically has the 4 elements listed below.
+</p></p>
+
+<table>
+<thead>
+<tr>
+<th>loc </th>
+<th> The actual url to the page you wish to list in the sitemap</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>changefreq </td>
+<td> How often the page changes, can be always, hourly, daily, weekly, monthly, yearly, or never.</td>
+</tr>
+<tr>
+<td>priority </td>
+<td> How important the page is within the context of your site.</td>
+</tr>
+<tr>
+<td>lastmod </td>
+<td> The date of the last modification of this page.</td>
+</tr>
+</tbody>
+</table>
+
+
+<p><br/></p>
+
+<p><p>
+  An example sitemap is listed below:
+</p></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>sitemap.xml </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;?</span><span class="n">xml</span> <span class="n">version</span><span class="o">=&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="mi">1</span><span class="o">.</span><span class="mi">0</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="n">encoding</span><span class="o">=&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">UTF</span><span class="o">-</span><span class="mi">8</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span><span class="sc">?&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">urlset</span> <span class="n">xmlns</span><span class="o">=</span><span class="s2">&quot;http://www.sitemaps.org/schemas/sitemap/0.9&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">url</span><span class="o">&gt;&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;&amp;lt;loc&amp;gt;http:/</span><span class="o">/</span><span class="ss">localhost</span><span class="p">:</span><span class="mi">3000</span><span class="o">/&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">/</span><span class="n">loc</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
+</span><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">changefreq</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">hourly</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">/</span><span class="n">changefreq</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
+</span><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">priority</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="mi">1</span><span class="o">.</span><span class="mi">0</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">/</span><span class="n">priority</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="sr">/url&gt;</span>
+</span><span class='line'><span class="sr">  &lt;url&gt;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">loc</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="ss">localhost</span><span class="p">:</span><span class="mi">3000</span><span class="o">/</span><span class="n">posts</span><span class="o">/</span><span class="mi">2</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">/</span><span class="n">loc</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
+</span><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">changefreq</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">daily</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">/</span><span class="n">changefreq</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
+</span><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">priority</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="mi">0</span><span class="o">.</span><span class="mi">8</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">/</span><span class="n">priority</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
+</span><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">lastmod</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="mi">2014</span><span class="o">-</span><span class="mo">03</span><span class="o">-</span><span class="mo">04</span><span class="ss">T17</span><span class="p">:</span><span class="mo">01</span><span class="p">:</span><span class="mi">15</span><span class="o">.</span><span class="mi">37</span><span class="o">+</span><span class="mo">00</span><span class="p">:</span><span class="mo">00</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">/</span><span class="n">lastmod</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="sr">/url&gt;</span>
+</span><span class='line'><span class="sr">  &lt;url&gt;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">loc</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="ss">localhost</span><span class="p">:</span><span class="mi">3000</span><span class="o">/</span><span class="n">posts</span><span class="o">/</span><span class="mi">1</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">/</span><span class="n">loc</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
+</span><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">changefreq</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">daily</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">/</span><span class="n">changefreq</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
+</span><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">priority</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="mi">0</span><span class="o">.</span><span class="mi">8</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">/</span><span class="n">priority</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
+</span><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">lastmod</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="mi">2014</span><span class="o">-</span><span class="mo">03</span><span class="o">-</span><span class="mo">04</span><span class="ss">T17</span><span class="p">:</span><span class="mo">01</span><span class="p">:</span><span class="mi">15</span><span class="o">.</span><span class="mi">36</span><span class="o">+</span><span class="mo">00</span><span class="p">:</span><span class="mo">00</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">/</span><span class="n">lastmod</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="sr">/url&gt;</span>
+</span><span class='line'><span class="sr">&lt;/u</span><span class="n">rlset</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><p>
+  This example was generated from our application. To do this yourself, create a new view for our Sitemaps controller called index.xml.builder and add in the code listed below.
+</p></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/views/sitemap/index.xml.builder </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">xml</span><span class="o">.</span><span class="n">instruct!</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;xml.urlset(xmlns: &amp;ldquo;&lt;a href=&quot;http:/</span><span class="o">/</span><span class="n">www</span><span class="o">.</span><span class="n">sitemaps</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">schemas</span><span class="o">/</span><span class="n">sitemap</span><span class="o">/</span><span class="mi">0</span><span class="o">.</span><span class="mi">9</span><span class="s2">&quot;&gt;http://www.sitemaps.org/schemas/sitemap/0.9&lt;/a&gt;&amp;rdquo;) do</span>
+</span><span class='line'><span class="s2">  xml.url do&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;pre&gt;&lt;code&gt;xml.loc root_url</span>
+</span><span class='line'><span class="s2">xml.changefreq(&quot;</span><span class="n">hourly</span><span class="s2">&quot;)</span>
+</span><span class='line'><span class="s2">xml.priority &quot;</span><span class="mi">1</span><span class="o">.</span><span class="mi">0</span><span class="s2">&quot;</span>
+</span><span class='line'><span class="s2">&lt;/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;  end</span>
+</span><span class='line'><span class="s2">  @posts.each do |post|&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;pre&gt;&lt;code&gt;xml.url do</span>
+</span><span class='line'><span class="s2">  xml.loc post_url(post)</span>
+</span><span class='line'><span class="s2">  xml.changefreq(&quot;</span><span class="n">daily</span><span class="s2">&quot;)</span>
+</span><span class='line'><span class="s2">  xml.priority &quot;</span><span class="mi">0</span><span class="o">.</span><span class="mi">8</span><span class="s2">&quot;</span>
+</span><span class='line'><span class="s2">  xml.lastmod post.updated_at.strftime(&quot;</span><span class="o">%</span><span class="n">Y</span><span class="o">-%</span><span class="n">m</span><span class="o">-%</span><span class="n">dT</span><span class="o">%</span><span class="ss">H</span><span class="p">:</span><span class="o">%</span><span class="ss">M</span><span class="p">:</span><span class="o">%</span><span class="n">S</span><span class="o">.</span><span class="n">%</span><span class="mi">2</span><span class="n">N</span><span class="o">%</span><span class="ss">:z</span><span class="s2">&quot;)</span>
+</span><span class='line'><span class="s2">end</span>
+</span><span class='line'><span class="s2">&lt;/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;  end</span>
+</span><span class='line'><span class="s2">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><p>
+  The first xml.url block adds an entry for our root url. In a more complex application we would probably want to add static entries for other pages. The next thing the code does is loop through each post and create a xml url element for each.
+</p></p>
+
+<p><p>
+  You can preview your sitemap by starting your rails server and visiting <a href="http://localhost:3000/sitemap.xml.">http://localhost:3000/sitemap.xml.</a>
+</p></p>
+
+<p><p>
+  So far so good, That&rsquo;s it!!! See ya!!! :)
+</p></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[What New with Foreign Keys in Rails 4.2?]]></title>
@@ -512,230 +884,6 @@
 <p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">%</span><span class="n">img</span><span class="p">{</span><span class="ss">src</span><span class="p">:</span> <span class="n">generate_qr</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;http://geekhmer.github.io/&quot;</span><span class="o">&gt;</span><span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="n">geekhmer</span><span class="o">.</span><span class="n">github</span><span class="o">.</span><span class="n">io</span><span class="o">/&lt;</span><span class="sr">/a&gt;&amp;rdquo;), class: &amp;ldquo;qr-code&amp;rdquo;}</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  So far so good, That's it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Translate Your Ruby on Rails Application]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/04/15/translate-your-ruby-on-rails-application/"/>
-    <updated>2015-04-15T08:58:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/04/15/translate-your-ruby-on-rails-application</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="Translate Your Ruby on Rails Application" />
-</p>
-
-
-
-
-<p>
-  If you're planning to take over the world, you'll need to convince everyone to speak your language, or better yet, why don't you offer them a website that speaks their language. The goal is to have a website available in multiple languages, and for the visitors to be able to toggle over to the language they are most comfortable with.
-</p>
-
-
-
-
-<p>
-  <strong>Routing</strong><br/>
-  I like to nest all of my routes inside of a :locale scope. I also limit the locale options to a set that I have predefined in an initializer. You could also choose to deal with locale validity later on in the flow (before_action method), but it is up to you.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/routes.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">scope</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;(</span><span class="ss">:locale</span><span class="p">)</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="ss">locale</span><span class="p">:</span> <span class="sr">/</span><span class="si">#{</span><span class="ss">MySite</span><span class="p">:</span><span class="ss">:ROUTE_LOCALES</span><span class="o">.</span><span class="n">keys</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">|&amp;</span><span class="n">rdquo</span><span class="p">;)</span><span class="si">}</span><span class="sr">/</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">root</span> <span class="ss">:to</span> <span class="o">=&gt;</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">home</span><span class="c1">#index&amp;rsquo;</span>
-</span><span class='line'>  <span class="n">resources</span> <span class="ss">:pages</span>
-</span><span class='line'>  <span class="c1"># etc&amp;hellip;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>onfig/initializers/my_site.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">MySite</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;MySite::LOCALES = {</span>
-</span><span class='line'><span class="sr">  en:    &amp;ldquo;English&amp;rdquo;,</span>
-</span><span class='line'><span class="sr">  kh:    &amp;ldquo;Khmer&amp;rdquo;,</span>
-</span><span class='line'><span class="sr">  fr:    &amp;ldquo;French&amp;rdquo;,</span>
-</span><span class='line'><span class="sr">  en_us: &amp;ldquo;US English&amp;rdquo;,</span>
-</span><span class='line'><span class="sr">  en_uk: &amp;ldquo;UK English&amp;rdquo;,</span>
-</span><span class='line'><span class="sr">}&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="ss">MySite</span><span class="p">:</span><span class="ss">:ROUTE_LOCALES</span> <span class="o">=</span> <span class="ss">MySite</span><span class="p">:</span><span class="ss">:LOCALES</span><span class="o">.</span><span class="n">keys</span><span class="o">.</span><span class="n">each_with_object</span><span class="p">({})</span> <span class="k">do</span> <span class="o">|</span><span class="n">locale</span><span class="p">,</span> <span class="n">hsh</span><span class="o">|</span>
-</span><span class='line'>  <span class="n">hsh</span><span class="o">[</span><span class="n">locale</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">_</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;)</span><span class="o">]</span> <span class="o">=</span> <span class="n">locale</span> <span class="k">if</span> <span class="n">locale</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="mi">2</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  This line of code will make sure all of your routes have the current locale in them.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/controllers/application_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">default_url_options</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="p">{})</span>
-</span><span class='line'>  <span class="p">{</span> <span class="ss">locale</span><span class="p">:</span> <span class="no">I18n</span><span class="o">.</span><span class="n">locale</span> <span class="p">}</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>Determining Locale</strong><br/>
-  I usually have a before_action filter which does its best to determine the URL of the application. You might have other things in here too if you keep track of the preferred locale in a cookie, or if it is attached to the user's session data or account. You may also want to use the HTTP_ACCEPT_LANGUAGE to determine if there is a match.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/controllers/application_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActionController</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">before_action</span> <span class="ss">:determine_locale</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  protected&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">def</span> <span class="nf">determine_locale</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;locale = if params.include?(:new_locale) &amp;amp;&amp;amp; MySite::ROUTE_LOCALES.keys.include?(params[:new_locale])</span>
-</span><span class='line'><span class="sr">  params[:new_locale]</span>
-</span><span class='line'><span class="sr">elsif params.include?(:locale)</span>
-</span><span class='line'><span class="sr">  params[:locale]</span>
-</span><span class='line'><span class="sr">else</span>
-</span><span class='line'><span class="sr">  locale_from_url(request.host) || I18n.default_locale</span>
-</span><span class='line'><span class="sr">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">set_locale(locale)</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">def</span> <span class="nf">locale_from_url</span><span class="p">(</span><span class="n">host</span><span class="p">)</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;# ... determine locale from host if you have different domains</span>
-</span><span class='line'><span class="sr"># for different locales</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">def</span> <span class="nf">set_locale</span><span class="p">(</span><span class="n">locale</span><span class="p">)</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;I18n.locale = locale.to_s.gsub(&quot;-&quot;,&quot;_&quot;).to_sym</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>Static Text</strong><br/>
-  The developers should be entering their keys into the yml files located in the locales folder if your rails application. I normally only have one for English, and then use other I18n backends (Redis for example) serve up the other translations. If the translations are in Redis, you will obviously need code that puts them there. I am working on an engine for this called <a href="https://github.com/leighhalliday/idioma" target="_blank">Idioma</a> which persists the translations using ActiveRecord and also to Redis at the same time.
-</p>
-
-
-
-
-<p>
-  <strong>Dynamic Content</strong><br/>
-  Because I18n comes built in to Rails, you won't need to install many gems. But for dynamic content I recommend <a href="https://github.com/globalize/globalize" target="_blank">Globalize</a>. Along with this one is a handy gem called <a href="https://rubygems.org/gems/globalize-accessors" target="_blank">Globalize Accessors</a> which will help you when creating forms to enter this data in.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Page</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">translates</span> <span class="ss">:title</span><span class="p">,</span> <span class="ss">:body</span><span class="p">,</span> <span class="n">fallbacks_for_empty_translations</span><span class="p">:</span> <span class="kp">true</span>
-</span><span class='line'>  <span class="n">globalize_accessors</span> <span class="ss">locales</span><span class="p">:</span> <span class="ss">MySite</span><span class="p">:</span><span class="ss">:LOCALES</span><span class="o">.</span><span class="n">keys</span><span class="p">,</span> <span class="ss">attributes</span><span class="p">:</span> <span class="o">[</span><span class="ss">:title</span><span class="p">,</span> <span class="ss">:body</span><span class="o">]</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>Dynamic Content</strong><br/>
-  One thing I set up are fallbacks... this is so you can translate English once, and only when there is a locale that differs from the default do you need to specifically translate it for that locale. Example, in the US colour is spelled like color.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/application.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">i18n</span><span class="o">.</span><span class="n">default_locale</span> <span class="o">=</span> <span class="ss">:en_ca</span>
-</span><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">i18n</span><span class="o">.</span><span class="n">fallbacks</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>  <span class="n">en_us</span><span class="p">:</span> <span class="ss">:en</span><span class="p">,</span>
-</span><span class='line'>  <span class="n">kh</span>   <span class="p">:</span> <span class="ss">:kh</span><span class="p">,</span>
-</span><span class='line'>  <span class="n">en_uk</span><span class="p">:</span> <span class="ss">:en</span><span class="p">,</span>
-</span><span class='line'>  <span class="n">fr_lu</span><span class="p">:</span> <span class="ss">:fr</span><span class="p">,</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>Having Your Website Translated</strong><br/>
-  Because the translation team probably isn't the same as the dev team, and they probably don't have access to your code repository nor know how to edit yml files, you will want to have another way of giving them access to the translations. There is an established tool called <a href="https://github.com/tolk/tolk" target="_blank">Tolk</a>.
-</p>
-
-
-
 
 <p>
   So far so good, That's it!!! See ya!!! :)
