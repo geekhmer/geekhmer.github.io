@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-04-17T10:40:20+07:00</updated>
+  <updated>2015-04-17T22:41:36+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,117 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails Export CSV]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/04/17/ruby-on-rails-export-csv/"/>
+    <updated>2015-04-17T22:25:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/04/17/ruby-on-rails-export-csv</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="Ruby on Rails Export CSV" />
+</p>
+
+
+
+
+<p>
+  Sometime you will want to provide a CSV export option for your users. This article will show you how.
+</p>
+
+
+
+
+<p>
+  The first thing we need to do is open up the config/application.rb file and add:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/application.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;csv&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Next, we need to add some code to the model that will export the data in the CSV format. Add the following code to the model you wish to export to CSV:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">as_csv</span>
+</span><span class='line'>  <span class="no">CSV</span><span class="o">.</span><span class="n">generate</span> <span class="k">do</span> <span class="o">|</span><span class="n">csv</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">csv</span> <span class="o">&lt;&lt;</span> <span class="n">column_names</span>
+</span><span class='line'>    <span class="n">all</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">item</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">csv</span> <span class="o">&lt;&lt;</span> <span class="n">item</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">values_at</span><span class="p">(</span><span class="o">*</span><span class="n">column_names</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  This code will export both the column headers as well as the data in the csv format and return the result.
+</p>
+
+
+
+
+<p>
+  Finally, we need to add a bit of extra code to our controller in order to return the CSV data to our user. Assuming your model and controller are named posts, add the following code to your posts controller:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>  <span class="vi">@posts</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="ss">:created_at</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+</span><span class='line'>    <span class="nb">format</span><span class="o">.</span><span class="n">html</span>
+</span><span class='line'>    <span class="nb">format</span><span class="o">.</span><span class="n">csv</span> <span class="p">{</span> <span class="n">send_data</span> <span class="vi">@posts</span><span class="o">.</span><span class="n">as_csv</span> <span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now, if you visit http://localhost:3000/posts.csv, you will be prompted to download the CSV.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[How to Build a Sitemap for Your Ruby on Rails Application]]></title>
@@ -2600,108 +2711,6 @@
 
 <p>
   So far so good, splitting the interface into two, we can comply to the Interface Segregation Principle. That&#8217;s it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Liskov Substitution Principle in Ruby]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/03/18/liskov-substitution-principle-in-ruby/"/>
-    <updated>2015-03-18T23:00:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/03/18/liskov-substitution-principle-in-ruby</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/rights_and_wrongsof_ruby.jpg" width="400" alt="Liskov Substitution Principle in Ruby" />
-</p>
-
-
-
-
-<p>
-  Assume that we already had the code:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Animal</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">walk</span>
-</span><span class='line'>     <span class="n">do_some_walkin</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Cat</span> <span class="o">&lt;</span> <span class="no">Animal</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">run</span>
-</span><span class='line'>    <span class="n">run_like_a_cat</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  This principle applies only to inheritance. In order to comply with the Liskov Substitution Principle, Subtypes must be substitutable for their base types.
-</p>
-
-
-
-
-<p>
-  Well, so they must have the same interface. Since ruby does not have abstract methods, we can do it like this:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Animal</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">walk</span>
-</span><span class='line'>    <span class="n">do_some_walkin</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">run</span>
-</span><span class='line'>    <span class="k">raise</span> <span class="no">NotImplementedError</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Cat</span> <span class="o">&lt;</span> <span class="no">Animal</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">run</span>
-</span><span class='line'>    <span class="n">run_like_a_cat</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
 </p>
 
 ]]></content>
