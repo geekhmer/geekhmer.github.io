@@ -78,6 +78,453 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/02/10/ruby-on-rails-uploads-multiple-files-with-dropzonejs-and-paperclip-gem/">Ruby on Rails Uploads Multiple Files With DropzoneJS and Paperclip Gem</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-10T21:37:00+07:00" pubdate data-updated="true">Feb 10<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/ruby_on_rails.png" width="400" alt="Ruby on Rails Uploads Multiple Files with DropzoneJS and Paperclip Gem" />
+</p>
+
+
+
+
+<p>
+  <a href="http://www.dropzonejs.com/" target="_blank">DropzoneJS</a> is a javascript library for allowing multiple file uploads via AJAX. It features drag and drop support, folder support, and much more on browsers that support these features.
+</p>
+
+
+
+
+<p>
+  In this article I will show you how to implement multiple images files uploads directly to paperclip using DropzoneJS. Let’s run through this with me.
+</p>
+
+
+
+
+<p>
+  <strong>Create Rails Project</strong><br/>
+  To create a Rails project; open up your terminal and type commands below: 
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="kp">new</span> <span class="n">dropzone</span> <span class="o">-</span><span class="n">d</span> <span class="n">mysql</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Add Gems</strong><br/>
+  We will add two gems to our Gemfile. <code>dropzonejs-rails</code> gem is a helper gem that integrates DropzoneJS into our Rails app. <code>paperclip</code> for processing image uploads.
+</p>
+
+
+
+
+<p>
+  Open up your <code>Gemfile</code> and add in the lines listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s2">&quot;paperclip&quot;</span><span class="p">,</span> <span class="s2">&quot;~&gt; 4.2&quot;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;dropzonejs-rails&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now let&#8217;s run a bundle install to install the gems:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Create a Image Model</strong><br/>
+  Now we will create a model to store our image information for Paperclip. Run the command below to create the image model and migrate the database:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="n">image</span> <span class="ss">avatar</span><span class="p">:</span><span class="n">attachment</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then add some code to Image model to tell paperclip we want to have an attachment attached. Open up your image model (<code>app/models/image.rb:</code>) and add the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>image.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Image</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">has_attached_file</span> <span class="ss">:avatar</span><span class="p">,</span> <span class="ss">:styles</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="ss">:medium</span> <span class="o">=&gt;</span> <span class="s2">&quot;300x300&gt;&quot;</span><span class="p">,</span> <span class="ss">:thumb</span> <span class="o">=&gt;</span> <span class="s2">&quot;100x100&gt;&quot;</span> <span class="p">},</span> <span class="ss">:default_url</span> <span class="o">=&gt;</span> <span class="s2">&quot;/images/:style/missing.png&quot;</span>
+</span><span class='line'>  <span class="n">validates_attachment_content_type</span> <span class="ss">:avatar</span><span class="p">,</span> <span class="ss">:content_type</span> <span class="o">=&gt;</span> <span class="sr">/\Aimage\/.*\Z/</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Create a Images Controller</strong><br/>
+  Then create an Images controller which will be used to display and allow the upload of our images. Run the command below to create this controller:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="n">images</span> <span class="n">index</span> <span class="n">create</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then update our routes file to set up the routes for our images controller. Open up the routes file (<code>config/routes.rb</code>) and modify it:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">resources</span> <span class="ss">:images</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:index</span><span class="p">,</span> <span class="ss">:create</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;images#index&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then modify our Images controller to add logic to handle the file upload as well as listing each of the images. Open up the Images controller (<code>app/controllers/images_controller.rb</code>) and modify it:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>images_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ImagesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>    <span class="vi">@images</span> <span class="o">=</span> <span class="no">Image</span><span class="o">.</span><span class="n">all</span>
+</span><span class='line'>    <span class="vi">@image</span> <span class="o">=</span> <span class="no">Image</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="vi">@image</span> <span class="o">=</span> <span class="no">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">image_params</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="vi">@image</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'>      <span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="p">{</span> <span class="ss">message</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="ss">fileID</span><span class="p">:</span> <span class="vi">@image</span><span class="o">.</span><span class="n">id</span> <span class="p">},</span> <span class="ss">status</span><span class="p">:</span> <span class="mi">200</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="p">{</span> <span class="ss">error</span><span class="p">:</span> <span class="vi">@image</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">full_messages</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)},</span> <span class="ss">status</span><span class="p">:</span> <span class="mi">400</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">image_params</span>
+</span><span class='line'>    <span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:image</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:avatar</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  DropzoneJS expects a json return, so the create method returns a JSON success or failure based on whether the image was uploaded successfully or not.
+</p>
+
+
+
+
+<p>
+  Then add Bootstrap to our application. Open up your application layout (<code>app/views/layouts/application.html.erb</code>)and modify it:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>application.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;!</span><span class="no">DOCTYPE</span> <span class="n">html</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">html</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">head</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">title</span><span class="o">&gt;</span><span class="no">DropzoneJS</span><span class="o">&lt;</span><span class="sr">/title&gt;</span>
+</span><span class='line'><span class="sr">  &lt;%= stylesheet_link_tag    &#39;application&#39;, media: &#39;all&#39;, &#39;data-turbolinks-track&#39; =&gt; true %&gt;</span>
+</span><span class='line'><span class="sr">  &lt;%= javascript_include_tag &#39;application&#39;, &#39;data-turbolinks-track&#39; =&gt; true %&gt;</span>
+</span><span class='line'><span class="sr">  &lt;%= stylesheet_link_tag    &#39;http:/</span><span class="o">/</span><span class="n">yandex</span><span class="o">.</span><span class="n">st</span><span class="o">/</span><span class="n">bootstrap</span><span class="o">/</span><span class="mi">3</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">1</span><span class="o">/</span><span class="n">css</span><span class="o">/</span><span class="n">bootstrap</span><span class="o">.</span><span class="n">min</span><span class="o">.</span><span class="n">css</span><span class="s1">&#39;, media: &#39;</span><span class="n">all</span><span class="s1">&#39;, &#39;</span><span class="n">data</span><span class="o">-</span><span class="n">turbolinks</span><span class="o">-</span><span class="n">track</span><span class="s1">&#39; =&gt; true %&gt;</span>
+</span><span class='line'><span class="s1">  &lt;%= javascript_include_tag &#39;</span><span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="n">yandex</span><span class="o">.</span><span class="n">st</span><span class="o">/</span><span class="n">bootstrap</span><span class="o">/</span><span class="mi">3</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">1</span><span class="o">/</span><span class="n">js</span><span class="o">/</span><span class="n">bootstrap</span><span class="o">.</span><span class="n">min</span><span class="o">.</span><span class="n">js</span><span class="s1">&#39;, &#39;</span><span class="n">data</span><span class="o">-</span><span class="n">turbolinks</span><span class="o">-</span><span class="n">track</span><span class="err">&#39;</span> <span class="o">=&gt;</span> <span class="kp">true</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%= csrf_meta_tags %&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/head&gt;</span>
+</span><span class='line'><span class="sr">&lt;body&gt;</span>
+</span><span class='line'><span class="sr">  &lt;%= yield %&gt;</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">body</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Well, then create our views. First let&#8217;s create the index view (<code>app/views/images/index.html.erb</code>). Open up your index view for the images controller and modify it:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>index.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">My</span> <span class="no">Images</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;%= form_for(Image.new, html: { multipart: true, class: &quot;dropzone&quot;}) do |f|  %&gt;</span>
+</span><span class='line'><span class="sr">  &lt;div class=&quot;fallback&quot;&gt;</span>
+</span><span class='line'><span class="sr">    &lt;%= f.file_field :avatar %&gt;&lt;br&gt;</span>
+</span><span class='line'><span class="sr">    &lt;%= f.submit &quot;Upload my Avatar&quot; %&gt;</span>
+</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% end %&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">&lt;div class=&quot;index&quot;&gt;</span>
+</span><span class='line'>  <span class="o">&lt;%=</span> <span class="n">render</span> <span class="s2">&quot;index&quot;</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">&lt;/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then we need to add some JavaScript to tell Rails how to handle the remote ajax file processing that we will do using dropzone. Create a view called <code>app/views/images/index.js.erb</code> for your images controller and add the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>index.js.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span><span class="p">(</span><span class="s2">&quot;.index&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">html</span><span class="p">(</span><span class="s2">&quot;&lt;%= escape_javascript(render(&#39;index&#39;)) %&gt;&quot;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then create the partial that we reference in the previous code. Create a new partial called <code>app/views/images/_index.html.erb</code> for your images controller and add the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>_index.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">% @images.each </span><span class="k">do</span> <span class="o">|</span><span class="n">image</span><span class="o">|</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;div class=&quot;img-thumbnail&quot;&gt;</span>
+</span><span class='line'>    <span class="o">&lt;%=</span> <span class="n">image_tag</span> <span class="n">image</span><span class="o">.</span><span class="n">avatar</span><span class="o">.</span><span class="n">url</span><span class="p">(</span><span class="ss">:thumb</span><span class="p">),</span> <span class="ss">alt</span><span class="p">:</span> <span class="n">image</span><span class="o">.</span><span class="n">avatar</span><span class="o">.</span><span class="n">url</span><span class="p">(</span><span class="ss">:thumb</span><span class="p">)</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;/div&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% end </span><span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then modify our application.css and add the dropzone css require. Open up your <code>app/assets/stylesheets/application.css</code> file and modify it:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>application.css </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">/*</span>
+</span><span class='line'><span class="sr"> *= require_tree .</span>
+</span><span class='line'><span class="sr"> *= require dropzone/</span><span class="n">dropzone</span>
+</span><span class='line'> <span class="o">*=</span> <span class="n">require_self</span>
+</span><span class='line'> <span class="o">*/</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then modify our application.js and add the dropzone js require. Open up your <code>app/assets/javascripts/application.js</code> file and modify it:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>application.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">/= require dropzone</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then add a bit more JavaScript to finish things up. Open up your <code>app/assets/javascripts/images.js</code> file and add in the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>images.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span><span class="p">(</span><span class="n">document</span><span class="p">)</span><span class="o">.</span><span class="n">ready</span><span class="p">(</span><span class="n">function</span><span class="p">(){</span>
+</span><span class='line'>  <span class="sr">//</span> <span class="n">disable</span> <span class="n">auto</span> <span class="n">discover</span>
+</span><span class='line'>  <span class="no">Dropzone</span><span class="o">.</span><span class="n">autoDiscover</span> <span class="o">=</span> <span class="kp">false</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">var</span> <span class="n">dropzone</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Dropzone</span> <span class="p">(</span><span class="s2">&quot;.dropzone&quot;</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>    <span class="ss">maxFilesize</span><span class="p">:</span> <span class="mi">256</span><span class="p">,</span> <span class="sr">//</span> <span class="n">set</span> <span class="n">the</span> <span class="n">maximum</span> <span class="n">file</span> <span class="n">size</span> <span class="n">to</span> <span class="mi">256</span> <span class="no">MB</span>
+</span><span class='line'>    <span class="ss">paramName</span><span class="p">:</span> <span class="s2">&quot;image[avatar]&quot;</span><span class="p">,</span> <span class="sr">//</span> <span class="no">Rails</span> <span class="n">expects</span> <span class="n">the</span> <span class="n">file</span> <span class="n">upload</span> <span class="n">to</span> <span class="n">be</span> <span class="n">something</span> <span class="n">like</span> <span class="n">model</span><span class="o">[</span><span class="n">field_name</span><span class="o">]</span>
+</span><span class='line'>    <span class="ss">addRemoveLinks</span><span class="p">:</span> <span class="kp">false</span> <span class="sr">//</span> <span class="n">don</span><span class="err">&#39;</span><span class="n">t</span> <span class="n">show</span> <span class="n">remove</span> <span class="n">links</span> <span class="n">on</span> <span class="n">dropzone</span> <span class="n">itself</span><span class="o">.</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">dropzone</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="n">function</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">this</span><span class="o">.</span><span class="n">removeFile</span><span class="p">(</span><span class="n">file</span><span class="p">);</span>
+</span><span class='line'>    <span class="vg">$.</span><span class="n">getScript</span><span class="p">(</span><span class="s2">&quot;/images&quot;</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">})</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, if you start your Rails server and navigate to http://localhost:3000 you will notice that you can drag and drop images onto the app. On certain browsers, such as Google Chrome, you can even drag and drop one or more folders of images onto the dropzone placeholder and have them upload. In addition you can also click the dropzone and select a file via the file selection screen. That&#8217;s it! See ya! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/02/09/use-git-with-ruby-on-rails-project/">Use Git With Ruby on Rails Project</a></h1>
     
     
@@ -3213,140 +3660,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/18/erlang-tail-recursion/">Erlang Tail Recursion</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-18T21:33:00+07:00" pubdate data-updated="true">Jan 18<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/logo_erlang.png" alt="Erlang Variables" />
-</p>
-
-
-
-
-<p>
-  A function is called tail recursive when the recursive call to itself happens only in the last expression of the body in every clause.
-</p>
-
-
-
-
-<p>
-  Syntax:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">non_tail_recursive</span><span class="p">(</span><span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="p">)</span> <span class="o">-&gt;</span>
-</span><span class='line'>  <span class="n">non_tail_recursive</span><span class="p">(</span><span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="p">),</span>
-</span><span class='line'>  <span class="n">other_expression</span><span class="p">,</span>
-</span><span class='line'>  <span class="o">.</span><span class="n">.</span><span class="o">.</span> <span class="o">.</span>
-</span><span class='line'><span class="n">tail_recursive</span><span class="p">(</span><span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="p">)</span> <span class="o">-&gt;</span>
-</span><span class='line'>  <span class="n">other_expression</span><span class="p">,</span>
-</span><span class='line'>  <span class="o">.</span><span class="n">.</span><span class="o">.</span>
-</span><span class='line'>  <span class="n">tail_recursive</span><span class="p">(</span><span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="p">)</span><span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The first function is not the tail recursive as the recursive call is followed by other expression. While the second is, since the recursive call is the last statement.
-</p>
-
-
-
-
-<p>
-  <strong>Tail Recursion & Performance</strong><br/>
-  In many programming languages tails recursion is a good approach performance. But in general, it is not the case in the latest releases of Erlang. Tail recursion is not guaranteed to give you better performance.
-</p>
-
-
-
-
-<p>
-  <strong>Tail Recursion VS Non Tail Recursion</strong><br/>
-</p>
-
-
-
-
-<p>
-  Non Tail Recursive:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">length</span><span class="p">(</span><span class="o">[]</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'><span class="n">length</span><span class="p">(</span><span class="o">[</span><span class="n">_</span> <span class="o">|</span> <span class="n">T</span><span class="o">]</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">length</span><span class="p">(</span><span class="n">T</span><span class="p">)</span><span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Tail Recursive:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">length</span><span class="p">(</span><span class="no">List</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">length</span><span class="p">(</span><span class="no">List</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">length</span><span class="p">(</span><span class="o">[]</span><span class="p">,</span> <span class="n">L</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">L</span><span class="p">;</span>
-</span><span class='line'><span class="n">length</span><span class="p">(</span><span class="o">[</span><span class="n">_</span> <span class="o">|</span> <span class="n">T</span><span class="o">]</span><span class="p">,</span> <span class="n">L</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">length</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">L</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/7/">&larr; Older</a>
@@ -3362,6 +3675,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/04/19/add-google-analytics-to-ruby-on-rails-application/">Add Google Analytics to Ruby on Rails Application</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/04/19/ruby-on-rails-generate-options/">Ruby on Rails Generate Options</a>
@@ -3387,10 +3704,6 @@
         <a href="/blog/2015/04/16/what-new-with-foreign-keys-in-rails-4-dot-2/">What New With Foreign Keys in Rails 4.2?</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2015/04/16/ruby-on-rails-filter-vs-action/">Ruby on Rails _filter vs _action</a>
-      </li>
-    
   </ul>
 </section>
 <section>
@@ -3402,7 +3715,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby/">Ruby [ 73 ]</a>
+        <a href="/blog/categories/ruby/">Ruby [ 74 ]</a>
       </li>
     
       <li>
@@ -3410,7 +3723,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 64 ]</a>
+        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 65 ]</a>
       </li>
     
       <li>
