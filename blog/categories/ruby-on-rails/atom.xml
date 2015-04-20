@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby on Rails | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby-on-rails/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-04-19T12:42:02+07:00</updated>
+  <updated>2015-04-20T11:48:10+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,159 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails Build a Simple Rake Task]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/04/20/ruby-on-rails-build-a-simple-rake-task/"/>
+    <updated>2015-04-20T10:46:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/04/20/ruby-on-rails-build-a-simple-rake-task</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="Ruby on Rails Build a Simple Rake Task" />
+</p>
+
+
+
+
+<p>
+  There are many tasks that need to be performed outside of your website that are related to your web application. An example would be cleaning up temporary files. You wouldn't want to have this code running in a web page. Fortunately rails includes a mechanism for doing this. Rake tasks make it easy to automate various aspects of your application.
+</p>
+
+
+
+
+<p>
+  First, we need to create a couple models for our sample. In this sample we will have 2 models. Our first model, Product, will store product information. Our second model, Review, will be a review of the product. Run the commands below to generate these 2 models:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Product</span> <span class="nb">name</span> <span class="n">average_rating</span><span class="ss">:float</span> <span class="ss">price</span><span class="p">:</span><span class="n">decimal</span><span class="p">{</span><span class="mi">12</span><span class="p">,</span><span class="mi">2</span><span class="p">}</span> <span class="ss">active</span><span class="p">:</span><span class="n">boolean</span>
+</span><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Review</span> <span class="ss">product</span><span class="p">:</span><span class="n">references</span> <span class="n">user</span> <span class="ss">rating</span><span class="p">:</span><span class="n">integer</span> <span class="ss">body</span><span class="p">:</span><span class="n">text</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Next, we need some seed data. Open up your seeds.rb file and add the following code:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>db/seeds.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Product</span><span class="o">.</span><span class="n">delete_all</span>
+</span><span class='line'><span class="no">Review</span><span class="o">.</span><span class="n">delete_all</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;Product.create!([</span>
+</span><span class='line'><span class="sr">  {id: 1, name: &amp;ldquo;Die Hard &amp;ndash; Blu-Ray&amp;rdquo;, price: 9.95, active: true},</span>
+</span><span class='line'><span class="sr">  {id: 2, name: &amp;ldquo;Iron Man 3 &amp;ndash; Blu-Ray&amp;rdquo;, price: 24.95, active: true},</span>
+</span><span class='line'><span class="sr">  {id: 3, name: &amp;ldquo;Star Trek &amp;ndash; Into Darkness &amp;ndash; Blu-Ray&amp;rdquo;, price: 19.95, active: true},</span>
+</span><span class='line'><span class="sr">  {id: 4, name: &amp;ldquo;The Little Mermaid &amp;ndash; Blu-Ray&amp;rdquo;, price: 29.95, active: true},</span>
+</span><span class='line'><span class="sr">  {id: 5, name: &amp;ldquo;This is the End &amp;ndash; Blu-Ray&amp;rdquo;, price: 17.95, active: true}</span>
+</span><span class='line'><span class="sr">])&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="no">Review</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="o">[</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Dan</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Epic</span> <span class="no">Action</span> <span class="no">Flick</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Will</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">The</span> <span class="no">Stunts</span> <span class="n">were</span> <span class="no">AMAZING</span><span class="o">!&amp;</span><span class="n">rdquo</span><span class="p">;},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">James</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">I</span> <span class="n">didn</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="n">t</span> <span class="n">like</span> <span class="n">it</span> <span class="n">as</span> <span class="n">much</span> <span class="n">as</span> <span class="n">the</span> <span class="n">first</span> <span class="n">one</span><span class="o">.</span><span class="n">&amp;rdquo</span><span class="p">;},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Lisa</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Epic</span><span class="o">!&amp;</span><span class="n">rdquo</span><span class="p">;},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Linda</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">A</span> <span class="n">classic</span> <span class="n">revived!</span>  <span class="no">Well</span> <span class="n">worth</span> <span class="n">watching</span> <span class="n">again</span><span class="o">.</span><span class="n">&amp;rdquo</span><span class="p">;},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Kathy</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">This</span> <span class="n">movie</span> <span class="n">is</span> <span class="n">hilarious!</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Jim</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Really</span> <span class="n">cheesy</span><span class="o">.</span><span class="n">&amp;rdquo</span><span class="p">;}</span>
+</span><span class='line'><span class="o">]</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Then run rake db:seed
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">seed</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Now, lets open up the Product model so that we can add an association to reviews. Modify the Product model so that it looks like the code listed below:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/models/product.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Product</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:reviews</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Then create a file called calculate_averages.rake in the lib/tasks folder and add the following code:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>lib/tasks/calculate_averages.rake </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">rake</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;task :calculate_averages =&gt; :environment do</span>
+</span><span class='line'><span class="sr">  products = Product.all&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="n">products</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">product</span><span class="o">|&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;puts &quot;Calculating average rating for </span><span class="si">#{</span><span class="n">product</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="sr">...&quot;</span>
+</span><span class='line'><span class="sr">product.update_attribute(:average_rating, product.reviews.average(&quot;rating&quot;))</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Now, if we run our rake command we will see that the averages are updated in the database.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="n">calculate_averages</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  So far so good, That's it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Add Google Analytics to Ruby on Rails Application]]></title>
@@ -405,114 +558,6 @@
 </span><span class='line'>
 </span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="nb">hash</span> <span class="o">=</span> <span class="ss">Digest</span><span class="p">:</span><span class="ss">:SHA512</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">this</span> <span class="n">is</span> <span class="n">a</span> <span class="nb">test</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;)</span> <span class="c1"># =&gt; &amp;ldquo;7d0a8468ed220400c0b8e6f335baa7e070ce880a37e2ac5995b9a97b809026de626da636ac7365249bb974c719edf543b52ed286646f437dc7f810cc2068375c&amp;rdquo;</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  So far so good, That's it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails Export CSV]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/04/17/ruby-on-rails-export-csv/"/>
-    <updated>2015-04-17T22:25:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/04/17/ruby-on-rails-export-csv</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="Ruby on Rails Export CSV" />
-</p>
-
-
-
-
-<p>
-  Sometime you will want to provide a CSV export option for your users. This article will show you how.
-</p>
-
-
-
-
-<p>
-  The first thing we need to do is open up the config/application.rb file and add:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/application.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">csv</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Next, we need to add some code to the model that will export the data in the CSV format. Add the following code to the model you wish to export to CSV:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">as_csv</span>
-</span><span class='line'>  <span class="no">CSV</span><span class="o">.</span><span class="n">generate</span> <span class="k">do</span> <span class="o">|</span><span class="n">csv</span><span class="o">|&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;csv &amp;lt;&amp;lt; column_names</span>
-</span><span class='line'><span class="sr">all.each do |item|</span>
-</span><span class='line'><span class="sr">  csv &amp;lt;&amp;lt; item.attributes.values_at(*column_names)</span>
-</span><span class='line'><span class="sr">end</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  This code will export both the column headers as well as the data in the csv format and return the result.
-</p>
-
-
-
-
-<p>
-  Finally, we need to add a bit of extra code to our controller in order to return the CSV data to our user. Assuming your model and controller are named posts, add the following code to your posts controller:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">index</span>
-</span><span class='line'>  <span class="vi">@posts</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="ss">:created_at</span><span class="p">)</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  respond_to do |format|&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="nb">format</span><span class="o">.</span><span class="n">html</span>
-</span><span class='line'><span class="nb">format</span><span class="o">.</span><span class="n">csv</span> <span class="p">{</span> <span class="n">send_data</span> <span class="vi">@posts</span><span class="o">.</span><span class="n">as_csv</span> <span class="p">}</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Now, if you visit http://localhost:3000/posts.csv, you will be prompted to download the CSV.
-</p>
-
-
-
 
 <p>
   So far so good, That's it!!! See ya!!! :)

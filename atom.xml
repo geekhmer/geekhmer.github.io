@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-04-19T12:42:02+07:00</updated>
+  <updated>2015-04-20T11:48:10+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,183 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails Build a Simple Rake Task]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/04/20/ruby-on-rails-build-a-simple-rake-task/"/>
+    <updated>2015-04-20T10:46:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/04/20/ruby-on-rails-build-a-simple-rake-task</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="Ruby on Rails Build a Simple Rake Task" />
+</p>
+
+
+
+
+<p>
+  There are many tasks that need to be performed outside of your website that are related to your web application. An example would be cleaning up temporary files. You wouldn&#8217;t want to have this code running in a web page. Fortunately rails includes a mechanism for doing this. Rake tasks make it easy to automate various aspects of your application.
+</p>
+
+
+
+
+<p>
+  First, we need to create a couple models for our sample. In this sample we will have 2 models. Our first model, Product, will store product information. Our second model, Review, will be a review of the product. Run the commands below to generate these 2 models:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Product</span> <span class="nb">name</span> <span class="n">average_rating</span><span class="ss">:float</span> <span class="ss">price</span><span class="p">:</span><span class="n">decimal</span><span class="p">{</span><span class="mi">12</span><span class="p">,</span><span class="mi">2</span><span class="p">}</span> <span class="ss">active</span><span class="p">:</span><span class="n">boolean</span>
+</span><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Review</span> <span class="ss">product</span><span class="p">:</span><span class="n">references</span> <span class="n">user</span> <span class="ss">rating</span><span class="p">:</span><span class="n">integer</span> <span class="ss">body</span><span class="p">:</span><span class="n">text</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Next, we need some seed data. Open up your seeds.rb file and add the following code:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>db/seeds.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Product</span><span class="o">.</span><span class="n">delete_all</span>
+</span><span class='line'><span class="no">Review</span><span class="o">.</span><span class="n">delete_all</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Product</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="o">[</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;Die Hard - Blu-Ray&quot;</span><span class="p">,</span> <span class="ss">price</span><span class="p">:</span> <span class="mi">9</span><span class="o">.</span><span class="mi">95</span><span class="p">,</span> <span class="ss">active</span><span class="p">:</span> <span class="kp">true</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;Iron Man 3 - Blu-Ray&quot;</span><span class="p">,</span> <span class="ss">price</span><span class="p">:</span> <span class="mi">24</span><span class="o">.</span><span class="mi">95</span><span class="p">,</span> <span class="ss">active</span><span class="p">:</span> <span class="kp">true</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;Star Trek - Into Darkness - Blu-Ray&quot;</span><span class="p">,</span> <span class="ss">price</span><span class="p">:</span> <span class="mi">19</span><span class="o">.</span><span class="mi">95</span><span class="p">,</span> <span class="ss">active</span><span class="p">:</span> <span class="kp">true</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;The Little Mermaid - Blu-Ray&quot;</span><span class="p">,</span> <span class="ss">price</span><span class="p">:</span> <span class="mi">29</span><span class="o">.</span><span class="mi">95</span><span class="p">,</span> <span class="ss">active</span><span class="p">:</span> <span class="kp">true</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;This is the End - Blu-Ray&quot;</span><span class="p">,</span> <span class="ss">price</span><span class="p">:</span> <span class="mi">17</span><span class="o">.</span><span class="mi">95</span><span class="p">,</span> <span class="ss">active</span><span class="p">:</span> <span class="kp">true</span><span class="p">}</span>
+</span><span class='line'><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Review</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="o">[</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Dan&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;Epic Action Flick&quot;</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Will&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;The Stunts were AMAZING!&quot;</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;James&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;I didn&#39;t like it as much as the first one.&quot;</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Lisa&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;Epic!&quot;</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Linda&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;A classic revived!  Well worth watching again.&quot;</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Kathy&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;This movie is hilarious!&quot;</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Jim&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;Really cheesy.&quot;</span><span class="p">}</span>
+</span><span class='line'><span class="o">]</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then run rake db:seed
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">seed</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now, lets open up the Product model so that we can add an association to reviews. Modify the Product model so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/models/product.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Product</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:reviews</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then create a file called calculate_averages.rake in the lib/tasks folder and add the following code:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>lib/tasks/calculate_averages.rake </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;rake&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">task</span> <span class="ss">:calculate_averages</span> <span class="o">=&gt;</span> <span class="ss">:environment</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">products</span> <span class="o">=</span> <span class="no">Product</span><span class="o">.</span><span class="n">all</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">products</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">product</span><span class="o">|</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;Calculating average rating for </span><span class="si">#{</span><span class="n">product</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">...&quot;</span>
+</span><span class='line'>    <span class="n">product</span><span class="o">.</span><span class="n">update_attribute</span><span class="p">(</span><span class="ss">:average_rating</span><span class="p">,</span> <span class="n">product</span><span class="o">.</span><span class="n">reviews</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="s2">&quot;rating&quot;</span><span class="p">))</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now, if we run our rake command we will see that the averages are updated in the database.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="n">calculate_averages</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Add Google Analytics to Ruby on Rails Application]]></title>
@@ -2632,109 +2809,6 @@
 
 <p>
   So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby Hooks for Metaprogramming]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/03/22/ruby-hooks-for-metaprogramming/"/>
-    <updated>2015-03-22T10:45:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/03/22/ruby-hooks-for-metaprogramming</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/rights_and_wrongsof_ruby.jpg" width="400" alt="Ruby Hooks for Metaprogramming" />
-</p>
-
-
-
-
-<h3>
-  Overview
-</h3>
-
-
-
-
-<p>
-  <strong>What is a Hook?</strong><br/>
-   In programming, a hook is a place and usually an interface provided in packaged code that allows a programmer to insert customized programming. For example, a programmer might want to provide code that analyzed how often a particular logic path was taken within a program.
-</p>
-
-
-
-
-<h3>
-  Ruby Hooks
-</h3>
-
-
-
-
-<p>
-  Ruby lets you hook in and change a lot of behavior of the core language. Methods, constants, classes, variables… etc. Ruby lets you query them all, and change a lot about them.
-</p>
-
-
-
-
-<p>
-  Here’s summaries and links for all the hooks I could find:
-</p>
-
-
-
-
-<p>
-  <strong>Methods</strong><br/>
-  - <code>respond_to_missing?</code> - A way to make sure your dynamic methods defined with method_missing also handle respond_to?<br/>
-  - <code>method_missing</code> - Called when a method cannot be found, potentially to allow dynamically defining one instead.<br/>
-  - <code>method_added</code> - Called whenever a method is added which can be used to modify the method.<br/>
-  - <code>method_removed</code> - Called whenever a method is removed.<br/>
-  - <code>singleton_method_added</code> - Method added to the singleton class of the object, to be callable just on this one instance.<br/>
-  - <code>singleton_method_removed</code> - Method removed from singleton class.<br/>
-  - <code>method_undefined</code> - A method has been undefined, with undef_method. Undef_method is different from remove_method because remove_method may still allow superclasses to define the method – undef_method means it’s gone entirely.<br/>
-  - <code>singleton_method_undefined</code> - Called when a singleton method is undefined entirely.<br/>
-  - <code>initialize_copy</code> - An optional callback when cloning any Object.
-</p>
-
-
-
-
-<p>
-  <strong>Classes</strong><br/>
-  - <code>inherited</code> - A Ruby class is subclassed.
-</p>
-
-
-
-
-<p>
-  <strong>Modules</strong><br/>
-  - <code>append_features</code> - A Module is included, and its constants, methods and variables used.<br/>
-  - <code>included</code> - A Module is included, which usually obsoletes &#8220;append_features&#8221;.<br/>
-  - <code>extend_object</code> - A Module extends an Object.<br/>
-  - <code>extended</code> - An Object is extended by a module, which mostly obsoletes extend_object.<br/>
-  - <code>const_missing</code> - A constant isn’t already present.
-</p>
-
-
-
-
-<p>
-  <strong>Marshalling</strong><br/>
-  - <code>marshal_dump</code> - Called on an object to have it dump itself in Ruby Marshal format.<br/>
-  - <code>marshal_load</code> - Called on an object to have it load itself in Ruby Mashal format.
-</p>
-
-
-
-
-<p>
-  <strong>Coercion</strong><br/>
-  - <code>coerce</code> - Called by the first type in a two-argument operator on the second argument, to make it turn into something the first argument can recognize.<br/>
-  - <code>induced_from</code> - Deprecated, please don’t use.<br/>
-  - <code>to_i</code>, <code>to_f</code>, <code>to_s</code>, <code>to_a</code>, <code>to_hash</code>, <code>to_proc</code> and others - Conversions, indicating that the object is being used as a type and should try to convert itself to that type.
 </p>
 
 ]]></content>
