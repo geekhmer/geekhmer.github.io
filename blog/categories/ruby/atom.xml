@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-05-03T15:44:47+07:00</updated>
+  <updated>2015-05-05T09:20:13+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,233 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Where Does Your Code Go in Rails Application?]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/05/05/where-does-your-code-go-in-rails-application/"/>
+    <updated>2015-05-05T08:50:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/05/05/where-does-your-code-go-in-rails-application</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="Where Does Your Code Go in Rails Application?" />
+</p>
+
+
+
+
+<p>
+  After you finish the Rails tutorials and start your own app, things get confusing something like where does your non-CRUD and general logic go?
+</p>
+
+
+
+
+<p>
+  You can't build the app you've been dreaming of without some general, non-Rails logic. So where do you put your code, and still keep things simple?
+</p>
+
+
+
+
+<p>
+  <strong>The Easy Place to Start</strong><br/>
+  when I have logic that feels related to an existing ActiveRecord model, I'll start by putting it into that model. For example if I had a Game model and I want to import a bunch of games from CSV files, I would put that method right onto the Game class.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/models/game.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Game</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">parse_from_csv</span><span class="p">(</span><span class="n">csv_string</span><span class="p">)</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;games = []</span>
+</span><span class='line'><span class="sr">CSV.parse(csv_string, quote_char: &quot;&#39;&quot;) do |row|</span>
+</span><span class='line'><span class="sr">  games &amp;lt;&amp;lt; Game.from_csv_row(row) if (row[0] == &#39;G&#39;)</span>
+</span><span class='line'><span class="sr">end</span>
+</span><span class='line'><span class="sr">games</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">from_csv_row</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;Game.new({</span>
+</span><span class='line'><span class="sr">  dgs_game_id: row[1],</span>
+</span><span class='line'><span class="sr">  opponent_name: row[2],</span>
+</span><span class='line'><span class="sr">  created_at: row[4],</span>
+</span><span class='line'><span class="sr">  updated_at: row[4],</span>
+</span><span class='line'><span class="sr">})</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  You have all the information your methods need right at hand. it's easily testable. And it's probably where a new contributor world look for that logic first.
+</p>
+
+
+
+
+<p>
+  But if you keep adding and changing that model, it'll get big and complicated. Different parts of the model will interact in strange ways. The more you change it, the harder it will be to change.
+</p>
+
+
+
+
+<p>
+  In that case, you would probably want to refactor that code out to a non-ActiveRecord model.
+</p>
+
+
+
+
+<p>
+  <strong>Non-ActiveRecord Models</strong><br/>
+  You can write your own Ruby code, in plain Ruby objects, and use them in your Rails app. These objects can still be called models, because they're modeling part of your problem. They just don't have an ActiveRecord database storing their data.
+</p>
+
+
+
+
+<p>
+  The next time I worked on that game CSV parser, the Game class was getting a little too big. So I moved the parser logic into its own GameCSVParser class.
+</p>
+
+
+
+
+<p>
+  Non-ActiveRecord class looks like:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/models/game_csv_parser.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">GameCSVParser</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">csv_string</span><span class="p">)</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@rows = CSV.parse(csv_string, quote_char: &quot;&#39;&quot;)</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">def</span> <span class="nf">games</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;game_rows.map { |row| Game.new(game_attributes(row)) }</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="kp">private</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  def game_rows&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="vi">@rows</span><span class="o">.</span><span class="n">select</span> <span class="p">{</span> <span class="o">|</span><span class="n">row</span><span class="o">|</span> <span class="n">is_game_row?</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  def game_attributes(row)&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="p">{</span>
+</span><span class='line'>  <span class="n">dgs_game_id</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>  <span class="n">opponent_name</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">2</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>  <span class="n">created_at</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">4</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>  <span class="n">updated_at</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">4</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  def is_game_row?(row)&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">row</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">==</span> <span class="s1">&#39;G&#39;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  I will go right to creating a new plain Ruby object if the logic I'm adding doesn't feel related to any specific ActiveRecord model. Of if the code seems like it should be a part of a thing that doesn't exist yet in the app. Otherwise, they mostly pop up through refactoring.
+</p>
+
+
+
+
+<p>
+  So far so good, That's it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby on Rails Charting with Chartkick Gem]]></title>
@@ -1267,185 +1494,6 @@
 <p>
   <strong>Sidekiq</strong><br/>
   There are many choices for background processing tools when using Ruby on Rails, however, <a href="https://rubygems.org/gems/sidekiq" target="_blank">Sidekiq</a> is the one of the most popular ones. The reason behind it’s popularity is the simplicity of it’s API and how it scales much better than other background processors.
-</p>
-
-
-
-
-<p>
-  So far so good, That's it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[How To Install Rails and Nginx with Passenger on Ubuntu?]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/04/24/how-to-install-rails-and-nginx-with-passenger-on-ubuntu/"/>
-    <updated>2015-04-24T20:32:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/04/24/how-to-install-rails-and-nginx-with-passenger-on-ubuntu</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="How To Install Rails and Nginx with Passenger on Ubuntu?" />
-</p>
-
-
-
-
-<p>
-  Ruby on Rails is an open source web application framework which runs on the Ruby programming language. It allows the developers creating pages and applications that gather information from the web server, talk to or query the database, and render templates out of the box directly to the internet browsers.
-</p>
-
-
-
-
-<p>
-  As a result, Rails features a routing system that is independent of the web server. The web server is used to render the content only. The choice for that would be Nginx. Nginx is fast webserver with a strong focus on high concurrency, high performance and low memory usage.
-</p>
-
-
-
-
-<h3>
-  Install Ruby and Rails
-</h3>
-
-
-
-
-<p>
-  Before we proceed with installation, we should make sure that our system repositories are up to date:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Once we are up to date with the latest available packages, the next step is to install Ruby Version Manager. It is application that allows to manage several different ruby versions easily, we can install RVM and then load it with:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">curl</span> <span class="o">-</span><span class="n">L</span> <span class="n">get</span><span class="o">.</span><span class="n">rvm</span><span class="o">.</span><span class="n">io</span> <span class="o">|</span> <span class="n">bash</span> <span class="o">-</span><span class="n">s</span> <span class="n">stable</span>
-</span><span class='line'><span class="n">source</span> <span class="sr">/usr/</span><span class="n">local</span><span class="o">/</span><span class="n">rvm</span><span class="o">/</span><span class="n">scripts</span><span class="o">/</span><span class="n">rvm</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  We must make sure that we have all dependencies from RVM. To make sure that we have all required dependencies, we execute the following command:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rvm</span> <span class="n">requirements</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  It will make sure that we are up to date and install the missing requirements (if any). Once we have RVM installed and configured, we can proceed to install and configure Ruby.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rvm</span> <span class="n">install</span> <span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">1</span>
-</span><span class='line'><span class="n">rvm</span> <span class="n">use</span> <span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">1</span> <span class="o">&amp;</span><span class="n">mdash</span><span class="p">;</span><span class="n">default</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  These two commands will install Ruby and set the system to use version 2.2.1 by default. The next step is to make sure we have all components for Ruby on Rails. Ruby Gems is a package manager for the Ruby programming language that provides a standard format for distributing Ruby programs and libraries, a tool designed to easily manage the installation of gems, and a server for distributing them, we can install it with this command and then use it to install Rails:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rvm</span> <span class="n">rubygems</span> <span class="n">current</span>
-</span><span class='line'><span class="n">gem</span> <span class="n">install</span> <span class="n">rails</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  This process could take some time, but after it finish, Ruby on Rails is installed.
-</p>
-
-
-
-
-<h3>
-  Install Passenger and Nginx
-</h3>
-
-
-
-
-<p>
-  We need to make sure that we can easily deploy Ruby on rails to any web server. We will install and use Passenger for that. It will serve as interface or bridge for communication between Ruby and the web server, you can install it with the following command:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="n">install</span> <span class="n">passenger</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Once passenger is installed, the rest of the required setup is fully automated. We execute the command:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rvmsudo</span> <span class="n">passenger</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">nginx</span><span class="o">-</span><span class="n">module</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Once we do this, it checks for all dependencies automatically and install those that are missing. If some manual user action is required, Passenger will tell us, as well as give us detailed instructions how to do it.
-</p>
-
-
-
-
-<p>
-  Now we need to configure nginx to “talk” to Passenger. In order to do that, we need to open the nginx configuration file (/opt/nginx/conf/nginx.conf), using our favorite editor and add the following:
-</p>
-
-
-<p></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>nginx.conf </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">server</span> <span class="p">{</span>
-</span><span class='line'>  <span class="n">listen</span> <span class="mi">80</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">server_name</span> <span class="n">example</span><span class="o">.</span><span class="n">com</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">passenger_enabled</span> <span class="n">on</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">root</span> <span class="sr">/var/</span><span class="n">www</span><span class="o">/</span><span class="n">rails_app</span><span class="o">/</span><span class="kp">public</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  In order to create our rails app, we need to install Node.js first:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">nodejs</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Once that is that, we should go to our directory (in this case it is /var/www/rails_app/public) and create the application. After all this is installed and configured, we simply need to start Nginx.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="kp">new</span> <span class="n">my_first_rails_app</span>
-</span><span class='line'><span class="n">sudo</span> <span class="n">service</span> <span class="n">nginx</span> <span class="n">start</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  We can try and access our new Ruby on Rails application using our browser. It seems that it was much easier to setup the environment and create our first Ruby on Rails project than we thought.
 </p>
 
 

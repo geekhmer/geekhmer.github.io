@@ -5,13 +5,13 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Interface Segregation Principle in Ruby - GeeKhmer</title>
+  <title>Where Does Your Code Go in Rails Application? - GeeKhmer</title>
   <meta name="author" content="Bunlong Van">
   
   
   <meta name="description" content="The biggest website of computer programming, Ruby, Ruby on Rails, Erlang, Chicagoboss and Javascript in Southeast Asia.">
 
-  <meta name="keywords" content="Interface Segregation Principle in Ruby">
+  <meta name="keywords" content="Where Does Your Code Go in Rails Application?">
 
   <!-- http://t.co/dKP3o1e -->
   <meta name="HandheldFriendly" content="True">
@@ -19,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://geekhmer.github.io/blog/2015/03/18/interface-segregation-principle-in-ruby">
+  <link rel="canonical" href="http://geekhmer.github.io/blog/2015/05/05/where-does-your-code-go-in-rails-application">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="" rel="alternate" title="GeeKhmer" type="application/atom+xml">
@@ -75,7 +75,7 @@
   
   <header>
     
-      <h1 class="entry-title">Interface Segregation Principle in Ruby</h1>
+      <h1 class="entry-title">Where Does Your Code Go in Rails Application?</h1>
     
     
       <p class="meta">
@@ -91,7 +91,7 @@
   
 
 
-<time datetime="2015-03-18T23:41:00+07:00" pubdate data-updated="true">Mar 18<span>th</span>, 2015</time>
+<time datetime="2015-05-05T08:50:00+07:00" pubdate data-updated="true">May 5<span>th</span>, 2015</time>
         
       </p>
     
@@ -99,27 +99,36 @@
 
 
 <div class="entry-content"><p>
-  <img src="/images/rights_and_wrongsof_ruby.jpg" width="400" alt="Interface Segregation Principle" />
+  <img src="/images/ruby_on_rails.png" width="400" alt="Where Does Your Code Go in Rails Application?" />
 </p>
 
 
 
 
 <p>
-  Simply Interface Segregation Principle states that: When a client depends upon a class that contains interfaces that the client does not use, but that other clients do use, then that client will be affected by the changes that those other clients force upon the class.
+  After you finish the Rails tutorials and start your own app, things get confusing something like where does your non-CRUD and general logic go?
 </p>
 
 
 
 
 <p>
-  If you have a class that has two clients (objects using it):
+  You can&#8217;t build the app you&#8217;ve been dreaming of without some general, non-Rails logic. So where do you put your code, and still keep things simple?
 </p>
 
 
 
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<p>
+  <strong>The Easy Place to Start</strong><br/>
+  when I have logic that feels related to an existing ActiveRecord model, I&#8217;ll start by putting it into that model. For example if I had a Game model and I want to import a bunch of games from CSV files, I would put that method right onto the Game class.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/models/game.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
@@ -137,32 +146,22 @@
 <span class='line-number'>16</span>
 <span class='line-number'>17</span>
 <span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Car</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">open</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Game</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">parse_from_csv</span><span class="p">(</span><span class="n">csv_string</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">games</span> <span class="o">=</span> <span class="o">[]</span>
+</span><span class='line'>    <span class="no">CSV</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">csv_string</span><span class="p">,</span> <span class="n">quote_char</span><span class="p">:</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">row</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">games</span> <span class="o">&lt;&lt;</span> <span class="no">Game</span><span class="o">.</span><span class="n">from_csv_row</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">row</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">==</span> <span class="s1">&#39;G&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>    <span class="n">games</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">start_engine</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">change_engine</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Driver</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">drive</span>
-</span><span class='line'>    <span class="vi">@car</span><span class="o">.</span><span class="n">open</span>
-</span><span class='line'>    <span class="vi">@car</span><span class="o">.</span><span class="n">start_engine</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Mechanic</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">do_stuff</span>
-</span><span class='line'>    <span class="vi">@car</span><span class="o">.</span><span class="n">change_engine</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">from_csv_row</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+</span><span class='line'>    <span class="no">Game</span><span class="o">.</span><span class="n">new</span><span class="p">({</span>
+</span><span class='line'>      <span class="n">dgs_game_id</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">opponent_name</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">2</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">created_at</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">4</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">updated_at</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">4</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>    <span class="p">})</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
@@ -171,13 +170,50 @@
 
 
 <p>
-  As you can see, our Car class has an interface that&#8217;s used partially by both the Driver and the Mechanic. We can improve our interface like this:
+  You have all the information your methods need right at hand. it&#8217;s easily testable. And it&#8217;s probably where a new contributor world look for that logic first.
 </p>
 
 
 
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<p>
+  But if you keep adding and changing that model, it&#8217;ll get big and complicated. Different parts of the model will interact in strange ways. The more you change it, the harder it will be to change.
+</p>
+
+
+
+
+<p>
+  In that case, you would probably want to refactor that code out to a non-ActiveRecord model.
+</p>
+
+
+
+
+<p>
+  <strong>Non-ActiveRecord Models</strong><br/>
+  You can write your own Ruby code, in plain Ruby objects, and use them in your Rails app. These objects can still be called models, because they&#8217;re modeling part of your problem. They just don&#8217;t have an ActiveRecord database storing their data.
+</p>
+
+
+
+
+<p>
+  The next time I worked on that game CSV parser, the Game class was getting a little too big. So I moved the parser logic into its own GameCSVParser class.
+</p>
+
+
+
+
+<p>
+  Non-ActiveRecord class looks like:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/models/game_csv_parser.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
@@ -202,29 +238,35 @@
 <span class='line-number'>23</span>
 <span class='line-number'>24</span>
 <span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Car</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">open</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">GameCSVParser</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">csv_string</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@rows</span> <span class="o">=</span> <span class="no">CSV</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">csv_string</span><span class="p">,</span> <span class="n">quote_char</span><span class="p">:</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">)</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">start_engine</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">games</span>
+</span><span class='line'>    <span class="n">game_rows</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">row</span><span class="o">|</span> <span class="no">Game</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">game_attributes</span><span class="p">(</span><span class="n">row</span><span class="p">))</span> <span class="p">}</span>
 </span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">CarInternals</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">change_engine</span>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">game_rows</span>
+</span><span class='line'>    <span class="vi">@rows</span><span class="o">.</span><span class="n">select</span> <span class="p">{</span> <span class="o">|</span><span class="n">row</span><span class="o">|</span> <span class="n">is_game_row?</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="p">}</span>
 </span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Driver</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">drive</span>
-</span><span class='line'>    <span class="vi">@car</span><span class="o">.</span><span class="n">open</span>
-</span><span class='line'>    <span class="vi">@car</span><span class="o">.</span><span class="n">start_engine</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">game_attributes</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>      <span class="n">dgs_game_id</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">opponent_name</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">2</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">created_at</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">4</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">updated_at</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">4</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>    <span class="p">}</span>
 </span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Mechanic</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">do_stuff</span>
-</span><span class='line'>    <span class="vi">@car_internals</span><span class="o">.</span><span class="n">change_engine</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">is_game_row?</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">row</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">==</span> <span class="s1">&#39;G&#39;</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
@@ -233,7 +275,14 @@
 
 
 <p>
-  So far so good, splitting the interface into two, we can comply to the Interface Segregation Principle. That&#8217;s it!!! See ya!!! :)
+  I will go right to creating a new plain Ruby object if the logic I&#8217;m adding doesn&#8217;t feel related to any specific ActiveRecord model. Of if the code seems like it should be a part of a thing that doesn&#8217;t exist yet in the app. Otherwise, they mostly pop up through refactoring.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
 </p>
 
 </div>
@@ -258,7 +307,7 @@
   
 
 
-<time datetime="2015-03-18T23:41:00+07:00" pubdate data-updated="true">Mar 18<span>th</span>, 2015</time>
+<time datetime="2015-05-05T08:50:00+07:00" pubdate data-updated="true">May 5<span>th</span>, 2015</time>
       
 
 <span class="categories">
@@ -272,7 +321,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2015/03/18/interface-segregation-principle-in-ruby/" data-via="" data-counturl="http://geekhmer.github.io/blog/2015/03/18/interface-segregation-principle-in-ruby/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2015/05/05/where-does-your-code-go-in-rails-application/" data-via="" data-counturl="http://geekhmer.github.io/blog/2015/05/05/where-does-your-code-go-in-rails-application/" >Tweet</a>
   
   
   
@@ -283,10 +332,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2015/03/18/liskov-substitution-principle-in-ruby/" title="Previous Post: Liskov Substitution Principle in Ruby">&laquo; Liskov Substitution Principle in Ruby</a>
+        <a class="basic-alignment left" href="/blog/2015/05/02/ruby-on-rails-charting-with-chartkick-gem/" title="Previous Post: Ruby on Rails Charting with Chartkick Gem">&laquo; Ruby on Rails Charting with Chartkick Gem</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2015/03/18/dependency-inversion-principle-in-ruby/" title="Next Post: Dependency Inversion Principle in Ruby">Dependency Inversion Principle in Ruby &raquo;</a>
       
     </p>
   </footer>
