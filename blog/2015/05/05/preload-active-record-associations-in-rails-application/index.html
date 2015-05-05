@@ -1,0 +1,516 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Preload Active Record Associations in Rails Application - GeeKhmer</title>
+  <meta name="author" content="Bunlong Van">
+  
+  
+  <meta name="description" content="The biggest website of computer programming, Ruby, Ruby on Rails, Erlang, Chicagoboss and Javascript in Southeast Asia.">
+
+  <meta name="keywords" content="Preload Active Record Associations in Rails Application">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://geekhmer.github.io/blog/2015/05/05/preload-active-record-associations-in-rails-application">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="" rel="alternate" title="GeeKhmer" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+<link href="/stylesheets/jquery.fancybox.css" media="screen, projection" rel="stylesheet" type="text/css">
+<script src="/javascripts/libs/jquery.fancybox.pack.js"></script>
+<script src="/javascripts/init_fancybox.js"></script>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1>
+    <!-- <a href="/">GeeKhmer</a> -->
+    <div class="logo" />
+  </h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation">
+  <form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:geekhmer.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+  </form>
+
+<ul class="subscription" data-subscription="rss">
+  
+  
+</ul>
+<ul class="main-navigation">
+  <li><a href="/">Home</a></li>
+  <li><a href="/blog/archives">Articles</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Preload Active Record Associations in Rails Application</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-05-05T16:26:00+07:00" pubdate data-updated="true">May 5<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>
+  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="Preload Active Record Associations in Rails Application" />
+</p>
+
+
+
+
+<p>
+  Active Record makes database querying so simple. Chain together a few methods and bam, you’ve saved your self lines and lines of T-SQL. The problem is this simplicity masks the underlying operation and it’s very easy to not realize how inefficient your database calls are.
+</p>
+
+
+
+
+<p>
+  For example:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:posts</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Post</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:comments</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:user</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Comment</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:post</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Let’s say on a users profile page we would like to show a listing of comments from this user.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="vi">@user</span><span class="o">.</span><span class="n">posts</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">post</span><span class="o">|</span>
+</span><span class='line'>   <span class="n">post</span><span class="o">.</span><span class="n">comments</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">comment</span><span class="o">|</span>
+</span><span class='line'>      <span class="o">&lt;%=</span> <span class="n">comment</span><span class="o">.</span><span class="n">message</span> <span class="o">%&gt;</span>
+</span><span class='line'>   <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  What you end up with is something like:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="mi">1</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="sb">`users`</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="sb">`users`</span> <span class="no">WHERE</span> <span class="s1">&#39;id&#39;</span> <span class="o">=</span> <span class="mi">1</span> <span class="no">LIMIT</span> <span class="mi">1</span>
+</span><span class='line'> <span class="no">Post</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">7</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="sb">`posts`</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="sb">`blogs`</span> <span class="no">WHERE</span> <span class="sb">`blogs`</span><span class="o">.</span><span class="n">`user_id</span><span class="sb">` = 2</span>
+</span><span class='line'><span class="sb"> Comment Load (0.7ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` = 43</span>
+</span><span class='line'><span class="sb"> Comment Load (1.7ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` = 55</span>
+</span><span class='line'><span class="sb"> Comment Load (2.2ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` = 32</span>
+</span><span class='line'><span class="sb"> Comment Load (0.9ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` = 66</span>
+</span><span class='line'><span class="sb"> Comment Load (2.2ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` = 56</span>
+</span><span class='line'><span class="sb"> Comment Load (4.8ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` = 65</span>
+</span><span class='line'><span class="sb"> Comment Load (1.8ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` = 68</span>
+</span><span class='line'><span class="sb"> Comment Load (0.8ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` = 71</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The user has commented in 9 different posts, which results in 9 separate queries to the DB. This is a small scale example, but you can see how this can compound into something nasty.
+</p>
+
+
+
+
+<p>
+  he solution is to user includes method:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">:posts</span> <span class="o">=&gt;</span> <span class="ss">:comments</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  When using includes method, Active Record ensures that all of the specified associations are loaded using the minimum possible number of queries. The actual query executed is converted into a more optimal singular query and it is that result set that is iterated over instead of the replicated find(id) style queries.
+</p>
+
+
+
+
+<p>
+  Our query stack list now looks like:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="mi">0</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="sb">`users`</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="sb">`users`</span> <span class="no">WHERE</span> <span class="s1">&#39;id&#39;</span> <span class="o">=</span> <span class="mi">1</span> <span class="no">LIMIT</span> <span class="mi">1</span>
+</span><span class='line'><span class="no">Post</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">4</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="sb">`posts`</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="sb">`posts`</span> <span class="no">WHERE</span> <span class="sb">`posts`</span><span class="o">.</span><span class="n">`user_id</span><span class="sb">` IN (1)</span>
+</span><span class='line'><span class="sb">Comment Load (0.5ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` IN (43, 55, 32, 66, 56, 65, 68, 71)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Bunlong Van</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-05-05T16:26:00+07:00" pubdate data-updated="true">May 5<span>th</span>, 2015</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ruby/'>Ruby</a>, <a class='category' href='/blog/categories/ruby-on-rails/'>Ruby on Rails</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2015/05/05/preload-active-record-associations-in-rails-application/" data-via="" data-counturl="http://geekhmer.github.io/blog/2015/05/05/preload-active-record-associations-in-rails-application/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/05/05/where-does-your-code-go-in-rails-application/" title="Previous Post: Where Does Your Code Go in Rails Application?">&laquo; Where Does Your Code Go in Rails Application?</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/05/05/preload-active-record-associations-in-rails-application/">Preload Active Record Associations in Rails Application</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/05/05/where-does-your-code-go-in-rails-application/">Where Does Your Code Go in Rails Application?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/05/02/ruby-on-rails-charting-with-chartkick-gem/">Ruby on Rails Charting With Chartkick Gem</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/05/02/automatically-updating-timeago-text-with-rails-livestamp-gem/">Automatically-updating Timeago Text With Rails-livestamp Gem</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/04/29/ruby-on-rails-getting-started-with-jbuilder/">Ruby on Rails Getting Started With JBuilder</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/04/25/10-useful-ruby-on-rails-4-gems/">10 Useful Ruby on Rails 4 Gems</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/04/24/how-to-install-rails-and-nginx-with-passenger-on-ubuntu/">How to Install Rails and Nginx With Passenger on Ubuntu?</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Category</h1>
+  <ul id="recent_posts">
+    
+      <li>
+        <a href="/blog/categories/facebook/">Facebook [ 4 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby/">Ruby [ 82 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/heroku/">Heroku [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 73 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/testing/">Testing [ 5 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/layout/">Layout [ 3 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby-metaprogramming/">Ruby metaprogramming [ 4 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/websocket/">Websocket [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/front-end-mvc-framework/">Front-end mvc framework [ 1 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/javascript/">Javascript [ 3 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/erlang/">Erlang [ 20 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/design-pattern/">Design pattern [ 1 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/other/">Other [ 18 ]</a>
+      </li>
+    
+  </ul>
+</section><section>
+  <h1>Notes</h1>
+  <ul id="recent_posts">
+    <li>
+      <a href="http://vimcommands.github.io/" target="_blank">Vim Commands</a>
+    </li>
+    <li>
+      <a href="http://ruby-hacking-style-guide.github.io/" target="_blank">Ruby Hacking Style Guide</a>
+    </li>
+  </ul>
+</section><section>
+  <h1>References</h1>
+  <ul id="recent_posts">
+    <li>
+      <a href="http://www.erlang.org/" target="_blank">
+        <img src="/images/logo_erlang.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://www.chicagoboss.org/" target="_blank">
+        <img src="/images/logo_chicagoboss.svg" />
+      </a>
+    </li>
+    <li>
+      <a href="https://www.ruby-lang.org/en/" target="_blank">
+        <img src="/images/logo_ruby.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://guides.rubyonrails.org" target="_blank">
+        <img src="/images/logo_rails_guides.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://railscasts.com" target="_blank">
+        <img src="/images/logo_rails_casts.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://github.com" target="_blank">
+        <img src="/images/logo_github.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://www.linode.com" target="_blank">
+        <img src="/images/logo_linode.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://newrelic.com" target="_blank">
+        <img src="/images/logo_newrelic.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://developers.facebook.com/" target="_blank">
+        <img src="/images/logo_facebook.png" />
+      </a>
+    </li>
+  </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 GeeKhmer in Phnom Penh, Cambodia.
+</p>
+
+</footer>
+  
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=1451301955117043&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

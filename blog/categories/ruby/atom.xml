@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-05-05T09:20:13+07:00</updated>
+  <updated>2015-05-05T16:42:20+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,153 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Preload Active Record Associations in Rails Application]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/05/05/preload-active-record-associations-in-rails-application/"/>
+    <updated>2015-05-05T16:26:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/05/05/preload-active-record-associations-in-rails-application</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="Preload Active Record Associations in Rails Application" />
+</p>
+
+
+
+
+<p>
+  Active Record makes database querying so simple. Chain together a few methods and bam, you’ve saved your self lines and lines of T-SQL. The problem is this simplicity masks the underlying operation and it’s very easy to not realize how inefficient your database calls are.
+</p>
+
+
+
+
+<p>
+  For example:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:posts</span>
+</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;class Post &amp;lt; ActiveRecord::Base</span>
+</span><span class='line'><span class="sr">  has_many :comments</span>
+</span><span class='line'><span class="sr">  belongs_to :user</span>
+</span><span class='line'><span class="sr">end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="k">class</span> <span class="nc">Comment</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:post</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Let’s say on a users profile page we would like to show a listing of comments from this user.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;@user.posts.each do |post|</span>
+</span><span class='line'><span class="sr">   post.comments.each do |comment|&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span>  <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%=</span> <span class="n">comment</span><span class="o">.</span><span class="n">message</span> <span class="o">%&amp;</span><span class="n">gt</span><span class="p">;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>   <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  What you end up with is something like:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="mi">1</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">users</span><span class="o">&lt;</span><span class="sr">/code&gt;.&lt;em&gt; FROM &lt;code&gt;users&lt;/</span><span class="n">code</span><span class="o">&gt;</span> <span class="no">WHERE</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="nb">id</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span> <span class="o">=</span> <span class="mi">1</span> <span class="no">LIMIT</span> <span class="mi">1</span>
+</span><span class='line'> <span class="no">Post</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">7</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">posts</span><span class="o">&lt;</span><span class="sr">/code&gt;.&lt;/em</span><span class="o">&gt;</span> <span class="no">FROM</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">blogs</span><span class="o">&lt;</span><span class="sr">/code&gt; WHERE &lt;code&gt;blogs&lt;/</span><span class="n">code</span><span class="o">&gt;.</span><span class="n">&lt;code</span><span class="o">&gt;</span><span class="n">user_id</span><span class="o">&lt;</span><span class="sr">/code&gt; = 2</span>
+</span><span class='line'><span class="sr"> Comment Load (0.7ms)  SELECT &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;.</span><span class="n">&lt;em</span><span class="o">&gt;</span> <span class="no">FROM</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt; WHERE &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;.</span><span class="n">&lt;code</span><span class="o">&gt;</span><span class="n">post_id</span><span class="o">&lt;</span><span class="sr">/code&gt; = 43</span>
+</span><span class='line'><span class="sr"> Comment Load (1.7ms)  SELECT &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;.</span><span class="n">&lt;</span><span class="sr">/em&gt; FROM &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;</span> <span class="no">WHERE</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt;.&lt;code&gt;post_id&lt;/</span><span class="n">code</span><span class="o">&gt;</span> <span class="o">=</span> <span class="mi">55</span>
+</span><span class='line'> <span class="no">Comment</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">2</span><span class="o">.</span><span class="mi">2</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt;.&lt;em&gt; FROM &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;</span> <span class="no">WHERE</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt;.&lt;code&gt;post_id&lt;/</span><span class="n">code</span><span class="o">&gt;</span> <span class="o">=</span> <span class="mi">32</span>
+</span><span class='line'> <span class="no">Comment</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">9</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt;.&lt;/em</span><span class="o">&gt;</span> <span class="no">FROM</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt; WHERE &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;.</span><span class="n">&lt;code</span><span class="o">&gt;</span><span class="n">post_id</span><span class="o">&lt;</span><span class="sr">/code&gt; = 66</span>
+</span><span class='line'><span class="sr"> Comment Load (2.2ms)  SELECT &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;.</span><span class="n">&lt;em</span><span class="o">&gt;</span> <span class="no">FROM</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt; WHERE &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;.</span><span class="n">&lt;code</span><span class="o">&gt;</span><span class="n">post_id</span><span class="o">&lt;</span><span class="sr">/code&gt; = 56</span>
+</span><span class='line'><span class="sr"> Comment Load (4.8ms)  SELECT &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;.</span><span class="n">&lt;</span><span class="sr">/em&gt; FROM &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;</span> <span class="no">WHERE</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt;.&lt;code&gt;post_id&lt;/</span><span class="n">code</span><span class="o">&gt;</span> <span class="o">=</span> <span class="mi">65</span>
+</span><span class='line'> <span class="no">Comment</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="mi">8</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt;.&lt;em&gt; FROM &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;</span> <span class="no">WHERE</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt;.&lt;code&gt;post_id&lt;/</span><span class="n">code</span><span class="o">&gt;</span> <span class="o">=</span> <span class="mi">68</span>
+</span><span class='line'> <span class="no">Comment</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">8</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt;.&lt;/em</span><span class="o">&gt;</span> <span class="no">FROM</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt; WHERE &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;.</span><span class="n">&lt;code</span><span class="o">&gt;</span><span class="n">post_id</span><span class="o">&lt;</span><span class="sr">/code&gt; = 71</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  The user has commented in 9 different posts, which results in 9 separate queries to the DB. This is a small scale example, but you can see how this can compound into something nasty.
+</p>
+
+
+
+
+<p>
+  he solution is to user includes method:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">:posts</span> <span class="o">=&gt;</span> <span class="ss">:comments</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  When using includes method, Active Record ensures that all of the specified associations are loaded using the minimum possible number of queries. The actual query executed is converted into a more optimal singular query and it is that result set that is iterated over instead of the replicated find(id) style queries.
+</p>
+
+
+
+
+<p>
+  Our query stack list now looks like:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="mi">0</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">users</span><span class="o">&lt;</span><span class="sr">/code&gt;.&lt;em&gt; FROM &lt;code&gt;users&lt;/</span><span class="n">code</span><span class="o">&gt;</span> <span class="no">WHERE</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="nb">id</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span> <span class="o">=</span> <span class="mi">1</span> <span class="no">LIMIT</span> <span class="mi">1</span>
+</span><span class='line'><span class="no">Post</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">4</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">posts</span><span class="o">&lt;</span><span class="sr">/code&gt;.&lt;/em</span><span class="o">&gt;</span> <span class="no">FROM</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">posts</span><span class="o">&lt;</span><span class="sr">/code&gt; WHERE &lt;code&gt;posts&lt;/</span><span class="n">code</span><span class="o">&gt;.</span><span class="n">&lt;code</span><span class="o">&gt;</span><span class="n">user_id</span><span class="o">&lt;</span><span class="sr">/code&gt; IN (1)</span>
+</span><span class='line'><span class="sr">Comment Load (0.5ms)  SELECT &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;.</span><span class="n">*</span> <span class="no">FROM</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt; WHERE &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;.</span><span class="n">&lt;code</span><span class="o">&gt;</span><span class="n">post_id</span><span class="o">&lt;</span><span class="sr">/code&gt; IN (43, 55, 32, 66, 56, 65, 68, 71)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  So far so good, That's it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Where Does Your Code Go in Rails Application?]]></title>
@@ -1380,120 +1527,6 @@
 
 <p>
   Excellent! Now if we refresh the page we'll see the review listing for each product. That's it folks! That's all there is to using the jbuilder gem.
-</p>
-
-
-
-
-<p>
-  So far so good, That's it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[10 Useful Ruby on Rails 4 Gems]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/04/25/10-useful-ruby-on-rails-4-gems/"/>
-    <updated>2015-04-25T16:09:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/04/25/10-useful-ruby-on-rails-4-gems</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="10 Useful Ruby on Rails 4 Gems" />
-</p>
-
-
-
-
-<p>
-  The Ruby on Rails framework is an extremely powerful tool for developing web applications. It comes with plenty of built-in features which help accelerate the development of your web application such as intelligent routing and an object-relation mapper, all using an MVC pattern.
-</p>
-
-
-
-
-<p>
-  Rails is designed in a way to be very easily extended using Ruby gems. This has created a large ecosystem of Ruby gems which can extend your application and accelerate your development process even more by reducing the time involved working in developing common functionality. We’re going to go over a few gems which we consider to be very useful.
-</p>
-
-
-
-
-<p>
-  <strong>Devise</strong><br/>
-  <a href="https://rubygems.org/gems/devise" target="_blank">Devise</a> is most probably the most commonly used Gem when using Ruby on Rails. It provides an easy-to-use authentication solution for your Rails application which will allow you to get login, registration, forget password, account locks and much more account-related features by simply using this Gem.
-</p>
-
-
-
-
-<p>
-  <strong>Pundit</strong><br/>
-  It’s important to know the distinction between authentication and authorization. Devise helps authenticate users and verify who they are while authorization ensures that the user is allowed to perform an action or access a resource. <a href="https://rubygems.org/gems/pundit" target="_blank">Pundit</a> takes care of this entire process by providing a simple way of defining authorization systems using nothing but Ruby classes.
-</p>
-
-
-
-
-<p>
-  <strong>Slim</strong><br/>
-  There are many template systems out there. Ruby on Rails uses the eRuby template system by default, however, it’s typically something that users will choose to replace. <a href="https://rubygems.org/gems/slim" target="_blank">Slim</a> is a common replacement because it allows you to maintain very easy to read templates due to it’s simple syntax while maintaining very fast compilation times.
-</p>
-
-
-
-
-<p>
-  <strong>Draper</strong><br/>
-  <a href="https://rubygems.org/gems/draper" target="_blank">Draper</a> allows you to build decorators around your models. It helps make your views much cleaner and lets you avoid writing helpers. Instead of procedurally calling helpers with models, you instead define a decorator which wraps the original model and provides a list of extended method and attributes to your object.
-</p>
-
-
-
-
-<p>
-  <strong>Cells</strong><br/>
-  You’ll often re-use many components of your application. Typically, partials are used for this type of behavior however you must make sure that your controllers that call the partial all have consistent behavior. <a href="https://rubygems.org/gems/cells" target="_blank">Cells</a> allow you to take parts of your controller and encapsulate them into their own little controller. This helps make your code much cleaner and avoid the long helper/partial/filter mes.
-</p>
-
-
-
-
-<p>
-  <strong>FriendlyId</strong><br/>
-  Typically, resources URLs are identified by their primary key which is usually their database ID. However, this can result in unoptimized web page URLs which are not user-friendly to read either. <a href="https://rubygems.org/gems/friendly_id" target="_blank">FriendlyId</a> can easily transform your URLs to much friendlier and easy to remember URLs for little to no code changes in your web application.
-</p>
-
-
-
-
-<p>
-  <strong>Simple Form</strong><br/>
-  Forms are at the heart of every single web application. If there is any level of interaction with the user, it typically is done using a web form. <a href="https://rubygems.org/gems/simple_form" target="_blank">Simple Form</a> helps simplify this very simple yet repetitive task. By implementing a simple and easy to use DSL for building forms, you can spend less time writing HTML for your forms and more time on the core business logic of your application.
-
-</p>
-
-
-
-
-<p>
-  <strong>Paperclip</strong><br/>
-  File attachments are never easy to work with. They typically involve a significant amount of work to implement and even more time to make sure that they are implemented in a very secure manner. <a href="https://rubygems.org/gems/paperclip" target="_blank">Paperclip</a> takes care of this entire process for you inside your Rails application and extends it even more to things like transforming images to thumbnails and much more.
-</p>
-
-
-
-
-<p>
-  <strong>Kaminari</strong><br/>
-  <a href="https://rubygems.org/gems/kaminari" target="_blank">Kaminari </a> is not a very descriptive name for a Gem, however, it is one of the most popular Gems with almost 5 million downloads. It enables you to paginate anything from ActiveRecord relations to simple arrays using a clean, easy to use and simple scope-based API which is fully agnostic to whatever ORM or template engine you use.
-</p>
-
-
-
-
-<p>
-  <strong>Sidekiq</strong><br/>
-  There are many choices for background processing tools when using Ruby on Rails, however, <a href="https://rubygems.org/gems/sidekiq" target="_blank">Sidekiq</a> is the one of the most popular ones. The reason behind it’s popularity is the simplicity of it’s API and how it scales much better than other background processors.
 </p>
 
 
