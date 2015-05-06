@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-05-05T16:42:20+07:00</updated>
+  <updated>2015-05-06T12:07:00+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,199 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Fast Rails API]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/05/06/fast-rails-api/"/>
+    <updated>2015-05-06T10:41:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/05/06/fast-rails-api</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/fast_rails_api.png" width="400" alt="Fast Rails API" />
+</p>
+
+
+
+
+<p>
+  Rendering JSON is pretty easy in Rails.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="vi">@statuses</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  It works well if there are small number of records to be returned. But what happens when we need to return 10,000 records at once? Things slow down dramatically and the most time-consuming parts are JSON serialization and database operations.
+</p>
+
+
+
+
+<p>
+  <strong>Include only Required Attributes</strong><br/>
+  The first obvious thing is generating JSON with only attributes that we need.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="vi">@statuses</span><span class="p">,</span> <span class="nb">methods</span><span class="p">:</span> <span class="o">[</span><span class="ss">:latitude</span><span class="p">,</span> <span class="ss">:longitude</span><span class="p">,</span> <span class="ss">:timestamp</span><span class="p">,</span> <span class="ss">:virtual_odometer</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Tidying JSON gives over 20% performance
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">default</span>    <span class="mi">5</span><span class="o">.</span><span class="mi">940000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">080000</span>   <span class="mi">6</span><span class="o">.</span><span class="mo">020000</span> <span class="p">(</span>  <span class="mi">6</span><span class="o">.</span><span class="mi">094221</span><span class="p">)</span>
+</span><span class='line'><span class="n">attrs</span>      <span class="mi">4</span><span class="o">.</span><span class="mi">820000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">4</span><span class="o">.</span><span class="mi">830000</span> <span class="p">(</span>  <span class="mi">4</span><span class="o">.</span><span class="mi">932337</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>Select only Required Columns</strong><br/>
+  Second, we should consider selecting only required columns when we don’t need all of them.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="vi">@statuses</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">[</span><span class="ss">:latitude</span><span class="p">,</span> <span class="ss">:longitude</span><span class="p">,</span> <span class="ss">:timestamp</span><span class="p">,</span> <span class="ss">:virtual_odometer</span><span class="o">]</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  It’ll help us to avoid transferring a huge amount of data to the application from the database and gives 2x speed up.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">default</span>    <span class="mi">5</span><span class="o">.</span><span class="mi">940000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">080000</span>   <span class="mi">6</span><span class="o">.</span><span class="mo">020000</span> <span class="p">(</span>  <span class="mi">6</span><span class="o">.</span><span class="mi">094221</span><span class="p">)</span>
+</span><span class='line'><span class="n">attrs</span>      <span class="mi">4</span><span class="o">.</span><span class="mi">820000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">4</span><span class="o">.</span><span class="mi">830000</span> <span class="p">(</span>  <span class="mi">4</span><span class="o">.</span><span class="mi">932337</span><span class="p">)</span>
+</span><span class='line'><span class="nb">select</span>     <span class="mi">2</span><span class="o">.</span><span class="mi">170000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">020000</span>   <span class="mi">2</span><span class="o">.</span><span class="mi">190000</span> <span class="p">(</span>  <span class="mi">2</span><span class="o">.</span><span class="mi">222277</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>Don’t Instantiate ActiveRecord Objects If Possible</strong><br/>
+  Let’s implement a method to return “lightning” array of hashes instead of ActiveRecord instances.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">lightning</span>
+</span><span class='line'>  <span class="n">connection</span><span class="o">.</span><span class="n">select_all</span><span class="p">(</span><span class="nb">select</span><span class="p">(</span><span class="o">[</span><span class="ss">:latitude</span><span class="p">,</span> <span class="ss">:longitude</span><span class="p">,</span> <span class="ss">:timestamp</span><span class="p">,</span> <span class="ss">:virtual_odometer</span><span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">arel</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">attrs</span><span class="o">|&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;attrs.each_key do |attr|</span>
+</span><span class='line'><span class="sr">  attrs[attr] = type_cast_attribute(attr, attrs)</span>
+</span><span class='line'><span class="sr">end</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Returns array of hashes instead of array of single column values. Invoke a new method in controller.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="vi">@statuses</span><span class="o">.</span><span class="n">lightning</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Using lightweight hashes makes JSON rendering 2x faster.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">default</span>    <span class="mi">5</span><span class="o">.</span><span class="mi">940000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">080000</span>   <span class="mi">6</span><span class="o">.</span><span class="mo">020000</span> <span class="p">(</span>  <span class="mi">6</span><span class="o">.</span><span class="mi">094221</span><span class="p">)</span>
+</span><span class='line'><span class="n">attrs</span>      <span class="mi">4</span><span class="o">.</span><span class="mi">820000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">4</span><span class="o">.</span><span class="mi">830000</span> <span class="p">(</span>  <span class="mi">4</span><span class="o">.</span><span class="mi">932337</span><span class="p">)</span>
+</span><span class='line'><span class="nb">select</span>     <span class="mi">2</span><span class="o">.</span><span class="mi">170000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">020000</span>   <span class="mi">2</span><span class="o">.</span><span class="mi">190000</span> <span class="p">(</span>  <span class="mi">2</span><span class="o">.</span><span class="mi">222277</span><span class="p">)</span>
+</span><span class='line'><span class="n">lightning</span>  <span class="mi">1</span><span class="o">.</span><span class="mi">120000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">1</span><span class="o">.</span><span class="mi">130000</span> <span class="p">(</span>  <span class="mi">1</span><span class="o">.</span><span class="mi">148763</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3>
+  Fastest JSON
+</h3>
+
+
+
+
+<p>
+  There are several JSON libraries available:
+  - <a href="https://github.com/flori/json" target="_blank">JSON</a> - The default JSON gem with C-extensions (ships with Ruby 1.9).<br/>
+  - <a href="https://github.com/brianmario/yajl-ruby" target="_blank">YAJL</a> - Yet Another JSON Library.<br/>
+  - <a href="https://github.com/ohler55/oj" target="_blank">OJ</a> - Optimized JSON.
+</p>
+
+
+
+
+<p>
+  It’s a good idea to use the fastest dumper of them.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">json</span>       <span class="mi">0</span><span class="o">.</span><span class="mi">810000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">020000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">830000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mi">841307</span><span class="p">)</span>
+</span><span class='line'><span class="n">yajl</span>       <span class="mi">0</span><span class="o">.</span><span class="mi">760000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">020000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">780000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mi">809903</span><span class="p">)</span>
+</span><span class='line'><span class="n">oj</span>         <span class="mi">0</span><span class="o">.</span><span class="mi">640000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">650000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mi">666230</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  But we prefer <a href="https://github.com/rails-api/active_model_serializers" target="_blank">active_model_serializers</a> which it run faster than OJ.
+</p>
+
+
+
+
+<p>
+  Summarized benchmark results are:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">user</span>     <span class="nb">system</span>      <span class="n">total</span>        <span class="n">real</span>
+</span><span class='line'><span class="n">default</span>    <span class="mi">5</span><span class="o">.</span><span class="mi">940000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">080000</span>   <span class="mi">6</span><span class="o">.</span><span class="mo">020000</span> <span class="p">(</span>  <span class="mi">6</span><span class="o">.</span><span class="mi">094221</span><span class="p">)</span>
+</span><span class='line'><span class="n">attrs</span>      <span class="mi">4</span><span class="o">.</span><span class="mi">820000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">4</span><span class="o">.</span><span class="mi">830000</span> <span class="p">(</span>  <span class="mi">4</span><span class="o">.</span><span class="mi">932337</span><span class="p">)</span>
+</span><span class='line'><span class="nb">select</span>     <span class="mi">2</span><span class="o">.</span><span class="mi">170000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">020000</span>   <span class="mi">2</span><span class="o">.</span><span class="mi">190000</span> <span class="p">(</span>  <span class="mi">2</span><span class="o">.</span><span class="mi">222277</span><span class="p">)</span>
+</span><span class='line'><span class="n">lightning</span>  <span class="mi">1</span><span class="o">.</span><span class="mi">120000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">1</span><span class="o">.</span><span class="mi">130000</span> <span class="p">(</span>  <span class="mi">1</span><span class="o">.</span><span class="mi">148763</span><span class="p">)</span>
+</span><span class='line'><span class="n">json</span>       <span class="mi">0</span><span class="o">.</span><span class="mi">810000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">020000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">830000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mi">841307</span><span class="p">)</span>
+</span><span class='line'><span class="n">yajl</span>       <span class="mi">0</span><span class="o">.</span><span class="mi">760000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">020000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">780000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mi">809903</span><span class="p">)</span>
+</span><span class='line'><span class="n">oj</span>         <span class="mi">0</span><span class="o">.</span><span class="mi">640000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">650000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mi">666230</span><span class="p">)</span>
+</span><span class='line'><span class="n">ams</span>        <span class="mi">0</span><span class="o">.</span><span class="mi">270000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">000000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">270000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mi">272239</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  So far so good, That's it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Preload Active Record Associations in Rails Application]]></title>
@@ -1267,273 +1460,6 @@
 
 <p>
   Wait half a minute - the livestamp will update automatically.
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails Getting Started with JBuilder]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/04/29/ruby-on-rails-getting-started-with-jbuilder/"/>
-    <updated>2015-04-29T20:20:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/04/29/ruby-on-rails-getting-started-with-jbuilder</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="Ruby on Rails Getting Started with JBuilder" />
-</p>
-
-
-
-
-<p>
-  In the past, it could be really cumbersome to build proper JSON data feeds. Fortunately Ruby on Rails makes dealing with JSON much easier. Today we will learn how to use the JBuilder gem, which will allow us to easily build complex data feeds.
-</p>
-
-
-
-
-<p>
-  First, we need to include the gem in our gemfile. Recent versions of Ruby on Rails include this gem commented out towards the bottom of the file. In addition, Rails 4 already includes this gem so you don't need to do anything. If it is in your gemfile and it is commented out, uncomment it, otherwise, add the gem using the line shown below.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Gemfile </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">jbuilder</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">~&gt;</span> <span class="mi">1</span><span class="o">.</span><span class="mi">2</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Then run a bundle install:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Next, we will need a model and some sample data. In this sample project we will have 2 models. A product model, and a review model, which will be associated with products. Lets generate these 2 models now. Run the commands below to create the models and migrate the database:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Product</span> <span class="nb">name</span> <span class="ss">price</span><span class="p">:</span><span class="n">decimal</span><span class="p">{</span><span class="mi">12</span><span class="p">,</span><span class="mi">2</span><span class="p">}</span> <span class="ss">active</span><span class="p">:</span><span class="n">boolean</span>
-</span><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Review</span> <span class="ss">product</span><span class="p">:</span><span class="n">references</span> <span class="n">user</span> <span class="ss">rating</span><span class="p">:</span><span class="n">integer</span> <span class="ss">body</span><span class="p">:</span><span class="n">text</span>
-</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Excellent, Now lets add some seed data. Copy and paste the following seed data into your seeds.rb file:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>db/seeds.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Product</span><span class="o">.</span><span class="n">delete_all</span>
-</span><span class='line'><span class="no">Review</span><span class="o">.</span><span class="n">delete_all</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;Product.create!([</span>
-</span><span class='line'><span class="sr">  {id: 1, name: &amp;ldquo;Nintendo Wii U Premium&amp;rdquo;, price: 250, active: true},</span>
-</span><span class='line'><span class="sr">  {id: 2, name: &amp;ldquo;XBox 360 250GB&amp;rdquo;, price: 250, active: true},</span>
-</span><span class='line'><span class="sr">  {id: 3, name: &amp;ldquo;Playstation 3 500 GB&amp;rdquo;, price: 239.95, active: true},</span>
-</span><span class='line'><span class="sr">  {id: 4, name: &amp;ldquo;Nintendo Wii&amp;rdquo;, price: 99.95, active: true},</span>
-</span><span class='line'><span class="sr">  {id: 5, name: &amp;ldquo;Nintendo 3DS&amp;rdquo;, price: 174.95, active: true}</span>
-</span><span class='line'><span class="sr">])&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="no">Review</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="o">[</span>
-</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Bob</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">dated</span> <span class="n">graphics</span><span class="o">.</span>  <span class="no">Overpriced</span><span class="o">.</span>  <span class="no">However</span><span class="p">,</span> <span class="n">the</span> <span class="n">games</span> <span class="n">are</span> <span class="n">awesome</span><span class="o">.</span><span class="n">&amp;rdquo</span><span class="p">;},</span>
-</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Rich</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">MARIO</span><span class="o">!</span>  <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">nuff</span> <span class="no">Said</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;},</span>
-</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">James</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Excellent</span> <span class="n">value</span> <span class="k">for</span> <span class="n">the</span> <span class="n">money</span><span class="o">.</span><span class="n">&amp;rdquo</span><span class="p">;},</span>
-</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Alison</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Love</span> <span class="n">it!</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;},</span>
-</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">James</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Bigger</span> <span class="n">hard</span> <span class="n">drive</span> <span class="k">then</span> <span class="n">my</span> <span class="no">XBox</span> <span class="mi">360</span><span class="o">.</span>  <span class="no">Weak</span> <span class="n">user</span> <span class="n">interface</span> <span class="n">though</span><span class="o">.</span><span class="n">&amp;rdquo</span><span class="p">;},</span>
-</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Kay</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Extremely</span> <span class="n">dated</span><span class="o">.</span>  <span class="no">Don</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="n">t</span> <span class="n">buy</span><span class="o">.</span>  <span class="no">Will</span> <span class="n">be</span> <span class="n">discontinued</span> <span class="n">soon</span><span class="o">.</span><span class="n">&amp;rdquo</span><span class="p">;},</span>
-</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Jed</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Awesome</span> <span class="n">handheld</span> <span class="nb">system</span><span class="p">,</span> <span class="n">but</span> <span class="n">a</span> <span class="n">bit</span> <span class="n">overpriced</span><span class="o">.</span><span class="n">&amp;rdquo</span><span class="p">;}</span>
-</span><span class='line'><span class="o">]</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Next, run the seed command to populate your database:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">seed</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Well, we now have a database populated with products and reviews. Next we will need to set up the association between our products and our reviews. First, open up the Product model and modify it so that it looks like the code listed below:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/models/product.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Product</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:reviews</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Great, now lets add the reverse association. Open up your Review model and verify that it looks like the code listed below. Rails should auto populate this, but double check just to be sure.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/models/reviews.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Review</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:product</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  With the database model created, our data populated, and our associations set up, now it's time to create a controller. Run the command below to create products controller.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="n">products</span> <span class="n">index</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Now, lets make a change to our routes.rb file so that our controller becomes a resourceful controller. Replace the line that says get "products/index" with the code listed below.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/routes.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;get &amp;ldquo;products/in</span><span class="n">dex</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;resources :products, only: [:index]</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  This sets up the products controller as a resourceful controller. Now, in order to create a json feed using jbuilder, we must create a jbuilder view. Create a new file in app/views/products called index.json.jbuilder and add the code listed below.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/views/products/index.json.jbuilder </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">json</span><span class="o">.</span><span class="n">products</span> <span class="k">do</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Excellent. Now if you navigate to http://localhost:3000/products.json You will see an empty json data feed. Now, lets add some content to that data feed. Now, open up the products controller and modify it so that it looks like the code listed below.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/controllers/products_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ProductsController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="no">ApplicationController</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@products = Product.all</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Next, Open the jbuilder file again and modify it so that it looks like the code listed below.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/views/products/index.json.jbuilder </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">json</span><span class="o">.</span><span class="n">products</span> <span class="vi">@products</span> <span class="k">do</span> <span class="o">|</span><span class="n">product</span><span class="o">|</span>
-</span><span class='line'>  <span class="n">json</span><span class="o">.</span><span class="n">name</span> <span class="n">product</span><span class="o">.</span><span class="n">name</span>
-</span><span class='line'>  <span class="n">json</span><span class="o">.</span><span class="n">price</span> <span class="n">number_to_currency</span> <span class="n">product</span><span class="o">.</span><span class="n">price</span>
-</span><span class='line'>  <span class="n">json</span><span class="o">.</span><span class="n">active</span> <span class="n">product</span><span class="o">.</span><span class="n">active</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Excellent, now if we refresh the page we will see a listing of products in json format. Now lets add the reviews. Modify your code so that it looks like the code listed below.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/views/products/index.json.jbuilder </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">json</span><span class="o">.</span><span class="n">products</span> <span class="vi">@products</span> <span class="k">do</span> <span class="o">|</span><span class="n">product</span><span class="o">|</span>
-</span><span class='line'>  <span class="n">json</span><span class="o">.</span><span class="n">name</span> <span class="n">product</span><span class="o">.</span><span class="n">name</span>
-</span><span class='line'>  <span class="n">json</span><span class="o">.</span><span class="n">price</span> <span class="n">number_to_currency</span> <span class="n">product</span><span class="o">.</span><span class="n">price</span>
-</span><span class='line'>  <span class="n">json</span><span class="o">.</span><span class="n">active</span> <span class="n">product</span><span class="o">.</span><span class="n">active</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  json.reviews product.reviews do |review|&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">json</span><span class="o">.</span><span class="n">user</span> <span class="n">review</span><span class="o">.</span><span class="n">user</span>
-</span><span class='line'><span class="n">json</span><span class="o">.</span><span class="n">rating</span> <span class="n">review</span><span class="o">.</span><span class="n">rating</span>
-</span><span class='line'><span class="n">json</span><span class="o">.</span><span class="n">body</span> <span class="n">review</span><span class="o">.</span><span class="n">body</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Excellent! Now if we refresh the page we'll see the review listing for each product. That's it folks! That's all there is to using the jbuilder gem.
-</p>
-
-
-
-
-<p>
-  So far so good, That's it!!! See ya!!! :)
 </p>
 
 ]]></content>
