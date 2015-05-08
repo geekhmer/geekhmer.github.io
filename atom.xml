@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-05-08T10:21:36+07:00</updated>
+  <updated>2015-05-08T16:32:30+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,376 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails Pagination with Kaminari]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/05/08/ruby-on-rails-pagination-with-kaminari/"/>
+    <updated>2015-05-08T14:53:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/05/08/ruby-on-rails-pagination-with-kaminari</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="Ruby on Rails Pagination with Kaminari" />
+</p>
+
+
+
+
+<p>
+  The <a href="https://github.com/mislav/will_paginate" target="_blank">will_paginate</a> gem has long since been the most popular gem used when it comes to pagination. However it is not the only gem out there. <a href="https://github.com/amatsuda/kaminari" target="_blank">Kaminari</a> is another very popular pagination gem. In this article we will show you how to use it in your application.
+</p>
+
+
+
+
+<p>
+  <strong>Setup Rails Application</strong><br/>
+  To begin using the kaminari gem, we must first add it to our Gemfile. Open up your Gemfile and add in the line listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;kaminari&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now run a bundle install to install the gem.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Next, create a model called Post. The post model in this example will represent a blog post. Run the commands below to create the post model:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Post</span> <span class="n">title</span> <span class="ss">body</span><span class="p">:</span><span class="n">string</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We need some seed data. Open your <code>db/seeds.rb</code> file and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>db/seeds.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span>
+</span><span class='line'>  <span class="no">Post</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="ss">title</span><span class="p">:</span> <span class="s2">&quot;Lipsum Post </span><span class="si">#{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="sx">%{</span>
+</span><span class='line'><span class="sx">      Nullam hendrerit iaculis sodales. Curabitur varius nibh arcu, id molestie nibh fermentum vitae. Cras quis semper dui. Cras porttitor urna sit amet risus vehicula tempor. Maecenas quis tempor ligula. Donec et nibh eu leo volutpat placerat. Fusce vulputate elit in nisi pretium, vel fermentum mi fermentum. Mauris scelerisque, lectus non luctus ultricies, urna eros tincidunt risus, at varius sapien diam id erat.</span>
+</span><span class='line'><span class="sx">  }</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now run a rake db:seed to add the seed data:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">seed</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We need to add a controller called Posts that we will use to render the posts. Run the command below to create this controller now:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="no">Posts</span> <span class="n">index</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Let&#8217;s modify our routes file to set a site root. Open up your config/routes.rb file and modify it so that it looks like the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;posts#index&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Open up your Posts controller and modify it so that it looks like the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/controllers/posts_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>    <span class="vi">@posts</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">page</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:page</span><span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">per</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  As you can see, the first bit of our pagination code is here. The <code>page</code> method tells kaminari what page we are on. The <code>per</code> method tells kaminari how many items we wish to have per page.
+</p>
+
+
+
+
+<p>
+  Let&#8217;s open up the <code>index</code> view for our <code>Posts</code> controller and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/posts/index.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Posts</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'><span class="sr">&lt;hr /</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% @posts.each </span><span class="k">do</span> <span class="o">|</span><span class="n">post</span><span class="o">|</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;h2&gt;</span><span class="o">&lt;</span><span class="sx">%= post.title %&gt;&lt;/h2&gt;</span>
+</span><span class='line'><span class="sx">  &lt;p&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%=</span> <span class="n">post</span><span class="o">.</span><span class="n">body</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;/p&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% end %&gt;</span>
+</span><span class='line'><span class="sx">&lt;hr /&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">%= paginate @posts %&gt;</span>
+</span><span class='line'><span class="sx">&lt;%=</span> <span class="n">page_entries_info</span> <span class="vi">@posts</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The <code>paginate</code> helper is the line actually responsible for rendering the pagination links. The <code>page_entries_info</code> helper displays a line similar to Displaying posts 1 - 10 of 100 in total. This can be extremely helpful in letting the user know how many items there are in the list.
+</p>
+
+
+
+
+<p>
+  <strong>Global Configuration</strong><br/>
+  You can also specify global defaults for Kaminari. First, run the following command to generate an initializer file for Kaminari:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="ss">kaminari</span><span class="p">:</span><span class="n">config</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If you open up the <code>config/initializers/kaminari_config.rb</code> file you&#8217;ll see something similar to the following:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/initializers/kaminari_config.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Kaminari</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+</span><span class='line'>  <span class="c1"># config.default_per_page = 25</span>
+</span><span class='line'>  <span class="c1"># config.max_per_page = nil</span>
+</span><span class='line'>  <span class="c1"># config.window = 4</span>
+</span><span class='line'>  <span class="c1"># config.outer_window = 0</span>
+</span><span class='line'>  <span class="c1"># config.left = 0</span>
+</span><span class='line'>  <span class="c1"># config.right = 0</span>
+</span><span class='line'>  <span class="c1"># config.page_method_name = :page</span>
+</span><span class='line'>  <span class="c1"># config.param_name = :page</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  A description of these options can be found below:
+</p>
+
+
+<table>
+<thead>
+<tr>
+<th>Config </th>
+<th> Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>config.default_per_page </td>
+<td> Specifies the default amount of items to display per page.</td>
+</tr>
+<tr>
+<td>config.max_per_page </td>
+<td> The maximum amount of items to display per page.</td>
+</tr>
+<tr>
+<td>config.window </td>
+<td> Specifies the inner window size. The inner window is the number of items in the middle of the pagination block. e.g. « First ‹ Prev &hellip; 1 2 3 4 &hellip; Next › Last », in the previous example, 1 2 3 4 would be considered the inner window.</td>
+</tr>
+<tr>
+<td>config.outer_window </td>
+<td> Specifies how many items to display in the outer window. For example: 1 2 3 4 &hellip; 8 9 10 11, numbers visible on the outside are the outer window.</td>
+</tr>
+<tr>
+<td>config.left </td>
+<td> Specifies how many items should be displayed in the left outer window.</td>
+</tr>
+<tr>
+<td>config.right </td>
+<td> Specifies how many items should be displayed in the right outer window.</td>
+</tr>
+<tr>
+<td>config.page_method_name </td>
+<td> Changes the page method name from page to whatever you want. Can be used to avoid conflict with other gems that use page.</td>
+</tr>
+<tr>
+<td>config.param_name </td>
+<td> The default parameter to use when looking for the page number.</td>
+</tr>
+</tbody>
+</table>
+
+
+<br/>
+
+
+
+
+<p>
+  <strong>I18N</strong><br/>
+  Kaminari can be configured via I18N. The default I18N configuration file looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">en</span><span class="p">:</span>
+</span><span class='line'>  <span class="ss">views</span><span class="p">:</span>
+</span><span class='line'>    <span class="ss">pagination</span><span class="p">:</span>
+</span><span class='line'>      <span class="ss">first</span><span class="p">:</span> <span class="s2">&quot;&amp;laquo; First&quot;</span>
+</span><span class='line'>      <span class="ss">last</span><span class="p">:</span> <span class="s2">&quot;Last &amp;raquo;&quot;</span>
+</span><span class='line'>      <span class="ss">previous</span><span class="p">:</span> <span class="s2">&quot;&amp;lsaquo; Prev&quot;</span>
+</span><span class='line'>      <span class="k">next</span><span class="p">:</span> <span class="s2">&quot;Next &amp;rsaquo;&quot;</span>
+</span><span class='line'>      <span class="ss">truncate</span><span class="p">:</span> <span class="s2">&quot;&amp;hellip;&quot;</span>
+</span><span class='line'>  <span class="ss">helpers</span><span class="p">:</span>
+</span><span class='line'>    <span class="n">page_entries_info</span><span class="p">:</span>
+</span><span class='line'>      <span class="n">one_page</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">display_entries</span><span class="p">:</span>
+</span><span class='line'>          <span class="ss">zero</span><span class="p">:</span> <span class="s2">&quot;No %{entry_name} found&quot;</span>
+</span><span class='line'>          <span class="ss">one</span><span class="p">:</span> <span class="s2">&quot;Displaying &lt;b&gt;1&lt;/b&gt; %{entry_name}&quot;</span>
+</span><span class='line'>          <span class="ss">other</span><span class="p">:</span> <span class="s2">&quot;Displaying &lt;b&gt;all %{count}&lt;/b&gt; %{entry_name}&quot;</span>
+</span><span class='line'>      <span class="n">more_pages</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">display_entries</span><span class="p">:</span> <span class="s2">&quot;Displaying %{entry_name} &lt;b&gt;%{first}&amp;nbsp;-&amp;nbsp;%{last}&lt;/b&gt; of &lt;b&gt;%{total}&lt;/b&gt; in total&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  To override it, simply modify your locale files under <code>config/locales</code>.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby/Ruby on Rails Mistakes]]></title>
@@ -4384,64 +4754,6 @@
 
 
 <br/>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Quickly Add Bootstrap to Your Project]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/04/16/quickly-add-bootstrap-to-your-project/"/>
-    <updated>2015-04-16T08:52:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/04/16/quickly-add-bootstrap-to-your-project</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/bootstrap.png" alt="Quickly Add Bootstrap to Your Project" />
-</p>
-
-
-
-
-<p>
-  Bootstrap is an amazing layout library that is awesome for building both prototypes as well as full blown websites. This very website makes extensive use of Bootstrap 3 to make things look awesome on both mobiles sites as well as the desktop.
-</p>
-
-
-
-
-<p>
-  What if we want to quickly prototype out a site using bootstrap? Fortunately you can easily add bootstrap to your site without downloading anything, simply reference the associated files on the Yandex CDN. 
-</p>
-
-
-
-
-<p>
-  Yandex is a worldwide search engine that is extremely popular in russia. Their CDN is extremely fast and has many different libraries available. To add bootstrap via yandex, simply include them like so (this also include jQuery, since Bootstrap JS requires it).
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;http://yandex.st/jquery/1.11.1/jquery.min.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">link</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;http://yandex.st/bootstrap/3.1.1/css/bootstrap.min.css&quot;</span> <span class="nx">media</span><span class="o">=</span><span class="s2">&quot;screen&quot;</span> <span class="nx">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="o">/&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;http://yandex.st/bootstrap/3.1.1/js/bootstrap.min.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  A full list of the libraries available can be found on the <a href="https://tech.yandex.ru/jslibs/" target="_blank">yandex</a> website. Note that it&#8217;s in russian, so you might need to translate it.
-</p>
 
 
 
