@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-05-08T16:32:30+07:00</updated>
+  <updated>2015-05-09T09:17:19+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,578 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Put Ruby on Rails on a Slim]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/05/09/put-ruby-on-rails-on-a-slim/"/>
+    <updated>2015-05-09T08:39:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/05/09/put-ruby-on-rails-on-a-slim</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="Put Ruby on Rails on a Slim" />
+</p>
+
+
+
+
+<p>
+  Ruby on Rails is my usual framework of choice to build web applications. It is good and easy to use, but let’s face it: it’s massive compared to more lightweight frameworks, such as Sinatra. Why is it bad? There are a few reasons and slow start-up time and high resources usage are just two most common concerns. Slimming down Ruby on Rails applications can allow you to use different components (say Sequel instead of ActiveRecord) and improve system security. Remember the last year’s security dramas related to JSON parameters parsing? It would be largely irrelevant for most applications if everyone who does not use it, disabled it.
+</p>
+
+
+
+
+<p>
+  <strong>Rails Modularity</strong><br/>
+  To enable individual modules, replace the following in config/application.rb:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/application.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">rails</span><span class="o">/</span><span class="n">all</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  With:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/application.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">active_record</span><span class="o">/</span><span class="n">railtie</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'><span class="nb">require</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">action_controller</span><span class="o">/</span><span class="n">railtie</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'><span class="nb">require</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">action_mailer</span><span class="o">/</span><span class="n">railtie</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'><span class="nb">require</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">active_model</span><span class="o">/</span><span class="n">railtie</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'><span class="nb">require</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">sprockets</span><span class="o">/</span><span class="n">railtie</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  As you can see above, you can remove ActiveRecord altogether if you use different database, the same with ActionMailer or Sprockets. It probably does not make sense to remove ActionController, however.
+</p>
+
+
+
+
+<p>
+  <strong>Internal Middleware Stack</strong><br/>
+  Each Ruby on Rails applications comes with <a href="http://guides.rubyonrails.org/rails_on_rack.html" target="_blank">Internal Middleware Stack Enabled</a>. Check out <a href="http://guides.rubyonrails.org/rails_on_rack.html#internal-middleware-stack" target="_blank">This Section of Documentation</a> for a list and description of each component. On a fairly small Ruby on Rails application I work on, the stack looks like this:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">rake</span> <span class="n">middleware</span>
+</span><span class='line'><span class="n">use</span> <span class="ss">Rack</span><span class="p">:</span><span class="ss">:Sendfile</span>
+</span><span class='line'><span class="n">use</span> <span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:Static</span>
+</span><span class='line'><span class="n">use</span> <span class="c1">#&amp;lt;ActiveSupport::Cache::Strategy::LocalCache::Middleware:0x007f0bda2d73e0&gt;</span>
+</span><span class='line'><span class="n">use</span> <span class="ss">Rack</span><span class="p">:</span><span class="ss">:Runtime</span>
+</span><span class='line'><span class="n">use</span> <span class="ss">Rack</span><span class="p">:</span><span class="ss">:MethodOverride</span>
+</span><span class='line'><span class="n">use</span> <span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:RequestId</span>
+</span><span class='line'><span class="n">use</span> <span class="ss">Rails</span><span class="p">:</span><span class="ss">:Rack</span><span class="o">::</span><span class="no">Logger</span>
+</span><span class='line'><span class="n">use</span> <span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:ShowExceptions</span>
+</span><span class='line'><span class="n">use</span> <span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:DebugExceptions</span>
+</span><span class='line'><span class="n">use</span> <span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:RemoteIp</span>
+</span><span class='line'><span class="n">use</span> <span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:Callbacks</span>
+</span><span class='line'><span class="n">use</span> <span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:Cookies</span>
+</span><span class='line'><span class="n">use</span> <span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:Session</span><span class="o">::</span><span class="no">CookieStore</span>
+</span><span class='line'><span class="n">use</span> <span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:Flash</span>
+</span><span class='line'><span class="n">use</span> <span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:ParamsParser</span>
+</span><span class='line'><span class="n">use</span> <span class="ss">Rack</span><span class="p">:</span><span class="ss">:Head</span>
+</span><span class='line'><span class="n">use</span> <span class="ss">Rack</span><span class="p">:</span><span class="ss">:ConditionalGet</span>
+</span><span class='line'><span class="n">use</span> <span class="ss">Rack</span><span class="p">:</span><span class="ss">:ETag</span>
+</span><span class='line'><span class="n">run</span> <span class="ss">Blog</span><span class="p">:</span><span class="ss">:Application</span><span class="o">.</span><span class="n">routes</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  I can safely disable most of the above by modifying config/application.rb, for example:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/application.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">middleware</span><span class="o">.</span><span class="n">disable</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="ss">Rack</span><span class="p">:</span><span class="ss">:ETag</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  The same way, I was able to disable most of the default middleware, without doing any harm to my little app. You will have to be careful, however, what you disable. If you use login system, you will need sessions, if you display flash messages do not remove “ActionDispatch::Flash”... etc.
+</p>
+
+
+
+
+<p>
+  When it comes to JSON parameters parsing, that was a headache for most Ruby on Rails developers last year, it can be easily disabled. To disable JSON params parsing, put this line into config/application.rb:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/application.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">middleware</span><span class="o">.</span><span class="n">swap</span> <span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:ParamsParser</span><span class="p">,</span> <span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:ParamsParser</span><span class="p">,</span> <span class="ss">Mime</span><span class="p">:</span><span class="ss">:JSON</span> <span class="o">=&gt;</span> <span class="kp">nil</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>Rails API</strong><br/>
+  If you are building only API for your application, you can use nice gem called <a href="https://github.com/rails-api/rails-api" target="_blank">rails-api</a>.
+</p>
+
+
+
+
+<p>
+  <strong>Put Controllers on a Hunger Slim</strong><br/>
+  If you check out Ruby on Rails source code for <a href="https://github.com/rails/rails/blob/master/actionpack/lib/action_controller/base.rb" target="_blank">ActionController::Base</a>, you will learn that it inherits from ActionController::Metal and includes <a href="https://github.com/rails/rails/blob/master/actionpack/lib/action_controller/base.rb#L203" target="_blank">Bunch of Modules</a> that you might or might not need in your controllers. A way to slim down your controllers stack, is to cherry-pick the ones you need. If all you need is basic rendering, there is nothing stopping you from creating lightweight controllers like this one:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">SlimController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActionController</span><span class="p">:</span><span class="ss">:Metal</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="ss">ActionController</span><span class="p">:</span><span class="ss">:Rendering</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  def index&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">render</span> <span class="ss">text</span><span class="p">:</span> <span class="s2">&quot;I&#39;m Slim, yes I&#39;m the real Bunlong&quot;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  There is no ActionController:HipHop I’m afraid, but that will work just as good.
+</p>
+
+
+
+
+<p>
+  <strong>Single File Rails Applications</strong><br/>
+  Okay, they don’t have to be single-file. But you are not forced to use default Rails catalogues structure, and you can make them really slim and custom.
+</p>
+
+
+
+
+<p>
+  You can, however, create 100% functional Rails application only in config.ru:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config.ru </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;Port of &lt;a href=&quot;https:/</span><span class="o">/</span><span class="n">gist</span><span class="o">.</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">josevalim</span><span class="o">/</span><span class="mi">1942658</span><span class="s2">&quot;&gt;https://gist.github.com/josevalim/1942658&lt;/a&gt; to Rails 4&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;Original author: Jose Valim&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;#&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;Run this file with:&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;#&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;bundle exec RAILS_ENV=production rackup -p 3000 -s thin&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;#&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;And access:&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;#&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;&lt;a href=&quot;</span><span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="ss">localhost</span><span class="p">:</span><span class="mi">3000</span><span class="o">/</span><span class="n">hello</span><span class="o">/</span><span class="n">world</span><span class="s2">&quot;&gt;http://localhost:3000/hello/world&lt;/a&gt;&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;#&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;We are using Bundler in this example, but we could also&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;have used rubygems:&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;#&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;require &amp;ldquo;rubygems&amp;rdquo;&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;#&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;gem &amp;ldquo;actionpack&amp;rdquo;&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;gem &amp;ldquo;railties&amp;rdquo;&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;#&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;require &amp;ldquo;rails&amp;rdquo;&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;require &amp;ldquo;rails/all&amp;rdquo;&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;The following lines should come as no surprise. Except by&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;ActionController::Metal, it follows the same structure of&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;config/application.rb, config/environment.rb and config.ru&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;existing in any Rails 4 app. Here they are simply in one&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;file and without the comments.&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;require &amp;ldquo;rails&amp;rdquo;</span>
+</span><span class='line'><span class="s2">require &amp;ldquo;action_controller/railtie&amp;rdquo; # require more if needed&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;class MyApp &amp;lt; Rails::Application</span>
+</span><span class='line'><span class="s2">  routes.append do&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;pre&gt;&lt;code&gt;get &quot;</span><span class="o">/</span><span class="n">hello</span><span class="o">/</span><span class="n">world</span><span class="s2">&quot; =&amp;gt; &quot;</span><span class="n">hello</span><span class="c1">#world&quot;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  # Enable cache classes. Production style.</span>
+</span><span class='line'><span class="sr">  config.cache_classes = true&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="c1"># uncomment below to display errors</span>
+</span><span class='line'>  <span class="c1"># config.consider_all_requests_local = true&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="c1"># Here you could remove some middlewares, for example</span>
+</span><span class='line'>  <span class="c1"># Rack::Lock, ActionDispatch::Flash and  ActionDispatch::BestStandardsSupport below.</span>
+</span><span class='line'>  <span class="c1"># The remaining stack is printed on rackup (for fun!).</span>
+</span><span class='line'>  <span class="c1"># Rails API has config.middleware.api_only! to get</span>
+</span><span class='line'>  <span class="c1"># rid of browser related middleware.</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">middleware</span><span class="o">.</span><span class="n">delete</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="ss">Rack</span><span class="p">:</span><span class="ss">:Lock</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">middleware</span><span class="o">.</span><span class="n">delete</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:Flash</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">middleware</span><span class="o">.</span><span class="n">delete</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:BestStandardsSupport</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  # We need a secret token for session, cookies, etc.</span>
+</span><span class='line'><span class="sr">  config.secret_token = &amp;ldquo;49837489qkuweoiuoqwehisuakshdjksadhaisdy78o34y138974xyqp9rmye8yrpiokeuioqwzyoiuxftoyqiuxrhm3iou1hrzmjk&amp;rdquo;</span>
+</span><span class='line'><span class="sr">end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">This</span> <span class="n">is</span> <span class="n">a</span> <span class="n">barebone</span> <span class="n">controller</span><span class="o">.</span> <span class="no">One</span> <span class="n">good</span> <span class="n">reference</span> <span class="n">can</span> <span class="n">be</span> <span class="n">found</span> <span class="ss">here</span><span class="p">:</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;&lt;a href=&quot;http:/</span><span class="o">/</span><span class="n">piotrsarnacki</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="mi">2010</span><span class="o">/</span><span class="mi">12</span><span class="o">/</span><span class="mi">12</span><span class="o">/</span><span class="n">lightweight</span><span class="o">-</span><span class="n">controllers</span><span class="o">-</span><span class="n">with</span><span class="o">-</span><span class="n">rails3</span><span class="o">/</span><span class="s2">&quot;&gt;http://piotrsarnacki.com/2010/12/12/lightweight-controllers-with-rails3/&lt;/a&gt;&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;class HelloController &amp;lt; ActionController::Metal</span>
+</span><span class='line'><span class="s2">  include ActionController::Rendering&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;  def world&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;pre&gt;&lt;code&gt;render :text =&amp;gt; &quot;</span><span class="no">Hello</span> <span class="n">world!</span><span class="s2">&quot;</span>
+</span><span class='line'><span class="s2">&lt;/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;  end</span>
+</span><span class='line'><span class="s2">end&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;Initialize the app (originally in config/environment.rb)&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;MyApp.initialize!&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;Print the stack for fun!&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;puts &amp;ldquo;&gt;&gt; Starting Rails lightweight stack&amp;rdquo;</span>
+</span><span class='line'><span class="s2">Rails.configuration.middleware.each do |middleware|</span>
+</span><span class='line'><span class="s2">  puts &amp;ldquo;use </span><span class="si">#{</span><span class="n">middleware</span><span class="o">.</span><span class="n">inspect</span><span class="si">}</span><span class="s2">&amp;rdquo;</span>
+</span><span class='line'><span class="s2">end</span>
+</span><span class='line'><span class="s2">puts &amp;ldquo;run </span><span class="si">#{</span><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.routes&amp;rdquo;&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;Run it (originally in config.ru)&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;run MyApp</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>Your Gemfile is Fat</strong><br/>
+  Including too many libraries is bad for weight of the app. You need to check your Gemfile, and make sure you do require gems like ‘pry’ only in :development group, ‘rspec’ in :test etc.
+</p>
+
+
+
+
+<p>
+  There is general tendency of Rails developers of putting together applications together with ready-to-use blocks. You need to consider if that is what you really need. Writing simple authentication is a matter of controller and two actions, you might not need Devise for that. Handling simple file uploads can be almost as easily implemented as with use of Carrierwave, with much less boilerplate code. I do encourage you to build minimal solutions for your needs only, especially when you do not need to use majority of functionality provided by given gem. If there is a hole found in, say, Carrierwave, including the gem might make your application vulnerable too, and heavier than it needs to be, of course.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">source</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;https://rubygems.org&quot;</span><span class="o">&gt;</span><span class="ss">https</span><span class="p">:</span><span class="sr">//</span><span class="n">rubygems</span><span class="o">.</span><span class="n">org</span><span class="o">&lt;</span><span class="sr">/a&gt;&amp;rsquo;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">rails</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">~&gt;</span> <span class="mi">4</span><span class="o">.</span><span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;gem &amp;lsquo;psych&amp;rsquo;, &amp;lsquo;~&gt; 2.0.12&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;builder&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;dynamic_form&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;aws-sdk-core&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;gchartrb&amp;rsquo;, require: &amp;lsquo;google_chart&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;gravtastic&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;high_voltage&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;highline&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;honeybadger&amp;rsquo;, &amp;lsquo;~&gt; 1.0&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;jquery-rails&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;mail&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;dalli&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;multi_json&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;paul_revere&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;pg&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;rack&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;rdoc&amp;rsquo;, &amp;lsquo;~&gt; 3.12.2&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;redis&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;rest-client&amp;rsquo;, require: &amp;lsquo;rest_client&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;statsd-instrument&amp;rsquo;, &amp;lsquo;~&gt; 2.0.6&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;unicorn&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;validates_formatting_of&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;will_paginate&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;xml-simple&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;yajl-ruby&amp;rsquo;, require: &amp;lsquo;yajl&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;autoprefixer-rails&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;clearance&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;daemons&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;delayed_job&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;delayed_job_active_record&amp;rsquo;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">newrelic_rpm</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">newrelic</span><span class="o">-</span><span class="n">redis</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;gem &amp;lsquo;sass-rails&amp;rsquo;,   &amp;lsquo;~&gt; 5.0.0&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;coffee-rails&amp;rsquo;, &amp;lsquo;~&gt; 4.0.0&amp;rsquo;</span>
+</span><span class='line'><span class="sr">gem &amp;lsquo;uglifier&amp;rsquo;, &amp;lsquo;&gt;= 1.0.3&amp;rsquo;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">group</span> <span class="ss">:development</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">capistrano</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">~&gt;</span> <span class="mi">2</span><span class="o">.</span><span class="mi">0</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">capistrano</span><span class="o">-</span><span class="n">notification</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">rails</span><span class="o">-</span><span class="n">erd</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;group :test do</span>
+</span><span class='line'><span class="sr">  gem &amp;lsquo;minitest&amp;rsquo;, require: false</span>
+</span><span class='line'><span class="sr">  gem &amp;lsquo;capybara&amp;rsquo;</span>
+</span><span class='line'><span class="sr">  gem &amp;lsquo;factory_girl_rails&amp;rsquo;</span>
+</span><span class='line'><span class="sr">  gem &amp;lsquo;launchy&amp;rsquo;</span>
+</span><span class='line'><span class="sr">  gem &amp;lsquo;rack-test&amp;rsquo;, require: &amp;lsquo;rack/</span><span class="nb">test</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">rr</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="nb">require</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>  <span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">shoulda</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="nb">require</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>  <span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">timecop</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;group :recovery do</span>
+</span><span class='line'><span class="sr">  gem &amp;ldquo;fakeredis&amp;rdquo;</span>
+</span><span class='line'><span class="sr">end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">platforms</span> <span class="ss">:jruby</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">jruby</span><span class="o">-</span><span class="n">openssl</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  So far so good, That' it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby on Rails Pagination with Kaminari]]></title>
@@ -1375,153 +1947,6 @@
 </span><span class='line'><span class="n">yajl</span>       <span class="mi">0</span><span class="o">.</span><span class="mi">760000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">020000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">780000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mi">809903</span><span class="p">)</span>
 </span><span class='line'><span class="n">oj</span>         <span class="mi">0</span><span class="o">.</span><span class="mi">640000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">650000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mi">666230</span><span class="p">)</span>
 </span><span class='line'><span class="n">ams</span>        <span class="mi">0</span><span class="o">.</span><span class="mi">270000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">000000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">270000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mi">272239</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  So far so good, That's it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Preload Active Record Associations in Rails Application]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/05/05/preload-active-record-associations-in-rails-application/"/>
-    <updated>2015-05-05T16:26:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/05/05/preload-active-record-associations-in-rails-application</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="Preload Active Record Associations in Rails Application" />
-</p>
-
-
-
-
-<p>
-  Active Record makes database querying so simple. Chain together a few methods and bam, you’ve saved your self lines and lines of T-SQL. The problem is this simplicity masks the underlying operation and it’s very easy to not realize how inefficient your database calls are.
-</p>
-
-
-
-
-<p>
-  For example:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:posts</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;class Post &amp;lt; ActiveRecord::Base</span>
-</span><span class='line'><span class="sr">  has_many :comments</span>
-</span><span class='line'><span class="sr">  belongs_to :user</span>
-</span><span class='line'><span class="sr">end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="k">class</span> <span class="nc">Comment</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:post</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Let’s say on a users profile page we would like to show a listing of comments from this user.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;@user.posts.each do |post|</span>
-</span><span class='line'><span class="sr">   post.comments.each do |comment|&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span>  <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%=</span> <span class="n">comment</span><span class="o">.</span><span class="n">message</span> <span class="o">%&amp;</span><span class="n">gt</span><span class="p">;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>   <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  What you end up with is something like:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="mi">1</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">users</span><span class="o">&lt;</span><span class="sr">/code&gt;.&lt;em&gt; FROM &lt;code&gt;users&lt;/</span><span class="n">code</span><span class="o">&gt;</span> <span class="no">WHERE</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="nb">id</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span> <span class="o">=</span> <span class="mi">1</span> <span class="no">LIMIT</span> <span class="mi">1</span>
-</span><span class='line'> <span class="no">Post</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">7</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">posts</span><span class="o">&lt;</span><span class="sr">/code&gt;.&lt;/em</span><span class="o">&gt;</span> <span class="no">FROM</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">blogs</span><span class="o">&lt;</span><span class="sr">/code&gt; WHERE &lt;code&gt;blogs&lt;/</span><span class="n">code</span><span class="o">&gt;.</span><span class="n">&lt;code</span><span class="o">&gt;</span><span class="n">user_id</span><span class="o">&lt;</span><span class="sr">/code&gt; = 2</span>
-</span><span class='line'><span class="sr"> Comment Load (0.7ms)  SELECT &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;.</span><span class="n">&lt;em</span><span class="o">&gt;</span> <span class="no">FROM</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt; WHERE &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;.</span><span class="n">&lt;code</span><span class="o">&gt;</span><span class="n">post_id</span><span class="o">&lt;</span><span class="sr">/code&gt; = 43</span>
-</span><span class='line'><span class="sr"> Comment Load (1.7ms)  SELECT &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;.</span><span class="n">&lt;</span><span class="sr">/em&gt; FROM &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;</span> <span class="no">WHERE</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt;.&lt;code&gt;post_id&lt;/</span><span class="n">code</span><span class="o">&gt;</span> <span class="o">=</span> <span class="mi">55</span>
-</span><span class='line'> <span class="no">Comment</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">2</span><span class="o">.</span><span class="mi">2</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt;.&lt;em&gt; FROM &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;</span> <span class="no">WHERE</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt;.&lt;code&gt;post_id&lt;/</span><span class="n">code</span><span class="o">&gt;</span> <span class="o">=</span> <span class="mi">32</span>
-</span><span class='line'> <span class="no">Comment</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">9</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt;.&lt;/em</span><span class="o">&gt;</span> <span class="no">FROM</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt; WHERE &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;.</span><span class="n">&lt;code</span><span class="o">&gt;</span><span class="n">post_id</span><span class="o">&lt;</span><span class="sr">/code&gt; = 66</span>
-</span><span class='line'><span class="sr"> Comment Load (2.2ms)  SELECT &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;.</span><span class="n">&lt;em</span><span class="o">&gt;</span> <span class="no">FROM</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt; WHERE &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;.</span><span class="n">&lt;code</span><span class="o">&gt;</span><span class="n">post_id</span><span class="o">&lt;</span><span class="sr">/code&gt; = 56</span>
-</span><span class='line'><span class="sr"> Comment Load (4.8ms)  SELECT &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;.</span><span class="n">&lt;</span><span class="sr">/em&gt; FROM &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;</span> <span class="no">WHERE</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt;.&lt;code&gt;post_id&lt;/</span><span class="n">code</span><span class="o">&gt;</span> <span class="o">=</span> <span class="mi">65</span>
-</span><span class='line'> <span class="no">Comment</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="mi">8</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt;.&lt;em&gt; FROM &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;</span> <span class="no">WHERE</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt;.&lt;code&gt;post_id&lt;/</span><span class="n">code</span><span class="o">&gt;</span> <span class="o">=</span> <span class="mi">68</span>
-</span><span class='line'> <span class="no">Comment</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">8</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt;.&lt;/em</span><span class="o">&gt;</span> <span class="no">FROM</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt; WHERE &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;.</span><span class="n">&lt;code</span><span class="o">&gt;</span><span class="n">post_id</span><span class="o">&lt;</span><span class="sr">/code&gt; = 71</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  The user has commented in 9 different posts, which results in 9 separate queries to the DB. This is a small scale example, but you can see how this can compound into something nasty.
-</p>
-
-
-
-
-<p>
-  he solution is to user includes method:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">:posts</span> <span class="o">=&gt;</span> <span class="ss">:comments</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  When using includes method, Active Record ensures that all of the specified associations are loaded using the minimum possible number of queries. The actual query executed is converted into a more optimal singular query and it is that result set that is iterated over instead of the replicated find(id) style queries.
-</p>
-
-
-
-
-<p>
-  Our query stack list now looks like:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="mi">0</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">users</span><span class="o">&lt;</span><span class="sr">/code&gt;.&lt;em&gt; FROM &lt;code&gt;users&lt;/</span><span class="n">code</span><span class="o">&gt;</span> <span class="no">WHERE</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="nb">id</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span> <span class="o">=</span> <span class="mi">1</span> <span class="no">LIMIT</span> <span class="mi">1</span>
-</span><span class='line'><span class="no">Post</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">4</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">posts</span><span class="o">&lt;</span><span class="sr">/code&gt;.&lt;/em</span><span class="o">&gt;</span> <span class="no">FROM</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">posts</span><span class="o">&lt;</span><span class="sr">/code&gt; WHERE &lt;code&gt;posts&lt;/</span><span class="n">code</span><span class="o">&gt;.</span><span class="n">&lt;code</span><span class="o">&gt;</span><span class="n">user_id</span><span class="o">&lt;</span><span class="sr">/code&gt; IN (1)</span>
-</span><span class='line'><span class="sr">Comment Load (0.5ms)  SELECT &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;.</span><span class="n">*</span> <span class="no">FROM</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">comments</span><span class="o">&lt;</span><span class="sr">/code&gt; WHERE &lt;code&gt;comments&lt;/</span><span class="n">code</span><span class="o">&gt;.</span><span class="n">&lt;code</span><span class="o">&gt;</span><span class="n">post_id</span><span class="o">&lt;</span><span class="sr">/code&gt; IN (43, 55, 32, 66, 56, 65, 68, 71)</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
