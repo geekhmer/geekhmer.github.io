@@ -5,13 +5,13 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Single Responsibility Principle in Ruby - GeeKhmer</title>
+  <title>Code Concerns in Rails 4 Models - GeeKhmer</title>
   <meta name="author" content="Bunlong Van">
   
   
   <meta name="description" content="The biggest website of computer programming, Ruby, Ruby on Rails, Erlang, Chicagoboss and Javascript in Southeast Asia.">
 
-  <meta name="keywords" content="Single Responsibility Principle in Ruby">
+  <meta name="keywords" content="Code Concerns in Rails 4 Models">
 
   <!-- http://t.co/dKP3o1e -->
   <meta name="HandheldFriendly" content="True">
@@ -19,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://geekhmer.github.io/blog/2015/03/17/single-responsibility-principle-in-ruby">
+  <link rel="canonical" href="http://geekhmer.github.io/blog/2015/05/14/code-concerns-in-rails-4-models">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="" rel="alternate" title="GeeKhmer" type="application/atom+xml">
@@ -75,7 +75,7 @@
   
   <header>
     
-      <h1 class="entry-title">Single Responsibility Principle in Ruby</h1>
+      <h1 class="entry-title">Code Concerns in Rails 4 Models</h1>
     
     
       <p class="meta">
@@ -91,7 +91,7 @@
   
 
 
-<time datetime="2015-03-17T20:55:00+07:00" pubdate data-updated="true">Mar 17<span>th</span>, 2015</time>
+<time datetime="2015-05-14T12:48:00+07:00" pubdate data-updated="true">May 14<span>th</span>, 2015</time>
         
       </p>
     
@@ -99,14 +99,21 @@
 
 
 <div class="entry-content"><p>
-  <img src="/images/rights_and_wrongsof_ruby.jpg" width="400" alt="Single Responsibility Principle in Ruby" />
+  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="Code Concerns in Rails 4 Models" />
 </p>
 
 
 
 
 <p>
-  Assume that we already had the code:
+  You may have noticed that Rails 4 creates a new folder called concerns. Concerns are pieces of code that allow you to better organize the code that you write. This feature has actually been around for a long time prior to Rails 4, Rails 4 merely creates the folders for you and sets up the environment. In this article, we focus primarily on Rails 4.0, but it should apply equally to 3.2.x or even 3.0.x and earlier.
+</p>
+
+
+
+
+<p>
+  Here is a simple example, lets say we have a model called user. In this model we would typically have something like this:
 </p>
 
 
@@ -125,21 +132,17 @@
 <span class='line-number'>11</span>
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AuthenticatesUser</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">authenticate</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">if</span> <span class="n">matches?</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
-</span><span class='line'>     <span class="n">do_some_authentication</span>
-</span><span class='line'>    <span class="k">else</span>
-</span><span class='line'>      <span class="k">raise</span> <span class="no">NotAllowedError</span>
-</span><span class='line'>    <span class="k">end</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">has_secure_password</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">authenticate</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="n">find_by_email</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">user</span> <span class="k">if</span> <span class="o">!</span><span class="n">user</span><span class="o">.</span><span class="n">nil?</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'>  <span class="kp">private</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">matches?</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="n">find_from_db</span><span class="p">(</span><span class="ss">:user</span><span class="p">,</span> <span class="n">email</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">user</span><span class="o">.</span><span class="n">encrypted_password</span> <span class="o">==</span> <span class="n">encrypt</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create_password_reset_token</span>
+</span><span class='line'>    <span class="n">logger</span><span class="o">.</span><span class="n">warn</span> <span class="s2">&quot;Create password reset token code goes here.&quot;</span>
+</span><span class='line'>    <span class="kp">false</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
@@ -148,7 +151,7 @@
 
 
 <p>
-  The AuthenticatesUser class is responsible for authenticating the user as well as knowing if the email and password match the ones in the database. It has two responsibilities, and according to the principle it should only have one, let&#8217;s extract one.
+  We can create a a file in the app/models/concerns folder called authentication.rb (app/models/concerns/authentication.rb) and place the following code in it:
 </p>
 
 
@@ -173,27 +176,23 @@
 <span class='line-number'>17</span>
 <span class='line-number'>18</span>
 <span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AuthenticatesUser</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">authenticate</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">if</span> <span class="no">MatchesPasswords</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span><span class="o">.</span><span class="n">matches?</span>
-</span><span class='line'>     <span class="n">do_some_authentication</span>
-</span><span class='line'>    <span class="k">else</span>
-</span><span class='line'>      <span class="k">raise</span> <span class="no">NotAllowedError</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Authentication</span>
+</span><span class='line'>  <span class="kp">extend</span> <span class="ss">ActiveSupport</span><span class="p">:</span><span class="ss">:Concern</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">included</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">has_secure_password</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">module</span> <span class="nn">ClassMethods</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">authenticate</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">user</span> <span class="o">=</span> <span class="n">find_by_email</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">user</span> <span class="k">if</span> <span class="n">user</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
 </span><span class='line'>    <span class="k">end</span>
 </span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">MatchesPasswords</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
-</span><span class='line'>     <span class="vi">@email</span> <span class="o">=</span> <span class="n">email</span>
-</span><span class='line'>     <span class="vi">@password</span> <span class="o">=</span> <span class="n">password</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">matches?</span>
-</span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="n">find_from_db</span><span class="p">(</span><span class="ss">:user</span><span class="p">,</span> <span class="vi">@email</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">user</span><span class="o">.</span><span class="n">encrypted_password</span> <span class="o">==</span> <span class="n">encrypt</span><span class="p">(</span><span class="vi">@password</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create_password_reset_token</span>
+</span><span class='line'>    <span class="n">logger</span><span class="o">.</span><span class="n">warn</span> <span class="s2">&quot;Create password reset token code goes here.&quot;</span>
+</span><span class='line'>    <span class="kp">false</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
@@ -202,14 +201,103 @@
 
 
 <p>
-  I&#8217;ve used a refactoring technique called &#8220;Extract Class&#8221; and then use it on the class I already had, this is called sharing behaviour through &#8220;Composition&#8221;.
+  Now, lets refactor the User model to use the new code. Change the users model (app/models/user.rb) so that it looks like this:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Authentication</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now if you start the rails server and attempt to authenticate, you&#8217;ll notice that the functionality hasn&#8217;t changed at all. That&#8217;s the idea! You can use this method for organizing and DRYing up your code.
 </p>
 
 
 
 
 <p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
+  The extend <code>ActiveSupport::Concern</code> tells rails that we are creating a concern.
+</p>
+
+
+
+
+<p>
+  The code contained within the included block will be executed within the context of the class that is including the module. This is perfect for including functionality provided by 3rd party gems, etc.
+</p>
+
+
+
+
+<p>
+  Next you will notice the <code>module ClassMethods</code> block. The code contained within this block will be added to the Class itself. For example, the code above adds an authenticate function to the User class. This allows you to do User.authenticate(email, password) instead of User.find_by_email(email).authenticate(password).
+</p>
+
+
+
+
+<p>
+  Finally you will see the last bit of code, the <code>create_password_reset_token</code> function. Code not included in the <code>ClassMethods</code> block or the <code>included</code> block will be included as instance methods. For example, You could do <code>@user = User.find(params[:id])</code> and then do <code>@user.create_password_reset_token</code> to create a password reset token for the specified user.
+</p>
+
+
+
+
+<p>
+  Now, all of this is great, but what benefit do you get from organizing your code in this fashion? Well, lets look at a good example of how utilizing this functionality of Rails can save you time and make your code much cleaner. Lets say we have a number of different models, BlogPosts, Articles, Comments, etc and we want to add tagging functionality that will allow the user to tag each object as something. Utilizing concerns we can quickly and easily do this:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Taggable</span>
+</span><span class='line'>  <span class="kp">extend</span> <span class="ss">ActiveSupport</span><span class="p">:</span><span class="ss">:Concern</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">included</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">has_many</span> <span class="ss">:taggings</span><span class="p">,</span> <span class="ss">as</span><span class="p">:</span> <span class="ss">:taggable</span><span class="p">,</span> <span class="ss">dependent</span><span class="p">:</span> <span class="ss">:destroy</span>
+</span><span class='line'>    <span class="n">has_many</span> <span class="ss">:tags</span><span class="p">,</span> <span class="ss">through</span><span class="p">:</span> <span class="ss">:taggings</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">tag_names</span>
+</span><span class='line'>    <span class="n">tags</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:name</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  In this simple example, you&#8217;ll see that simply including Taggable on your modules will (with the database structure in place of course) make your models taggable. This code can quickly and easily be spread upon as many models as needed. Well that&#8217;s it! Concerns are a great way to keep your code organized and DRY.
+</p>
+
+
+
+
+<p>
+  So far so good, That it!!! See ya!!! :)
 </p>
 
 </div>
@@ -234,7 +322,7 @@
   
 
 
-<time datetime="2015-03-17T20:55:00+07:00" pubdate data-updated="true">Mar 17<span>th</span>, 2015</time>
+<time datetime="2015-05-14T12:48:00+07:00" pubdate data-updated="true">May 14<span>th</span>, 2015</time>
       
 
 <span class="categories">
@@ -248,7 +336,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2015/03/17/single-responsibility-principle-in-ruby/" data-via="" data-counturl="http://geekhmer.github.io/blog/2015/03/17/single-responsibility-principle-in-ruby/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2015/05/14/code-concerns-in-rails-4-models/" data-via="" data-counturl="http://geekhmer.github.io/blog/2015/05/14/code-concerns-in-rails-4-models/" >Tweet</a>
   
   
   
@@ -259,10 +347,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2015/03/16/push-to-multiple-git-repositories/" title="Previous Post: Push to Multiple Git Repositories">&laquo; Push to Multiple Git Repositories</a>
+        <a class="basic-alignment left" href="/blog/2015/05/13/awesome-jquery-tricks/" title="Previous Post: Awesome jQuery Tricks">&laquo; Awesome jQuery Tricks</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2015/03/17/open-slash-closed-principle-in-ruby/" title="Next Post: Open/Closed Principle in Ruby">Open/Closed Principle in Ruby &raquo;</a>
       
     </p>
   </footer>
