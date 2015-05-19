@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-05-15T11:24:21+07:00</updated>
+  <updated>2015-05-19T10:32:47+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,211 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[IP Geolocation in Ruby on Rails Application]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/05/16/ip-geolocation-in-ruby-on-rails-application/"/>
+    <updated>2015-05-16T23:47:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/05/16/ip-geolocation-in-ruby-on-rails-application</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="IP Geolocation in Ruby on Rails Application" />
+</p>
+
+
+
+
+<p>
+  Sometimes it can be useful to find a user&#8217;s physical location in our Rails application. For instance, maybe we want to send a special Happy Holidays to users of a particular country. IP address geolocation lets us do exactly that. With IP address geolocation you can get a pretty good idea of where the customer is accessing your site from as long as they aren&#8217;t using a proxy server or some other means of obscuring their IP address. In this article we will show you how to utilize the Maxmind GeoIP database to look up the location of just about any IP address. Let&#8217;s get started.
+</p>
+
+
+
+
+<p>
+  <strong>Setup Rails Application</strong><br/>
+  To utilize the IP address geolocation functionality, we first need to add the geoip gem to our gemfile. Open up your gemfile and add in the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;geoip&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 1.4.0&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Great, now let&#8217;s run a bundle install to install the gem.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now we need to download the GeoIP database for use with the geoip gem. A free one <a href="http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz" target="_blank"> can be downloaded at this link</a>, or you can use the paid version if you have a subscription. Once downloaded, extract the compressed archive and place the .dat folder contained within in the root directory of your Rails app.
+</p>
+
+
+
+
+<p>
+  Great, now let&#8217;s create a controller so that we can play around with the GeoIP functionality. Run the commands below to create a controller called GeoIpRequest:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="n">geo_ip_request</span> <span class="kp">new</span> <span class="n">create</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Next, open up your routes file and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">resource</span> <span class="ss">:geo_ip_request</span><span class="p">,</span> <span class="ss">controller</span><span class="p">:</span> <span class="ss">:geo_ip_request</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;geo_ip_request#new&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Great, now open up your GeoIpRequest controller and modify it so that it looks like the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/controllers/geo_ip_request_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">GeoIpRequestController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">new</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="nb">require</span> <span class="s1">&#39;geoip&#39;</span>
+</span><span class='line'>    <span class="vi">@info</span> <span class="o">=</span> <span class="no">GeoIP</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Rails</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;GeoLiteCity.dat&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">city</span><span class="p">(</span><span class="n">ip_request_params</span><span class="o">[</span><span class="ss">:host</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">ip_request_params</span>
+</span><span class='line'>    <span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:request</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:host</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  In the code above, we tell the geoip gem to load our database file and do a search for the host parameter.
+</p>
+
+
+
+
+<p>
+  Now let&#8217;s create our views. Open up the new view for the GeoIpRequest controller and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/geo_ip_request/new.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">GeoIP</span> <span class="no">Example</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'><span class="sr">&lt;p&gt;Get the country for any ip address or hostname by typing it below and pressing the lookup button.&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">%= form_for :request, url: geo_ip_request_index_path do |f| %&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">text_field</span> <span class="ss">:host</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%= f.submit &quot;Lookup&quot; %&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% end </span><span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Great, now finally let&#8217;s do the create view. Open up the create view for the GeoIpRequest controller and modify it so that it looks like the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/geo_ip_request/create.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">IP</span> <span class="no">Address</span> <span class="no">Info</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'><span class="sr">&lt;b&gt;IP:&amp;nbsp;&amp;nbsp;&lt;/</span><span class="n">b</span><span class="o">&gt;&lt;</span><span class="sx">%= @info.request %&gt;&lt;br /&gt;</span>
+</span><span class='line'><span class="sx">&lt;b&gt;Country:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;%=</span> <span class="vi">@info</span><span class="o">.</span><span class="n">country_name</span> <span class="sx">%&gt;&lt;br /&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="ss">City</span><span class="p">:</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/b&gt;&lt;%= @info.city_name %&gt;&lt;br /</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="ss">Region</span><span class="p">:</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/b&gt;&lt;%= @info.real_region_name %&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Excellent, now if you fire up your rails development server and and navigate to http://localhost:3000 you will see a form requesting your ip address or hostname. Entering any ip address or host name will show the country, city, and region that ip is from.
+</p>
+
+
+
+
+<p>
+  So far so good, that&#8217;s it!!! that&#8217;s all there is to it!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Code Concerns in Rails 4 Models]]></title>
@@ -4963,75 +5168,6 @@
 <figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="n">calculate_averages</span>
 </span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Add Google Analytics to Ruby on Rails Application]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/04/19/add-google-analytics-to-ruby-on-rails-application/"/>
-    <updated>2015-04-19T12:30:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/04/19/add-google-analytics-to-ruby-on-rails-application</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/ruby_on_rails.png" width="400" alt="Add Google Analytics to Ruby on Rails Application" />
-</p>
-
-
-
-
-<p>
-  Google Analytics is used by the vast majority of the internet to monitor traffic. You can quickly and easily add Google Analytics to your Rails application, however there are a few things you should pay attention to. First, make sure that the Analytics code only loads up in a production environment. It&#8217;s best to do this by first creating a partial called google_analytics and placing the following code inside of it:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/views/layouts/_google_analytics.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">% if </span><span class="no">Rails</span><span class="o">.</span><span class="n">env</span> <span class="o">==</span> <span class="s2">&quot;production&quot;</span>  <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">  &lt;script type=&quot;text/javascript&quot;&gt;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">var</span> <span class="n">_gaq</span> <span class="o">=</span> <span class="n">_gaq</span> <span class="o">||</span> <span class="o">[]</span><span class="p">;</span>
-</span><span class='line'>    <span class="n">_gaq</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="o">[</span><span class="s1">&#39;_setAccount&#39;</span><span class="p">,</span> <span class="s1">&#39;UA-00000000-1&#39;</span><span class="o">]</span><span class="p">);</span>
-</span><span class='line'>    <span class="n">_gaq</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="o">[</span><span class="s1">&#39;_trackPageview&#39;</span><span class="o">]</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="p">(</span><span class="n">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>      <span class="n">var</span> <span class="n">ga</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">createElement</span><span class="p">(</span><span class="s1">&#39;script&#39;</span><span class="p">);</span> <span class="n">ga</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s1">&#39;text/javascript&#39;</span><span class="p">;</span> <span class="n">ga</span><span class="o">.</span><span class="n">async</span> <span class="o">=</span> <span class="kp">true</span><span class="p">;</span>
-</span><span class='line'>      <span class="n">ga</span><span class="o">.</span><span class="n">src</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;https:&#39;</span> <span class="o">==</span> <span class="n">document</span><span class="o">.</span><span class="n">location</span><span class="o">.</span><span class="n">protocol</span> <span class="p">?</span> <span class="s1">&#39;https://ssl&#39;</span> <span class="p">:</span> <span class="s1">&#39;http://www&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.google-analytics.com/ga.js&#39;</span><span class="p">;</span>
-</span><span class='line'>      <span class="n">var</span> <span class="n">s</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;script&#39;</span><span class="p">)</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="p">;</span> <span class="n">s</span><span class="o">.</span><span class="n">parentNode</span><span class="o">.</span><span class="n">insertBefore</span><span class="p">(</span><span class="n">ga</span><span class="p">,</span> <span class="n">s</span><span class="p">);</span>
-</span><span class='line'>    <span class="p">})();</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">&lt;</span><span class="sr">/script&gt;</span>
-</span><span class='line'><span class="sr">&lt;% end %&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  This code will tell Rails to only include the Analytics code in a production environment.
-</p>
 
 
 

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby on Rails | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby-on-rails/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-05-15T11:24:21+07:00</updated>
+  <updated>2015-05-19T10:32:47+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,206 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[IP Geolocation in Ruby on Rails Application]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/05/16/ip-geolocation-in-ruby-on-rails-application/"/>
+    <updated>2015-05-16T23:47:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/05/16/ip-geolocation-in-ruby-on-rails-application</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="IP Geolocation in Ruby on Rails Application" />
+</p>
+
+
+
+
+<p>
+  Sometimes it can be useful to find a user's physical location in our Rails application. For instance, maybe we want to send a special Happy Holidays to users of a particular country. IP address geolocation lets us do exactly that. With IP address geolocation you can get a pretty good idea of where the customer is accessing your site from as long as they aren't using a proxy server or some other means of obscuring their IP address. In this article we will show you how to utilize the Maxmind GeoIP database to look up the location of just about any IP address. Let's get started.
+</p>
+
+
+
+
+<p>
+  <strong>Setup Rails Application</strong><br/>
+  To utilize the IP address geolocation functionality, we first need to add the geoip gem to our gemfile. Open up your gemfile and add in the code listed below:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">geoip</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">~&gt;</span> <span class="mi">1</span><span class="o">.</span><span class="mi">4</span><span class="o">.</span><span class="mi">0</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Great, now let's run a bundle install to install the gem.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Now we need to download the GeoIP database for use with the geoip gem. A free one <a href="http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz" target="_blank"> can be downloaded at this link</a>, or you can use the paid version if you have a subscription. Once downloaded, extract the compressed archive and place the .dat folder contained within in the root directory of your Rails app.
+</p>
+
+
+
+
+<p>
+  Great, now let's create a controller so that we can play around with the GeoIP functionality. Run the commands below to create a controller called GeoIpRequest:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="n">geo_ip_request</span> <span class="kp">new</span> <span class="n">create</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Next, open up your routes file and modify it so that it looks like the code listed below:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">resource</span> <span class="ss">:geo_ip_request</span><span class="p">,</span> <span class="ss">controller</span><span class="p">:</span> <span class="ss">:geo_ip_request</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  root to: &amp;ldquo;geo_ip_request#new&amp;rdquo;</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Great, now open up your GeoIpRequest controller and modify it so that it looks like the code listed below.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/controllers/geo_ip_request_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">GeoIpRequestController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">new</span>
+</span><span class='line'>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  def create&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="nb">require</span> <span class="s1">&#39;geoip&#39;</span>
+</span><span class='line'><span class="vi">@info</span> <span class="o">=</span> <span class="no">GeoIP</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Rails</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;GeoLiteCity.dat&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">city</span><span class="p">(</span><span class="n">ip_request_params</span><span class="o">[</span><span class="ss">:host</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  private</span>
+</span><span class='line'><span class="sr">  def ip_request_params&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:request</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:host</span><span class="p">)</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  In the code above, we tell the geoip gem to load our database file and do a search for the host parameter.
+</p>
+
+
+
+
+<p>
+  Now let's create our views. Open up the new view for the GeoIpRequest controller and modify it so that it looks like the code listed below:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/views/geo_ip_request/new.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;GeoIP Example&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="no">Get</span> <span class="n">the</span> <span class="n">country</span> <span class="k">for</span> <span class="n">any</span> <span class="n">ip</span> <span class="n">address</span> <span class="ow">or</span> <span class="n">hostname</span> <span class="n">by</span> <span class="n">typing</span> <span class="n">it</span> <span class="n">below</span> <span class="ow">and</span> <span class="n">pressing</span> <span class="n">the</span> <span class="n">lookup</span> <span class="n">button</span><span class="o">.</span><span class="n">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;&amp;lt;%= form_for :request, url: geo_ip_request_index_path do |f| %&gt;</span>
+</span><span class='line'><span class="sr">  &amp;lt;%= f.text_field :host %&gt;</span>
+</span><span class='line'><span class="sr">  &amp;lt;%= f.submit &amp;ldquo;Lookup&amp;rdquo; %&gt;</span>
+</span><span class='line'><span class="sr">&amp;lt;% end %&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Great, now finally let's do the create view. Open up the create view for the GeoIpRequest controller and modify it so that it looks like the code listed below.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/views/geo_ip_request/create.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;IP Address Info&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="ss">IP</span><span class="p">:</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/b&gt;&amp;lt;%= @info.request %&gt;&lt;br /</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="ss">Country</span><span class="p">:</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/b&gt;&amp;lt;%= @info.country_name %&gt;&lt;br /</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="ss">City</span><span class="p">:</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/b&gt;&amp;lt;%= @info.city_name %&gt;&lt;br /</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="ss">Region</span><span class="p">:</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/b&gt;&amp;lt;%= @info.real_region_name %&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Excellent, now if you fire up your rails development server and and navigate to http://localhost:3000 you will see a form requesting your ip address or hostname. Entering any ip address or host name will show the country, city, and region that ip is from.
+</p>
+
+
+
+
+<p>
+  So far so good, that's it!!! that's all there is to it!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Code Concerns in Rails 4 Models]]></title>
@@ -601,7 +801,7 @@
 
 
 <p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="sx">%= image_tag gravatar_url(&amp;ldquo;&lt;a href=</span><span class="s2">&quot;&amp;#109;&amp;#97;&amp;#x69;&amp;#x6c;&amp;#x74;&amp;#111;&amp;#58;&amp;#121;&amp;#x6f;&amp;#x75;&amp;#64;&amp;#x79;&amp;#111;&amp;#117;&amp;#114;&amp;#101;&amp;#x6d;&amp;#97;&amp;#x69;&amp;#108;&amp;#x2e;&amp;#x63;&amp;#111;&amp;#x6d;&quot;</span><span class="o">&gt;&amp;</span><span class="c1">#x79;&amp;#111;&amp;#117;&amp;#x40;&amp;#x79;&amp;#111;&amp;#117;&amp;#x72;&amp;#x65;&amp;#x6d;&amp;#97;&amp;#105;&amp;#x6c;&amp;#46;&amp;#x63;&amp;#111;&amp;#x6d;&lt;/a&gt;&amp;rdquo;, 64), alt: &amp;ldquo;&amp;rdquo; %&gt;</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="sx">%= image_tag gravatar_url(&amp;ldquo;&lt;a href=</span><span class="s2">&quot;&amp;#109;&amp;#97;&amp;#105;&amp;#108;&amp;#116;&amp;#111;&amp;#58;&amp;#x79;&amp;#x6f;&amp;#117;&amp;#64;&amp;#x79;&amp;#111;&amp;#x75;&amp;#x72;&amp;#101;&amp;#109;&amp;#97;&amp;#105;&amp;#x6c;&amp;#46;&amp;#99;&amp;#111;&amp;#109;&quot;</span><span class="o">&gt;&amp;</span><span class="c1">#121;&amp;#111;&amp;#117;&amp;#x40;&amp;#x79;&amp;#x6f;&amp;#x75;&amp;#114;&amp;#101;&amp;#109;&amp;#97;&amp;#105;&amp;#108;&amp;#x2e;&amp;#x63;&amp;#x6f;&amp;#x6d;&lt;/a&gt;&amp;rdquo;, 64), alt: &amp;ldquo;&amp;rdquo; %&gt;</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
@@ -630,578 +830,6 @@
 
 <p>
   So far so good, That's it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Put Ruby on Rails on a Slim]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/05/09/put-ruby-on-rails-on-a-slim/"/>
-    <updated>2015-05-09T08:39:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/05/09/put-ruby-on-rails-on-a-slim</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="Put Ruby on Rails on a Slim" />
-</p>
-
-
-
-
-<p>
-  Ruby on Rails is my usual framework of choice to build web applications. It is good and easy to use, but let’s face it: it’s massive compared to more lightweight frameworks, such as Sinatra. Why is it bad? There are a few reasons and slow start-up time and high resources usage are just two most common concerns. Slimming down Ruby on Rails applications can allow you to use different components (say Sequel instead of ActiveRecord) and improve system security. Remember the last year’s security dramas related to JSON parameters parsing? It would be largely irrelevant for most applications if everyone who does not use it, disabled it.
-</p>
-
-
-
-
-<p>
-  <strong>Rails Modularity</strong><br/>
-  To enable individual modules, replace the following in config/application.rb:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/application.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">rails</span><span class="o">/</span><span class="n">all</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  With:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/application.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">active_record</span><span class="o">/</span><span class="n">railtie</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
-</span><span class='line'><span class="nb">require</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">action_controller</span><span class="o">/</span><span class="n">railtie</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
-</span><span class='line'><span class="nb">require</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">action_mailer</span><span class="o">/</span><span class="n">railtie</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
-</span><span class='line'><span class="nb">require</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">active_model</span><span class="o">/</span><span class="n">railtie</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
-</span><span class='line'><span class="nb">require</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">sprockets</span><span class="o">/</span><span class="n">railtie</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  As you can see above, you can remove ActiveRecord altogether if you use different database, the same with ActionMailer or Sprockets. It probably does not make sense to remove ActionController, however.
-</p>
-
-
-
-
-<p>
-  <strong>Internal Middleware Stack</strong><br/>
-  Each Ruby on Rails applications comes with <a href="http://guides.rubyonrails.org/rails_on_rack.html" target="_blank">Internal Middleware Stack Enabled</a>. Check out <a href="http://guides.rubyonrails.org/rails_on_rack.html#internal-middleware-stack" target="_blank">This Section of Documentation</a> for a list and description of each component. On a fairly small Ruby on Rails application I work on, the stack looks like this:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">rake</span> <span class="n">middleware</span>
-</span><span class='line'><span class="n">use</span> <span class="ss">Rack</span><span class="p">:</span><span class="ss">:Sendfile</span>
-</span><span class='line'><span class="n">use</span> <span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:Static</span>
-</span><span class='line'><span class="n">use</span> <span class="c1">#&amp;lt;ActiveSupport::Cache::Strategy::LocalCache::Middleware:0x007f0bda2d73e0&gt;</span>
-</span><span class='line'><span class="n">use</span> <span class="ss">Rack</span><span class="p">:</span><span class="ss">:Runtime</span>
-</span><span class='line'><span class="n">use</span> <span class="ss">Rack</span><span class="p">:</span><span class="ss">:MethodOverride</span>
-</span><span class='line'><span class="n">use</span> <span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:RequestId</span>
-</span><span class='line'><span class="n">use</span> <span class="ss">Rails</span><span class="p">:</span><span class="ss">:Rack</span><span class="o">::</span><span class="no">Logger</span>
-</span><span class='line'><span class="n">use</span> <span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:ShowExceptions</span>
-</span><span class='line'><span class="n">use</span> <span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:DebugExceptions</span>
-</span><span class='line'><span class="n">use</span> <span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:RemoteIp</span>
-</span><span class='line'><span class="n">use</span> <span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:Callbacks</span>
-</span><span class='line'><span class="n">use</span> <span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:Cookies</span>
-</span><span class='line'><span class="n">use</span> <span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:Session</span><span class="o">::</span><span class="no">CookieStore</span>
-</span><span class='line'><span class="n">use</span> <span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:Flash</span>
-</span><span class='line'><span class="n">use</span> <span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:ParamsParser</span>
-</span><span class='line'><span class="n">use</span> <span class="ss">Rack</span><span class="p">:</span><span class="ss">:Head</span>
-</span><span class='line'><span class="n">use</span> <span class="ss">Rack</span><span class="p">:</span><span class="ss">:ConditionalGet</span>
-</span><span class='line'><span class="n">use</span> <span class="ss">Rack</span><span class="p">:</span><span class="ss">:ETag</span>
-</span><span class='line'><span class="n">run</span> <span class="ss">Blog</span><span class="p">:</span><span class="ss">:Application</span><span class="o">.</span><span class="n">routes</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  I can safely disable most of the above by modifying config/application.rb, for example:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/application.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">middleware</span><span class="o">.</span><span class="n">disable</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="ss">Rack</span><span class="p">:</span><span class="ss">:ETag</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  The same way, I was able to disable most of the default middleware, without doing any harm to my little app. You will have to be careful, however, what you disable. If you use login system, you will need sessions, if you display flash messages do not remove “ActionDispatch::Flash”... etc.
-</p>
-
-
-
-
-<p>
-  When it comes to JSON parameters parsing, that was a headache for most Ruby on Rails developers last year, it can be easily disabled. To disable JSON params parsing, put this line into config/application.rb:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/application.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">middleware</span><span class="o">.</span><span class="n">swap</span> <span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:ParamsParser</span><span class="p">,</span> <span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:ParamsParser</span><span class="p">,</span> <span class="ss">Mime</span><span class="p">:</span><span class="ss">:JSON</span> <span class="o">=&gt;</span> <span class="kp">nil</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>Rails API</strong><br/>
-  If you are building only API for your application, you can use nice gem called <a href="https://github.com/rails-api/rails-api" target="_blank">rails-api</a>.
-</p>
-
-
-
-
-<p>
-  <strong>Put Controllers on a Hunger Slim</strong><br/>
-  If you check out Ruby on Rails source code for <a href="https://github.com/rails/rails/blob/master/actionpack/lib/action_controller/base.rb" target="_blank">ActionController::Base</a>, you will learn that it inherits from ActionController::Metal and includes <a href="https://github.com/rails/rails/blob/master/actionpack/lib/action_controller/base.rb#L203" target="_blank">Bunch of Modules</a> that you might or might not need in your controllers. A way to slim down your controllers stack, is to cherry-pick the ones you need. If all you need is basic rendering, there is nothing stopping you from creating lightweight controllers like this one:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">SlimController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActionController</span><span class="p">:</span><span class="ss">:Metal</span>
-</span><span class='line'>  <span class="kp">include</span> <span class="ss">ActionController</span><span class="p">:</span><span class="ss">:Rendering</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  def index&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">render</span> <span class="ss">text</span><span class="p">:</span> <span class="s2">&quot;I&#39;m Slim, yes I&#39;m the real Bunlong&quot;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  There is no ActionController:HipHop I’m afraid, but that will work just as good.
-</p>
-
-
-
-
-<p>
-  <strong>Single File Rails Applications</strong><br/>
-  Okay, they don’t have to be single-file. But you are not forced to use default Rails catalogues structure, and you can make them really slim and custom.
-</p>
-
-
-
-
-<p>
-  You can, however, create 100% functional Rails application only in config.ru:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config.ru </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-<span class='line-number'>81</span>
-<span class='line-number'>82</span>
-<span class='line-number'>83</span>
-<span class='line-number'>84</span>
-<span class='line-number'>85</span>
-<span class='line-number'>86</span>
-<span class='line-number'>87</span>
-<span class='line-number'>88</span>
-<span class='line-number'>89</span>
-<span class='line-number'>90</span>
-<span class='line-number'>91</span>
-<span class='line-number'>92</span>
-<span class='line-number'>93</span>
-<span class='line-number'>94</span>
-<span class='line-number'>95</span>
-<span class='line-number'>96</span>
-<span class='line-number'>97</span>
-<span class='line-number'>98</span>
-<span class='line-number'>99</span>
-<span class='line-number'>100</span>
-<span class='line-number'>101</span>
-<span class='line-number'>102</span>
-<span class='line-number'>103</span>
-<span class='line-number'>104</span>
-<span class='line-number'>105</span>
-<span class='line-number'>106</span>
-<span class='line-number'>107</span>
-<span class='line-number'>108</span>
-<span class='line-number'>109</span>
-<span class='line-number'>110</span>
-<span class='line-number'>111</span>
-<span class='line-number'>112</span>
-<span class='line-number'>113</span>
-<span class='line-number'>114</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;Port of &lt;a href=&quot;https:/</span><span class="o">/</span><span class="n">gist</span><span class="o">.</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">josevalim</span><span class="o">/</span><span class="mi">1942658</span><span class="s2">&quot;&gt;https://gist.github.com/josevalim/1942658&lt;/a&gt; to Rails 4&lt;/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;h1&gt;Original author: Jose Valim&lt;/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;p&gt;#&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;h1&gt;Run this file with:&lt;/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;p&gt;#&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;h1&gt;bundle exec RAILS_ENV=production rackup -p 3000 -s thin&lt;/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;p&gt;#&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;h1&gt;And access:&lt;/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;p&gt;#&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;h1&gt;&lt;a href=&quot;</span><span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="ss">localhost</span><span class="p">:</span><span class="mi">3000</span><span class="o">/</span><span class="n">hello</span><span class="o">/</span><span class="n">world</span><span class="s2">&quot;&gt;http://localhost:3000/hello/world&lt;/a&gt;&lt;/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;p&gt;#&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;h1&gt;We are using Bundler in this example, but we could also&lt;/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;h1&gt;have used rubygems:&lt;/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;p&gt;#&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;h1&gt;require &amp;ldquo;rubygems&amp;rdquo;&lt;/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;p&gt;#&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;h1&gt;gem &amp;ldquo;actionpack&amp;rdquo;&lt;/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;h1&gt;gem &amp;ldquo;railties&amp;rdquo;&lt;/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;p&gt;#&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;h1&gt;require &amp;ldquo;rails&amp;rdquo;&lt;/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;h1&gt;require &amp;ldquo;rails/all&amp;rdquo;&lt;/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;h1&gt;The following lines should come as no surprise. Except by&lt;/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;h1&gt;ActionController::Metal, it follows the same structure of&lt;/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;h1&gt;config/application.rb, config/environment.rb and config.ru&lt;/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;h1&gt;existing in any Rails 4 app. Here they are simply in one&lt;/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;h1&gt;file and without the comments.&lt;/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;p&gt;require &amp;ldquo;rails&amp;rdquo;</span>
-</span><span class='line'><span class="s2">require &amp;ldquo;action_controller/railtie&amp;rdquo; # require more if needed&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;p&gt;class MyApp &amp;lt; Rails::Application</span>
-</span><span class='line'><span class="s2">  routes.append do&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;pre&gt;&lt;code&gt;get &quot;</span><span class="o">/</span><span class="n">hello</span><span class="o">/</span><span class="n">world</span><span class="s2">&quot; =&amp;gt; &quot;</span><span class="n">hello</span><span class="c1">#world&quot;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  # Enable cache classes. Production style.</span>
-</span><span class='line'><span class="sr">  config.cache_classes = true&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="c1"># uncomment below to display errors</span>
-</span><span class='line'>  <span class="c1"># config.consider_all_requests_local = true&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="c1"># Here you could remove some middlewares, for example</span>
-</span><span class='line'>  <span class="c1"># Rack::Lock, ActionDispatch::Flash and  ActionDispatch::BestStandardsSupport below.</span>
-</span><span class='line'>  <span class="c1"># The remaining stack is printed on rackup (for fun!).</span>
-</span><span class='line'>  <span class="c1"># Rails API has config.middleware.api_only! to get</span>
-</span><span class='line'>  <span class="c1"># rid of browser related middleware.</span>
-</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">middleware</span><span class="o">.</span><span class="n">delete</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="ss">Rack</span><span class="p">:</span><span class="ss">:Lock</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">middleware</span><span class="o">.</span><span class="n">delete</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:Flash</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">middleware</span><span class="o">.</span><span class="n">delete</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="ss">ActionDispatch</span><span class="p">:</span><span class="ss">:BestStandardsSupport</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  # We need a secret token for session, cookies, etc.</span>
-</span><span class='line'><span class="sr">  config.secret_token = &amp;ldquo;49837489qkuweoiuoqwehisuakshdjksadhaisdy78o34y138974xyqp9rmye8yrpiokeuioqwzyoiuxftoyqiuxrhm3iou1hrzmjk&amp;rdquo;</span>
-</span><span class='line'><span class="sr">end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">This</span> <span class="n">is</span> <span class="n">a</span> <span class="n">barebone</span> <span class="n">controller</span><span class="o">.</span> <span class="no">One</span> <span class="n">good</span> <span class="n">reference</span> <span class="n">can</span> <span class="n">be</span> <span class="n">found</span> <span class="ss">here</span><span class="p">:</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;&lt;a href=&quot;http:/</span><span class="o">/</span><span class="n">piotrsarnacki</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="mi">2010</span><span class="o">/</span><span class="mi">12</span><span class="o">/</span><span class="mi">12</span><span class="o">/</span><span class="n">lightweight</span><span class="o">-</span><span class="n">controllers</span><span class="o">-</span><span class="n">with</span><span class="o">-</span><span class="n">rails3</span><span class="o">/</span><span class="s2">&quot;&gt;http://piotrsarnacki.com/2010/12/12/lightweight-controllers-with-rails3/&lt;/a&gt;&lt;/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;p&gt;class HelloController &amp;lt; ActionController::Metal</span>
-</span><span class='line'><span class="s2">  include ActionController::Rendering&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;p&gt;  def world&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;pre&gt;&lt;code&gt;render :text =&amp;gt; &quot;</span><span class="no">Hello</span> <span class="n">world!</span><span class="s2">&quot;</span>
-</span><span class='line'><span class="s2">&lt;/code&gt;&lt;/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;p&gt;  end</span>
-</span><span class='line'><span class="s2">end&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;h1&gt;Initialize the app (originally in config/environment.rb)&lt;/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;p&gt;MyApp.initialize!&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;h1&gt;Print the stack for fun!&lt;/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;p&gt;puts &amp;ldquo;&gt;&gt; Starting Rails lightweight stack&amp;rdquo;</span>
-</span><span class='line'><span class="s2">Rails.configuration.middleware.each do |middleware|</span>
-</span><span class='line'><span class="s2">  puts &amp;ldquo;use </span><span class="si">#{</span><span class="n">middleware</span><span class="o">.</span><span class="n">inspect</span><span class="si">}</span><span class="s2">&amp;rdquo;</span>
-</span><span class='line'><span class="s2">end</span>
-</span><span class='line'><span class="s2">puts &amp;ldquo;run </span><span class="si">#{</span><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.routes&amp;rdquo;&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;h1&gt;Run it (originally in config.ru)&lt;/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;p&gt;run MyApp</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>Your Gemfile is Fat</strong><br/>
-  Including too many libraries is bad for weight of the app. You need to check your Gemfile, and make sure you do require gems like ‘pry’ only in :development group, ‘rspec’ in :test etc.
-</p>
-
-
-
-
-<p>
-  There is general tendency of Rails developers of putting together applications together with ready-to-use blocks. You need to consider if that is what you really need. Writing simple authentication is a matter of controller and two actions, you might not need Devise for that. Handling simple file uploads can be almost as easily implemented as with use of Carrierwave, with much less boilerplate code. I do encourage you to build minimal solutions for your needs only, especially when you do not need to use majority of functionality provided by given gem. If there is a hole found in, say, Carrierwave, including the gem might make your application vulnerable too, and heavier than it needs to be, of course.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Gemfile </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">source</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;https://rubygems.org&quot;</span><span class="o">&gt;</span><span class="ss">https</span><span class="p">:</span><span class="sr">//</span><span class="n">rubygems</span><span class="o">.</span><span class="n">org</span><span class="o">&lt;</span><span class="sr">/a&gt;&amp;rsquo;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">rails</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">~&gt;</span> <span class="mi">4</span><span class="o">.</span><span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;gem &amp;lsquo;psych&amp;rsquo;, &amp;lsquo;~&gt; 2.0.12&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;builder&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;dynamic_form&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;aws-sdk-core&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;gchartrb&amp;rsquo;, require: &amp;lsquo;google_chart&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;gravtastic&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;high_voltage&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;highline&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;honeybadger&amp;rsquo;, &amp;lsquo;~&gt; 1.0&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;jquery-rails&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;mail&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;dalli&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;multi_json&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;paul_revere&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;pg&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;rack&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;rdoc&amp;rsquo;, &amp;lsquo;~&gt; 3.12.2&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;redis&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;rest-client&amp;rsquo;, require: &amp;lsquo;rest_client&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;statsd-instrument&amp;rsquo;, &amp;lsquo;~&gt; 2.0.6&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;unicorn&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;validates_formatting_of&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;will_paginate&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;xml-simple&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;yajl-ruby&amp;rsquo;, require: &amp;lsquo;yajl&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;autoprefixer-rails&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;clearance&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;daemons&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;delayed_job&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;delayed_job_active_record&amp;rsquo;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">newrelic_rpm</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
-</span><span class='line'><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">newrelic</span><span class="o">-</span><span class="n">redis</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;gem &amp;lsquo;sass-rails&amp;rsquo;,   &amp;lsquo;~&gt; 5.0.0&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;coffee-rails&amp;rsquo;, &amp;lsquo;~&gt; 4.0.0&amp;rsquo;</span>
-</span><span class='line'><span class="sr">gem &amp;lsquo;uglifier&amp;rsquo;, &amp;lsquo;&gt;= 1.0.3&amp;rsquo;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">group</span> <span class="ss">:development</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">capistrano</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">~&gt;</span> <span class="mi">2</span><span class="o">.</span><span class="mi">0</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">capistrano</span><span class="o">-</span><span class="n">notification</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">rails</span><span class="o">-</span><span class="n">erd</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;group :test do</span>
-</span><span class='line'><span class="sr">  gem &amp;lsquo;minitest&amp;rsquo;, require: false</span>
-</span><span class='line'><span class="sr">  gem &amp;lsquo;capybara&amp;rsquo;</span>
-</span><span class='line'><span class="sr">  gem &amp;lsquo;factory_girl_rails&amp;rsquo;</span>
-</span><span class='line'><span class="sr">  gem &amp;lsquo;launchy&amp;rsquo;</span>
-</span><span class='line'><span class="sr">  gem &amp;lsquo;rack-test&amp;rsquo;, require: &amp;lsquo;rack/</span><span class="nb">test</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">rr</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="nb">require</span><span class="p">:</span> <span class="kp">false</span>
-</span><span class='line'>  <span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">shoulda</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="nb">require</span><span class="p">:</span> <span class="kp">false</span>
-</span><span class='line'>  <span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">timecop</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;group :recovery do</span>
-</span><span class='line'><span class="sr">  gem &amp;ldquo;fakeredis&amp;rdquo;</span>
-</span><span class='line'><span class="sr">end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">platforms</span> <span class="ss">:jruby</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">jruby</span><span class="o">-</span><span class="n">openssl</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  So far so good, That' it!!! See ya!!! :)
 </p>
 
 ]]></content>

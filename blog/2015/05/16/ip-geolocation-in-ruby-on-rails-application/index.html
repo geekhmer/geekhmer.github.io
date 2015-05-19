@@ -5,13 +5,13 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Slim on Rails - GeeKhmer</title>
+  <title>IP Geolocation in Ruby on Rails Application - GeeKhmer</title>
   <meta name="author" content="Bunlong Van">
   
   
   <meta name="description" content="The biggest website of computer programming, Ruby, Ruby on Rails, Erlang, Chicagoboss and Javascript in Southeast Asia.">
 
-  <meta name="keywords" content="Slim on Rails, Ruby on Rails Slim, Rails Slim">
+  <meta name="keywords" content="IP Geolocation in Ruby on Rails Application">
 
   <!-- http://t.co/dKP3o1e -->
   <meta name="HandheldFriendly" content="True">
@@ -19,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://geekhmer.github.io/blog/2015/02/23/slim-on-rails">
+  <link rel="canonical" href="http://geekhmer.github.io/blog/2015/05/16/ip-geolocation-in-ruby-on-rails-application">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="" rel="alternate" title="GeeKhmer" type="application/atom+xml">
@@ -75,7 +75,7 @@
   
   <header>
     
-      <h1 class="entry-title">Slim on Rails</h1>
+      <h1 class="entry-title">IP Geolocation in Ruby on Rails Application</h1>
     
     
       <p class="meta">
@@ -91,7 +91,7 @@
   
 
 
-<time datetime="2015-02-23T00:12:00+07:00" pubdate data-updated="true">Feb 23<span>rd</span>, 2015</time>
+<time datetime="2015-05-16T23:47:00+07:00" pubdate data-updated="true">May 16<span>th</span>, 2015</time>
         
       </p>
     
@@ -99,14 +99,22 @@
 
 
 <div class="entry-content"><p>
-  <img src="/images/ruby_on_rails.png" width="400" alt="Slim on Rails" />
+  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="IP Geolocation in Ruby on Rails Application" />
 </p>
 
 
 
 
 <p>
-  The first thing you need to do is add a couple gems to the Gemfile. The slim gem tells Rails how to parse the Slim syntax. The slim-rails gem overrides the Rails generators for ERB and replaces them with Slim generators. Add these gems to your Gemfile as below:
+  Sometimes it can be useful to find a user&#8217;s physical location in our Rails application. For instance, maybe we want to send a special Happy Holidays to users of a particular country. IP address geolocation lets us do exactly that. With IP address geolocation you can get a pretty good idea of where the customer is accessing your site from as long as they aren&#8217;t using a proxy server or some other means of obscuring their IP address. In this article we will show you how to utilize the Maxmind GeoIP database to look up the location of just about any IP address. Let&#8217;s get started.
+</p>
+
+
+
+
+<p>
+  <strong>Setup Rails Application</strong><br/>
+  To utilize the IP address geolocation functionality, we first need to add the geoip gem to our gemfile. Open up your gemfile and add in the code listed below:
 </p>
 
 
@@ -114,16 +122,14 @@
 
 <figure class='code'><figcaption><span>Gemfile </span></figcaption>
  <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;slim&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 2.0.3&#39;</span>
-</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;slim-rails&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 2.1.5&#39;</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;geoip&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 1.4.0&#39;</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 
 
 <p>
-  Then run <code>bundle install</code> to install the gems:
+  Great, now let&#8217;s run a bundle install to install the gem.
 </p>
 
 
@@ -137,44 +143,57 @@
 
 
 <p>
-  Then generate a Homes controller with a show action by running the command below:
+  Now we need to download the GeoIP database for use with the geoip gem. A free one <a href="http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz" target="_blank"> can be downloaded at this link</a>, or you can use the paid version if you have a subscription. Once downloaded, extract the compressed archive and place the .dat folder contained within in the root directory of your Rails app.
+</p>
+
+
+
+
+<p>
+  Great, now let&#8217;s create a controller so that we can play around with the GeoIP functionality. Run the commands below to create a controller called GeoIpRequest:
 </p>
 
 
 
 
 <figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="no">Homes</span> <span class="n">show</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="n">geo_ip_request</span> <span class="kp">new</span> <span class="n">create</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 
 
 <p>
-  Notice that the generated view ends in .slim, Rails has generated a slim file for us, courtesy of the slim-rails gem. Now let&#8217;s modify our routes file to set up a resource and add a root path. Open up your routes file (<code>config/routes.rb</code>) and modify it so that it looks somethings like:
+  Next, open up your routes file and modify it so that it looks like the code listed below:
 </p>
 
 
 
 
-<figure class='code'><figcaption><span>routes.rb </span></figcaption>
+<figure class='code'><figcaption><span>config/routes.rb </span></figcaption>
  <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;homes#show&quot;</span>
-</span><span class='line'><span class="n">resource</span> <span class="ss">:home</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:show</span><span class="o">]</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">resource</span> <span class="ss">:geo_ip_request</span><span class="p">,</span> <span class="ss">controller</span><span class="p">:</span> <span class="ss">:geo_ip_request</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;geo_ip_request#new&quot;</span>
+</span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 
 
 <p>
-  Now you are ready to play with Slim. Open up the show view for homes (<code>app/views/homes/show.html.slim</code>) and modify it so that it looks somethings like:
+  Great, now open up your GeoIpRequest controller and modify it so that it looks like the code listed below.
 </p>
 
 
 
 
-<figure class='code'><figcaption><span>show.html.slim </span></figcaption>
+<figure class='code'><figcaption><span>app/controllers/geo_ip_request_controller.rb </span></figcaption>
  <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -189,85 +208,91 @@
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
 <span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">javascript</span><span class="p">:</span>
-</span><span class='line'>  <span class="n">alert</span><span class="p">(</span><span class="s2">&quot;HELLO!!!!!&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="n">h1</span> <span class="no">Welcome</span> <span class="n">to</span> <span class="n">my</span> <span class="n">site</span>
-</span><span class='line'><span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="n">inline</span> <span class="n">html</span> <span class="n">is</span> <span class="n">supported</span><span class="o">&lt;</span><span class="sr">/b&gt;</span>
-</span><span class='line'><span class="sr">p</span>
-</span><span class='line'><span class="sr">  | The time is </span><span class="si">#{</span> <span class="no">Time</span><span class="o">.</span><span class="n">now</span> <span class="si">}</span><span class="sr">, </span>
-</span><span class='line'><span class="sr">    I Like to program in Ruby on Rails.</span>
-</span><span class='line'><span class="sr">#hashtag I threw a hashtag in here!</span>
-</span><span class='line'><span class="sr">#classy I&#39;m classy!</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">GeoIpRequestController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">new</span>
+</span><span class='line'>  <span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'><span class="sr">p = Random.rand(10)</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="nb">require</span> <span class="s1">&#39;geoip&#39;</span>
+</span><span class='line'>    <span class="vi">@info</span> <span class="o">=</span> <span class="no">GeoIP</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Rails</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;GeoLiteCity.dat&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">city</span><span class="p">(</span><span class="n">ip_request_params</span><span class="o">[</span><span class="ss">:host</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'><span class="sr">- if Random.rand(6) == 1</span>
-</span><span class='line'><span class="sr">  |Lucky number 1!  You win!</span>
-</span><span class='line'><span class="sr">br</span>
-</span><span class='line'><span class="sr">br</span>
-</span><span class='line'><span class="sr">small Goodbye!</span>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">ip_request_params</span>
+</span><span class='line'>    <span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:request</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:host</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 
 
 <p>
-  Which translates to:
+  In the code above, we tell the geoip gem to load our database file and do a search for the host parameter.
 </p>
 
 
 
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<p>
+  Now let&#8217;s create our views. Open up the new view for the GeoIpRequest controller and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/geo_ip_request/new.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">script</span> <span class="n">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="n">alert</span><span class="p">(</span><span class="s2">&quot;HELLO!!!!!&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/script&gt;</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">GeoIP</span> <span class="no">Example</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'><span class="sr">&lt;p&gt;Get the country for any ip address or hostname by typing it below and pressing the lookup button.&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
 </span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;Welcome to my site&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="n">inline</span> <span class="n">html</span> <span class="n">is</span> <span class="n">supported</span><span class="o">&lt;</span><span class="sr">/b&gt;</span>
-</span><span class='line'><span class="sr">&lt;p&gt;The time is 2015-02-22 00:24:59 - 0400, I Like to program in Ruby on Rails.&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;hashtag&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="n">I</span> <span class="n">threw</span> <span class="n">a</span> <span class="n">hashtag</span> <span class="k">in</span> <span class="n">here!</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;div id=&quot;classy&quot;&gt;</span>
-</span><span class='line'><span class="sr">  I&#39;m classy!</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="mi">2</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'><span class="sr">&lt;br&gt;</span>
-</span><span class='line'><span class="sr">&lt;br&gt;</span>
-</span><span class='line'><span class="sr">&lt;small&gt;Goodbye!&lt;/sm</span><span class="n">all</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">%= form_for :request, url: geo_ip_request_index_path do |f| %&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">text_field</span> <span class="ss">:host</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%= f.submit &quot;Lookup&quot; %&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% end </span><span class="o">%&gt;</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 
 
 <p>
-  So far so good, That&#8217;s it! See ya! :)
+  Great, now finally let&#8217;s do the create view. Open up the create view for the GeoIpRequest controller and modify it so that it looks like the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/geo_ip_request/create.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">IP</span> <span class="no">Address</span> <span class="no">Info</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'><span class="sr">&lt;b&gt;IP:&amp;nbsp;&amp;nbsp;&lt;/</span><span class="n">b</span><span class="o">&gt;&lt;</span><span class="sx">%= @info.request %&gt;&lt;br /&gt;</span>
+</span><span class='line'><span class="sx">&lt;b&gt;Country:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;%=</span> <span class="vi">@info</span><span class="o">.</span><span class="n">country_name</span> <span class="sx">%&gt;&lt;br /&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="ss">City</span><span class="p">:</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/b&gt;&lt;%= @info.city_name %&gt;&lt;br /</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="ss">Region</span><span class="p">:</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/b&gt;&lt;%= @info.real_region_name %&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Excellent, now if you fire up your rails development server and and navigate to http://localhost:3000 you will see a form requesting your ip address or hostname. Entering any ip address or host name will show the country, city, and region that ip is from.
+</p>
+
+
+
+
+<p>
+  So far so good, that&#8217;s it!!! that&#8217;s all there is to it!!! :)
 </p>
 
 </div>
@@ -292,7 +317,7 @@
   
 
 
-<time datetime="2015-02-23T00:12:00+07:00" pubdate data-updated="true">Feb 23<span>rd</span>, 2015</time>
+<time datetime="2015-05-16T23:47:00+07:00" pubdate data-updated="true">May 16<span>th</span>, 2015</time>
       
 
 <span class="categories">
@@ -306,7 +331,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2015/02/23/slim-on-rails/" data-via="" data-counturl="http://geekhmer.github.io/blog/2015/02/23/slim-on-rails/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2015/05/16/ip-geolocation-in-ruby-on-rails-application/" data-via="" data-counturl="http://geekhmer.github.io/blog/2015/05/16/ip-geolocation-in-ruby-on-rails-application/" >Tweet</a>
   
   
   
@@ -317,10 +342,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2015/02/22/slim-template-language/" title="Previous Post: Slim Template Language">&laquo; Slim Template Language</a>
+        <a class="basic-alignment left" href="/blog/2015/05/14/code-concerns-in-rails-4-models/" title="Previous Post: Code Concerns in Rails 4 Models">&laquo; Code Concerns in Rails 4 Models</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2015/02/23/actionpack-variants-on-rails/" title="Next Post: ActionPack Variants on Rails">ActionPack Variants on Rails &raquo;</a>
       
     </p>
   </footer>
