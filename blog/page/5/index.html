@@ -78,6 +78,311 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/03/23/ruby-on-rails-nested-form-fields/">Ruby on Rails Nested Form Fields</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-03-23T23:47:00+07:00" pubdate data-updated="true">Mar 23<span>rd</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/ruby_on_rails.png" width="400" alt="Ruby on Rails Nested Form Fields" />
+</p>
+
+
+
+
+<p>
+  It’s super common to want to edit records along with their has_many associations on a single page.
+</p>
+
+
+
+
+<p>
+  This Rails gem helps creating forms for models with nested has_many associations and relies on jQuery to dynamically add and remove nested form fields without a page reload.<br/>
+  - Works for arbitrarily deeply nested associations (tested up to 4 levels).<br/>
+  - Works with form builders like simple_form.<br/>
+  - Requires at least Ruby 1.9 and the Rails asset pipeline.
+</p>
+
+
+
+
+<p>
+  To install, add nested_form_fields to your application’s Gemfile:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;nested_form_fields&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Run bundle intall to install the gem:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  In application.js file add:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>application.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">nested_form_fields</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  assuming that you have a User model with nested videos:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>user.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:videos</span>
+</span><span class='line'>  <span class="n">accepts_nested_attributes_for</span> <span class="ss">:videos</span><span class="p">,</span> <span class="n">allow_destroy</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Use the nested_fields_for helper inside your user form to add the video fields:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">=</span> <span class="n">form_for</span> <span class="vi">@user</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span>
+</span><span class='line'>  <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">nested_fields_for</span> <span class="ss">:videos</span> <span class="k">do</span> <span class="o">|</span><span class="n">ff</span><span class="o">|</span>
+</span><span class='line'>    <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">text_field</span> <span class="ss">:video_title</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Links to add and remove fields can be added using the add_nested_fields_link and remove_nested_fields_link helpers:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">=</span> <span class="n">form_for</span> <span class="vi">@user</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span>
+</span><span class='line'>  <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">nested_fields_for</span> <span class="ss">:videos</span> <span class="k">do</span> <span class="o">|</span><span class="n">ff</span><span class="o">|</span>
+</span><span class='line'>    <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">remove_nested_fields_link</span>
+</span><span class='line'>    <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">text_field</span> <span class="ss">:video_title</span>
+</span><span class='line'>  <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_nested_fields_link</span> <span class="ss">:videos</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Note that remove_nested_fields_link needs to be called within the nested_fields_for call and add_nested_fields_link outside of it via the parent builder.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/03/22/ruby-hooks-for-metaprogramming/">Ruby Hooks for Metaprogramming</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-03-22T10:45:00+07:00" pubdate data-updated="true">Mar 22<span>nd</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/rights_and_wrongsof_ruby.jpg" width="400" alt="Ruby Hooks for Metaprogramming" />
+</p>
+
+
+
+
+<h3>
+  Overview
+</h3>
+
+
+
+
+<p>
+  <strong>What is a Hook?</strong><br/>
+   In programming, a hook is a place and usually an interface provided in packaged code that allows a programmer to insert customized programming. For example, a programmer might want to provide code that analyzed how often a particular logic path was taken within a program.
+</p>
+
+
+
+
+<h3>
+  Ruby Hooks
+</h3>
+
+
+
+
+<p>
+  Ruby lets you hook in and change a lot of behavior of the core language. Methods, constants, classes, variables… etc. Ruby lets you query them all, and change a lot about them.
+</p>
+
+
+
+
+<p>
+  Here’s summaries and links for all the hooks I could find:
+</p>
+
+
+
+
+<p>
+  <strong>Methods</strong><br/>
+  - <code>respond_to_missing?</code> - A way to make sure your dynamic methods defined with method_missing also handle respond_to?<br/>
+  - <code>method_missing</code> - Called when a method cannot be found, potentially to allow dynamically defining one instead.<br/>
+  - <code>method_added</code> - Called whenever a method is added which can be used to modify the method.<br/>
+  - <code>method_removed</code> - Called whenever a method is removed.<br/>
+  - <code>singleton_method_added</code> - Method added to the singleton class of the object, to be callable just on this one instance.<br/>
+  - <code>singleton_method_removed</code> - Method removed from singleton class.<br/>
+  - <code>method_undefined</code> - A method has been undefined, with undef_method. Undef_method is different from remove_method because remove_method may still allow superclasses to define the method – undef_method means it’s gone entirely.<br/>
+  - <code>singleton_method_undefined</code> - Called when a singleton method is undefined entirely.<br/>
+  - <code>initialize_copy</code> - An optional callback when cloning any Object.
+</p>
+
+
+
+
+<p>
+  <strong>Classes</strong><br/>
+  - <code>inherited</code> - A Ruby class is subclassed.
+</p>
+
+
+
+
+<p>
+  <strong>Modules</strong><br/>
+  - <code>append_features</code> - A Module is included, and its constants, methods and variables used.<br/>
+  - <code>included</code> - A Module is included, which usually obsoletes &#8220;append_features&#8221;.<br/>
+  - <code>extend_object</code> - A Module extends an Object.<br/>
+  - <code>extended</code> - An Object is extended by a module, which mostly obsoletes extend_object.<br/>
+  - <code>const_missing</code> - A constant isn’t already present.
+</p>
+
+
+
+
+<p>
+  <strong>Marshalling</strong><br/>
+  - <code>marshal_dump</code> - Called on an object to have it dump itself in Ruby Marshal format.<br/>
+  - <code>marshal_load</code> - Called on an object to have it load itself in Ruby Mashal format.
+</p>
+
+
+
+
+<p>
+  <strong>Coercion</strong><br/>
+  - <code>coerce</code> - Called by the first type in a two-argument operator on the second argument, to make it turn into something the first argument can recognize.<br/>
+  - <code>induced_from</code> - Deprecated, please don’t use.<br/>
+  - <code>to_i</code>, <code>to_f</code>, <code>to_s</code>, <code>to_a</code>, <code>to_hash</code>, <code>to_proc</code> and others - Conversions, indicating that the object is being used as a type and should try to convert itself to that type.
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/03/21/ruby-on-rails-callback-classes/">Ruby on Rails Callback Classes</a></h1>
     
     
@@ -1100,191 +1405,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/03/16/why-choose-ruby-on-rails-framework/">Why Choose Ruby on Rails Framework?</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-03-16T20:03:00+07:00" pubdate data-updated="true">Mar 16<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/ruby_on_rails.png" width="400" alt="Why Choose Ruby on Rails Framework?" />
-</p>
-
-
-
-
-<p>
-  Ruby on rails is one of the popular development frameworks for regular websites as well as kind of tools, web and mobile apps or combinations of all. Some of the following reasons which makes it popular among others:
-</p>
-
-
-
-
-<p>
-  <strong>Higher Flexibility</strong> - In Ruby on Rails, it is easy to mold the platform to suit different business needs more efficiently than other frameworks. We can quickly mock up a working prototype, and then see how things work and then build on the idea. Faster Development Speed - In Rails, there are lots of in-built components(called gems) available which we can re-use to build the application rather than building everything from scratch.
-</p>
-
-
-
-
-<p>
-  <strong>Agile Development at its best</strong> - Ruby on Rails is developed using the MVC design pattern along with the agile methodology which is well suited for web application development with fast changing requirements.
-</p>
-
-
-
-
-<p>
-  <strong>Integrated testing tools</strong> - Rails features a convenient testing tool as it automatically starts producing the skeleton test code in background at the time of development. Rails tests can also simulate browser requests and thus you can test your application&#8217;s response without having to test it over browser.
-</p>
-
-
-
-
-<p>
-  <strong>Compatibility</strong> - Rails development is compatible with a wide range of web servers and databases; which ultimately makes the web deployment easier.Cost-effective Web solutions - As it is an open source framework this helps in developing cost-effective web applications without sacrificing performance, speed and quality.
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/03/16/reasons-to-bring-ruby-on-rails-development-on-board/">Reasons to Bring Ruby on Rails Development on Board</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-03-16T00:09:00+07:00" pubdate data-updated="true">Mar 16<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/ruby_on_rails.png" width="400" alt="Reasons to bring Ruby on Rails Development on Board" />
-</p>
-
-
-
-
-<p>
-  Ruby on Rails is an innovation in development framework. It encompasses all the necessary elements to boost a web application’s performance. This framework is designed to address agile development and deliver productivity as well as flexibility to Ruby on Rails developers. Developed using Ruby programming language, it has transformed the world of web development through its practical approach.
-</p>
-
-
-
-
-<h3>Ruby on Rails is built upon two programming philosophies</h3>
-
-
-
-
-<p>
-  <strong>Convention over Configuration:</strong>
-  Developers only need to write codes for the irregular or unconventional aspects of the web application.
-</p>
-
-
-
-
-<p>
-  <strong>Don’t Repeat Yourself:</strong>
-  The data is stored in definite place. It saves time and reduces code.
-</p>
-
-
-
-
-<h3>Advantages of Ruby on Rails</h3>
-
-
-
-
-<p>
-  <strong>Faster Development:</strong>
-  Rails framework enables the developers to write concise and clear syntax and produces fewer codes than its competitors. Therefore it requires less time to code and generates fewer errors. On the other hand it facilitates the programmers to maintain much less code. It is also enabled to integrate numerous tools to automate repetitive tasks such as managing database errors, creating forms etc&#8230; it simplifies development process because the language is lightweight and easily readable, almost like the natural language.
-</p>
-
-
-
-
-<p>
-  <strong>Increases Productivity:</strong>
-  Rails framework is specifically featured to reduce the development aspects of applications, instead leveraging creativity and uniqueness of the web application. It empowers productivity by eliminating repetitive programming codes.
-</p>
-
-
-
-
-<p>
-  <strong>Assists Development of Creative Interfaces:</strong>
-  Rails includes numerous integrations to enable developers in creating rich, intriguing user interfaces. Integrated JavaScript framework is easier to activate and features elements like apparition progressive, drag & drop and many more to ease the designing aspects of the application.
-</p>
-
-
-
-
-<p>
-  <strong>Model View Controller Design Pattern:</strong>
-   Rails is developed on MVC architecture that separates the development logics from the presentation layer. It provides a well-structured application to the developers and the code is maintained in a logical and coherent manner.  It encourages abstraction in the application and enables the team to work on separate modules without depending on each other. It focuses on the features rather than minute details. Rails framework delivers ease of project development, conciseness and faster deployment of application.
-</p>
-
-
-
-
-<p>
-  Rails Development makes web app development easier because it involves less coding while implementing new changes and updates into the development process. It enables the organizations to meet all the business requirements within the budget and schedule. So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/6/">&larr; Older</a>
@@ -1300,6 +1420,14 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/05/20/how-technology-company-make-money/">How Technology Company Make Money?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/05/19/5-tips-to-scale-your-ruby-on-rails-application/">5 Tips to Scale Your Ruby on Rails Application</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/05/16/ip-geolocation-in-ruby-on-rails-application/">IP Geolocation in Ruby on Rails Application</a>
@@ -1321,14 +1449,6 @@
         <a href="/blog/2015/05/11/enable-compression-for-nginx/">Enable Compression for Nginx</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2015/05/09/rails-4-friendlyid/">Rails 4 FriendlyId</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/05/09/ruby-on-rails-get-a-users-gravatar/">Ruby on Rails Get a User&#8217;s Gravatar</a>
-      </li>
-    
   </ul>
 </section>
 <section>
@@ -1340,7 +1460,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby/">Ruby [ 92 ]</a>
+        <a href="/blog/categories/ruby/">Ruby [ 94 ]</a>
       </li>
     
       <li>
@@ -1348,7 +1468,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 83 ]</a>
+        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 85 ]</a>
       </li>
     
       <li>
