@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-05-22T15:05:01+07:00</updated>
+  <updated>2015-05-22T15:52:18+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -33,7 +33,40 @@
 
 
 <p>
+  <strong>1. Cache, cache, cache and More Cache</strong><br/>
+  Cache at the client and use Ajax libraries like JQuery to stream in data to the browser on demand. Use gateway /reverse proxy caches to cache HTTP responses at your website, and learn how to use expiration and etags. Take full advantage of Rails' built-in action, page and fragment caching. Use memcache to cache results that you'd otherwise pull from your database.
+</p>
 
+
+
+
+<p>
+  <strong>2. Segregate Data and Data Serving</strong><br/>
+  Don't munge all your data storage into a single database "for convenience." Datasets that are independent should go into separate databases. Serve static assets from a separate tier, or use Amazon S3 or a CDN like Akamai to serve those assets. It's more expensive, but it simplifies scaling. Relational databases scale up, not out, so sit down and have a heart to heart talk with your DBA over whether you really need a relational data model for all your data stores. Maybe you can get away with a simpler key-value data store for some of your simpler data. There are ruby clients, so use Hadoop for scaling the storage and analysis of large amounts of unstructured data. Also know the scalability limitations of whatever file system you're using. If you have heavy data reporting needs, do your reporting from a copy of your main database, not from your production database.
+</p>
+
+
+
+
+<p>
+  <strong>3. Minimize & Handle External Dependencies</strong><br/>
+  Watch for dependencies on external services like ad serving networks or RSS feeds. If a service isn't responding or can't handle your growing request load, make sure that you have a fallback strategy.
+</p>
+
+
+
+
+<p>
+  <strong>4. Tend Your Database and Your Job Handlers</strong><br/>
+  Any ORM, including Rails' ActiveRecord can generate SQL queries that cause database performance issues. Make sure you're looking at your slow query log after each major integration to make sure you don't have "missing" database indices, and haven't written inappropriate find-all's in your Rails code. Scrub your database periodically for indices that are no longer being used. Similarly, watch the resource consumption of your background and scheduled jobs. As your user base grows jobs can start to overlap, and daily log processing can start to take more than 24 hrs! This kind of thing can sneak up on you easily. Ideally, segregate your jobs in a separate tier. And, as you grow, look at moving to a message based job handler.
+</p>
+
+
+
+
+<p>
+  <strong>5. Shard Your Unavoidably Relational Data</strong><br/>
+  At high scaling levels, your MySQL database will have to be sharded. Sharding involves breaking up your datasets into independent pieces based on a key. For many consumer-oriented Rails sites, that can mean sharding based on userid's, but other sharding schemes use data-age, or access-frequency (if that's predictable).
 </p>
 
 ]]></content>
@@ -64,18 +97,19 @@
 </p>
 
 
-<p>{% codeblock Gemfile lang:ruby %}
-gem &lsquo;geoip&rsquo;, &lsquo;~> 1.4.0&rsquo;
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">geoip</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">~&gt;</span> <span class="mi">1</span><span class="o">.</span><span class="mi">4</span><span class="o">.</span><span class="mi">0</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   Great, now let's run a bundle install to install the gem.
 </p>
 
 
-<p>{% codeblock lang:ruby %}
-bundle install
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   Now we need to download the GeoIP database for use with the geoip gem. A free one <a href="http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz" target="_blank"> can be downloaded at this link</a>, or you can use the paid version if you have a subscription. Once downloaded, extract the compressed archive and place the .dat folder contained within in the root directory of your Rails app.
@@ -89,50 +123,75 @@ bundle install
 </p>
 
 
-<p>{% codeblock lang:ruby %}
-rails g controller geo_ip_request new create
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="n">geo_ip_request</span> <span class="kp">new</span> <span class="n">create</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   Next, open up your routes file and modify it so that it looks like the code listed below:
 </p>
 
 
-<p>{% codeblock config/routes.rb lang:ruby %}
-Rails.application.routes.draw do
-  resource :geo_ip_request, controller: :geo_ip_request</p>
-
-<p>  root to: &ldquo;geo_ip_request#new&rdquo;
-end
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">resource</span> <span class="ss">:geo_ip_request</span><span class="p">,</span> <span class="ss">controller</span><span class="p">:</span> <span class="ss">:geo_ip_request</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  root to: &amp;ldquo;geo_ip_request#new&amp;rdquo;</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   Great, now open up your GeoIpRequest controller and modify it so that it looks like the code listed below.
 </p>
 
 
-<p>{% codeblock app/controllers/geo_ip_request_controller.rb lang:ruby %}
-class GeoIpRequestController &lt; ApplicationController
-  def new
-  end</p>
-
-<p>  def create</p>
-
-<pre><code>require 'geoip'
-@info = GeoIP.new(Rails.root.join("GeoLiteCity.dat")).city(ip_request_params[:host])
-</code></pre>
-
-<p>  end</p>
-
-<p>  private
-  def ip_request_params</p>
-
-<pre><code>params.require(:request).permit(:host)
-</code></pre>
-
-<p>  end
-end
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/controllers/geo_ip_request_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">GeoIpRequestController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">new</span>
+</span><span class='line'>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  def create&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="nb">require</span> <span class="s1">&#39;geoip&#39;</span>
+</span><span class='line'><span class="vi">@info</span> <span class="o">=</span> <span class="no">GeoIP</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Rails</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;GeoLiteCity.dat&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">city</span><span class="p">(</span><span class="n">ip_request_params</span><span class="o">[</span><span class="ss">:host</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  private</span>
+</span><span class='line'><span class="sr">  def ip_request_params&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:request</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:host</span><span class="p">)</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   In the code above, we tell the geoip gem to load our database file and do a search for the host parameter.
@@ -146,35 +205,58 @@ end
 </p>
 
 
-<p>{% codeblock app/views/geo_ip_request/new.html.erb lang:ruby %}</p>
-
-<h1>GeoIP Example</h1>
-
-
-<p>Get the country for any ip address or hostname by typing it below and pressing the lookup button.</p>
-
-
-<p>&lt;%= form_for :request, url: geo_ip_request_index_path do |f| %>
-  &lt;%= f.text_field :host %>
-  &lt;%= f.submit &ldquo;Lookup&rdquo; %>
-&lt;% end %>
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/views/geo_ip_request/new.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;GeoIP Example&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="no">Get</span> <span class="n">the</span> <span class="n">country</span> <span class="k">for</span> <span class="n">any</span> <span class="n">ip</span> <span class="n">address</span> <span class="ow">or</span> <span class="n">hostname</span> <span class="n">by</span> <span class="n">typing</span> <span class="n">it</span> <span class="n">below</span> <span class="ow">and</span> <span class="n">pressing</span> <span class="n">the</span> <span class="n">lookup</span> <span class="n">button</span><span class="o">.</span><span class="n">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;&amp;lt;%= form_for :request, url: geo_ip_request_index_path do |f| %&gt;</span>
+</span><span class='line'><span class="sr">  &amp;lt;%= f.text_field :host %&gt;</span>
+</span><span class='line'><span class="sr">  &amp;lt;%= f.submit &amp;ldquo;Lookup&amp;rdquo; %&gt;</span>
+</span><span class='line'><span class="sr">&amp;lt;% end %&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   Great, now finally let's do the create view. Open up the create view for the GeoIpRequest controller and modify it so that it looks like the code listed below.
 </p>
 
 
-<p>{% codeblock app/views/geo_ip_request/create.html.erb lang:ruby %}</p>
-
-<h1>IP Address Info</h1>
-
-
-<p><b>IP:&nbsp;&nbsp;</b>&lt;%= @info.request %><br />
-<b>Country:&nbsp;&nbsp;</b>&lt;%= @info.country_name %><br />
-<b>City:&nbsp;&nbsp;</b>&lt;%= @info.city_name %><br />
-<b>Region:&nbsp;&nbsp;</b>&lt;%= @info.real_region_name %>
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/views/geo_ip_request/create.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;IP Address Info&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="ss">IP</span><span class="p">:</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/b&gt;&amp;lt;%= @info.request %&gt;&lt;br /</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="ss">Country</span><span class="p">:</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/b&gt;&amp;lt;%= @info.country_name %&gt;&lt;br /</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="ss">City</span><span class="p">:</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/b&gt;&amp;lt;%= @info.city_name %&gt;&lt;br /</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="ss">Region</span><span class="p">:</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/b&gt;&amp;lt;%= @info.real_region_name %&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   Excellent, now if you fire up your rails development server and and navigate to http://localhost:3000 you will see a form requesting your ip address or hostname. Entering any ip address or host name will show the country, city, and region that ip is from.
@@ -214,74 +296,121 @@ end
 </p>
 
 
-<p>{% codeblock lang:ruby %}
-class User &lt; ActiveRecord::Base
-  has_secure_password</p>
-
-<p>  def self.authenticate(email, password)</p>
-
-<pre><code>user = find_by_email(email)
-user if !user.nil? &amp;&amp; user.authenticate(password)
-</code></pre>
-
-<p>  end</p>
-
-<p>  def create_password_reset_token</p>
-
-<pre><code>logger.warn "Create password reset token code goes here."
-false
-</code></pre>
-
-<p>  end
-end
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">has_secure_password</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  def self.authenticate(email, password)&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">user</span> <span class="o">=</span> <span class="n">find_by_email</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+</span><span class='line'><span class="n">user</span> <span class="k">if</span> <span class="o">!</span><span class="n">user</span><span class="o">.</span><span class="n">nil?</span> <span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span> <span class="n">user</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  def create_password_reset_token&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span> <span class="s2">&quot;Create password reset token code goes here.&quot;</span>
+</span><span class='line'><span class="kp">false</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   We can create a a file in the app/models/concerns folder called authentication.rb (app/models/concerns/authentication.rb) and place the following code in it:
 </p>
 
 
-<p>{% codeblock lang:ruby %}
-module Authentication
-  extend ActiveSupport::Concern</p>
-
-<p>  included do</p>
-
-<pre><code>has_secure_password
-</code></pre>
-
-<p>  end</p>
-
-<p>  module ClassMethods</p>
-
-<pre><code>def authenticate(email, password)
-  user = find_by_email(email)
-  user if user &amp;&amp; user.authenticate(password)
-end
-</code></pre>
-
-<p>  end</p>
-
-<p>  def create_password_reset_token</p>
-
-<pre><code>logger.warn "Create password reset token code goes here."
-false
-</code></pre>
-
-<p>  end
-end
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Authentication</span>
+</span><span class='line'>  <span class="kp">extend</span> <span class="ss">ActiveSupport</span><span class="p">:</span><span class="ss">:Concern</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  included do&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">has_secure_password</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  module ClassMethods&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">def</span> <span class="nf">authenticate</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">user</span> <span class="o">=</span> <span class="n">find_by_email</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">user</span> <span class="k">if</span> <span class="n">user</span> <span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span> <span class="n">user</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  def create_password_reset_token&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span> <span class="s2">&quot;Create password reset token code goes here.&quot;</span>
+</span><span class='line'><span class="kp">false</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   Now, lets refactor the User model to use the new code. Change the users model (app/models/user.rb) so that it looks like this:
 </p>
 
 
-<p>{% codeblock lang:ruby %}
-class User &lt; ActiveRecord::Base
-  include Authentication
-end
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Authentication</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   Now if you start the rails server and attempt to authenticate, you'll notice that the functionality hasn't changed at all. That's the idea! You can use this method for organizing and DRYing up your code.
@@ -323,26 +452,43 @@ end
 </p>
 
 
-<p>{% codeblock lang:ruby %}
-module Taggable
-  extend ActiveSupport::Concern</p>
-
-<p>  included do</p>
-
-<pre><code>has_many :taggings, as: :taggable, dependent: :destroy
-has_many :tags, through: :taggings 
-</code></pre>
-
-<p>  end</p>
-
-<p>  def tag_names</p>
-
-<pre><code>tags.map(&amp;:name)
-</code></pre>
-
-<p>  end
-end
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Taggable</span>
+</span><span class='line'>  <span class="kp">extend</span> <span class="ss">ActiveSupport</span><span class="p">:</span><span class="ss">:Concern</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  included do&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">has_many</span> <span class="ss">:taggings</span><span class="p">,</span> <span class="ss">as</span><span class="p">:</span> <span class="ss">:taggable</span><span class="p">,</span> <span class="ss">dependent</span><span class="p">:</span> <span class="ss">:destroy</span>
+</span><span class='line'><span class="n">has_many</span> <span class="ss">:tags</span><span class="p">,</span> <span class="ss">through</span><span class="p">:</span> <span class="ss">:taggings</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  def tag_names&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">tags</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="ss">:name</span><span class="p">)</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   In this simple example, you'll see that simply including Taggable on your modules will (with the database structure in place of course) make your models taggable. This code can quickly and easily be spread upon as many models as needed. Well that's it! Concerns are a great way to keep your code organized and DRY.
@@ -390,9 +536,10 @@ end
 </p>
 
 
-<p>{% codeblock Gemfile lang:ruby %}
-gem &lsquo;bootstrap-sass&rsquo;, &lsquo;~> 2.3&rsquo;
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">bootstrap</span><span class="o">-</span><span class="n">sass</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">~&gt;</span> <span class="mi">2</span><span class="o">.</span><span class="mi">3</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   Run a <code>bundle install</code> and start your <code>rails server</code>. Now that the gem is installed you are ready to to start using bootstrap.
@@ -406,27 +553,30 @@ gem &lsquo;bootstrap-sass&rsquo;, &lsquo;~> 2.3&rsquo;
 </p>
 
 
-<p>{% codeblock app/assets/stylesheets/bootstrap_config.scss lang:ruby %}
-@import &ldquo;bootstrap&rdquo;;
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/assets/stylesheets/bootstrap_config.scss </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@import</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">bootstrap</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   If you want a responsive layout, also add the following line:
 </p>
 
 
-<p>{% codeblock app/assets/stylesheets/bootstrap_config.scss lang:ruby %}
-@import &ldquo;bootstrap-responsive&rdquo;;
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/assets/stylesheets/bootstrap_config.scss </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@import</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">bootstrap</span><span class="o">-</span><span class="n">responsive</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   This will include bootstrap in your application. Now, any views you create will automatically include bootstrap as long as they use the main application layout. We aren't quite done yet though, if you are on Rails 4 (Rails 3.2 users don't need to do this) you will need to perform one more step. Open up the <code>config/application.rb</code> file and add the following line to your application's configuration:
 </p>
 
 
-<p>{% codeblock config/application.rb lang:ruby %}
-config.assets.precompile += %w(<em>.png </em>.jpg <em>.jpeg </em>.gif)
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/application.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">assets</span><span class="o">.</span><span class="n">precompile</span> <span class="o">+=</span> <span class="sx">%w(&lt;em&gt;.png &lt;/em&gt;.jpg &lt;em&gt;.jpeg &lt;/em&gt;.gif)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   This is due to rails no longer compiling images in vendor assets by default.
@@ -448,9 +598,10 @@ config.assets.precompile += %w(<em>.png </em>.jpg <em>.jpeg </em>.gif)
 </p>
 
 
-<p>{% codeblock app/assets/stylesheets/bootstrap_config.scss lang:ruby %}
-$bodyBackground: #e0e0e0;
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/assets/stylesheets/bootstrap_config.scss </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vg">$bodyBackground</span><span class="p">:</span> <span class="c1">#e0e0e0;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   Now, if you refresh the page you will notice that the body background has changed to a light gray color. 
@@ -465,18 +616,19 @@ $bodyBackground: #e0e0e0;
 </p>
 
 
-<p>{% codeblock Gemfile lang:ruby %}
-gem &lsquo;will_paginate-bootstrap&rsquo;
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">will_paginate</span><span class="o">-</span><span class="n">bootstrap</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   Now, open up the view where you are using will_paginate, find any will_paginate lines and add <code>:renderer => BootstrapPagination::Rails</code> to the end of them so they look like this:
 </p>
 
 
-<p>{% codeblock lang:ruby %}
-&lt;%= will_paginate @products, :renderer => BootstrapPagination::Rails %>
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="sx">%= will_paginate @products, :renderer =</span><span class="o">&gt;</span> <span class="ss">BootstrapPagination</span><span class="p">:</span><span class="ss">:Rails</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   Now if you refresh the page, you'll see that that will_paginate is now styled using bootstrap.
@@ -516,89 +668,138 @@ gem &lsquo;will_paginate-bootstrap&rsquo;
 </p>
 
 
-<p>{% codeblock Gemfile lang:ruby %}
-gem &ldquo;friendly_id&rdquo;, &ldquo;~> 5.0.1&rdquo;
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">friendly_id</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">~&gt;</span> <span class="mi">5</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   FriendlyId no longer overrides finder code by default. Because of this we will need to change the way our controller code works. FriendlyId now exposes it's functionality via <code>.friendly</code>. For example, to find a post by it's friendly id, we use something like <code>Post.friendly.find(params[:id])</code>. To get FriendlyId working, you need to modify your controllers to use this behavior. An example is shown below.
 </p>
 
 
-<p>{% codeblock app/controllers/posts_controller.rb lang:ruby %}
-class PostsController &lt; ApplicationController
-  def index</p>
-
-<pre><code>@posts = Post.all
-</code></pre>
-
-<p>  end</p>
-
-<p>  def show</p>
-
-<pre><code>@post = Post.friendly.find(params[:id])
-</code></pre>
-
-<p>  end
-end
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/controllers/posts_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostsController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@posts = Post.all</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">def</span> <span class="nf">show</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@post = Post.friendly.find(params[:id])</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   If you have a large site making extensive use of FriendlyId, you can also restore the old finder override behavior. This isn't recommended though. An example of how to do this is listed below.
 </p>
 
 
-<p>{% codeblock app/models/post.rb lang:ruby %}
-class Post &lt; ActiveRecord::Base
-  extend FriendlyId
-  friendly_id :title, use: [:slugged, :finders]
-end
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/models/post.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="kp">extend</span> <span class="no">FriendlyId</span>
+</span><span class='line'>  <span class="n">friendly_id</span> <span class="ss">:title</span><span class="p">,</span> <span class="ss">use</span><span class="p">:</span> <span class="o">[</span><span class="ss">:slugged</span><span class="p">,</span> <span class="ss">:finders</span><span class="o">]</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   Once you've added this, finder override functionality should now be restored. For example, the code listed below will now work as before.
 </p>
 
 
-<p>{% codeblock app/controllers/posts_controller.rb lang:ruby %}
-class PostsController &lt; ApplicationController
-  def index</p>
-
-<pre><code>@posts = Post.all
-</code></pre>
-
-<p>  end</p>
-
-<p>  def show</p>
-
-<pre><code>@post = Post.find(params[:id])
-</code></pre>
-
-<p>  end
-end
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/controllers/posts_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostsController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@posts = Post.all</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">def</span> <span class="nf">show</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@post = Post.find(params[:id])</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   FriendlyId 5 introduces a new slug candidates feature. This feature allows you to tell friendly id what to do in the case of duplicate slugs. See the code listed below for an example of how to utilize this functionality.
 </p>
 
 
-<p>{% codeblock app/models/post.rb lang:ruby %}
-class Post &lt; ActiveRecord::Base
-  extend FriendlyId
-  friendly_id :slug_candidates, use: [:slugged, :finders]</p>
-
-<p>  def slug_candidates</p>
-
-<pre><code>[
-  :title,
-  [:title, :id]
-]
-</code></pre>
-
-<p>  end
-end
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/models/post.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="kp">extend</span> <span class="no">FriendlyId</span>
+</span><span class='line'>  <span class="n">friendly_id</span> <span class="ss">:slug_candidates</span><span class="p">,</span> <span class="ss">use</span><span class="p">:</span> <span class="o">[</span><span class="ss">:slugged</span><span class="p">,</span> <span class="ss">:finders</span><span class="o">]&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  def slug_candidates&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;[</span>
+</span><span class='line'>  <span class="ss">:title</span><span class="p">,</span>
+</span><span class='line'>  <span class="o">[</span><span class="ss">:title</span><span class="p">,</span> <span class="ss">:id</span><span class="o">]</span>
+</span><span class='line'><span class="o">]</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   The code listed above tells FriendlyId you want to use the slug_candidates method to make the slug unique. It will try the list beginning to last, so in the example above, it will try to generate the slug first using title, and then if a post by that title already exists, it will try again by appending the id.
