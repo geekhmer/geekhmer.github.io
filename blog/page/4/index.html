@@ -79,6 +79,144 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/04/17/ruby-on-rails-export-csv/">Ruby on Rails Export CSV</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-17T22:25:00+07:00" pubdate data-updated="true">Apr 17<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/ruby_on_rails.png" width="400" alt="Ruby on Rails Export CSV" />
+</p>
+
+
+
+
+<p>
+  Sometime you will want to provide a CSV export option for your users. This article will show you how.
+</p>
+
+
+
+
+<p>
+  The first thing we need to do is open up the config/application.rb file and add:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/application.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;csv&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Next, we need to add some code to the model that will export the data in the CSV format. Add the following code to the model you wish to export to CSV:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">as_csv</span>
+</span><span class='line'>  <span class="no">CSV</span><span class="o">.</span><span class="n">generate</span> <span class="k">do</span> <span class="o">|</span><span class="n">csv</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">csv</span> <span class="o">&lt;&lt;</span> <span class="n">column_names</span>
+</span><span class='line'>    <span class="n">all</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">item</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">csv</span> <span class="o">&lt;&lt;</span> <span class="n">item</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">values_at</span><span class="p">(</span><span class="o">*</span><span class="n">column_names</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  This code will export both the column headers as well as the data in the csv format and return the result.
+</p>
+
+
+
+
+<p>
+  Finally, we need to add a bit of extra code to our controller in order to return the CSV data to our user. Assuming your model and controller are named posts, add the following code to your posts controller:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>  <span class="vi">@posts</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="ss">:created_at</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+</span><span class='line'>    <span class="nb">format</span><span class="o">.</span><span class="n">html</span>
+</span><span class='line'>    <span class="nb">format</span><span class="o">.</span><span class="n">csv</span> <span class="p">{</span> <span class="n">send_data</span> <span class="vi">@posts</span><span class="o">.</span><span class="n">as_csv</span> <span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now, if you visit http://localhost:3000/posts.csv, you will be prompted to download the CSV.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/04/16/how-to-build-a-sitemap-for-your-ruby-on-rails-application/">How to Build a Sitemap for Your Ruby on Rails Application</a></h1>
     
     
@@ -1809,124 +1947,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/04/12/how-to-uninstall-rvm/">How to Uninstall RVM?</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-04-12T15:05:00+07:00" pubdate data-updated="true">Apr 12<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/rights_and_wrongsof_ruby.jpg" width="400" alt="How to uninstall RVM?" />
-</p>
-
-
-
-
-<p>
-  There are times when you may need to completely remove RVM. For example, lets say that your installation is corrupt, or you don&#8217;t wish to use RVM anymore. Luckily this is easy to do. The first thing we need to do is to tell RVM to remove itself. This can be accomplished with the rvm impode command. Simply type:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rvm</span> <span class="n">implode</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Once you do that, RVM should remove itself. The next thing you need to do is uninstall the &#8216;rvm&#8217; gem. Simply type:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="n">uninstall</span> <span class="n">rvm</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  This will uninstall the RVM gem.
-</p>
-
-
-
-
-<p>
-  The next thing you need to do is check to make sure that RVM is removed from your path. You need to check files like .bashrc, .bash_profile, and .profile to make sure all traces of the path are removed.
-</p>
-
-
-
-
-<p>
-  The final thing you need to do is make sure both the .rvm and .rvmrc files have been removed. simply type:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">ls</span> <span class="o">-</span><span class="n">a</span> <span class="o">~</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  This will list all of the files in your home directory. Type the following lines to remove the .rvm and .rvmrc files if they exist:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="o">.</span><span class="n">rvm</span>
-</span><span class='line'><span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="o">.</span><span class="n">rvmrc</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, if you no longer have a Ruby installation on your system you may also want to remove the .gem folder if it exists. Once you are finished, make sure to log out/back into your system for all changes to take effect. That&#8217;s it!!! See ya!!!
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/5/">&larr; Older</a>
@@ -1942,6 +1962,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/06/03/my-development-stack/">My Development Stack</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/05/24/best-practices-for-agile-ruby-on-rails-development/">Best Practices for Agile Ruby on Rails Development</a>
@@ -1965,10 +1989,6 @@
     
       <li class="post">
         <a href="/blog/2015/05/16/ip-geolocation-in-ruby-on-rails-application/">IP Geolocation in Ruby on Rails Application</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/05/14/code-concerns-in-rails-4-models/">Code Concerns in Rails 4 Models</a>
       </li>
     
   </ul>
@@ -2026,7 +2046,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 21 ]</a>
+        <a href="/blog/categories/other/">Other [ 22 ]</a>
       </li>
     
   </ul>
