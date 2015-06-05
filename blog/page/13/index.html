@@ -79,6 +79,266 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2014/08/05/good-rails3-activerecord-finder-vs-very-good-rails4-activerecord-finder/">Good Rails3 ActiveRecord Finder vs Very Good Rails4 ActiveRecord Finder</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-05T23:39:00+07:00" pubdate data-updated="true">Aug 5<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/what_is_new_in_rails4.png" width="500" />
+</p>
+
+
+
+
+<p>
+  Well, previouse article I had talked about <a href="http://geekhmer.github.io/blog/2014/08/02/keyword-arguments-feature-in-ruby-2-dot-0/">Keyword Arguments Feature in Ruby 2.0</a>. now we can apply keyword arguments in Rails4.
+</p>
+
+
+
+
+<p>
+  <strong>FINDERS</strong>
+</p>
+
+
+
+
+<p>  
+  <strong>old-style finders are deprecated</strong><br/>
+  - Rails3: 
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Rails3 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="ss">:all</span><span class="p">,</span> <span class="ss">conditions</span><span class="p">:</span> <span class="p">{</span> <span class="ss">author</span><span class="p">:</span> <span class="s1">&#39;admin&#39;</span><span class="p">})</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Warning: Calling #find(:all) is deprecated. Please call #all directly instead. You have also used finder options. Please build s scope instead of using finder options.
+</p>
+
+
+
+
+<p>
+  - Rails4:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Rails4 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">author</span><span class="p">:</span> <span class="s1">&#39;admin&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Dynamic finder that return collections are deprecated</strong><br/>
+  - Rails3:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Rails3 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find_all_by_title</span><span class="p">(</span><span class="s1">&#39;Rails 4&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find_last_by_author</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Warning: This dynamic method is deprecated. Please use e.g Post.where(&#8230;).all instead.
+</p>
+
+
+
+
+<p>
+  - Rails4:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Rails4 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">title</span><span class="p">:</span> <span class="s1">&#39;Rails 4&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">author</span><span class="p">:</span> <span class="s1">&#39;admin&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">last</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>FIND_BY</strong>
+</p>
+
+
+
+
+<p>
+- Rails3:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Rails3 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find_by_title</span><span class="p">(</span><span class="s1">&#39;Rails 4&#39;</span><span class="p">)</span> <span class="c1"># Dynamic find_by finders that take a single argument are not deprecated.</span>
+</span><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find_by_title</span><span class="p">(</span><span class="s1">&#39;Rails 4&#39;</span><span class="p">,</span> <span class="ss">conditions</span><span class="p">:</span> <span class="p">{</span> <span class="ss">author</span><span class="p">:</span> <span class="s1">&#39;admin&#39;</span> <span class="p">})</span> <span class="c1"># Dynamic find_by finders with conditions are deprecated.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  - Rails4:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Rails4 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find_by</span><span class="p">(</span><span class="ss">title</span><span class="p">:</span> <span class="s1">&#39;Rails 4&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find_by</span><span class="p">(</span><span class="ss">title</span><span class="p">:</span> <span class="s1">&#39;Rails 4&#39;</span><span class="p">,</span> <span class="ss">author</span><span class="p">:</span> <span class="s1">&#39;admin&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>FIND_BY WITH HASH</strong>
+</p>
+
+
+
+
+<p>
+  <strong>allows dynamic input more easily</strong><br/>
+  - Rails4:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Rails4 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">post_params</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">title</span><span class="p">:</span> <span class="s1">&#39;Rails 4&#39;</span><span class="p">,</span> <span class="ss">author</span><span class="p">:</span> <span class="s1">&#39;admin&#39;</span> <span class="p">}</span>
+</span><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find_by</span><span class="p">(</span><span class="n">post_params</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find_by</span><span class="p">(</span><span class="s2">&quot;published_on &lt; ?&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="o">.</span><span class="n">weeks</span><span class="o">.</span><span class="n">ago</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>FIND_OR_*</strong>
+</p>
+
+
+
+
+<p>
+  <strong>dynamic finders that create new objects are deprecated</strong><br/>
+  - Rails3:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Rails3 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find_or_initialize_by_title</span><span class="p">(</span><span class="s1">&#39;Rails 4&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find_or_create_by_title</span><span class="p">(</span><span class="s1">&#39;Rails 4&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Warning: This dinamic method is deprecated. Please use e.g Post.find_or_initialize_by(name: &#8216;foo&#8217;) instead.<br/>
+  Warning: This dinamic method is deprecated. Please use e.g Post.find_or_create_by(name: &#8216;foo&#8217;) instead.
+</p>
+
+
+
+
+<p>
+  - Rails4:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Rails4 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find_or_initialize_by</span><span class="p">(</span><span class="ss">title</span><span class="p">:</span> <span class="s1">&#39;Rails 4&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">find_or_create_by</span><span class="p">(</span><span class="ss">title</span><span class="p">:</span> <span class="s1">&#39;Rails 4&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, let upgrade to Rails4 then refactor ActiveRecord Finder together. :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2014/08/04/what-we-should-test-with-rspec-in-rails/">What We Should Test With RSpec in Rails</a></h1>
     
     
@@ -1825,268 +2085,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/17/useful-best-coding-in-ruby-on-rails-project/">Useful Best Coding in Ruby on Rails Project</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-17T22:24:00+07:00" pubdate data-updated="true">Jul 17<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  While a lot of techniques and libraries have come and gone as the community&#8217;s preferred way of doing something, there are some best practices that remain, and can lead to writing the clean code, most secure and maintainable Ruby on Rails code possible.<br/><br/>
-  Listed here there are the most popular and useful best coding you can use as a Ruby on Rails developer:
-</p>
-
-
-
-
-<p>
-  <strong>Fat Model - Thin Controller</strong><br/>
-  The most important ways to write clear and concise cod in Ruby on Rails is &#8220;Fat Model - Thin Controller&#8221;. Model and Controller are parts of MVC(Model - View - Controller), many logic should go in the Model, and Controller is a nice interface between the view and Model.<br/><br/>
-  In priactice, We should move any logic that isn&#8217;t about the response(setting a flash message, redirect, render view) to the model instead of the controller, anyway we can reuse it where possible and make it possible for testing outside of the Controller.
-</p>
-
-
-
-
-<p>
-  Let look at sample example we have code in brands_controller.rb:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>brands_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">index</span>
-</span><span class='line'>  <span class="vi">@brands</span> <span class="o">=</span> <span class="no">Brand</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">:products</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">&#39;products.category_uuid = ?&#39;</span><span class="p">,</span> <span class="s1">&#39;AA43D840-C70B-11E3-9C51-B888E33867FC&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">uniq</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  We can refactor it like this:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>brands_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">index</span>
-</span><span class='line'>  <span class="vi">@brands</span> <span class="o">=</span> <span class="no">Brand</span><span class="o">.</span><span class="n">find_brands_by_category</span><span class="p">(</span><span class="s1">&#39;AA43D840-C70B-11E3-9C51-B888E33867FC&#39;</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Then we can move the logic into model brand.rb:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>brand.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">find_brands_by_category</span><span class="p">(</span><span class="n">uuid</span><span class="p">)</span>
-</span><span class='line'>  <span class="no">Brand</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">:products</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">&#39;products.category_uuid = ?&#39;</span><span class="p">,</span> <span class="n">uuid</span><span class="p">)</span><span class="o">.</span><span class="n">uniq</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  With the methods Brand.find_brands_by_category, we’ve not only made it simpler to test our code, we’ve also made it possible to reuse that same set of conditions in another location. But as we’ll see shortly, even this is still not ideal.
-</p>
-
-
-
-
-<p>
-  <strong>Reusable Scopes and Relations</strong><br/>
-  Ruby on Rails provides a better way &#8211; scopes to avoid duplication condition in another methods.
-</p>
-
-
-
-
-<p>
-  Let look at sample example we have code in brands.rb:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>brand.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">scope</span> <span class="ss">:under_portal</span><span class="p">,</span> <span class="nb">lambda</span><span class="p">{</span> <span class="o">|</span><span class="n">portal_uuid</span><span class="o">|</span> <span class="n">where</span><span class="p">(</span><span class="n">portal_uuid</span><span class="p">:</span> <span class="n">portal_uuid</span><span class="p">)</span> <span class="k">unless</span> <span class="n">portal_uuid</span><span class="o">.</span><span class="n">blank?</span> <span class="p">}</span>
-</span><span class='line'><span class="n">scope</span> <span class="ss">:under_listing</span><span class="p">,</span> <span class="nb">lambda</span><span class="p">{</span> <span class="o">|</span><span class="n">alias_id</span><span class="o">|</span> <span class="n">where</span><span class="p">(</span><span class="n">listing_alias_id</span><span class="p">:</span> <span class="n">alias_id</span><span class="p">)</span> <span class="k">unless</span> <span class="n">alias_id</span><span class="o">.</span><span class="n">blank?</span> <span class="p">}</span>
-</span><span class='line'><span class="n">scope</span> <span class="ss">:under_category</span><span class="p">,</span> <span class="nb">lambda</span><span class="p">{</span> <span class="o">|</span><span class="n">category_uuid</span><span class="o">|</span> <span class="n">where</span><span class="p">(</span><span class="n">category_uuid</span><span class="p">:</span> <span class="n">category_uuid</span><span class="p">)</span> <span class="k">unless</span> <span class="n">category_uuid</span><span class="o">.</span><span class="n">blank?</span> <span class="p">}</span>
-</span><span class='line'><span class="n">scope</span> <span class="ss">:under_brand</span><span class="p">,</span> <span class="nb">lambda</span><span class="p">{</span> <span class="o">|</span><span class="n">brand_uuid</span><span class="o">|</span> <span class="n">where</span><span class="p">(</span><span class="n">brand_uuid</span><span class="p">:</span> <span class="n">brand_uuid</span><span class="p">)</span> <span class="k">unless</span> <span class="n">brand_uuid</span><span class="o">.</span><span class="n">blank?</span> <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">set_scope</span><span class="p">(</span><span class="n">portal_uuid</span><span class="p">,</span> <span class="n">listing_alias_id</span><span class="p">,</span> <span class="n">category_uuid</span><span class="o">=</span><span class="kp">nil</span><span class="p">,</span> <span class="n">brand_uuid</span><span class="o">=</span><span class="kp">nil</span><span class="p">)</span>
-</span><span class='line'>  <span class="nb">self</span><span class="o">.</span><span class="n">under_portal</span><span class="p">(</span><span class="n">portal_uuid</span><span class="p">)</span><span class="o">.</span><span class="n">under_listing</span><span class="p">(</span><span class="n">listing_alias_id</span><span class="p">)</span><span class="o">.</span><span class="n">under_category</span><span class="p">(</span><span class="n">category_uuid</span><span class="p">)</span><span class="o">.</span><span class="n">under_brand</span><span class="p">(</span><span class="n">brand_uuid</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Virtual Attributes</strong><br/>
-  If you find that you’re manipulating data before passing it to a model (for example, converting the type of an object), it’s likely time you started structuring your code to take advantage of virtual attributes.
-</p>
-
-
-
-
-<p>
-  Virtual attributes are a very simple idea—essentially, all you’re doing is defining your own getter and setter methods.
-</p>
-
-
-
-
-<p>
-  Let look at sample example we have code:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>brand.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span><span class="p">)</span>
-</span><span class='line'><span class="vi">@user</span><span class="o">.</span><span class="n">first_name</span><span class="p">,</span> <span class="vi">@user</span><span class="o">.</span><span class="n">last_name</span> <span class="o">=</span> <span class="n">params</span><span class="o">[</span><span class="ss">:user</span><span class="o">][</span><span class="ss">:full_name</span><span class="o">].</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  We could remove the second line, and instead add the following to our User model:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>brand.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">full_name</span><span class="o">=</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-</span><span class='line'>  <span class="nb">self</span><span class="o">.</span><span class="n">first_name</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="n">last_name</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Use the Built-in Ruby Duck Typing Methods</strong><br/>
-  Ruby uses several conventions that can make development easier like implementing a to_s instance method on an object will give you a standard way of getting a string representation of your object.
-</p>
-
-
-
-
-<p>
-  By implementing these standard type conversions—in addition to to_s, there’s also to_i for integers, let have a look at the following string interpolation:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>brand.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="s2">&quot;Hello there, </span><span class="si">#{</span><span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Use Non-database-backed Models</strong><br/>
-  Although models in Rails are mostly based on ActiveRecord::Base or some other type of object mapper for a database, it’s important to remember that in MVC, the M isn’t restricted to database-backed models.
-</p>
-
-
-
-
-<p>
-  Using non-database-backed models can help to organize logic which might otherwise become muddy. For example, there are libraries that give you anActiveRecord-like interface for contact form emails.
-</p>
-
-
-
-
-<p>
-  When it comes time to interact with these models in your controller code, your code will be that much cleaner, as you can use the exact same approach as with database-backed models.
-</p>
-
-
-
-
-<p>
-  <strong>Package Your Code into Gems</strong><br/>
-  I you&#8217;ve used Ruby on Rails, you&#8217;ve noticed the wealth of rubygems available to Rails developers.
-  When you write code you think is general enough—which usually just means you’ve written it more than once before in another application, let extract it into a gem suitable for a wider range of purposes.
-</p>
-
-
-
-
-<p>
-  So far so good, there are hundreds of coding practices or techniques that can make your life as a Ruby on Rails developer easier, but I’ve tried to pick out some. :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/14/">&larr; Older</a>
@@ -2102,6 +2100,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/06/05/how-to-spend-less-time-and-money-on-growing-your-business/">How to Spend Less Time and Money on Growing Your Business?</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/06/03/my-development-stack/">My Development Stack</a>
@@ -2125,10 +2127,6 @@
     
       <li class="post">
         <a href="/blog/2015/05/19/5-tips-to-scale-your-ruby-on-rails-application/">5 Tips to Scale Your Ruby on Rails Application</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/05/16/ip-geolocation-in-ruby-on-rails-application/">IP Geolocation in Ruby on Rails Application</a>
       </li>
     
   </ul>
@@ -2186,7 +2184,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 22 ]</a>
+        <a href="/blog/categories/other/">Other [ 23 ]</a>
       </li>
     
   </ul>
