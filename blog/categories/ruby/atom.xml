@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-06-17T08:07:06+07:00</updated>
+  <updated>2015-06-17T14:54:57+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,358 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Is Ruby Interpreted or Compiled?]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/06/17/is-ruby-interpreted-or-compiled/"/>
+    <updated>2015-06-17T12:14:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/06/17/is-ruby-interpreted-or-compiled</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/rights_and_wrongsof_ruby.jpg" width="400" />
+</p>
+
+
+
+
+<p>
+  Ever since I started to work with Ruby in 2012, I’ve always assumed that it was an interpreted language like PHP or Javascript – in other words, that Ruby read in, parsed and executed my code all at runtime, at the moment my program was run. This seemed especially obvious since the default and most popular implementation of Ruby is called “MRI,” short for “Matz’s Ruby Interpreter.” I always thought it was necessary to use an interpreter to make all of the dynamic features of the language possible.
+</p>
+
+
+
+
+<p>
+  However, it turns out that both JRuby and Rubinius, two other popular implementations of Ruby, support using a compiler the same way you would with a statically typed language like C or Java. Both JRuby and Rubinius first compile your Ruby code to byte code into machine language, and later execute it.
+</p>
+
+
+
+
+<p>
+  Today I’m going to show you how to use these Ruby compilers, and I’ll also take a peek under the hood to see what they produce internally. Possibly you’ll rethink some of your assumptions about how Ruby works along the way.
+</p>
+
+
+
+
+<p>
+  <strong>Use the Rubinius Compiler</strong><br/>
+  Using the Rubinius compiler is as simple as running any Ruby script. Here’s a very silly but simple Ruby program I’ll use as an example today:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Adder</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">add_two</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;x+2</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="nb">puts</span> <span class="no">Adder</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">add_two</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Now if I save that into a file called “simple.rb,” switch to Rubinius using RVM, and run the script I’ll get the number “5” as expected:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">rvm</span> <span class="n">rbx</span><span class="o">-</span><span class="mi">1</span><span class="o">.</span><span class="mi">2</span><span class="o">.</span><span class="mi">4</span><span class="o">-</span><span class="mi">20110705</span>
+</span><span class='line'><span class="err">$</span> <span class="n">ruby</span> <span class="n">simple</span><span class="o">.</span><span class="n">rb</span>
+</span><span class='line'><span class="mi">5</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Not very interesting, I know. But what is interesting is that when I ran simple.rb Rubinius created a new, hidden directory called “.rbx” with a strange, cryptically named file in it:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">ls</span> <span class="o">-</span><span class="n">a</span>
+</span><span class='line'><span class="o">.</span>         <span class="o">.</span><span class="n">.</span>        <span class="o">.</span><span class="n">rbx</span>      <span class="n">simple</span><span class="o">.</span><span class="n">rb</span>
+</span><span class='line'><span class="err">$</span> <span class="n">find</span> <span class="o">.</span><span class="n">rbx</span>
+</span><span class='line'><span class="o">.</span><span class="n">rbx</span>
+</span><span class='line'><span class="o">.</span><span class="n">rbx</span><span class="o">/</span><span class="n">a7</span>
+</span><span class='line'><span class="o">.</span><span class="n">rbx</span><span class="o">/</span><span class="n">a7</span><span class="o">/</span><span class="n">a7fc1eb2edc84efed8db760d37bee43753483f41</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  This vaguely reminds me of how git saves the git repository data in a hidden folder called “.git,” also using cryptic hexadecimal names. What we are looking at here is a compiled version of simple.rb: the “a7fc1eb2e…” file contains my Ruby code converted into Rubinius byte code.
+</p>
+
+
+
+
+<p>
+  Whenever you run a Ruby script, Rubinius uses a two step process to compile and run your code:
+</p>
+
+
+
+
+<p>
+  <img src="http://geekhmer.github.io/images/rubinius_diagram.png" />
+</p>
+
+
+
+
+<p>
+  On the top you can see that first Rubinius compiles your code into byte code, and then below later executes it using the Rubinius Virtual Machine, which can compile the byte code into native machine language. Rubinius also caches the byte code using the hexadecimal naming scheme I showed above, avoiding the need for the compile step entirely if the Ruby source code file didn’t change.
+</p>
+
+
+
+
+<p>
+  You can actually run the Rubinius compiler directly like this:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">rbx</span> <span class="n">compile</span> <span class="n">simple</span><span class="o">.</span><span class="n">rb</span> <span class="o">-</span><span class="n">o</span> <span class="n">simple</span><span class="o">.</span><span class="n">bytecode</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  This compiles my Ruby code and saves the byte code in the specified file. If we look at the simple.bytecode file, we’ll see a series of alphanumeric tokens that don’t make any sense. But if you run the compiler using the “-B” option you can see an annotated version of the Rubinius byte code:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">rbx</span> <span class="n">compile</span> <span class="n">simple</span><span class="o">.</span><span class="n">rb</span> <span class="o">-</span><span class="n">o</span> <span class="n">simple</span><span class="o">.</span><span class="n">bytecode</span> <span class="o">-</span><span class="n">B</span>
+</span><span class='line'><span class="o">=============</span> <span class="p">:</span><span class="o">&lt;</span><span class="n">strong</span><span class="o">&gt;</span><span class="n">script</span><span class="o">&lt;</span><span class="sr">/strong&gt; ==============</span>
+</span><span class='line'><span class="sr">Arguments:   0 required, 0 post, 0 total</span>
+</span><span class='line'><span class="sr">Arity:       0</span>
+</span><span class='line'><span class="sr">Locals:      0</span>
+</span><span class='line'><span class="sr">Stack size:  6</span>
+</span><span class='line'><span class="sr">Lines to IP: 1: 0..26, 7: 27..63&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="mo">0000</span><span class="p">:</span>  <span class="n">push_rubinius</span>            <span class="o">&lt;</span><span class="n">br</span><span class="o">/&gt;</span>
+</span><span class='line'><span class="mo">0001</span><span class="p">:</span>  <span class="n">push_literal</span>               <span class="ss">:Adder</span>
+</span><span class='line'><span class="mo">0003</span><span class="p">:</span>  <span class="n">push_nil</span>                 <span class="o">&lt;</span><span class="n">br</span><span class="o">/&gt;</span>
+</span><span class='line'><span class="mo">0004</span><span class="p">:</span>  <span class="n">push_scope</span>               <span class="o">&lt;</span><span class="n">br</span><span class="o">/&gt;</span>
+</span><span class='line'><span class="mo">0005</span><span class="p">:</span>  <span class="n">send_stack</span>                 <span class="ss">:open_class</span><span class="p">,</span> <span class="mi">3</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;&amp;hellip; etc &amp;hellip;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;===============</span> <span class="ss">:add_two</span> <span class="o">===============</span>
+</span><span class='line'><span class="ss">Arguments</span><span class="p">:</span>   <span class="mi">1</span> <span class="n">required</span><span class="p">,</span> <span class="mi">0</span> <span class="n">post</span><span class="p">,</span> <span class="mi">1</span> <span class="n">total</span>
+</span><span class='line'><span class="ss">Arity</span><span class="p">:</span>       <span class="mi">1</span>
+</span><span class='line'><span class="ss">Locals</span><span class="p">:</span>      <span class="mi">1</span><span class="p">:</span> <span class="n">x</span>
+</span><span class='line'><span class="no">Stack</span> <span class="ss">size</span><span class="p">:</span>  <span class="mi">3</span>
+</span><span class='line'><span class="no">Lines</span> <span class="n">to</span> <span class="ss">IP</span><span class="p">:</span> <span class="mi">2</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="mi">5</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;0000:  push_local                 0    # x</span>
+</span><span class='line'><span class="sr">0002:  meta_push_2              &lt;br/</span><span class="o">&gt;</span>
+</span><span class='line'><span class="mo">0003</span><span class="p">:</span>  <span class="n">meta_send_op_plus</span>          <span class="ss">:+</span>
+</span><span class='line'><span class="mo">0005</span><span class="p">:</span>  <span class="n">ret</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;&amp;hellip; etc &amp;hellip;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  At the bottom here we can see the compiled version of my silly add_two method. It’s actually somewhat easy to understand the byte code, since it’s annotated so well:
+</p>
+
+
+
+
+<p>
+  - First “push_local” saves the value of the “x” parameter on the virtual machine stack.<br/>
+  - Then it pushes the literal value 2.<br/>
+  - Then it executes the + operation.<br/>
+  - And finally it returns.
+</p>
+
+
+
+
+<p>
+  The Rubinius virtual machine reminds me of those old “reverse polish” calculators from the 1980s, in which you would enter values on a stack in a similar way. The Rubinius source code is actually quite easy to understand since a large portion of it is actually written in Ruby, while the rest is written in well documented C++. The Rubinius compiler is no exception: it’s actually written in Ruby too! If you’re interested, you can see how the Rubinius compiler works without having to understand C++ at all. To get started take a look in the “lib/compiler” directory.
+</p>
+
+
+
+
+<p>
+  The Rubinius virtual machine, which runs the Rubinius byte code, is implemented in C++ and leverages an open source project called LLVM. Like JRuby, it uses a “Just In Time” compiler to convert the byte code to machine language at runtime. This means that your Ruby code, for example the add_two method above, ends up being converted into native machine language and run directly by your computer’s hardware.
+</p>
+
+
+
+
+<p>
+  <strong>Use the JRuby Compiler</strong><br/>
+  Now let’s take a look at how JRuby compiles Ruby code; I’ll start by using RVM to switch over to JRuby, and then I’ll run the same simple.rb script:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">rvm</span> <span class="n">jruby</span><span class="o">-</span><span class="n">head</span>
+</span><span class='line'><span class="err">$</span> <span class="n">ruby</span> <span class="n">simple</span><span class="o">.</span><span class="n">rb</span>
+</span><span class='line'><span class="mi">5</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  No surprise, we get the same result. At a high level, JRuby uses the same two step process to run your script – first it compiles the Ruby code into byte code, and then executes the byte code using the Java Virtual Machine (JVM).
+</p>
+
+
+
+
+<p>
+  Here’s another diagram showing the two step process, this time for JRuby:
+</p>
+
+
+
+
+<p>
+  <img src="http://geekhmer.github.io/images/jruby_diagram.png" />
+</p>
+
+
+
+
+<p>
+  Like with Rubinius, it’s possible to run the JRuby compiler directly using the "jrubyc" command… following the Java executable naming pattern ("java" –> "javac"). Running "jrubyc" will create a Java .class file, which we can inspect using the Java decompiler like I did last week:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">jrubyc</span> <span class="n">simple</span><span class="o">.</span><span class="n">rb</span>
+</span><span class='line'><span class="err">$</span> <span class="n">ls</span>
+</span><span class='line'><span class="n">simple</span><span class="o">.</span><span class="n">class</span> <span class="n">simple</span><span class="o">.</span><span class="n">rb</span>
+</span><span class='line'><span class="err">$</span> <span class="n">javap</span> <span class="o">-</span><span class="n">c</span> <span class="n">simple</span><span class="o">.</span><span class="n">class</span> <span class="o">&gt;</span> <span class="n">simple</span><span class="o">.</span><span class="n">bytecode</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Now the simple.bytecode file will contain an annotated version of the Java byte code the JVM will execute. Unlike Rubinius, which creates byte code that is fairly clean, simple and easy to understand, Java byte code is much more cryptic and confusing. Searching through the simple.bytecode file for my method add_two, I found the following snippet of byte code:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'> <span class="kp">public</span> <span class="n">static</span> <span class="n">org</span><span class="o">.</span><span class="n">jruby</span><span class="o">.</span><span class="n">runtime</span><span class="o">.</span><span class="n">builtin</span><span class="o">.</span><span class="n">IRubyObject</span> <span class="n">method__1</span><span class="vg">$RUBY$add_two</span><span class="p">(</span><span class="n">simple</span><span class="p">,</span> <span class="n">org</span><span class="o">.</span><span class="n">jruby</span><span class="o">.</span><span class="n">runtime</span><span class="o">.</span><span class="n">Thread</span><span class="o">&amp;</span><span class="n">hellip</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;Code:</span>
+</span><span class='line'><span class="sr">   0: aload_3       </span>
+</span><span class='line'><span class="sr">   1: astore        9</span>
+</span><span class='line'><span class="sr">   3: aload_1       </span>
+</span><span class='line'><span class="sr">   4: aload_2       </span>
+</span><span class='line'><span class="sr">   5: aload         9</span>
+</span><span class='line'><span class="sr">   7: invokedynamic #80,  0             /</span><span class="o">/</span> <span class="no">InvokeDynamic</span> <span class="c1">#1:&quot;fixnumOperator:+&quot;:(Lorg/jruby/runtime/Thread...</span>
+</span><span class='line'>  <span class="mi">12</span><span class="p">:</span> <span class="n">areturn</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Although quite difficult to understand, there are a couple of important details to notice:
+</p>
+
+
+
+
+<p>
+  First, JRuby has compiled my Ruby add_two method into a byte code method called method__1$RUBY$add_two. This proves that my Ruby script has been compiled! That is, when JRuby ran simple.rb above, it did not read the Ruby code, interpret it and just follow the instructions like the MRI interpreter would do. Instead, it converted my Ruby script into byte code, and specifically my add_two method into the byte code snippet above.
+</p>
+
+
+
+
+<p>
+  Second, notice the use of the “invokedynamic” byte code instruction. This is a new innovation of the Java Virtual Machine, making it easier for the JVM to support dynamic languages like Ruby. Here you can see it’s used by the add_two method to call the + operator of the Ruby Fixnum class, for my x+2 Ruby code. This use of invokedynamic is actually new for Java 1.7 and JRuby 1.7, so if you’re using the current release version of JRuby (1.6.4) or earlier you won’t see it appear in the byte code.
+</p>
+
+
+
+
+<p>
+  All of the byte code you see above – in other words my Ruby script including the add_two method – will be compiled directly into native machine language if the JVM notices that it is called enough times, that it’s in a "hotspot".
+</p>
+
+
+
+
+<p>
+  <strong>Who cares how Ruby works?</strong><br/>
+  Today I’ve shown you some of the internal, technical details of Rubinius and JRuby. Many of you might find this boring and unimportant: who cares how Ruby works internally? All I care about is that my Ruby program works. And from one point of view that is all that really matters.
+</p>
+
+
+
+
+<p>
+  However, I find Ruby internals to be fascinating… I really do like having at least a small understanding of what’s going on inside of Ruby while it’s running my code. I also believe it will help me to become a more effective and knowledgeable Ruby developer, even if I never contribute a line of internal code to Rubinius, JRuby or MRI. And studying Ruby internals has definitely lead me to a number of surprising discoveries, and forced me to rethink the mental model I have always had of the Ruby interpreter… or should I say, the Ruby compiler!
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[How the Hash Works in Ruby?]]></title>
@@ -1495,7 +1847,7 @@
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="sx">%= link_to &amp;ldquo;Create User&amp;rdquo;, users_path(:email =</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;&amp;#109;&amp;#x61;&amp;#x69;&amp;#108;&amp;#116;&amp;#111;&amp;#x3a;&amp;#106;&amp;#100;&amp;#x6f;&amp;#101;&amp;#64;&amp;#x65;&amp;#109;&amp;#97;&amp;#105;&amp;#108;&amp;#46;&amp;#x63;&amp;#x6f;&amp;#x6d;&quot;</span><span class="o">&gt;&amp;</span><span class="c1">#106;&amp;#x64;&amp;#111;&amp;#101;&amp;#x40;&amp;#101;&amp;#109;&amp;#x61;&amp;#x69;&amp;#108;&amp;#x2e;&amp;#x63;&amp;#x6f;&amp;#x6d;&lt;/a&gt;&amp;rdquo;, :password =&gt; &amp;ldquo;secret&amp;rdquo;), :method =&gt; :post %&gt;&lt;/p&gt;</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="sx">%= link_to &amp;ldquo;Create User&amp;rdquo;, users_path(:email =</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;&amp;#x6d;&amp;#x61;&amp;#105;&amp;#x6c;&amp;#x74;&amp;#x6f;&amp;#58;&amp;#x6a;&amp;#x64;&amp;#111;&amp;#x65;&amp;#x40;&amp;#x65;&amp;#x6d;&amp;#97;&amp;#105;&amp;#x6c;&amp;#46;&amp;#x63;&amp;#111;&amp;#x6d;&quot;</span><span class="o">&gt;&amp;</span><span class="c1">#106;&amp;#100;&amp;#111;&amp;#x65;&amp;#64;&amp;#101;&amp;#109;&amp;#97;&amp;#105;&amp;#x6c;&amp;#x2e;&amp;#x63;&amp;#111;&amp;#109;&lt;/a&gt;&amp;rdquo;, :password =&gt; &amp;ldquo;secret&amp;rdquo;), :method =&gt; :post %&gt;&lt;/p&gt;</span>
 </span><span class='line'>
 </span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;=&gt;</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">rel</span><span class="o">=</span><span class="s2">&quot;nofollow&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">method</span><span class="o">=</span><span class="s2">&quot;post&quot;</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;http://geekhmer.github.io/users?email=jdoe%40email.com&amp;amp;password=secret&quot;</span><span class="o">&gt;</span><span class="no">Create</span> <span class="no">User</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
 </span><span class='line'>
@@ -1570,206 +1922,6 @@
 <p>
   <strong>5. Shard Your Unavoidably Relational Data</strong><br/>
   At high scaling levels, your MySQL database will have to be sharded. Sharding involves breaking up your datasets into independent pieces based on a key. For many consumer-oriented Rails sites, that can mean sharding based on userid's, but other sharding schemes use data-age, or access-frequency (if that's predictable).
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[IP Geolocation in Ruby on Rails Application]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/05/16/ip-geolocation-in-ruby-on-rails-application/"/>
-    <updated>2015-05-16T23:47:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/05/16/ip-geolocation-in-ruby-on-rails-application</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="IP Geolocation in Ruby on Rails Application" />
-</p>
-
-
-
-
-<p>
-  Sometimes it can be useful to find a user's physical location in our Rails application. For instance, maybe we want to send a special Happy Holidays to users of a particular country. IP address geolocation lets us do exactly that. With IP address geolocation you can get a pretty good idea of where the customer is accessing your site from as long as they aren't using a proxy server or some other means of obscuring their IP address. In this article we will show you how to utilize the Maxmind GeoIP database to look up the location of just about any IP address. Let's get started.
-</p>
-
-
-
-
-<p>
-  <strong>Setup Rails Application</strong><br/>
-  To utilize the IP address geolocation functionality, we first need to add the geoip gem to our gemfile. Open up your gemfile and add in the code listed below:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Gemfile </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">geoip</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">~&gt;</span> <span class="mi">1</span><span class="o">.</span><span class="mi">4</span><span class="o">.</span><span class="mi">0</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Great, now let's run a bundle install to install the gem.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Now we need to download the GeoIP database for use with the geoip gem. A free one <a href="http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz" target="_blank"> can be downloaded at this link</a>, or you can use the paid version if you have a subscription. Once downloaded, extract the compressed archive and place the .dat folder contained within in the root directory of your Rails app.
-</p>
-
-
-
-
-<p>
-  Great, now let's create a controller so that we can play around with the GeoIP functionality. Run the commands below to create a controller called GeoIpRequest:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="n">geo_ip_request</span> <span class="kp">new</span> <span class="n">create</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Next, open up your routes file and modify it so that it looks like the code listed below:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/routes.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">resource</span> <span class="ss">:geo_ip_request</span><span class="p">,</span> <span class="ss">controller</span><span class="p">:</span> <span class="ss">:geo_ip_request</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  root to: &amp;ldquo;geo_ip_request#new&amp;rdquo;</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Great, now open up your GeoIpRequest controller and modify it so that it looks like the code listed below.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/controllers/geo_ip_request_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">GeoIpRequestController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="no">ApplicationController</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">new</span>
-</span><span class='line'>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  def create&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="nb">require</span> <span class="s1">&#39;geoip&#39;</span>
-</span><span class='line'><span class="vi">@info</span> <span class="o">=</span> <span class="no">GeoIP</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Rails</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;GeoLiteCity.dat&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">city</span><span class="p">(</span><span class="n">ip_request_params</span><span class="o">[</span><span class="ss">:host</span><span class="o">]</span><span class="p">)</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  private</span>
-</span><span class='line'><span class="sr">  def ip_request_params&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:request</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:host</span><span class="p">)</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  In the code above, we tell the geoip gem to load our database file and do a search for the host parameter.
-</p>
-
-
-
-
-<p>
-  Now let's create our views. Open up the new view for the GeoIpRequest controller and modify it so that it looks like the code listed below:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/views/geo_ip_request/new.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;GeoIP Example&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="no">Get</span> <span class="n">the</span> <span class="n">country</span> <span class="k">for</span> <span class="n">any</span> <span class="n">ip</span> <span class="n">address</span> <span class="ow">or</span> <span class="n">hostname</span> <span class="n">by</span> <span class="n">typing</span> <span class="n">it</span> <span class="n">below</span> <span class="ow">and</span> <span class="n">pressing</span> <span class="n">the</span> <span class="n">lookup</span> <span class="n">button</span><span class="o">.</span><span class="n">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;&amp;lt;%= form_for :request, url: geo_ip_request_index_path do |f| %&gt;</span>
-</span><span class='line'><span class="sr">  &amp;lt;%= f.text_field :host %&gt;</span>
-</span><span class='line'><span class="sr">  &amp;lt;%= f.submit &amp;ldquo;Lookup&amp;rdquo; %&gt;</span>
-</span><span class='line'><span class="sr">&amp;lt;% end %&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Great, now finally let's do the create view. Open up the create view for the GeoIpRequest controller and modify it so that it looks like the code listed below.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/views/geo_ip_request/create.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;IP Address Info&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="ss">IP</span><span class="p">:</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/b&gt;&amp;lt;%= @info.request %&gt;&lt;br /</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="ss">Country</span><span class="p">:</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/b&gt;&amp;lt;%= @info.country_name %&gt;&lt;br /</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="ss">City</span><span class="p">:</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/b&gt;&amp;lt;%= @info.city_name %&gt;&lt;br /</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="ss">Region</span><span class="p">:</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/b&gt;&amp;lt;%= @info.real_region_name %&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Excellent, now if you fire up your rails development server and and navigate to http://localhost:3000 you will see a form requesting your ip address or hostname. Entering any ip address or host name will show the country, city, and region that ip is from.
-</p>
-
-
-
-
-<p>
-  So far so good, that's it!!! that's all there is to it!!! :)
 </p>
 
 ]]></content>

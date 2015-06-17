@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-06-17T08:07:06+07:00</updated>
+  <updated>2015-06-17T14:54:57+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,384 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Is Ruby Interpreted or Compiled?]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/06/17/is-ruby-interpreted-or-compiled/"/>
+    <updated>2015-06-17T12:14:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/06/17/is-ruby-interpreted-or-compiled</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/rights_and_wrongsof_ruby.jpg" width="400" />
+</p>
+
+
+
+
+<p>
+  Ever since I started to work with Ruby in 2012, I’ve always assumed that it was an interpreted language like PHP or Javascript – in other words, that Ruby read in, parsed and executed my code all at runtime, at the moment my program was run. This seemed especially obvious since the default and most popular implementation of Ruby is called “MRI,” short for “Matz’s Ruby Interpreter.” I always thought it was necessary to use an interpreter to make all of the dynamic features of the language possible.
+</p>
+
+
+
+
+<p>
+  However, it turns out that both JRuby and Rubinius, two other popular implementations of Ruby, support using a compiler the same way you would with a statically typed language like C or Java. Both JRuby and Rubinius first compile your Ruby code to byte code into machine language, and later execute it.
+</p>
+
+
+
+
+<p>
+  Today I’m going to show you how to use these Ruby compilers, and I’ll also take a peek under the hood to see what they produce internally. Possibly you’ll rethink some of your assumptions about how Ruby works along the way.
+</p>
+
+
+
+
+<p>
+  <strong>Use the Rubinius Compiler</strong><br/>
+  Using the Rubinius compiler is as simple as running any Ruby script. Here’s a very silly but simple Ruby program I’ll use as an example today:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Adder</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">add_two</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">x</span><span class="o">+</span><span class="mi">2</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="no">Adder</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">add_two</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now if I save that into a file called “simple.rb,” switch to Rubinius using RVM, and run the script I’ll get the number “5” as expected:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">rvm</span> <span class="n">rbx</span><span class="o">-</span><span class="mi">1</span><span class="o">.</span><span class="mi">2</span><span class="o">.</span><span class="mi">4</span><span class="o">-</span><span class="mi">20110705</span>
+</span><span class='line'><span class="err">$</span> <span class="n">ruby</span> <span class="n">simple</span><span class="o">.</span><span class="n">rb</span>
+</span><span class='line'><span class="mi">5</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Not very interesting, I know. But what is interesting is that when I ran simple.rb Rubinius created a new, hidden directory called “.rbx” with a strange, cryptically named file in it:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">ls</span> <span class="o">-</span><span class="n">a</span>
+</span><span class='line'><span class="o">.</span>         <span class="o">.</span><span class="n">.</span>        <span class="o">.</span><span class="n">rbx</span>      <span class="n">simple</span><span class="o">.</span><span class="n">rb</span>
+</span><span class='line'><span class="err">$</span> <span class="n">find</span> <span class="o">.</span><span class="n">rbx</span>
+</span><span class='line'><span class="o">.</span><span class="n">rbx</span>
+</span><span class='line'><span class="o">.</span><span class="n">rbx</span><span class="o">/</span><span class="n">a7</span>
+</span><span class='line'><span class="o">.</span><span class="n">rbx</span><span class="o">/</span><span class="n">a7</span><span class="o">/</span><span class="n">a7fc1eb2edc84efed8db760d37bee43753483f41</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  This vaguely reminds me of how git saves the git repository data in a hidden folder called “.git,” also using cryptic hexadecimal names. What we are looking at here is a compiled version of simple.rb: the “a7fc1eb2e…” file contains my Ruby code converted into Rubinius byte code.
+</p>
+
+
+
+
+<p>
+  Whenever you run a Ruby script, Rubinius uses a two step process to compile and run your code:
+</p>
+
+
+
+
+<p>
+  <img src="http://geekhmer.github.io/images/rubinius_diagram.png" />
+</p>
+
+
+
+
+<p>
+  On the top you can see that first Rubinius compiles your code into byte code, and then below later executes it using the Rubinius Virtual Machine, which can compile the byte code into native machine language. Rubinius also caches the byte code using the hexadecimal naming scheme I showed above, avoiding the need for the compile step entirely if the Ruby source code file didn’t change.
+</p>
+
+
+
+
+<p>
+  You can actually run the Rubinius compiler directly like this:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">rbx</span> <span class="n">compile</span> <span class="n">simple</span><span class="o">.</span><span class="n">rb</span> <span class="o">-</span><span class="n">o</span> <span class="n">simple</span><span class="o">.</span><span class="n">bytecode</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  This compiles my Ruby code and saves the byte code in the specified file. If we look at the simple.bytecode file, we’ll see a series of alphanumeric tokens that don’t make any sense. But if you run the compiler using the “-B” option you can see an annotated version of the Rubinius byte code:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">rbx</span> <span class="n">compile</span> <span class="n">simple</span><span class="o">.</span><span class="n">rb</span> <span class="o">-</span><span class="n">o</span> <span class="n">simple</span><span class="o">.</span><span class="n">bytecode</span> <span class="o">-</span><span class="n">B</span>
+</span><span class='line'><span class="o">=============</span> <span class="ss">:__script__</span> <span class="o">==============</span>
+</span><span class='line'><span class="ss">Arguments</span><span class="p">:</span>   <span class="mi">0</span> <span class="n">required</span><span class="p">,</span> <span class="mi">0</span> <span class="n">post</span><span class="p">,</span> <span class="mi">0</span> <span class="n">total</span>
+</span><span class='line'><span class="ss">Arity</span><span class="p">:</span>       <span class="mi">0</span>
+</span><span class='line'><span class="ss">Locals</span><span class="p">:</span>      <span class="mi">0</span>
+</span><span class='line'><span class="no">Stack</span> <span class="ss">size</span><span class="p">:</span>  <span class="mi">6</span>
+</span><span class='line'><span class="no">Lines</span> <span class="n">to</span> <span class="ss">IP</span><span class="p">:</span> <span class="mi">1</span><span class="p">:</span> <span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="mi">26</span><span class="p">,</span> <span class="mi">7</span><span class="p">:</span> <span class="mi">27</span><span class="o">.</span><span class="n">.</span><span class="mi">63</span>
+</span><span class='line'>
+</span><span class='line'><span class="mo">0000</span><span class="p">:</span>  <span class="n">push_rubinius</span>
+</span><span class='line'><span class="mo">0001</span><span class="p">:</span>  <span class="n">push_literal</span>               <span class="ss">:Adder</span>
+</span><span class='line'><span class="mo">0003</span><span class="p">:</span>  <span class="n">push_nil</span>
+</span><span class='line'><span class="mo">0004</span><span class="p">:</span>  <span class="n">push_scope</span>
+</span><span class='line'><span class="mo">0005</span><span class="p">:</span>  <span class="n">send_stack</span>                 <span class="ss">:open_class</span><span class="p">,</span> <span class="mi">3</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span> <span class="n">etc</span> <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">===============</span> <span class="ss">:add_two</span> <span class="o">===============</span>
+</span><span class='line'><span class="ss">Arguments</span><span class="p">:</span>   <span class="mi">1</span> <span class="n">required</span><span class="p">,</span> <span class="mi">0</span> <span class="n">post</span><span class="p">,</span> <span class="mi">1</span> <span class="n">total</span>
+</span><span class='line'><span class="ss">Arity</span><span class="p">:</span>       <span class="mi">1</span>
+</span><span class='line'><span class="ss">Locals</span><span class="p">:</span>      <span class="mi">1</span><span class="p">:</span> <span class="n">x</span>
+</span><span class='line'><span class="no">Stack</span> <span class="ss">size</span><span class="p">:</span>  <span class="mi">3</span>
+</span><span class='line'><span class="no">Lines</span> <span class="n">to</span> <span class="ss">IP</span><span class="p">:</span> <span class="mi">2</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="mi">5</span>
+</span><span class='line'>
+</span><span class='line'><span class="mo">0000</span><span class="p">:</span>  <span class="n">push_local</span>                 <span class="mi">0</span>    <span class="c1"># x</span>
+</span><span class='line'><span class="mo">0002</span><span class="p">:</span>  <span class="n">meta_push_2</span>
+</span><span class='line'><span class="mo">0003</span><span class="p">:</span>  <span class="n">meta_send_op_plus</span>          <span class="ss">:+</span>
+</span><span class='line'><span class="mo">0005</span><span class="p">:</span>  <span class="n">ret</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span> <span class="n">etc</span> <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  At the bottom here we can see the compiled version of my silly add_two method. It’s actually somewhat easy to understand the byte code, since it’s annotated so well:
+</p>
+
+
+
+
+<p>
+  - First “push_local” saves the value of the “x” parameter on the virtual machine stack.<br/>
+  - Then it pushes the literal value 2.<br/>
+  - Then it executes the + operation.<br/>
+  - And finally it returns.
+</p>
+
+
+
+
+<p>
+  The Rubinius virtual machine reminds me of those old “reverse polish” calculators from the 1980s, in which you would enter values on a stack in a similar way. The Rubinius source code is actually quite easy to understand since a large portion of it is actually written in Ruby, while the rest is written in well documented C++. The Rubinius compiler is no exception: it’s actually written in Ruby too! If you’re interested, you can see how the Rubinius compiler works without having to understand C++ at all. To get started take a look in the “lib/compiler” directory.
+</p>
+
+
+
+
+<p>
+  The Rubinius virtual machine, which runs the Rubinius byte code, is implemented in C++ and leverages an open source project called LLVM. Like JRuby, it uses a “Just In Time” compiler to convert the byte code to machine language at runtime. This means that your Ruby code, for example the add_two method above, ends up being converted into native machine language and run directly by your computer’s hardware.
+</p>
+
+
+
+
+<p>
+  <strong>Use the JRuby Compiler</strong><br/>
+  Now let’s take a look at how JRuby compiles Ruby code; I’ll start by using RVM to switch over to JRuby, and then I’ll run the same simple.rb script:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">rvm</span> <span class="n">jruby</span><span class="o">-</span><span class="n">head</span>
+</span><span class='line'><span class="err">$</span> <span class="n">ruby</span> <span class="n">simple</span><span class="o">.</span><span class="n">rb</span>
+</span><span class='line'><span class="mi">5</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  No surprise, we get the same result. At a high level, JRuby uses the same two step process to run your script – first it compiles the Ruby code into byte code, and then executes the byte code using the Java Virtual Machine (JVM).
+</p>
+
+
+
+
+<p>
+  Here’s another diagram showing the two step process, this time for JRuby:
+</p>
+
+
+
+
+<p>
+  <img src="http://geekhmer.github.io/images/jruby_diagram.png" />
+</p>
+
+
+
+
+<p>
+  Like with Rubinius, it’s possible to run the JRuby compiler directly using the &#8220;jrubyc&#8221; command… following the Java executable naming pattern (&#8220;java&#8221; –> &#8220;javac&#8221;). Running &#8220;jrubyc&#8221; will create a Java .class file, which we can inspect using the Java decompiler like I did last week:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">jrubyc</span> <span class="n">simple</span><span class="o">.</span><span class="n">rb</span>
+</span><span class='line'><span class="err">$</span> <span class="n">ls</span>
+</span><span class='line'><span class="n">simple</span><span class="o">.</span><span class="n">class</span> <span class="n">simple</span><span class="o">.</span><span class="n">rb</span>
+</span><span class='line'><span class="err">$</span> <span class="n">javap</span> <span class="o">-</span><span class="n">c</span> <span class="n">simple</span><span class="o">.</span><span class="n">class</span> <span class="o">&gt;</span> <span class="n">simple</span><span class="o">.</span><span class="n">bytecode</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now the simple.bytecode file will contain an annotated version of the Java byte code the JVM will execute. Unlike Rubinius, which creates byte code that is fairly clean, simple and easy to understand, Java byte code is much more cryptic and confusing. Searching through the simple.bytecode file for my method add_two, I found the following snippet of byte code:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'> <span class="kp">public</span> <span class="n">static</span> <span class="n">org</span><span class="o">.</span><span class="n">jruby</span><span class="o">.</span><span class="n">runtime</span><span class="o">.</span><span class="n">builtin</span><span class="o">.</span><span class="n">IRubyObject</span> <span class="n">method__1</span><span class="vg">$RUBY$add_two</span><span class="p">(</span><span class="n">simple</span><span class="p">,</span> <span class="n">org</span><span class="o">.</span><span class="n">jruby</span><span class="o">.</span><span class="n">runtime</span><span class="o">.</span><span class="n">Thread</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>    <span class="ss">Code</span><span class="p">:</span>
+</span><span class='line'>       <span class="mi">0</span><span class="p">:</span> <span class="n">aload_3</span>
+</span><span class='line'>       <span class="mi">1</span><span class="p">:</span> <span class="n">astore</span>        <span class="mi">9</span>
+</span><span class='line'>       <span class="mi">3</span><span class="p">:</span> <span class="n">aload_1</span>
+</span><span class='line'>       <span class="mi">4</span><span class="p">:</span> <span class="n">aload_2</span>
+</span><span class='line'>       <span class="mi">5</span><span class="p">:</span> <span class="n">aload</span>         <span class="mi">9</span>
+</span><span class='line'>       <span class="mi">7</span><span class="p">:</span> <span class="n">invokedynamic</span> <span class="c1">#80,  0             // InvokeDynamic #1:&quot;fixnumOperator:+&quot;:(Lorg/jruby/runtime/Thread...</span>
+</span><span class='line'>      <span class="mi">12</span><span class="p">:</span> <span class="n">areturn</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Although quite difficult to understand, there are a couple of important details to notice:
+</p>
+
+
+
+
+<p>
+  First, JRuby has compiled my Ruby add_two method into a byte code method called method__1$RUBY$add_two. This proves that my Ruby script has been compiled! That is, when JRuby ran simple.rb above, it did not read the Ruby code, interpret it and just follow the instructions like the MRI interpreter would do. Instead, it converted my Ruby script into byte code, and specifically my add_two method into the byte code snippet above.
+</p>
+
+
+
+
+<p>
+  Second, notice the use of the “invokedynamic” byte code instruction. This is a new innovation of the Java Virtual Machine, making it easier for the JVM to support dynamic languages like Ruby. Here you can see it’s used by the add_two method to call the + operator of the Ruby Fixnum class, for my x+2 Ruby code. This use of invokedynamic is actually new for Java 1.7 and JRuby 1.7, so if you’re using the current release version of JRuby (1.6.4) or earlier you won’t see it appear in the byte code.
+</p>
+
+
+
+
+<p>
+  All of the byte code you see above – in other words my Ruby script including the add_two method – will be compiled directly into native machine language if the JVM notices that it is called enough times, that it’s in a &#8220;hotspot&#8221;.
+</p>
+
+
+
+
+<p>
+  <strong>Who cares how Ruby works?</strong><br/>
+  Today I’ve shown you some of the internal, technical details of Rubinius and JRuby. Many of you might find this boring and unimportant: who cares how Ruby works internally? All I care about is that my Ruby program works. And from one point of view that is all that really matters.
+</p>
+
+
+
+
+<p>
+  However, I find Ruby internals to be fascinating… I really do like having at least a small understanding of what’s going on inside of Ruby while it’s running my code. I also believe it will help me to become a more effective and knowledgeable Ruby developer, even if I never contribute a line of internal code to Rubinius, JRuby or MRI. And studying Ruby internals has definitely lead me to a number of surprising discoveries, and forced me to rethink the mental model I have always had of the Ruby interpreter… or should I say, the Ruby compiler!
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[How the Hash Works in Ruby?]]></title>
@@ -4460,426 +4838,6 @@
 
 <p>
   To override it, simply modify your locale files under <code>config/locales</code>.
-</p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby/Ruby on Rails Mistakes]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/05/07/ruby-slash-ruby-on-rails-mistakes/"/>
-    <updated>2015-05-07T21:16:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/05/07/ruby-slash-ruby-on-rails-mistakes</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="Ruby/Ruby on Rails Mistakes" />
-</p>
-
-
-
-
-<p>
-  Software Engineer make mistakes. Some of them are just annoying (for others to read) and some are really dangerous. Here is my selection of 10 mistakes done by Ruby / Ruby on Rails developers. These tips are easy to follow and can save you much time of later debugging.
-</p>
-
-
-
-
-<p>
-  <strong>Double Negative and Complex Conditionals</strong><br/>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">if</span> <span class="o">!</span><span class="n">user</span><span class="o">.</span><span class="n">nil?</span>
-</span><span class='line'>  <span class="c1"># ...</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">unless</span> <span class="n">user</span><span class="o">.</span><span class="n">blank?</span>
-</span><span class='line'>  <span class="c1"># ...</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">unless</span> <span class="n">user</span><span class="o">.</span><span class="n">active?</span> <span class="o">||</span> <span class="n">address</span><span class="o">.</span><span class="n">confirmed?</span>
-</span><span class='line'>  <span class="c1"># ...</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Double negative is hard to read. Every time I encounter it, I spend a couple of seconds on parsing the condition. Use the API which Rails gives you  <code>user.present?</code> instead of <code>!user.blank?</code>.
-</p>
-
-
-
-
-<p>
-  I also rarely see any usage for unless, especially with complex conditionals connected by && and ||. How fast can you decide when unless <code>user.active? || address.confirmed?</code> will fire?
-</p>
-
-
-
-
-<p>
-  <strong>Using Save Instead of save! and Not Checking Return Value</strong><br/>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;John&quot;</span>
-</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">save</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  What is wrong with this piece of code? It will fail silently when user cannot be saved. There will be no single trace of this failure in your logs and you will spend time wondering: “why there are no users in the database”. If you expect that data is valid and model should be always saved successfully, then use bang versions – <code>save!</code>, <code>create!</code> and so on. Use save only when you handle the return value:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">if</span> <span class="n">user</span><span class="o">.</span><span class="n">save</span>
-</span><span class='line'>  <span class="c1"># ...</span>
-</span><span class='line'><span class="k">else</span>
-</span><span class='line'>  <span class="c1"># ...</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>self When It’s Not Needed</strong><br/>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span>
-</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:first_name</span>
-</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:last_name</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">display_name</span>
-</span><span class='line'>    <span class="s2">&quot;</span><span class="si">#{</span><span class="nb">self</span><span class="o">.</span><span class="n">first_name</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="nb">self</span><span class="o">.</span><span class="n">last_name</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  In this case writing self.first_name is completely unnecessary, because <code>first_name</code> will do. This is of course just matter of style and has no other negative consequences than overly verbose code. Please mind that you need <code>self</code> in assignments: <code>self.first_name = "John"</code>.
-</p>
-
-
-
-
-<p>
-  <strong>N + 1 Queries</strong><br/>
-  This is a vast topic, but I will try to give the simplest example. You want to display a list of posts with names of authors. Post model <code>belongs_to :user</code>. If you just do <code>Post.limit(10)</code> and then call <code>post.user.name</code> in your views, you will make a separate database query for each user. That’s because Rails has no single chance to guess that you need users when you make the first query in the controller.
-</p>
-
-
-
-
-<p>
-  It’s easy to spot N + 1 queries problem just by looking at server’s logs:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Template</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">4</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;templates&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;templates&quot;</span>   <span class="no">ORDER</span> <span class="no">BY</span> <span class="s2">&quot;templates&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="n">desc</span> <span class="no">LIMIT</span> <span class="mi">30</span> <span class="no">OFFSET</span> <span class="mi">0</span>
-</span><span class='line'>  <span class="no">Collection</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">2</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;collections&quot;</span>  <span class="no">WHERE</span> <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">LIMIT</span> <span class="mi">1</span>  <span class="o">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="o">]]</span>
-</span><span class='line'>  <span class="no">Collection</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;collections&quot;</span>  <span class="no">WHERE</span> <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">LIMIT</span> <span class="mi">1</span>  <span class="o">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="mi">6</span><span class="o">]]</span>
-</span><span class='line'>  <span class="no">CACHE</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;collections&quot;</span>  <span class="no">WHERE</span> <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">LIMIT</span> <span class="mi">1</span>  <span class="o">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="mi">6</span><span class="o">]]</span>
-</span><span class='line'>  <span class="no">CACHE</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;collections&quot;</span>  <span class="no">WHERE</span> <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">LIMIT</span> <span class="mi">1</span>  <span class="o">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="mi">6</span><span class="o">]]</span>
-</span><span class='line'>  <span class="no">Collection</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;collections&quot;</span>  <span class="no">WHERE</span> <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">LIMIT</span> <span class="mi">1</span>  <span class="o">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="o">]]</span>
-</span><span class='line'>  <span class="no">CACHE</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;collections&quot;</span>  <span class="no">WHERE</span> <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">LIMIT</span> <span class="mi">1</span>  <span class="o">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="o">]]</span>
-</span><span class='line'>  <span class="no">Collection</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;collections&quot;</span>  <span class="no">WHERE</span> <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">LIMIT</span> <span class="mi">1</span>  <span class="o">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="o">]]</span>
-</span><span class='line'>  <span class="no">CACHE</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;collections&quot;</span>  <span class="no">WHERE</span> <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">LIMIT</span> <span class="mi">1</span>  <span class="o">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="o">]]</span>
-</span><span class='line'>  <span class="no">CACHE</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;collections&quot;</span>  <span class="no">WHERE</span> <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">LIMIT</span> <span class="mi">1</span>  <span class="o">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="o">]]</span>
-</span><span class='line'>  <span class="no">CACHE</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;collections&quot;</span>  <span class="no">WHERE</span> <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">LIMIT</span> <span class="mi">1</span>  <span class="o">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="o">]]</span>
-</span><span class='line'>  <span class="no">CACHE</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;collections&quot;</span>  <span class="no">WHERE</span> <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">LIMIT</span> <span class="mi">1</span>  <span class="o">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="o">]]</span>
-</span><span class='line'>  <span class="no">Collection</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;collections&quot;</span>  <span class="no">WHERE</span> <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">LIMIT</span> <span class="mi">1</span>  <span class="o">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="o">]]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You have to be explicit at telling what you need from the database. In the easy cases Rails includes method will do. You can read more about it in Rails guides - <a href="http://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations" target="_blank">Eager Loading</a>
-</p>
-
-
-
-
-<p>
-  <strong>Boolean Field with Three Possible Values</strong><br/>
-  Boolean is supposed to have two possible values – <code>true</code> and <code>false</code>, right? And how about <code>nil</code>? If you do not specify default value and null: false in your migrations, you end up with boolean field with three possible values – <code>true</code>, <code>false</code> and <code>nil</code>. This leads to nasty code like:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># post is new, not published, not rejected</span>
-</span><span class='line'><span class="k">if</span> <span class="n">post</span><span class="o">.</span><span class="n">published</span><span class="o">.</span><span class="n">nil?</span>
-</span><span class='line'>  <span class="c1"># ...</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># post is published</span>
-</span><span class='line'><span class="k">if</span> <span class="n">post</span><span class="o">.</span><span class="n">published</span>
-</span><span class='line'>  <span class="c1"># ...</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># post is new or rejected</span>
-</span><span class='line'><span class="k">unless</span> <span class="n">post</span><span class="o">.</span><span class="n">published</span>
-</span><span class='line'>  <span class="c1"># ...</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  If you need three possible states – use string field with three <code>well-defined</code> values.
-</p>
-
-
-
-
-<p>
-  <strong>Orphaned Records After Destroy</strong><br/>
-  When you destroy a model and it is required by associated records, you should handle it. It’s easy to find such cases:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:user</span>
-</span><span class='line'>  <span class="n">validates_presence_of</span> <span class="ss">:user</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  User is required for post. Hence, we have to write:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:posts</span><span class="p">,</span> <span class="ss">dependent</span><span class="p">:</span> <span class="ss">:destroy</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Leaving puts</strong><br/>
-  Leaving <code>puts</code> in the code after some debugging session pollutes server logs and output of tests. Use <code>Rails.logger.debug</code> so it’s later possible to adjust the desired log level.
-</p>
-
-
-
-
-<p>
-  <strong>Not Using map</strong><br/>
-  I’ve seen such code many times:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">users</span> <span class="o">=</span> <span class="o">[]</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">posts</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">post</span><span class="o">|</span>
-</span><span class='line'>  <span class="n">users</span> <span class="o">&lt;&lt;</span> <span class="n">post</span><span class="o">.</span><span class="n">user</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  This is exactly the case for using <code>map</code>, which is shorter and more idiomatic:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">users</span> <span class="o">=</span> <span class="n">posts</span><span class="o">.</span><span class="n">map</span> <span class="k">do</span> <span class="o">|</span><span class="n">post</span><span class="o">|</span>
-</span><span class='line'>  <span class="n">post</span><span class="o">.</span><span class="n">user</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Not Using Hash#fetch</strong><br/>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">name</span> <span class="o">=</span> <span class="n">params</span><span class="o">[</span><span class="ss">:user</span><span class="o">][</span><span class="ss">:name</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  What’s wrong with this code? It will throw <code>NoMethodError: undefined method `[]' for nil:NilClass</code> if there is no user key in the hash. If you expect the key to always be present, use <code>Hash#fetch</code>:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">name</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span><span class="o">[</span><span class="ss">:name</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  This will give you a meaningful <code>exception – KeyError: key not found: :user</code>.
-</p>
-
-
-
-
-<p>
-  <strong>Using Code from app/ in Migrations</strong><br/>
-  Let’s say you have the following model:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="no">ACTIVE</span> <span class="o">=</span> <span class="s2">&quot;after_registration&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  and you want to add points field to it. So you create a migration. But you would also like to handle existing users: 10 points for active and 0 for the rest. You add to your migration:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">status</span><span class="p">:</span> <span class="ss">User</span><span class="p">:</span><span class="ss">:ACTIVE</span><span class="p">)</span><span class="o">.</span><span class="n">update_all</span><span class="p">(</span><span class="ss">points</span><span class="p">:</span> <span class="mi">10</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  It works and you are happy. Time passes by and you decide to remove <code>User::ACTIVE</code> constant. Your migrations are now broken, you cannot run them from scratch, because <code>User::ACTIVE</code> is undefined.
-</p>
-
-
-
-
-<p>
-  Never use code from app/ directory in migrations. If you need to update existing data and do it in a few environments (development, staging, production) create a Rake task and delete it once it’s executed in every environment.
 </p>
 
 
