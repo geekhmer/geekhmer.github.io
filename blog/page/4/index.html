@@ -79,6 +79,260 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/04/24/how-to-install-rails-and-nginx-with-passenger-on-ubuntu/">How to Install Rails and Nginx With Passenger on Ubuntu?</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-24T20:32:00+07:00" pubdate data-updated="true">Apr 24<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/ruby_on_rails.png" width="400" alt="How To Install Rails and Nginx with Passenger on Ubuntu?" />
+</p>
+
+
+
+
+<p>
+  Ruby on Rails is an open source web application framework which runs on the Ruby programming language. It allows the developers creating pages and applications that gather information from the web server, talk to or query the database, and render templates out of the box directly to the internet browsers.
+</p>
+
+
+
+
+<p>
+  As a result, Rails features a routing system that is independent of the web server. The web server is used to render the content only. The choice for that would be Nginx. Nginx is fast webserver with a strong focus on high concurrency, high performance and low memory usage.
+</p>
+
+
+
+
+<h3>
+  Install Ruby and Rails
+</h3>
+
+
+
+
+<p>
+  Before we proceed with installation, we should make sure that our system repositories are up to date:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Once we are up to date with the latest available packages, the next step is to install Ruby Version Manager. It is application that allows to manage several different ruby versions easily, we can install RVM and then load it with:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">curl</span> <span class="o">-</span><span class="n">L</span> <span class="n">get</span><span class="o">.</span><span class="n">rvm</span><span class="o">.</span><span class="n">io</span> <span class="o">|</span> <span class="n">bash</span> <span class="o">-</span><span class="n">s</span> <span class="n">stable</span>
+</span><span class='line'><span class="n">source</span> <span class="sr">/usr/</span><span class="n">local</span><span class="o">/</span><span class="n">rvm</span><span class="o">/</span><span class="n">scripts</span><span class="o">/</span><span class="n">rvm</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We must make sure that we have all dependencies from RVM. To make sure that we have all required dependencies, we execute the following command:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rvm</span> <span class="n">requirements</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  It will make sure that we are up to date and install the missing requirements (if any). Once we have RVM installed and configured, we can proceed to install and configure Ruby.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rvm</span> <span class="n">install</span> <span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">1</span>
+</span><span class='line'><span class="n">rvm</span> <span class="n">use</span> <span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">1</span> <span class="o">--</span><span class="n">default</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  These two commands will install Ruby and set the system to use version 2.2.1 by default. The next step is to make sure we have all components for Ruby on Rails. Ruby Gems is a package manager for the Ruby programming language that provides a standard format for distributing Ruby programs and libraries, a tool designed to easily manage the installation of gems, and a server for distributing them, we can install it with this command and then use it to install Rails:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rvm</span> <span class="n">rubygems</span> <span class="n">current</span>
+</span><span class='line'><span class="n">gem</span> <span class="n">install</span> <span class="n">rails</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  This process could take some time, but after it finish, Ruby on Rails is installed.
+</p>
+
+
+
+
+<h3>
+  Install Passenger and Nginx
+</h3>
+
+
+
+
+<p>
+  We need to make sure that we can easily deploy Ruby on rails to any web server. We will install and use Passenger for that. It will serve as interface or bridge for communication between Ruby and the web server, you can install it with the following command:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="n">install</span> <span class="n">passenger</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Once passenger is installed, the rest of the required setup is fully automated. We execute the command:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rvmsudo</span> <span class="n">passenger</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">nginx</span><span class="o">-</span><span class="n">module</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Once we do this, it checks for all dependencies automatically and install those that are missing. If some manual user action is required, Passenger will tell us, as well as give us detailed instructions how to do it.
+</p>
+
+
+
+
+<p>
+  Now we need to configure nginx to “talk” to Passenger. In order to do that, we need to open the nginx configuration file (/opt/nginx/conf/nginx.conf), using our favorite editor and add the following:
+</p>
+
+
+<p></p>
+
+<figure class='code'><figcaption><span>nginx.conf </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">server</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">listen</span> <span class="mi">80</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">server_name</span> <span class="n">example</span><span class="o">.</span><span class="n">com</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">passenger_enabled</span> <span class="n">on</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">root</span> <span class="sr">/var/</span><span class="n">www</span><span class="o">/</span><span class="n">rails_app</span><span class="o">/</span><span class="kp">public</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  In order to create our rails app, we need to install Node.js first:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">nodejs</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Once that is that, we should go to our directory (in this case it is /var/www/rails_app/public) and create the application. After all this is installed and configured, we simply need to start Nginx.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="kp">new</span> <span class="n">my_first_rails_app</span>
+</span><span class='line'><span class="n">sudo</span> <span class="n">service</span> <span class="n">nginx</span> <span class="n">start</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We can try and access our new Ruby on Rails application using our browser. It seems that it was much easier to setup the environment and create our first Ruby on Rails project than we thought.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/04/20/ruby-on-rails-build-a-simple-rake-task/">Ruby on Rails Build a Simple Rake Task</a></h1>
     
     
@@ -1667,91 +1921,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/04/16/quickly-add-bootstrap-to-your-project/">Quickly Add Bootstrap to Your Project</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-04-16T08:52:00+07:00" pubdate data-updated="true">Apr 16<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/bootstrap.png" alt="Quickly Add Bootstrap to Your Project" />
-</p>
-
-
-
-
-<p>
-  Bootstrap is an amazing layout library that is awesome for building both prototypes as well as full blown websites. This very website makes extensive use of Bootstrap 3 to make things look awesome on both mobiles sites as well as the desktop.
-</p>
-
-
-
-
-<p>
-  What if we want to quickly prototype out a site using bootstrap? Fortunately you can easily add bootstrap to your site without downloading anything, simply reference the associated files on the Yandex CDN. 
-</p>
-
-
-
-
-<p>
-  Yandex is a worldwide search engine that is extremely popular in russia. Their CDN is extremely fast and has many different libraries available. To add bootstrap via yandex, simply include them like so (this also include jQuery, since Bootstrap JS requires it).
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;http://yandex.st/jquery/1.11.1/jquery.min.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">link</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;http://yandex.st/bootstrap/3.1.1/css/bootstrap.min.css&quot;</span> <span class="nx">media</span><span class="o">=</span><span class="s2">&quot;screen&quot;</span> <span class="nx">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="o">/&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;http://yandex.st/bootstrap/3.1.1/js/bootstrap.min.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  A full list of the libraries available can be found on the <a href="https://tech.yandex.ru/jslibs/" target="_blank">yandex</a> website. Note that it&#8217;s in russian, so you might need to translate it.
-</p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/5/">&larr; Older</a>
@@ -1767,6 +1936,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/06/18/the-10-best-project-management-tools-for-freelancers/">The 10 Best Project Management Tools for Freelancers</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/06/17/is-ruby-interpreted-or-compiled/">Is Ruby Interpreted or Compiled?</a>
@@ -1790,10 +1963,6 @@
     
       <li class="post">
         <a href="/blog/2015/06/03/my-development-stack/">My Development Stack</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/05/24/best-practices-for-agile-ruby-on-rails-development/">Best Practices for Agile Ruby on Rails Development</a>
       </li>
     
   </ul>
@@ -1851,7 +2020,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 23 ]</a>
+        <a href="/blog/categories/other/">Other [ 24 ]</a>
       </li>
     
   </ul>
