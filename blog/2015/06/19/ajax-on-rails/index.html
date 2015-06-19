@@ -1,0 +1,842 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Ajax on Rails - GeeKhmer</title>
+  <meta name="author" content="Bunlong Van">
+  
+  
+  <meta name="description" content="The biggest website of computer programming, Ruby, Ruby on Rails, Erlang, Chicagoboss and Javascript in Southeast Asia.">
+
+  <meta name="keywords" content="Ajax on Rails">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://geekhmer.github.io/blog/2015/06/19/ajax-on-rails">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="" rel="alternate" title="GeeKhmer" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+<link href="/stylesheets/jquery.fancybox.css" media="screen, projection" rel="stylesheet" type="text/css">
+<script src="/javascripts/libs/jquery.fancybox.pack.js"></script>
+<script src="/javascripts/init_fancybox.js"></script>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1>
+    <!-- <a href="/">GeeKhmer</a> -->
+    <div class="logo" />
+  </h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation">
+  <form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:geekhmer.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+  </form>
+
+<ul class="subscription" data-subscription="rss">
+  
+  
+</ul>
+<ul class="main-navigation">
+  <li><a href="/">Home</a></li>
+  <li><a href="/blog/archives">Articles</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/team">Team</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Ajax on Rails</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-06-19T11:37:00+07:00" pubdate data-updated="true">Jun 19<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>
+  <img src="/images/ajax_on_rails.png" width="400" alt="Ajax on Rails" />
+</p>
+
+
+
+
+<p>
+  This is a tutorial for ajax use with Rails conventions. For illustrative purposes, we’ll build a single-page Product list app.
+</p>
+
+
+
+
+<p>
+  <strong>About Ajax</strong><br/>
+  Ajax (Asynchronous JavaScript and XML) is used as a mechanism for sending and retrieving data asynchronously (in the background). While XML can certainly be used with ajax, it is not limited to this format. The JSON format, for example, is more commonly used today, especially in the Rails community. There are significant advantages in using Ajax, which include better user interactivity. Ajax allows content on a page to be updated without having to re-render the entire page, making it a &#8220;seamless&#8221; experience.
+</p>
+
+
+
+
+<p>
+  <strong>Create a New Product on the Index Page</strong><br/>
+  Before we start, let’s take a quick look at our schema so that we know what we’re working with:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Schema</span><span class="o">.</span><span class="n">define</span><span class="p">(</span><span class="ss">version</span><span class="p">:</span> <span class="mi">20140620130316</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">create_table</span> <span class="s2">&quot;products&quot;</span><span class="p">,</span> <span class="ss">force</span><span class="p">:</span> <span class="kp">true</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">t</span><span class="o">.</span><span class="n">datetime</span> <span class="s2">&quot;created_at&quot;</span><span class="p">,</span>  <span class="ss">null</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>    <span class="n">t</span><span class="o">.</span><span class="n">datetime</span> <span class="s2">&quot;updated_at&quot;</span><span class="p">,</span>  <span class="ss">null</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>    <span class="n">t</span><span class="o">.</span><span class="n">string</span>   <span class="s2">&quot;name&quot;</span><span class="p">,</span>        <span class="ss">null</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>    <span class="n">t</span><span class="o">.</span><span class="n">string</span>   <span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="ss">null</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  After creating a Product model and then create some products to play with, our Product Controller should look like this:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>products_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ProductsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>    <span class="vi">@products</span> <span class="o">=</span> <span class="no">Product</span><span class="o">.</span><span class="n">all</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Instead of creating new.html.erb, let’s add a button somewhere on our index.html.erb that users can use to display a hidden form:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>index.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;%=</span> <span class="n">link_to</span> <span class="s1">&#39;New Product&#39;</span><span class="p">,</span> <span class="n">new_product_path</span><span class="p">,</span> <span class="ss">remote</span><span class="p">:</span> <span class="kp">true</span> <span class="o">%&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Here we pass the <code>remote: true</code> option to disable the default Rails mechanism that would have otherwise navigated us to <code>/products/new</code>.
+</p>
+
+
+
+
+<p>
+  Before moving on, let’s quickly revisit our Product Controller and set it up to create new products with ajax:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>products_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ProductsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="n">before_action</span> <span class="ss">:all_product</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:index</span><span class="p">,</span> <span class="ss">:create</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># index action has been removed</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">new</span>
+</span><span class='line'>    <span class="vi">@product</span> <span class="o">=</span> <span class="no">Product</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="vi">@product</span>  <span class="o">=</span> <span class="no">Product</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">product_params</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">all_products</span>
+</span><span class='line'>    <span class="vi">@products</span> <span class="o">=</span> <span class="no">Product</span><span class="o">.</span><span class="n">all</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">product_params</span>
+</span><span class='line'>    <span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:product</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span> <span class="ss">:description</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  I have removed the index action because I created a before_action filter that creates the @products instance variable for us automatically. Because we no longer have any logic in our index action, it is not necessary. Rails will automatically render the correct template, even without the presence of the action.
+</p>
+
+
+
+
+<p>
+  Noteworthy here is the <code>respond_to</code> method invoked near the top that will allow us to render both html and javascript responses with all of our controller actions. The respond_to method provides the ability to respond to the requests with many formats(i.e. csv, xml, etc…). This can be done for one or all actions in a controller. If we wanted to provide json only in our index action, we would write something like this:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>  <span class="vi">@products</span> <span class="o">=</span> <span class="no">Product</span><span class="o">.</span><span class="n">all</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+</span><span class='line'>    <span class="nb">format</span><span class="o">.</span><span class="n">html</span>
+</span><span class='line'>    <span class="nb">format</span><span class="o">.</span><span class="n">json</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now, choose a place on the index page to hide your form by passing a style attribute with the following:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>index.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;product-form&quot;</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;display:none;&quot;</span><span class="o">&gt;&lt;</span><span class="sr">/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">...</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  which will hide our form when the page is initially visited.
+</p>
+
+
+
+
+<p>
+  Next, create <code>new.js.erb</code>:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>new.js.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span><span class="p">(</span><span class="s1">&#39;#product-form&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">html</span><span class="p">(</span><span class="s2">&quot;&lt;%= j (render &#39;form&#39;) %&gt;&quot;</span><span class="p">);</span>
+</span><span class='line'><span class="err">$</span><span class="p">(</span><span class="s1">&#39;#product-form&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">slideDown</span><span class="p">(</span><span class="mi">350</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  This is just an ERB template that generates Javascript instead of the HTML we’re used to. It basically translates to: &#8220;Find the element with an id attribute of product-form and at that point render the html in the form partial.&#8221; We typically do this in <code>new.html.erb</code> with:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>new.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">render</span> <span class="s1">&#39;form&#39;</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p><p>
+  Since render is a Rails method, JavaScript doesn’t understand it and it has to be interpreted with ERB. The &lsquo;j&rsquo; is syntactic sugar for <code>&lt;%= escape_javascript (render &lsquo;form&rsquo;) %></code>
+</p></p>
+
+<p><figure class='code'><figcaption><span>_form.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= simple_form_for @product, remote: true do |f| %&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">input</span>  <span class="ss">:description</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%= f.input  :deadline %&gt;</span>
+</span><span class='line'>  <span class="o">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">button</span> <span class="ss">:submit</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">&lt;% end %&gt;</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  This is the &lsquo;form&rsquo; being rendered in <code>new.js.erb</code> with a <code>remote: true</code> option being passed in. In our form partial, we also pass the <code>remote: true</code> option that will execute an ajax POST request.
+</p></p>
+
+<p><p>
+  Finally, we can wrap things up by rendering our new Product list and hiding our form. This final step includes identifying where to render our list. Using the rai-jax app as an example, let’s look at what our final <code>index.html.erb</code> should look like at this stage:
+</p></p>
+
+<p><figure class='code'><figcaption><span>index.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;row&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-md-5 col-md-offset-1&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="n">h2</span><span class="o">&gt;</span><span class="no">Products</span><span class="o">&lt;</span><span class="sr">/h2&gt;</span>
+</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-md-2 col-md-offset-4&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="sx">%= link_to new_product_path, remote: true do %&gt;</span>
+</span><span class='line'><span class="sx">      &lt;button class=</span><span class="s2">&quot;btn btn-default&quot;</span><span class="o">&gt;</span><span class="no">New</span><span class="o">&lt;</span><span class="sr">/button&gt;</span>
+</span><span class='line'><span class="sr">    &lt;% end %&gt;</span>
+</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;div class=&quot;row&quot;&gt;</span>
+</span><span class='line'><span class="sr">  &lt;div class=&quot;col-md-6 col-md-offset-2&quot; id=&quot;product-form&quot; style=&quot;display:none;&quot;&gt;&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;div class=&quot;row&quot;&gt;</span>
+</span><span class='line'><span class="sr">  &lt;div class=&quot;col-md-7 col-md-offset-1&quot; id=&quot;products&quot;&gt;&lt;%= render @products %&gt;&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  And we update our product list and hide our form with <code>create.js.erb</code>:
+</p></p>
+
+<p><figure class='code'><figcaption><span>create.js.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span><span class="p">(</span><span class="s1">&#39;#products&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">html</span><span class="p">(</span><span class="s2">&quot;&lt;%= j (render @products) %&gt;&quot;</span><span class="p">);</span>
+</span><span class='line'><span class="err">$</span><span class="p">(</span><span class="s1">&#39;#product-form&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">slideUp</span><span class="p">(</span><span class="mi">350</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  <strong>Update a Product on the Index Page</strong><br/>
+  As in Part One, let’s start by visiting our Product Controller and setting it up for updates:
+</p></p>
+
+<p><figure class='code'><figcaption><span>products_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ProductsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="n">before_action</span> <span class="ss">:all_products</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:index</span><span class="p">,</span> <span class="ss">:create</span><span class="p">,</span> <span class="ss">:update</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">before_action</span> <span class="ss">:set_products</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:edit</span><span class="p">,</span> <span class="ss">:update</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">update</span>
+</span><span class='line'>    <span class="vi">@product</span><span class="o">.</span><span class="n">update_attributes</span><span class="p">(</span><span class="n">product_params</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>  <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">set_products</span>
+</span><span class='line'>    <span class="vi">@product</span> <span class="o">=</span> <span class="no">Product</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">product_params</span>
+</span><span class='line'>    <span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:product</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span> <span class="ss">:description</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  Similar to Part One, we add an edit button with a <code>remote:</code> true option:
+</p></p>
+
+<p><figure class='code'><figcaption><span>_product.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">&lt;%=</span> <span class="n">link_to</span> <span class="n">edit_product_path</span><span class="p">(</span><span class="n">product</span><span class="p">),</span> <span class="ss">remote</span><span class="p">:</span> <span class="kp">true</span> <span class="k">do</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">    &lt;button&gt;</span><span class="no">Edit</span><span class="o">&lt;</span><span class="sr">/button&gt;</span>
+</span><span class='line'><span class="sr">  &lt;% end %&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&hellip;</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  And, finally, our <code>edit.js.erb</code> and <code>update.js.erb</code> are the same as our new and update templates: <code>edit.js.erb</code> corresponds to <code>new.js.erb</code> and <code>create.js.erb</code> corresponds to <code>update.js.erb</code>.
+</p></p>
+
+<p><p>
+  <strong>Delete a Product on the Index Page</strong><br/>
+  Our final updates to our Product Controller involves us providing the destroy action:
+</p></p>
+
+<p><figure class='code'><figcaption><span>product_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ProductsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="n">before_action</span> <span class="ss">:all_products</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:index</span><span class="p">,</span> <span class="ss">:create</span><span class="p">,</span> <span class="ss">:update</span><span class="p">,</span> <span class="ss">:destroy</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">before_action</span> <span class="ss">:set_products</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:edit</span><span class="p">,</span> <span class="ss">:update</span><span class="p">,</span> <span class="ss">:destroy</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">destroy</span>
+</span><span class='line'>    <span class="vi">@product</span><span class="o">.</span><span class="n">destroy</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  When adding our delete button, two additional steps are required:
+</p></p>
+
+<p><figure class='code'><figcaption><span>_product.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;%=</span> <span class="n">link_to</span> <span class="n">product</span><span class="p">,</span> <span class="ss">remote</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="nb">method</span><span class="p">:</span> <span class="ss">:delete</span><span class="p">,</span>  <span class="ss">data</span><span class="p">:</span> <span class="p">{</span> <span class="ss">confirm</span><span class="p">:</span> <span class="s1">&#39;Are you sure?&#39;</span> <span class="p">}</span> <span class="k">do</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;button&gt;</span><span class="no">Delete</span><span class="o">!&lt;</span><span class="sr">/button&gt;</span>
+</span><span class='line'><span class="sr">&lt;% end %&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&hellip;</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  First, we pass in a <code>method: :delete</code> option; Second, we provide a courtesy confirmation to the user making sure they don’t delete anything by accident.
+</p></p>
+
+<p><p>
+  The last file we’ll create is <code>destroy.js.erb</code> and it will contain one line:
+</p></p>
+
+<p><figure class='code'><figcaption><span>destroy.js.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span><span class="p">(</span><span class="s1">&#39;#products&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">html</span><span class="p">(</span><span class="s2">&quot;&lt;%= j (render @products) %&gt;&quot;</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  Seriously, Rails makes ajax easy. As I mentioned above.
+</p></p>
+
+<p><p>
+  So far so good, That&rsquo;s it!!! See ya!!! :)
+</p></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Bunlong Van</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-06-19T11:37:00+07:00" pubdate data-updated="true">Jun 19<span>th</span>, 2015</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ruby/'>Ruby</a>, <a class='category' href='/blog/categories/ruby-on-rails/'>Ruby on Rails</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2015/06/19/ajax-on-rails/" data-via="" data-counturl="http://geekhmer.github.io/blog/2015/06/19/ajax-on-rails/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/06/18/the-10-best-project-management-tools-for-freelancers/" title="Previous Post: The 10 Best Project Management Tools for Freelancers">&laquo; The 10 Best Project Management Tools for Freelancers</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/06/19/ajax-on-rails/">Ajax on Rails</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/18/the-10-best-project-management-tools-for-freelancers/">The 10 Best Project Management Tools for Freelancers</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/17/is-ruby-interpreted-or-compiled/">Is Ruby Interpreted or Compiled?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/16/how-the-hash-works-in-ruby/">How the Hash Works in Ruby?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/08/master-ruby-blocks/">Master Ruby Blocks</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/06/how-to-use-link-to-in-ruby-on-rails/">How to Use Link_to in Ruby on Rails?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/05/how-to-spend-less-time-and-money-on-growing-your-business/">How to Spend Less Time and Money on Growing Your Business?</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Category</h1>
+  <ul id="recent_posts">
+    
+      <li>
+        <a href="/blog/categories/facebook/">Facebook [ 4 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby/">Ruby [ 98 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/heroku/">Heroku [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 88 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/testing/">Testing [ 5 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/layout/">Layout [ 3 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby-metaprogramming/">Ruby metaprogramming [ 4 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/websocket/">Websocket [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/front-end-mvc-framework/">Front-end mvc framework [ 1 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/javascript/">Javascript [ 4 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/erlang/">Erlang [ 20 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/design-pattern/">Design pattern [ 1 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/other/">Other [ 24 ]</a>
+      </li>
+    
+  </ul>
+</section><section>
+  <h1>Notes</h1>
+  <ul id="recent_posts">
+    <li>
+      <a href="http://vimcommands.github.io/" target="_blank">Vim Commands</a>
+    </li>
+    <li>
+      <a href="http://ruby-hacking-style-guide.github.io/" target="_blank">Ruby Hacking Style Guide</a>
+    </li>
+  </ul>
+</section><section>
+  <h1>References</h1>
+  <ul id="recent_posts">
+    <li>
+      <a href="http://www.erlang.org/" target="_blank">
+        <img src="/images/logo_erlang.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://www.chicagoboss.org/" target="_blank">
+        <img src="/images/logo_chicagoboss.svg" />
+      </a>
+    </li>
+    <li>
+      <a href="https://www.ruby-lang.org/en/" target="_blank">
+        <img src="/images/logo_ruby.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://guides.rubyonrails.org" target="_blank">
+        <img src="/images/logo_rails_guides.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://railscasts.com" target="_blank">
+        <img src="/images/logo_rails_casts.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://github.com" target="_blank">
+        <img src="/images/logo_github.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://www.linode.com" target="_blank">
+        <img src="/images/logo_linode.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://newrelic.com" target="_blank">
+        <img src="/images/logo_newrelic.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://developers.facebook.com/" target="_blank">
+        <img src="/images/logo_facebook.png" />
+      </a>
+    </li>
+  </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 GeeKhmer in Phnom Penh, Cambodia.
+</p>
+
+</footer>
+  
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=1451301955117043&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
