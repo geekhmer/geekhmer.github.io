@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-06-19T12:55:12+07:00</updated>
+  <updated>2015-06-21T11:40:20+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,341 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Use Message Queue in Rails]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/06/21/use-message-queue-in-rails/"/>
+    <updated>2015-06-21T10:53:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/06/21/use-message-queue-in-rails</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/message_queue .png" width="400" alt="Use Message Queue in Rails" />
+</p>
+
+
+
+
+<p>
+  This article describes the application architecture pattern which is (in general) nothing new, but (from my experience) rarely applied in the Rails world. I’m talking about the nice and simple abstraction – message queue. But let me start by describing the goals I want to achieve and some alternative solutions.
+</p>
+
+
+
+
+<h3>
+  Goals
+</h3>
+
+
+
+
+<p>
+  <strong>Split</strong> application into a few smaller applications<br/>
+  Smaller applications are easier to reason about. You don’t have to go through 50 classes, you can just read 10, because it’s all you’ve got. When a new developer joins the team he has nice onboarding if you can tell him: “hey, start with this small piece of code, everything you need to know to implement this new feature is encapsulated here”.
+</p>
+
+
+
+
+<p>
+  <strong>Separate</strong> code for concepts which are not logically connected<br/>
+  Smaller applications are easier to reason about. You don’t have to go through 50 classes, you can just read 10, because it’s all you’ve got. When a new developer joins the team he has nice onboarding if you can tell him: &#8220;hey, start with this small piece of code, everything you need to know to implement this new feature is encapsulated here&#8221;.
+</p>
+
+
+
+
+<p>
+  Use <strong>new</strong> languages and frameworks<br/>
+  We, developers, want to try and learn new languages, libraries, frameworks and technologies. If you make a small application with a shiny new tool and fail – the consequences are less severe, because you can quickly rewrite this small application. If you are going to make one big application, you will think twice before introducing a new tool. So, in some way, smaller applications minimize the risk.
+</p>
+
+
+
+
+<h3>
+  Solution1 - One database, multiple apps
+</h3>
+
+
+
+
+<p>
+  This is the very first idea which may come to your mind – just point multiple applications to the one shared database. Been there, done that, won’t do that again! Data is associated with validation logic. Either you duplicate this logic in every app or you extract it to Rails engine gem. Both solutions are hard to maintain (think about running migrations…) and you still have strong coupling in your system.
+</p>
+
+
+
+
+<p>
+  One case when this approach may work – one read-write app and many read-only apps, but I haven’t tried it.
+</p>
+
+
+
+
+<h3>
+  Solution2 - Expose REST API
+</h3>
+
+
+
+
+<p>
+  As Rails devs we are pretty familiar with REST, so we can expose REST API in one of our apps and call this API in the other. This approach has many solid use cases so here I’m just listing some weak points to take into consideration:
+</p>
+
+
+
+
+<p>
+  - Usually requests in Ruby are blocking – calling app has to wait for the response even if it’s not interested in it.<br/>
+  - Requires authentication – we have to somehow ensure that our internal API is not used… well, externally.<br/>
+  - Everything happens in server process – if you are calling your internal API you may end up using the same server process which is used for handling requests of your “real users”. You would like to give your “real users” priority.<br/>
+  - Calling app has knowledge about receiving app – you have to know which endpoints should be called and which parameters be passed. This introduces coupling.<br/>
+</p>
+
+
+
+
+<h3>
+  Solution3 - Message queue
+</h3>
+
+
+
+
+<p>
+  Message queue is a really nice abstraction. Publisher just leaves messages at one end of the &#8220;pipe&#8221;, consumer reads messages from the other end of the &#8220;pipe&#8221;. It is asynchronous, because publisher does not wait for his message to be processed. Moreover, it decouples publisher from consumer, because publisher does not care what happens with his message and who will read it.
+</p>
+
+
+
+
+<p>
+  This architecture is also resistant to outages, at least when we assume that the queue service rarely breaks. If the consumer is not processing messages, nothing prevents publisher from adding more of them to the queue. When consumer starts to function again, it will process messages from the buffer (if they didn’t take all of your memory).
+</p>
+
+
+
+
+<h3>
+  When it shines?
+</h3>
+
+
+
+
+<p>
+  Message queue is really useful if we have some processing which happens out of the main business flow and the main business flow does not have to wait for the results of this processing. The most common example is custom event tracking – own analytics module. We just publish an event and continue execution without slowing anything down.
+</p>
+
+
+
+
+<h3>
+  RabbitMQ
+</h3>
+
+
+
+
+<p>
+  RabbitMQ is a popular choice for message queue service, especially in Rails world. Honestly, I haven’t tried different implementations, because RabbitMQ really has everything I need.
+</p>
+
+
+
+
+<p>
+  There are Ruby gems for communicating with RabbitMQ and it’s also easy to install and configure.
+</p>
+
+
+
+
+<p>
+  <img src="http://geekhmer.github.io/images/rabbitmq_concepts.png" width="400" alt="Use Message Queue in Rails" />
+</p>
+
+
+
+
+<p>
+  In this diagram there are presented some concepts introduced by RabbitMQ. Publisher leaves messages in the exchange. Then they are routed from the exchange to multiple queues. There are many routing algorithms available – <a href="https://www.rabbitmq.com/tutorials/amqp-concepts.html#exchanges" target="_blank">https://www.rabbitmq.com/tutorials/amqp-concepts.html#exchanges</a>
+</p>
+
+
+
+
+<p>
+  Workers grab messages from queue. If there are multiple workers connected to one queue, they will be load balanced and the message will be delivered only to one of them.
+</p>
+
+
+
+
+<h3>
+  Easy case
+</h3>
+
+
+
+
+<p>
+  If you feel overwhelmed – don’t worry. Here is what you should start with:
+</p>
+
+
+
+
+<p>
+  <img src="http://geekhmer.github.io/images/rabbitmq_easy_case.png" width="400" alt="Use Message Queue in Rails" />
+</p>
+
+
+
+
+<h3>
+  Publishing
+</h3>
+
+
+
+
+<p>
+  Now it’s time for some code. It’s really simple, because integration with RabbitMQ is simple. We will use two gems – <code>bunny</code> and <code>sneakers</code>.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Gemfile</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;bunny&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># an initializer</span>
+</span><span class='line'><span class="n">connection</span> <span class="o">=</span> <span class="no">Bunny</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">host</span><span class="p">:</span> <span class="s1">&#39;localhost&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="n">connection</span><span class="o">.</span><span class="n">start</span>
+</span><span class='line'><span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">create_channel</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># a service</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">RabbitPublisher</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">channel</span> <span class="o">=</span> <span class="n">channel</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">publish</span><span class="p">(</span><span class="n">exchange_name</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">exchange</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="n">fanout</span><span class="p">(</span><span class="n">exchange_name</span><span class="p">,</span> <span class="ss">durable</span><span class="p">:</span> <span class="kp">true</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">exchange</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">to_json</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:channel</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<h3>
+  Receiving
+</h3>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Gemfile</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;sneakers&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># an initializer</span>
+</span><span class='line'><span class="no">Sneakers</span><span class="o">.</span><span class="n">configure</span>  <span class="ss">daemonize</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span>
+</span><span class='line'>                    <span class="ss">amqp</span><span class="p">:</span> <span class="s2">&quot;amqp://localhost&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="ss">log</span><span class="p">:</span> <span class="s2">&quot;log/sneakers.log&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="n">pid_path</span><span class="p">:</span> <span class="s2">&quot;tmp/pids/sneakers.pid&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="ss">threads</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+</span><span class='line'>                    <span class="ss">workers</span><span class="p">:</span> <span class="mi">1</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># app/workers/events_worker.rb</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">EventsWorker</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="ss">Sneakers</span><span class="p">:</span><span class="ss">:Worker</span>
+</span><span class='line'>  <span class="n">from_queue</span> <span class="s2">&quot;events&quot;</span><span class="p">,</span> <span class="ss">env</span><span class="p">:</span> <span class="kp">nil</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">work</span><span class="p">(</span><span class="n">raw_event</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">event_params</span> <span class="o">=</span> <span class="no">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">raw_event</span><span class="p">)</span>
+</span><span class='line'>    <span class="no">SomeWiseService</span><span class="o">.</span><span class="n">build</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">event_params</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">ack!</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  For details refer to documentation of <a href="https://github.com/ruby-amqp/bunny" target="_blank">bunny</a> and <a href="https://github.com/jondot/sneakers" target="_blank">sneakers</a>.
+</p>
+
+
+
+
+<p>
+  If you enjoyed this article you can consider ping me for more details.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ajax on Rails]]></title>
@@ -4712,92 +5047,6 @@
   Some other quick things to note when upgrading to FriendlyId 5:<br/>
   - The default sequence separator has been changed from two dashes (&#8211;) to one dash (-). If you have a url scheme in place using the old way of doing things, you might want to find a workaround.<br/>
   - FriendlyId no longer uses a numeric sequence to differentiate a conflicting slug. Instead it uses a UUID (example: 2bc08962-b3dd-4f29-b2e6-244710c86106). If you dislike this functionality, you can utilize the new slug candidates feature explained above.
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails Get a User's Gravatar]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/05/09/ruby-on-rails-get-a-users-gravatar/"/>
-    <updated>2015-05-09T21:02:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/05/09/ruby-on-rails-get-a-users-gravatar</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="Ruby on Rails Get a User's Gravatar" />
-</p>
-
-
-
-
-<p>
-  <a href="https://en.gravatar.com/" target="_blank">Gravatar</a> is a Fantastic service that provides a universal avatar for users. Gravatar has designed their service in such a way that the user&#8217;s avatar can be rendered on any site free of charge. Gravatar is used on millions of sites across the globe including GitHub, Stack Overflow, Word Press, Disqus, and many more sites. You can easily use gravatar without much effort. Simply add the code below to your application helper:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ApplicationHelper</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">gravatar_url</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">gravatar</span> <span class="o">=</span> <span class="ss">Digest</span><span class="p">:</span><span class="ss">:MD5</span><span class="o">::</span><span class="n">hexdigest</span><span class="p">(</span><span class="n">email</span><span class="p">)</span><span class="o">.</span><span class="n">downcase</span>
-</span><span class='line'>    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://gravatar.com/avatar/</span><span class="si">#{</span><span class="n">gravatar</span><span class="si">}</span><span class="s2">.png?s=</span><span class="si">#{</span><span class="n">size</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The first parameter, email, is the email address you wish to obtain the gravatar for. The second parameter, size, is the size of the gravatar you wish to render. To actually get the link to the gravatar, we obtain an MD5 hash of the email and then lowercase it and append it to the end of the gravatar url. The size is specified using the s parameter. To use this function, simple pass the newly generated Gravatar url to an image tag like this:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">image_tag</span> <span class="n">gravatar_url</span><span class="p">(</span><span class="s2">&quot;you@youremail.com&quot;</span><span class="p">,</span> <span class="mi">64</span><span class="p">),</span> <span class="ss">alt</span><span class="p">:</span> <span class="s2">&quot;&quot;</span> <span class="o">%&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  This will render the gravatar for that email address or a default image if the avatar doesn&#8217;t exist. If you wish to specify your default image, you can modify your helper to look like the code listed below, changing the default url to whatever you wish:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">gravatar_url</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">gravatar_id</span> <span class="o">=</span> <span class="ss">Digest</span><span class="p">:</span><span class="ss">:MD5</span><span class="o">::</span><span class="n">hexdigest</span><span class="p">(</span><span class="n">email</span><span class="p">)</span><span class="o">.</span><span class="n">downcase</span>
-</span><span class='line'>  <span class="n">default_url</span> <span class="o">=</span> <span class="s2">&quot;http://mysite.com/myavatar.png&quot;</span>
-</span><span class='line'>  <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://gravatar.com/avatar/</span><span class="si">#{</span><span class="n">gravatar_id</span><span class="si">}</span><span class="s2">.png?s=</span><span class="si">#{</span><span class="n">size</span><span class="si">}</span><span class="s2">&amp;d=</span><span class="si">#{</span><span class="ss">CGI</span><span class="p">:</span><span class="ss">:escape</span><span class="p">(</span><span class="n">default_url</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  This will use whatever default URL you provide for the default url variable.
-</p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
 </p>
 
 ]]></content>
