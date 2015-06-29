@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-06-21T11:40:20+07:00</updated>
+  <updated>2015-06-29T23:29:13+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,420 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Mark Methods Private When You Don’t Test Them]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/06/25/mark-methods-private-when-you-dont-test-them/"/>
+    <updated>2015-06-25T20:58:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/06/25/mark-methods-private-when-you-dont-test-them</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="Mark Methods Private When You Don’t Test Them" />
+</p>
+
+
+
+
+<p>
+  In Ruby and many other languages, you write private methods to implement internal logic you don’t want to expose. You want the freedom to rename, repurpose or even delete them without worrying about impacting anything else. The <code>private</code> keyword signals other developers: Don’t rely on this; don’t call it; it might change. This is especially important when writing framework or library code that many other developers will use.
+</p>
+
+
+
+
+<p>
+  But which methods should you make private? Sometimes this is obvious; sometimes it isn&#8217;t. A good rule of thumb to use is: If you’re not testing a method, it should be private.
+</p>
+
+
+
+
+<p>
+  But wait a minute! Aren&#8217;t we supposed to test everything? Isn&#8217;t 100% code coverage the every Ruby developer seeks? Let me clarify. You should mark methods private when you test them indirectly by calling the other, public methods in the same class. Use the <code>private</code> keyword to help organize your code, to remind yourself what you still need to test, and what you don&#8217;t.
+</p>
+
+
+
+
+<p>
+  <strong>Three Paintings</strong><br/>
+  A simple example will make this clear. Suppose I have a class that describes a painting:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Painting</span> <span class="o">=</span> <span class="no">Struct</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span> <span class="ss">:year</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now I can create a list of three paintings in a Minitest::Spec file like this:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">let</span><span class="p">(</span><span class="ss">:one</span><span class="p">)</span> <span class="p">{</span> <span class="no">Painting</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;Spanish Couple In Front Of Inn&quot;</span><span class="p">,</span> <span class="mi">1900</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="n">let</span><span class="p">(</span><span class="ss">:two</span><span class="p">)</span> <span class="p">{</span> <span class="no">Painting</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;Guernica&quot;</span><span class="p">,</span> <span class="mi">1937</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="n">let</span><span class="p">(</span><span class="ss">:three</span><span class="p">)</span> <span class="p">{</span> <span class="no">Painting</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;Petite Fleurs&quot;</span><span class="p">,</span> <span class="mi">1958</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="n">let</span><span class="p">(</span><span class="ss">:paintings</span><span class="p">)</span> <span class="p">{</span> <span class="o">[</span><span class="n">one</span><span class="p">,</span> <span class="n">two</span><span class="p">,</span> <span class="n">three</span><span class="o">]</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Suppose my first requirement is to return the first painting from the list. Simple enough:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">list</span><span class="o">.</span><span class="n">first</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="s2">&quot;should return the first element&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">first</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">must_equal</span> <span class="n">one</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  I just call Array#first and I’m done. Returning the rest of the list is slightly more interesting:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">rest</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">_</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span> <span class="o">=</span> <span class="n">list</span>
+</span><span class='line'>  <span class="n">rest</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="s2">&quot;returns the rest of the elements&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">rest</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">must_equal</span> <span class="o">[</span><span class="n">two</span><span class="p">,</span> <span class="n">three</span><span class="o">]</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Rest always returns an array even if the input list was empty or had only one element. So far, so good. I’ve written two methods and two tests:
+</p>
+
+
+
+
+<p>
+  <img src="http://geekhmer.github.io/images/two_tests.png" width="400" alt="Mark Methods Private When You Don’t Test Them" />
+</p>
+
+
+
+
+<p>
+  <strong>A New Requirement</strong><br/>
+  Now suppose my business requirement changes slightly and I instead need to return the first painting sorted alphabetically by name. Once again, it’s not hard to do:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">list</span><span class="o">.</span><span class="n">sort</span> <span class="k">do</span> <span class="o">|</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">p1</span><span class="o">.</span><span class="n">name</span> <span class="o">&lt;=&gt;</span> <span class="n">p2</span><span class="o">.</span><span class="n">name</span>
+</span><span class='line'>  <span class="k">end</span><span class="o">.</span><span class="n">first</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="s2">&quot;should return the first element&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">first</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">must_equal</span> <span class="s2">&quot;Guernica&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And I need rest to use the same sort order, so I repeat the call to sort:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">rest</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">_</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span> <span class="o">=</span> <span class="n">list</span><span class="o">.</span><span class="n">sort</span> <span class="k">do</span> <span class="o">|</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">p1</span><span class="o">.</span><span class="n">name</span> <span class="o">&lt;=&gt;</span> <span class="n">p2</span><span class="o">.</span><span class="n">name</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="n">rest</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="s2">&quot;returns the rest of the elements&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">rest</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:name</span><span class="p">)</span><span class="o">.</span><span class="n">must_equal</span> <span class="o">[</span>
+</span><span class='line'>    <span class="s2">&quot;Petite Fleurs&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;Spanish Couple In Front Of Inn&quot;</span>
+</span><span class='line'>  <span class="o">]</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  I’ve implemented new behavior, but still have two methods and two tests:
+</p>
+
+
+
+
+<p>
+  <img src="http://geekhmer.github.io/images/two_tests.png" width="400" alt="Mark Methods Private When You Don’t Test Them" />
+</p>
+
+
+
+
+<p>
+  <strong>Extracting a Method</strong><br/>
+  Because both of my methods are covered by tests, I’m free to refactor them. I decide to extract a new method, sorted_by_name:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">sorted_by_name</span><span class="p">(</span><span class="n">list</span><span class="p">)</span><span class="o">.</span><span class="n">first</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">rest</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">_</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span> <span class="o">=</span> <span class="n">sorted_by_name</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">rest</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">sorted_by_name</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">list</span><span class="o">.</span><span class="n">sort</span> <span class="k">do</span> <span class="o">|</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">p1</span><span class="o">.</span><span class="n">name</span> <span class="o">&lt;=&gt;</span> <span class="n">p2</span><span class="o">.</span><span class="n">name</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="s2">&quot;returns the element with the first name&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">first</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">must_equal</span> <span class="s2">&quot;Guernica&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">it</span> <span class="s2">&quot;returns the rest after the first name&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">rest</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:name</span><span class="p">)</span><span class="o">.</span><span class="n">must_equal</span> <span class="o">[</span>
+</span><span class='line'>    <span class="s2">&quot;Petite Fleurs&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;Spanish Couple In Front Of Inn&quot;</span>
+</span><span class='line'>  <span class="o">]</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Here I’ve simply moved the call to sort into a utility method called sorted_by_name. Now first and rest both call sorted_by_name, making the code a bit clearer and DRY-er. But now I have three methods and only two tests:
+</p>
+
+
+
+
+<p>
+  <img src="http://geekhmer.github.io/images/two_tests_three_methods.png" width="400" alt="Mark Methods Private When You Don’t Test Them" />
+</p>
+
+
+
+
+<p>
+  <strong>Mark Methods Private When You Don’t Test Them</strong><br/>
+  Notice I didn’t bother writing a test for sorted_by_name. I know it works because my other tests still pass. The existing tests are sufficient; I am testing sorted_by_name indirectly. Because I extracted sorted_by_name from first and rest, because I refactored my code without adding any new behavior, no new test were required.
+</p>
+
+
+
+
+<p>
+  In this scenario, take the time to mark the new, untested method as private:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">sorted_by_name</span><span class="p">(</span><span class="n">list</span><span class="p">)</span><span class="o">.</span><span class="n">first</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">rest</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">_</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span> <span class="o">=</span> <span class="n">sorted_by_name</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">rest</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="kp">private</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">sorted_by_name</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">list</span><span class="o">.</span><span class="n">sort</span> <span class="k">do</span> <span class="o">|</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">p1</span><span class="o">.</span><span class="n">name</span> <span class="o">&lt;=&gt;</span> <span class="n">p2</span><span class="o">.</span><span class="n">name</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="s2">&quot;returns the element with the first name&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">first</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">must_equal</span> <span class="s2">&quot;Guernica&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">it</span> <span class="s2">&quot;returns the rest after the first name&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">rest</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:name</span><span class="p">)</span><span class="o">.</span><span class="n">must_equal</span> <span class="o">[</span>
+</span><span class='line'>    <span class="s2">&quot;Petite Fleurs&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;Spanish Couple In Front Of Inn&quot;</span>
+</span><span class='line'>  <span class="o">]</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The private keyword here reminds me I’ve already tested sorted_by_name, that I don’t need to write new tests for it. Now private is helping me organize my code; it’s helping me remember which methods I don’t need to test… and which methods are missing important tests.
+</p>
+
+
+
+
+<p>
+  <img src="http://geekhmer.github.io/images/two_tests_three_methods_private.png" width="400" alt="Mark Methods Private When You Don’t Test Them" />
+</p>
+
+
+
+
+<p>
+  f my tests don’t need to know about sorted_by_name, then certainly other developers don’t. It should be private. Marking it private reminds me that it is being tested indirectly, that I didn’t just forget to write a test for it. Marking it private tells other developers about what I’ve learned from my own test suite.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Use Message Queue in Rails]]></title>
@@ -4880,174 +5294,6 @@
 </p>
 
 
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Rails 4 FriendlyId]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/05/09/rails-4-friendlyid/"/>
-    <updated>2015-05-09T22:13:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/05/09/rails-4-friendlyid</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="Rails 4 FriendlyId" />
-</p>
-
-
-
-
-<p>
-  In this article we will go over using <a href="https://github.com/norman/friendly_id" target="_blank">FriendlyId</a> in Rails 4. It is important to note that the current version of FriendlyId (4.0) does not work with Rails 4. Therefore we will need to use FriendlyId 5.x, which is currently in release candidate status.
-</p>
-
-
-
-
-<p>
-  First, let&#8217;s include the FriendlyId gem in our gemfile.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Gemfile </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s2">&quot;friendly_id&quot;</span><span class="p">,</span> <span class="s2">&quot;~&gt; 5.0.1&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  FriendlyId no longer overrides finder code by default. Because of this we will need to change the way our controller code works. FriendlyId now exposes it&#8217;s functionality via <code>.friendly</code>. For example, to find a post by it&#8217;s friendly id, we use something like <code>Post.friendly.find(params[:id])</code>. To get FriendlyId working, you need to modify your controllers to use this behavior. An example is shown below.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/controllers/posts_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
-</span><span class='line'>    <span class="vi">@posts</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">all</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
-</span><span class='line'>    <span class="vi">@post</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">friendly</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  If you have a large site making extensive use of FriendlyId, you can also restore the old finder override behavior. This isn&#8217;t recommended though. An example of how to do this is listed below.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/models/post.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="kp">extend</span> <span class="no">FriendlyId</span>
-</span><span class='line'>  <span class="n">friendly_id</span> <span class="ss">:title</span><span class="p">,</span> <span class="ss">use</span><span class="p">:</span> <span class="o">[</span><span class="ss">:slugged</span><span class="p">,</span> <span class="ss">:finders</span><span class="o">]</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Once you&#8217;ve added this, finder override functionality should now be restored. For example, the code listed below will now work as before.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/controllers/posts_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
-</span><span class='line'>    <span class="vi">@posts</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">all</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
-</span><span class='line'>    <span class="vi">@post</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  FriendlyId 5 introduces a new slug candidates feature. This feature allows you to tell friendly id what to do in the case of duplicate slugs. See the code listed below for an example of how to utilize this functionality.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/models/post.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="kp">extend</span> <span class="no">FriendlyId</span>
-</span><span class='line'>  <span class="n">friendly_id</span> <span class="ss">:slug_candidates</span><span class="p">,</span> <span class="ss">use</span><span class="p">:</span> <span class="o">[</span><span class="ss">:slugged</span><span class="p">,</span> <span class="ss">:finders</span><span class="o">]</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">slug_candidates</span>
-</span><span class='line'>    <span class="o">[</span>
-</span><span class='line'>      <span class="ss">:title</span><span class="p">,</span>
-</span><span class='line'>      <span class="o">[</span><span class="ss">:title</span><span class="p">,</span> <span class="ss">:id</span><span class="o">]</span>
-</span><span class='line'>    <span class="o">]</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The code listed above tells FriendlyId you want to use the slug_candidates method to make the slug unique. It will try the list beginning to last, so in the example above, it will try to generate the slug first using title, and then if a post by that title already exists, it will try again by appending the id.
-</p>
-
-
-
-
-<p>
-  Some other quick things to note when upgrading to FriendlyId 5:<br/>
-  - The default sequence separator has been changed from two dashes (&#8211;) to one dash (-). If you have a url scheme in place using the old way of doing things, you might want to find a workaround.<br/>
-  - FriendlyId no longer uses a numeric sequence to differentiate a conflicting slug. Instead it uses a UUID (example: 2bc08962-b3dd-4f29-b2e6-244710c86106). If you dislike this functionality, you can utilize the new slug candidates feature explained above.
-</p>
 
 ]]></content>
   </entry>

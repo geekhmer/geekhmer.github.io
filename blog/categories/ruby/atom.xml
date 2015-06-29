@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-06-21T11:40:20+07:00</updated>
+  <updated>2015-06-29T23:29:13+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,404 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Mark Methods Private When You Don’t Test Them]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/06/25/mark-methods-private-when-you-dont-test-them/"/>
+    <updated>2015-06-25T20:58:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/06/25/mark-methods-private-when-you-dont-test-them</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="Mark Methods Private When You Don’t Test Them" />
+</p>
+
+
+
+
+<p>
+  In Ruby and many other languages, you write private methods to implement internal logic you don’t want to expose. You want the freedom to rename, repurpose or even delete them without worrying about impacting anything else. The <code>private</code> keyword signals other developers: Don’t rely on this; don’t call it; it might change. This is especially important when writing framework or library code that many other developers will use.
+</p>
+
+
+
+
+<p>
+  But which methods should you make private? Sometimes this is obvious; sometimes it isn't. A good rule of thumb to use is: If you’re not testing a method, it should be private.
+</p>
+
+
+
+
+<p>
+  But wait a minute! Aren't we supposed to test everything? Isn't 100% code coverage the every Ruby developer seeks? Let me clarify. You should mark methods private when you test them indirectly by calling the other, public methods in the same class. Use the <code>private</code> keyword to help organize your code, to remind yourself what you still need to test, and what you don't.
+</p>
+
+
+
+
+<p>
+  <strong>Three Paintings</strong><br/>
+  A simple example will make this clear. Suppose I have a class that describes a painting:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Painting</span> <span class="o">=</span> <span class="no">Struct</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span> <span class="ss">:year</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Now I can create a list of three paintings in a Minitest::Spec file like this:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">let</span><span class="p">(</span><span class="ss">:one</span><span class="p">)</span> <span class="p">{</span> <span class="no">Painting</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Spanish</span> <span class="no">Couple</span> <span class="no">In</span> <span class="no">Front</span> <span class="no">Of</span> <span class="no">Inn</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="mi">1900</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="n">let</span><span class="p">(</span><span class="ss">:two</span><span class="p">)</span> <span class="p">{</span> <span class="no">Painting</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Guernica</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="mi">1937</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="n">let</span><span class="p">(</span><span class="ss">:three</span><span class="p">)</span> <span class="p">{</span> <span class="no">Painting</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Petite</span> <span class="no">Fleurs</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="mi">1958</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="n">let</span><span class="p">(</span><span class="ss">:paintings</span><span class="p">)</span> <span class="p">{</span> <span class="o">[</span><span class="n">one</span><span class="p">,</span> <span class="n">two</span><span class="p">,</span> <span class="n">three</span><span class="o">]</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Suppose my first requirement is to return the first painting from the list. Simple enough:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">list</span><span class="o">.</span><span class="n">first</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">should</span> <span class="k">return</span> <span class="n">the</span> <span class="n">first</span> <span class="n">element</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">first</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">must_equal</span> <span class="n">one</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  I just call Array#first and I’m done. Returning the rest of the list is slightly more interesting:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">rest</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">_</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span> <span class="o">=</span> <span class="n">list</span>
+</span><span class='line'>  <span class="n">rest</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">returns</span> <span class="n">the</span> <span class="n">rest</span> <span class="n">of</span> <span class="n">the</span> <span class="n">elements</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">rest</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">must_equal</span> <span class="o">[</span><span class="n">two</span><span class="p">,</span> <span class="n">three</span><span class="o">]</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Rest always returns an array even if the input list was empty or had only one element. So far, so good. I’ve written two methods and two tests:
+</p>
+
+
+
+
+<p>
+  <img src="http://geekhmer.github.io/images/two_tests.png" width="400" alt="Mark Methods Private When You Don’t Test Them" />
+</p>
+
+
+
+
+<p>
+  <strong>A New Requirement</strong><br/>
+  Now suppose my business requirement changes slightly and I instead need to return the first painting sorted alphabetically by name. Once again, it’s not hard to do:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">list</span><span class="o">.</span><span class="n">sort</span> <span class="k">do</span> <span class="o">|</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">|&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;p1.name &amp;lt;=&amp;gt; p2.name</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end.first</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">should</span> <span class="k">return</span> <span class="n">the</span> <span class="n">first</span> <span class="n">element</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">first</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">must_equal</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Guernica</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  And I need rest to use the same sort order, so I repeat the call to sort:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">rest</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">_</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span> <span class="o">=</span> <span class="n">list</span><span class="o">.</span><span class="n">sort</span> <span class="k">do</span> <span class="o">|</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">|&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;p1.name &amp;lt;=&amp;gt; p2.name</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">  rest</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">returns</span> <span class="n">the</span> <span class="n">rest</span> <span class="n">of</span> <span class="n">the</span> <span class="n">elements</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">rest</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="ss">:name</span><span class="p">)</span><span class="o">.</span><span class="n">must_equal</span> <span class="o">[&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;&quot;Petite Fleurs&quot;,</span>
+</span><span class='line'><span class="sr">&quot;Spanish Couple In Front Of Inn&quot;</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  ]</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  I’ve implemented new behavior, but still have two methods and two tests:
+</p>
+
+
+
+
+<p>
+  <img src="http://geekhmer.github.io/images/two_tests.png" width="400" alt="Mark Methods Private When You Don’t Test Them" />
+</p>
+
+
+
+
+<p>
+  <strong>Extracting a Method</strong><br/>
+  Because both of my methods are covered by tests, I’m free to refactor them. I decide to extract a new method, sorted_by_name:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">sorted_by_name</span><span class="p">(</span><span class="n">list</span><span class="p">)</span><span class="o">.</span><span class="n">first</span>
+</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;def rest(list)</span>
+</span><span class='line'><span class="sr">  _, *rest = sorted_by_name(list)</span>
+</span><span class='line'><span class="sr">  rest</span>
+</span><span class='line'><span class="sr">end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="k">def</span> <span class="nf">sorted_by_name</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">list</span><span class="o">.</span><span class="n">sort</span> <span class="k">do</span> <span class="o">|</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">|&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;p1.name &amp;lt;=&amp;gt; p2.name</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">returns</span> <span class="n">the</span> <span class="n">element</span> <span class="n">with</span> <span class="n">the</span> <span class="n">first</span> <span class="nb">name</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">first</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">must_equal</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Guernica</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;it &amp;ldquo;returns the rest after the first name&amp;rdquo; do</span>
+</span><span class='line'><span class="sr">  rest(paintings).map(&amp;amp;:name).must_equal [&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="s2">&quot;Petite Fleurs&quot;</span><span class="p">,</span>
+</span><span class='line'><span class="s2">&quot;Spanish Couple In Front Of Inn&quot;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="o">]</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Here I’ve simply moved the call to sort into a utility method called sorted_by_name. Now first and rest both call sorted_by_name, making the code a bit clearer and DRY-er. But now I have three methods and only two tests:
+</p>
+
+
+
+
+<p>
+  <img src="http://geekhmer.github.io/images/two_tests_three_methods.png" width="400" alt="Mark Methods Private When You Don’t Test Them" />
+</p>
+
+
+
+
+<p>
+  <strong>Mark Methods Private When You Don’t Test Them</strong><br/>
+  Notice I didn’t bother writing a test for sorted_by_name. I know it works because my other tests still pass. The existing tests are sufficient; I am testing sorted_by_name indirectly. Because I extracted sorted_by_name from first and rest, because I refactored my code without adding any new behavior, no new test were required.
+</p>
+
+
+
+
+<p>
+  In this scenario, take the time to mark the new, untested method as private:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">sorted_by_name</span><span class="p">(</span><span class="n">list</span><span class="p">)</span><span class="o">.</span><span class="n">first</span>
+</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;def rest(list)</span>
+</span><span class='line'><span class="sr">  _, *rest = sorted_by_name(list)</span>
+</span><span class='line'><span class="sr">  rest</span>
+</span><span class='line'><span class="sr">end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="kp">private</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">sorted_by_name</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">list</span><span class="o">.</span><span class="n">sort</span> <span class="k">do</span> <span class="o">|</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">|&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;p1.name &amp;lt;=&amp;gt; p2.name</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">returns</span> <span class="n">the</span> <span class="n">element</span> <span class="n">with</span> <span class="n">the</span> <span class="n">first</span> <span class="nb">name</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">first</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">must_equal</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Guernica</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;it &amp;ldquo;returns the rest after the first name&amp;rdquo; do</span>
+</span><span class='line'><span class="sr">  rest(paintings).map(&amp;amp;:name).must_equal [&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="s2">&quot;Petite Fleurs&quot;</span><span class="p">,</span>
+</span><span class='line'><span class="s2">&quot;Spanish Couple In Front Of Inn&quot;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="o">]</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  The private keyword here reminds me I’ve already tested sorted_by_name, that I don’t need to write new tests for it. Now private is helping me organize my code; it’s helping me remember which methods I don’t need to test… and which methods are missing important tests.
+</p>
+
+
+
+
+<p>
+  <img src="http://geekhmer.github.io/images/two_tests_three_methods_private.png" width="400" alt="Mark Methods Private When You Don’t Test Them" />
+</p>
+
+
+
+
+<p>
+  f my tests don’t need to know about sorted_by_name, then certainly other developers don’t. It should be private. Marking it private reminds me that it is being tested indirectly, that I didn’t just forget to write a test for it. Marking it private tells other developers about what I’ve learned from my own test suite.
+</p>
+
+
+
+
+<p>
+  So far so good, That's it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Use Message Queue in Rails]]></title>
@@ -1710,642 +2108,6 @@
 
 <p>
   So far so good, That's it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Master Ruby Blocks]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/06/08/master-ruby-blocks/"/>
-    <updated>2015-06-08T20:29:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/06/08/master-ruby-blocks</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="Master Ruby Blocks" />
-</p>
-
-
-
-
-<p>
-  Blocks are one of the most powerful and often overlooked feature of ruby. I must confess that it took me a while to figure out how ruby blocks work and how they can be useful in practice.
-</p>
-
-
-
-
-<p>
-  There is something about <code>yield</code> that makes blocks very hard to understand at first. I'm going to talk about some of the concepts and provide a few examples so by the end of this post you'll have a solid understanding of ruby blocks.
-</p>
-
-
-
-
-<p>
-  <strong>The basics: What are ruby blocks?</strong><br/>
-  1. What are ruby blocks?<br/>
-  2. How yield works?<br/>
-  3. What does <code>&block</code> mean?<br/>
-  4. Return value<br/>
-  5. How does <code>.map(&:something)</code> work?<br/>
-  6. Iterators and how to build one yourself<br/>
-  7. Initialize objects with default values using blocks<br/>
-  8. Ruby block examples
-</p>
-
-
-
-
-<p>
-  <strong>What are ruby blocks?</strong><br/>
-  A block is basically just code that you put inside <code>do</code> and <code>end</code>. That's it. "But where's the magic?" you might ask. We'll get there in just a minute but first things first.
-</p>
-
-
-
-
-<p>
-  You can write the block in two ways:<br/>
-  1. Multi-line, between <code>do</code> and <code>end</code><br/>
-  2. Inline, between <code>{</code> and <code>}</code>
-</p>
-
-
-
-
-<p>
-  Both versions will do the exact same thing so it's up to you which one you choose. As a general style-guide, it's better to use the multi-line version if your code has more than one line, just to make it easier to read.
-</p>
-
-
-
-
-<p>
-  Here's a basic example of a multi-line block:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">n</span><span class="o">|</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Number</span> <span class="c1">#{n}&amp;rdquo;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  It's called a multi-line block because it's not inline, not because it's got more than one line of code (which is not the case here). The same example can be written with an inline block:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span><span class="n">each</span> <span class="p">{</span><span class="o">|</span><span class="n">n</span><span class="o">|</span> <span class="nb">puts</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Number</span> <span class="c1">#{n}&amp;rdquo;}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Both versions will print numbers 1, 2 and 3 in order. The little n letter you see between the pipes (<code>|n|</code>) is called a block parameter and it's value in this case is going to be each of the numbers in turn, in the order they are listed inside the array. So for the first iteration, the value of n will be 1, then for the second iteration, the value will be 2, and then 3.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Number</span> <span class="mi">1</span>
-</span><span class='line'><span class="no">Number</span> <span class="mi">2</span>
-</span><span class='line'><span class="no">Number</span> <span class="mi">3</span>
-</span><span class='line'> <span class="o">=&gt;</span> <span class="kp">nil</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>How yield works?</strong><br/>
-  Here's the bad wolf. This guy is responsible for all the confusion and magic around ruby blocks. I think most of the confusion comes from the way it calls the block and how it's passing parameters to it. We'll be looking at both scenarios in this section.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">my_method</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">reached</span> <span class="n">the</span> <span class="n">top</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">yield</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">reached</span> <span class="n">the</span> <span class="n">bottom</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;my_method do</span>
-</span><span class='line'><span class="sr">  puts &amp;ldquo;reached yield&amp;rdquo;</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">reached</span> <span class="n">the</span> <span class="n">top</span>
-</span><span class='line'><span class="n">reached</span> <span class="k">yield</span>
-</span><span class='line'><span class="n">reached</span> <span class="n">the</span> <span class="n">bottom</span>
-</span><span class='line'> <span class="o">=&gt;</span> <span class="kp">nil</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  So basically when the execution of <code>my_method</code> reaches the line with the call to <code>yield</code>, the code inside the block gets executed. Then, when the code inside the block finishes, the execution of <code>my_method</code> continues.
-</p>
-
-
-
-
-<p>
-  <img src="http://geekhmer.github.io/images/ruby_block_flow.png" alt="Ruby Block Flow" />
-</p>
-
-
-
-
-<p>
-  <strong>Passing blocks to methods</strong><br/>
-  A method doesn't need to specify the block in it's signature in order to receive a block parameter. You can just pass a block to any function but unless that function calls <code>yield</code>, the block won't get executed.
-</p>
-
-
-
-
-<p>
-  On the other hand, if you do call <code>yield</code> in your method, then the block parameter becomes mandatory and the method will raise an exception if it doesn't receive a block.
-</p>
-
-
-
-
-<p>
-  If you want to make the block an optional parameter, you can use the <code>block_given?</code> method which will return either true or false depending on if a block was passed in to the method or not.
-</p>
-
-
-
-
-<p>
-  <strong>Yield takes parameters too</strong><br/>
-  Any parameter passed to <code>yield</code> will serve as a parameter to the block. So when the block runs, it can use the parameters passed in from the original method. Those parameters can be variables local to the method in which <code>yield</code> lives in.
-</p>
-
-
-
-
-<p>
-  The order of the arguments is important because the order you use to pass in the parameters is the order in which the block receives them.
-</p>
-
-
-
-
-<p>
-  <img src="http://geekhmer.github.io/images/ruby_block_arguments.png" alt="Ruby Block Arguments" />
-</p>
-
-
-
-
-<p>
-  One thing to note here is that the parameters inside the block are local to the block (unlike those passed in from the method to the block).
-</p>
-
-
-
-
-<p>
-  <strong>What does &block (ampersand parameter) mean?</strong><br/>
-  You've probably seen this <code>&block</code> all over the place in ruby code. It's how you can pass a reference to the block (instead of a local variable) to a method. In fact, ruby allows you to pass any object to a method as if it were a block. The method will try to use the passed in object if it's already a block but if it's not a block it will call to_proc on it in an attempt to convert it to a block.
-</p>
-
-
-
-
-<p>
-  Also note that the <code>block</code> part (without the ampersand) is just a name for the reference, you can use whatever name you like if it makes more sense to you.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">my_method</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">block</span><span class="p">)</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="n">block</span>
-</span><span class='line'>  <span class="n">block</span><span class="o">.</span><span class="n">call</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;my_method { puts &amp;ldquo;Hello!&amp;rdquo; }</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;&amp;lt;Proc:0x0000010124e5a8@tmp/ex</span><span class="n">ample</span><span class="o">.</span><span class="n">rb</span><span class="p">:</span><span class="mi">6</span><span class="o">&gt;&lt;</span><span class="sr">/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;Hello!</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>Return value</strong><br/>
-  <code>yield</code> returns the last evaluated expression (from inside the block). So in other words, the value that <code>yield</code> returns is the value the block returns.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">my_method</span>
-</span><span class='line'>  <span class="n">value</span> <span class="o">=</span> <span class="k">yield</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">value</span> <span class="ss">is</span><span class="p">:</span> <span class="c1">#{value}&amp;rdquo;</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;my_method do</span>
-</span><span class='line'><span class="sr">  2</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">value</span> <span class="n">is</span> <span class="mi">2</span>
-</span><span class='line'>  <span class="o">=&gt;</span> <span class="kp">nil</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>How does .map(&:something) work?</strong><br/>
-  You've probably used shortcuts like <code>.map(&:capitalize)</code> a lot, especially if you've done any Rails coding. It's a very clean shortcut to <code>.map { |title| title.capitalize }</code>.
-</p>
-
-
-
-
-<p>
-  But how does it really work?
-</p>
-
-
-
-
-<p>
-  It turns out that the Symbol class implements the to_proc method which will unwrap the short version into it's longer variant. Nice right?
-</p>
-
-
-
-
-<p>
-  <strong>Iterators and how to build one yourself</strong><br/>
-  You can call yield as many times as you want inside a method. That's basically how iterators work. Calling <code>yield</code> for each of the elements in the array mimics the behavior of the built in ruby iterators.
-</p>
-
-
-
-
-<p>
-  Let's see how we can write a method similar to the map method in ruby.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">my_map</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">new_array</span> <span class="o">=</span> <span class="o">[]&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  for element in array&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">new_array</span><span class="o">.</span><span class="n">push</span> <span class="k">yield</span> <span class="n">element</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  new_array</span>
-</span><span class='line'><span class="sr">end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">my_map</span><span class="p">(</span><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">number</span><span class="o">|</span>
-</span><span class='line'>  <span class="n">number</span> <span class="o">*</span> <span class="mi">2</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">2</span>
-</span><span class='line'><span class="mi">4</span>
-</span><span class='line'><span class="mi">6</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>Initialize objects with default values</strong><br/>
-  A cool pattern we can use with ruby blocks is to initialize an object with default values. You've probably seen this pattern if you've ever ventured into a .gemspec file from any ruby gem.
-</p>
-
-
-
-
-<p>
-  The way it works is, you have an initializer that calls <code>yield(self)</code>. In the context of the <code>initialize</code> method, <code>self</code> is the object being initialized.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Car</span>
-</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:color</span><span class="p">,</span> <span class="ss">:doors</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  def initialize&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">yield</span><span class="p">(</span><span class="nb">self</span><span class="p">)</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;car = Car.new do |c|</span>
-</span><span class='line'><span class="sr">  c.color = &amp;ldquo;Red&amp;rdquo;</span>
-</span><span class='line'><span class="sr">  c.doors = 4</span>
-</span><span class='line'><span class="sr">end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="nb">puts</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">My</span> <span class="n">car</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="n">s</span> <span class="n">color</span> <span class="n">is</span> <span class="c1">#{car.color} and it&amp;rsquo;s got #{car.doors} doors.&amp;rdquo;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">My</span> <span class="n">car</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="n">s</span> <span class="n">color</span> <span class="n">is</span> <span class="no">Red</span> <span class="ow">and</span> <span class="n">it</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="n">s</span> <span class="n">got</span> <span class="mi">4</span> <span class="n">doors</span><span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>Ruby blocks examples</strong><br/>
-  Examples are all the rage these days so let's try to find a few interesting ways of using blocks in real world (or as close to real world as possible) scenarios.
-</p>
-
-
-
-
-<p>
-  <strong>Wrap text in html tags</strong><br/>
-  Blocks are the perfect candidate whenever you need to wrap a chunk of dynamic code within some static code. So for example if you want to generate an html tag for some text. The text is the dynamic part (cause you never know what you'll want to wrap) and the tags are the static part, they never change.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">wrap_in_h1</span>
-</span><span class='line'>  <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="c1">#{yield}&lt;/h1&gt;&amp;rdquo;</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;wrap_in_h1 { &amp;ldquo;Here&amp;rsquo;s my heading&amp;rdquo; }&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;=&gt;</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Here</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="n">s</span> <span class="n">my</span> <span class="n">heading</span><span class="o">&lt;</span><span class="sr">/h1&gt;&amp;rdquo;&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">wrap_in_h1</span> <span class="p">{</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Ha</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="o">*</span> <span class="mi">3</span> <span class="p">}</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;=&gt; &amp;ldquo;&lt;h1&gt;HaHaHa&lt;/</span><span class="n">h1</span><span class="o">&gt;&amp;</span><span class="n">rdquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Note that the power of using blocks over methods is when you need to reuse some of the behavior but do something slightly different with it. So let's say we have a string we want to wrap inside html tags and then do something different with it.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">wrap_in_tags</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">html</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="c1">#{tag}&gt;#{text}&amp;lt;/#{tag}&gt;&amp;rdquo;</span>
-</span><span class='line'>  <span class="k">yield</span> <span class="n">html</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;wrap_in_tags(&amp;ldquo;title&amp;rdquo;, &amp;ldquo;Hello&amp;rdquo;) { |html| Mailer.send(html) }</span>
-</span><span class='line'><span class="sr">wrap_in_tags(&amp;ldquo;title&amp;rdquo;, &amp;ldquo;Hello&amp;rdquo;) { |html| Page.create(:body =&gt; html) }</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  In the first case we're sending the <title>Hello</title> string via email and in the second case we're creating a Page record. Both cases use the same method but they do different things.
-</p>
-
-
-
-
-<p>
-  <strong>Take a note</strong><br/>
-  Let's say we want to build a way to quickly store ideas into a database table. For that to work we want to pass in the note and have the method deal with the database connections. Ideally we'd like to call <code>Note.create { "Nice day today" }</code> and not worry about opening and closing database connections. So let's do this.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Note</span>
-</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:note</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  def initialize(note=nil)&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="vi">@note</span> <span class="o">=</span> <span class="n">note</span>
-</span><span class='line'><span class="nb">puts</span> <span class="s2">&quot;@note is </span><span class="si">#{</span><span class="vi">@note</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  def self.create&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="nb">self</span><span class="o">.</span><span class="n">connect</span>
-</span><span class='line'><span class="n">note</span> <span class="o">=</span> <span class="kp">new</span><span class="p">(</span><span class="k">yield</span><span class="p">)</span>
-</span><span class='line'><span class="n">note</span><span class="o">.</span><span class="n">write</span>
-</span><span class='line'><span class="nb">self</span><span class="o">.</span><span class="n">disconnect</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  def write&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="nb">puts</span> <span class="s2">&quot;Writing </span><span class="se">\&quot;</span><span class="si">#{</span><span class="vi">@note</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2"> to the database.&quot;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  private</span>
-</span><span class='line'><span class="sr">  def self.connect&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="nb">puts</span> <span class="s2">&quot;Connecting to the database...&quot;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  def self.disconnect&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="nb">puts</span> <span class="s2">&quot;Disconnecting from the database...&quot;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;Note.create { &amp;ldquo;Foo&amp;rdquo; }</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Connecting</span> <span class="n">to</span> <span class="n">the</span> <span class="n">database</span><span class="o">&amp;</span><span class="n">hellip</span><span class="p">;</span>
-</span><span class='line'><span class="vi">@note</span> <span class="n">is</span> <span class="no">Foo</span>
-</span><span class='line'><span class="no">Writing</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Foo</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="n">to</span> <span class="n">the</span> <span class="n">database</span><span class="o">.</span>
-</span><span class='line'><span class="no">Disconnecting</span> <span class="n">from</span> <span class="n">the</span> <span class="n">database</span><span class="o">&amp;</span><span class="n">hellip</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  The implementation details of connecting, writing and disconnecting to and from the database were left out since they're out of the scope of this article.
-</p>
-
-
-
-
-<p>
-  <strong>Find divisible elements of an array</strong><br/>
-  It seems like I'm getting further and further away from "the real world scenario" but anyways, I'm gonna shoot one last example. So let's say you want to get every element of an array that is divisible by 3 (or any number you choose), how would you do that with ruby blocks?
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Fixnum</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">to_proc</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;Proc.new do |obj, *args|</span>
-</span><span class='line'><span class="sr">  obj % self == 0</span>
-</span><span class='line'><span class="sr">end</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span><span class='line'><span class="sr">end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">numbers</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="o">].</span><span class="n">select</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="mi">3</span><span class="p">)</span>
-</span><span class='line'><span class="nb">puts</span> <span class="n">numbers</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">3</span>
-</span><span class='line'><span class="mi">6</span>
-</span><span class='line'><span class="mi">9</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  You can think of blocks as simply a chunk of code, and yield allows you to inject that code at some place into a method. That means you can have one method work in different ways, you don't have to write multiple methods (you can reuse one method to do different things).
 </p>
 
 ]]></content>
