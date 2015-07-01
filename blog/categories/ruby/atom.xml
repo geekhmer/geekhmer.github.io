@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-07-01T13:15:42+07:00</updated>
+  <updated>2015-07-01T23:14:03+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,813 +12,6 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
-  
-  <entry>
-    <title type="html"><![CDATA[AngularJS on Rails]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/06/30/angularjs-on-rails/"/>
-    <updated>2015-06-30T23:43:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/06/30/angularjs-on-rails</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="AngularJS on Rails" />
-</p>
-
-
-
-
-<p>
-  AngularJS is an extremely popular JavaScript library that enables you to quickly and easily create rich web applications. In this article we will show you how to integrate AngularJS with your Rails app. We will also build a simple AngularJS application called VisitorsCenter. The VisitorsCenter application allows the user to track visitors that are coming and going from a building such as an office building. 
-</p>
-
-
-
-
-<p>
-  <strong>Setup Rails Application</strong><br/>
-  Before we begin, we will need to add a couple gems to our Gemfile. The <code>angularJs-rails</code> gem provides integration with the AngularJS library and our Rails application. The bootstrap-sass gem merely adds bootstrap support so we can focus on the code rather than the style of the app. Add these gems to your gemfile now as listed below.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Gemfile </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">angularjs</span><span class="o">-</span><span class="n">rails</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">~&gt;</span> <span class="mi">1</span><span class="o">.</span><span class="mi">2</span><span class="o">.</span><span class="mi">25</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
-</span><span class='line'><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">bootstrap</span><span class="o">-</span><span class="n">sass</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">~&gt;</span> <span class="mi">3</span><span class="o">.</span><span class="mi">2</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">2</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Now run a bundle install to install the gems:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Next, we need to create a model called <code>Visitor</code>. The <code>Visitor</code> model will represent a visitor that visits. Run the command below to create the visitor model now:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Visitor</span> <span class="n">first_name</span><span class="ss">:string</span> <span class="n">last_name</span><span class="ss">:string</span> <span class="ss">reason</span><span class="p">:</span><span class="n">string</span>
-</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Great, now we need to create a <code>Visitors</code> controller that will give us a way to interact with our model. The <code>Visitors</code> controller will have 3 different actions in this example application. The first action, <code>index</code> will return either the visitors page or a json list of visitors depending on how it is accessed. The second action, <code>create</code> will be responsible for creating the visitor. The final action, <code>destroy</code> will destroy the visitor. Run the command below to create this controller now:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="no">Visitors</span> <span class="n">index</span> <span class="n">create</span> <span class="n">destroy</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Now let's modify our routes file to set up the proper paths and add a site root. Open up your routes file and modify it so that it looks like the code listed below:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>routes.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">resources</span> <span class="ss">:visitors</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:index</span><span class="p">,</span> <span class="ss">:create</span><span class="p">,</span> <span class="ss">:destroy</span><span class="o">]</span><span class="p">,</span> <span class="ss">defaults</span><span class="p">:</span> <span class="p">{</span><span class="nb">format</span><span class="p">:</span> <span class="ss">:json</span><span class="p">}</span>
-</span><span class='line'>  <span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">visitors</span><span class="c1">#index&amp;rdquo;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  The code fragment that says <code>defaults: {format: :json}</code> tells Rails that we wish to return json by default for our actions. We do this because most of the interaction in our application will be via JSON.
-</p>
-
-
-
-
-<p>
-  By default, AngularJS knows nothing of the cross site request forgery (CSRF) protections in our applications. We need a way to tell AngularJS how to interact with our application while obeying the CSRF protections that we have in place. Luckily we have a way to do this. Open up your <code>ApplicationController</code> and add in the code listed below.
-</p>
-
-
-
-
-<p>
-  If you are using Rails 4.2 and up, use the code below:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>application_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActionController</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">protect_from_forgery</span> <span class="ss">with</span><span class="p">:</span> <span class="ss">:exception</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  after_action :set_csrf_cookie_for_ng&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">def</span> <span class="nf">set_csrf_cookie_for_ng</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;cookies[&#39;XSRF-TOKEN&#39;] = form_authenticity_token if protect_against_forgery?</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="kp">protected</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">verified_request?</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;super || valid_authenticity_token?(session, request.headers[&#39;X-XSRF-TOKEN&#39;])</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  If you are still using Rails 4.1, use the code below instead:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>application_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActionController</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">protect_from_forgery</span> <span class="ss">with</span><span class="p">:</span> <span class="ss">:exception</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  after_action :set_csrf_cookie_for_ng&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">def</span> <span class="nf">set_csrf_cookie_for_ng</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;cookies[&#39;XSRF-TOKEN&#39;] = form_authenticity_token if protect_against_forgery?</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="kp">protected</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">verified_request?</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;super || form_authenticity_token == request.headers[&#39;X-XSRF-TOKEN&#39;]</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  The code listed above will create a cookie called <code>XSRF-TOKEN</code> that will contain our <code>form_authenticity_token</code>. Any time a request is made, AngularJS will present that token in the HTTP headers for the request.
-</p>
-
-
-
-
-<p>
-  Now let's modify our <code>VisitorsController</code> to allow for access to the <code>Visitor</code> model. Open up your <code>VisitorsController</code> and modify it so that it looks like the code listed below:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>visitors_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">VisitorsController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="no">ApplicationController</span>
-</span><span class='line'>  <span class="n">respond_to</span> <span class="ss">:json</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  def index&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
-</span><span class='line'>  <span class="nb">format</span><span class="o">.</span><span class="n">json</span> <span class="p">{</span> <span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="no">Visitor</span><span class="o">.</span><span class="n">all</span> <span class="p">}</span>
-</span><span class='line'>  <span class="nb">format</span><span class="o">.</span><span class="n">html</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  def create&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">respond_with</span> <span class="no">Visitor</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">visitor_params</span><span class="p">)</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  def destroy&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">respond_with</span> <span class="no">Visitor</span><span class="o">.</span><span class="n">destroy</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  private</span>
-</span><span class='line'><span class="sr">  def visitor_params&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:visitor</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:first_name</span><span class="p">,</span> <span class="ss">:last_name</span><span class="p">,</span> <span class="ss">:reason</span><span class="p">)</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  The code above is typical Rails code, with the exception being that we return JSON as a result. Since our application will be communicating primarily via AJAX we have no need for HTML other than the index action, which will return either html or json depending on the request type.
-</p>
-
-
-
-
-<p>
-  Next we need to add support for both AngularJS and Bootstrap to our application.js file. Open up your application.js file and modify it so that it looks like the code listed below.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>application.js </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">jquery</span>
-</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">jquery_ujs</span>
-</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">turbolinks</span>
-</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">angular</span>
-</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">angular</span><span class="o">-</span><span class="n">resource</span>
-</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">bootstrap</span><span class="o">-</span><span class="n">sprockets</span>
-</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="n">require_tree</span> <span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  In the code above we add support for AngularJS as well as Bootstrap. We also add support for a library called <code>angular-resource</code> which allows us to easily talk to our Rails application.
-</p>
-
-
-
-
-<p>
-  Now let's add a bit of CSS for bootstrap. Create a new file called <code>bootstrap_config</code>.scss and add in the code listed below:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>bootstrap_config.scss </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@import</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">bootstrap</span><span class="o">-</span><span class="n">sprockets</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;;</span>
-</span><span class='line'><span class="vi">@import</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">bootstrap</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  The next thing we need to do is create our AngularJS application. AngularJS applications typically consists of JavaScript code that glues together various bits of HTML. To get started doing this, the first thing we must do is rename our <code>visitors.js.coffee</code> file to <code>visitors.js</code> and modify it so that it looks like the code listed below. You can also rewrite this in CoffeeScript, but I use JavaScript for those that haven't yet learned CoffeeScript.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>visitors.js </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">var</span> <span class="n">visitorCenter</span> <span class="o">=</span> <span class="n">angular</span><span class="o">.</span><span class="n">module</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">VisitorCenter</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">[&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">ngResource</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">]</span><span class="p">);</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;visitorCenter.factory(&amp;ldquo;Visitor&amp;rdquo;, function($resource) {</span>
-</span><span class='line'><span class="sr">  return $resource(&amp;ldquo;visitors/</span><span class="ss">:id</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="p">{</span> <span class="nb">id</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="vi">@id</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span> <span class="p">},</span> <span class="p">{</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;index:   { method: &#39;GET&#39;, isArray: true, responseType: &#39;json&#39; },</span>
-</span><span class='line'><span class="sr">update:  { method: &#39;PUT&#39;, responseType: &#39;json&#39; }</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  });</span>
-</span><span class='line'><span class="sr">})&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">visitorCenter</span><span class="o">.</span><span class="n">controller</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">visitorsController</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="n">function</span><span class="p">(</span><span class="vg">$scope</span><span class="p">,</span> <span class="no">Visitor</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="vg">$scope</span><span class="o">.</span><span class="n">visitors</span> <span class="o">=</span> <span class="no">Visitor</span><span class="o">.</span><span class="n">index</span><span class="p">()</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  $scope.addVisitor = function() {&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">visitor</span> <span class="o">=</span> <span class="no">Visitor</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="vg">$scope</span><span class="o">.</span><span class="n">newVisitor</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="vg">$scope</span><span class="o">.</span><span class="n">visitors</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">visitor</span><span class="p">)</span>
-</span><span class='line'><span class="vg">$scope</span><span class="o">.</span><span class="n">newVisitor</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="p">}</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  $scope.deleteVisitor = function(index) {&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">visitor</span> <span class="o">=</span> <span class="vg">$scope</span><span class="o">.</span><span class="n">visitors</span><span class="o">[</span><span class="n">index</span><span class="o">]</span>
-</span><span class='line'><span class="no">Visitor</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">visitor</span><span class="p">)</span>
-</span><span class='line'><span class="vg">$scope</span><span class="o">.</span><span class="n">visitors</span><span class="o">.</span><span class="n">splice</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="p">}</span>
-</span><span class='line'><span class="p">})</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  There is a lot going on here, so i'm going to break it down into pieces. The first line:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">var</span> <span class="n">visitorCenter</span> <span class="o">=</span> <span class="n">angular</span><span class="o">.</span><span class="n">module</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">VisitorCenter</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">[&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">ngResource</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">]</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  defines an AngularJS module. AngularJS modules can be thought of as individual components in your application. You'll notice we include <code>ngResource</code> as an argument. <code>ngResource</code> provides easy access to RESTful resources such as our Rails application.
-</p>
-
-
-
-
-<p>
-  The next set of lines:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">visitorCenter</span><span class="o">.</span><span class="n">factory</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Visitor</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="n">function</span><span class="p">(</span><span class="vg">$resource</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">return</span> <span class="vg">$resource</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">visitors</span><span class="o">/</span><span class="ss">:id</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="p">{</span> <span class="nb">id</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="vi">@id</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span> <span class="p">},</span> <span class="p">{</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;index:   { method: &#39;GET&#39;, isArray: true, responseType: &#39;json&#39; },</span>
-</span><span class='line'><span class="sr">update:  { method: &#39;PUT&#39;, responseType: &#39;json&#39; }</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  });</span>
-</span><span class='line'><span class="sr">})</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  defines a service, in this case, it ties in the <code>ngResource</code> service mentioned earlier and tells AngularJS how to talk to our application.
-</p>
-
-
-
-
-<p>
-  The next set of lines:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">visitorCenter</span><span class="o">.</span><span class="n">controller</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">visitorsController</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="n">function</span><span class="p">(</span><span class="vg">$scope</span><span class="p">,</span> <span class="no">Visitor</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="vg">$scope</span><span class="o">.</span><span class="n">visitors</span> <span class="o">=</span> <span class="no">Visitor</span><span class="o">.</span><span class="n">index</span><span class="p">()</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  $scope.addVisitor = function() {&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">visitor</span> <span class="o">=</span> <span class="no">Visitor</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="vg">$scope</span><span class="o">.</span><span class="n">newVisitor</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="vg">$scope</span><span class="o">.</span><span class="n">visitors</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">visitor</span><span class="p">)</span>
-</span><span class='line'><span class="vg">$scope</span><span class="o">.</span><span class="n">newVisitor</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="p">}</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  $scope.deleteVisitor = function(index) {&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">visitor</span> <span class="o">=</span> <span class="vg">$scope</span><span class="o">.</span><span class="n">visitors</span><span class="o">[</span><span class="n">index</span><span class="o">]</span>
-</span><span class='line'><span class="no">Visitor</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">visitor</span><span class="p">)</span>
-</span><span class='line'><span class="vg">$scope</span><span class="o">.</span><span class="n">visitors</span><span class="o">.</span><span class="n">splice</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="p">}</span>
-</span><span class='line'><span class="p">})</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  define a controller. Controllers tell AngularJS how to interact with our application similar to how Rails controllers are used to tell Rails how our views interact with our models.
-</p>
-
-
-
-
-<p>
-  ow that we've written the JavaScript application, we need to create our view to tie everything together. Open up the index view for your <code>Visitors</code> controller and modify it so that it looks like the code listed below:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>index.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;div class=&quot;container&quot; ng-app=&quot;VisitorCenter&quot;&gt;</span>
-</span><span class='line'><span class="sr">  &lt;h1&gt;Visitors&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">ng</span><span class="o">-</span><span class="n">controller</span><span class="o">=</span><span class="s2">&quot;visitorsController&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;well&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Add</span> <span class="n">a</span> <span class="kp">new</span> <span class="no">Visitor</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
-</span><span class='line'><span class="sr">      &lt;form ng-submit=&quot;addVisitor()&quot;&gt;</span>
-</span><span class='line'><span class="sr">        &lt;div class=&quot;row&quot;&gt;</span>
-</span><span class='line'><span class="sr">          &lt;div class=&quot;col-xs-6&quot;&gt;</span>
-</span><span class='line'><span class="sr">            &lt;input type=&quot;text&quot; ng-model=&quot;newVisitor.first_name&quot; class=&quot;form-control&quot; placeholder=&quot;First Name&quot; /</span><span class="o">&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="sr">/div&gt;</span>
-</span><span class='line'><span class="sr">          &lt;div class=&quot;col-xs-6&quot;&gt;</span>
-</span><span class='line'><span class="sr">            &lt;input type=&quot;text&quot; ng-model=&quot;newVisitor.last_name&quot; class=&quot;form-control&quot; placeholder=&quot;Last Name&quot; /</span><span class="o">&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="sr">/div&gt;</span>
-</span><span class='line'><span class="sr">        &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;row&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-12&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>            <span class="o">&lt;</span><span class="n">br</span> <span class="sr">/&gt;</span>
-</span><span class='line'><span class="sr">            &lt;input type=&quot;text&quot; ng-model=&quot;newVisitor.reason&quot; class=&quot;form-control&quot; placeholder=&quot;Reason for Visit&quot; /</span><span class="o">&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="sr">/div&gt;</span>
-</span><span class='line'><span class="sr">        &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;row&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-12 text-center&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>            <span class="o">&lt;</span><span class="n">br</span> <span class="sr">/&gt;</span>
-</span><span class='line'><span class="sr">            &lt;input type=&quot;Submit&quot; value=&quot;Add Visitor&quot; class=&quot;btn btn-primary&quot; /</span><span class="o">&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="sr">/div&gt;</span>
-</span><span class='line'><span class="sr">        &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="sr">/form&gt;</span>
-</span><span class='line'><span class="sr">    &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Currently</span> <span class="no">Visiting</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
-</span><span class='line'><span class="sr">    &lt;hr /</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="n">table</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;table table-bordered table-striped&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="n">thead</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="n">tr</span><span class="o">&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="n">th</span><span class="o">&gt;</span><span class="no">First</span> <span class="no">Name</span><span class="o">&lt;</span><span class="sr">/th&gt;</span>
-</span><span class='line'><span class="sr">          &lt;th&gt;Last Name&lt;/</span><span class="n">th</span><span class="o">&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="n">th</span><span class="o">&gt;</span><span class="no">Reason</span> <span class="k">for</span> <span class="no">Visit</span><span class="o">&lt;</span><span class="sr">/th&gt;</span>
-</span><span class='line'><span class="sr">          &lt;th&gt;&amp;nbsp;&lt;/</span><span class="n">th</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="sr">/tr&gt;</span>
-</span><span class='line'><span class="sr">      &lt;/</span><span class="n">thead</span><span class="o">&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="n">tbody</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="n">tr</span> <span class="n">ng</span><span class="o">-</span><span class="n">show</span><span class="o">=</span><span class="s2">&quot;!visitors.length&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="n">td</span> <span class="n">colspan</span><span class="o">=</span><span class="s2">&quot;4&quot;</span><span class="o">&gt;</span><span class="no">No</span> <span class="n">visitors</span> <span class="k">in</span> <span class="n">the</span> <span class="n">building</span><span class="o">.</span><span class="n">&lt;</span><span class="sr">/td&gt;</span>
-</span><span class='line'><span class="sr">        &lt;/</span><span class="n">tr</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="n">tr</span> <span class="n">ng</span><span class="o">-</span><span class="n">repeat</span><span class="o">=</span><span class="s2">&quot;visitor in visitors&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="n">td</span><span class="o">&gt;&lt;</span><span class="sr">/td&gt;</span>
-</span><span class='line'><span class="sr">          &lt;td&gt;&lt;/</span><span class="n">td</span><span class="o">&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="n">td</span><span class="o">&gt;&lt;</span><span class="sr">/td&gt;</span>
-</span><span class='line'><span class="sr">          &lt;td&gt;&lt;a class=&quot;btn btn-danger&quot; ng-click=&quot;deleteVisitor($index)&quot;&gt;Remove&lt;/</span><span class="n">a</span><span class="o">&gt;&lt;</span><span class="sr">/td&gt;</span>
-</span><span class='line'><span class="sr">        &lt;/</span><span class="n">tr</span><span class="o">&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="sr">/tbody&gt;</span>
-</span><span class='line'><span class="sr">    &lt;/</span><span class="n">table</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="sr">/div&gt;</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Let's break this down a bit:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;div class=&quot;container&quot; ng-app=&quot;VisitorCenter&quot;&gt;</span>
-</span><span class='line'><span class="sr">  ...</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  The outer div on the first line has an attribute called <code>ng-app</code>. The <code>ng-app</code> attribute tells AngularJS that this is part of our AngularJS application. In this case we specify the name of our AngularJS module, <code>VisitorCenter</code>.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;div ng-controller=&quot;visitorsController&quot;&gt;</span>
-</span><span class='line'><span class="sr">  ...</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  The next inner div contains an attribute called <code>ng-controller</code>. This attribute tells AngularJS that we wish to use our visitorsController as the controller for this portion of the application.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">form</span> <span class="n">ng</span><span class="o">-</span><span class="n">submit</span><span class="o">=</span><span class="s2">&quot;addVisitor()&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;row&quot;</span><span class="o">&gt;&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;&amp;lt;div class=&quot;col-xs-6&quot;&amp;gt;</span>
-</span><span class='line'><span class="sr">  &amp;lt;input type=&quot;text&quot; ng-model=&quot;newVisitor.first_name&quot; class=&quot;form-control&quot; placeholder=&quot;First Name&quot; /</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
-</span><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">/</span><span class="n">div</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
-</span><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
-</span><span class='line'>  <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">input</span> <span class="n">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span> <span class="n">ng</span><span class="o">-</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;newVisitor.last_name&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;form-control&quot;</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">&quot;Last Name&quot;</span> <span class="sr">/&amp;gt;</span>
-</span><span class='line'><span class="sr">&amp;lt;/</span><span class="n">div</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="sr">/div&gt;</span>
-</span><span class='line'><span class="sr">  &lt;div class=&quot;row&quot;&gt;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-12&quot;</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
-</span><span class='line'>  <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">br</span> <span class="sr">/&amp;gt;</span>
-</span><span class='line'><span class="sr">  &amp;lt;input type=&quot;text&quot; ng-model=&quot;newVisitor.reason&quot; class=&quot;form-control&quot; placeholder=&quot;Reason for Visit&quot; /</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
-</span><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">/</span><span class="n">div</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="sr">/div&gt;</span>
-</span><span class='line'><span class="sr">  &lt;div class=&quot;row&quot;&gt;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-12 text-center&quot;</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
-</span><span class='line'>  <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">br</span> <span class="sr">/&amp;gt;</span>
-</span><span class='line'><span class="sr">  &amp;lt;input type=&quot;Submit&quot; value=&quot;Add Visitor&quot; class=&quot;btn btn-primary&quot; /</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
-</span><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">/</span><span class="n">div</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="sr">/div&gt;</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">form</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  The <code>ng-submit</code> attribute on our form tells AngularJS that we wish to use the addVisitor() method on our controller to process the form request. Each of the input elements contain an <code>ng-model</code> attribute. This attribute maps the input elements to our model.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">tr</span> <span class="n">ng</span><span class="o">-</span><span class="n">show</span><span class="o">=</span><span class="s2">&quot;!visitors.length&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">td</span> <span class="n">colspan</span><span class="o">=</span><span class="s2">&quot;4&quot;</span><span class="o">&gt;</span><span class="no">No</span> <span class="n">visitors</span> <span class="k">in</span> <span class="n">the</span> <span class="n">building</span><span class="o">.</span><span class="n">&lt;</span><span class="sr">/td&gt;</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">tr</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  The <code>ng-show</code> attribute on the first row tells AngularJS that we only want to show the row if the condition mentioned is matched. In this case we only want to show the first row if there are no visitors.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">tr</span> <span class="n">ng</span><span class="o">-</span><span class="n">repeat</span><span class="o">=</span><span class="s2">&quot;visitor in visitors&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&amp;</span><span class="n">hellip</span><span class="p">;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/tr&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  The <code>ng-repeat</code> attribute is a loop. This particular loop tells AngularJS that we want to loop through each visitor.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">td</span><span class="o">&gt;</span><span class="p">{{</span> <span class="n">visitor</span><span class="o">.</span><span class="n">first_name</span> <span class="p">}}</span><span class="o">&lt;</span><span class="sr">/td&gt;</span>
-</span><span class='line'><span class="sr">&lt;td&gt;{{ visitor.last_name }}&lt;/</span><span class="n">td</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="n">td</span><span class="o">&gt;</span><span class="p">{{</span> <span class="n">visitor</span><span class="o">.</span><span class="n">reason</span> <span class="p">}}</span><span class="o">&lt;</span><span class="sr">/td&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Text contained within <code>{{ .... }}</code> are AngularJS expressions. In this case we are telling AngularJS to render the fields mentioned in each expression.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">td</span><span class="o">&gt;&lt;</span><span class="n">a</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;btn btn-danger&quot;</span> <span class="n">ng</span><span class="o">-</span><span class="n">click</span><span class="o">=</span><span class="s2">&quot;deleteVisitor($index)&quot;</span><span class="o">&gt;</span><span class="no">Remove</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="n">td</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  The <code>ng-click</code> button tells AngularJS to run the specified controller function when the html tag in question is clicked. In this case we run the code to delete the specified user.
-</p>
-
-
-
-
-<p>
-  So far so good, That's it!!! for this introduction to AngularJS and Rails. See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
   
   <entry>
     <title type="html"><![CDATA[Mark Methods Private When You Don’t Test Them]]></title>
@@ -2469,6 +1662,452 @@
 
 <p>
   However, I find Ruby internals to be fascinating… I really do like having at least a small understanding of what’s going on inside of Ruby while it’s running my code. I also believe it will help me to become a more effective and knowledgeable Ruby developer, even if I never contribute a line of internal code to Rubinius, JRuby or MRI. And studying Ruby internals has definitely lead me to a number of surprising discoveries, and forced me to rethink the mental model I have always had of the Ruby interpreter… or should I say, the Ruby compiler!
+</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[How the Hash Works in Ruby?]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/06/16/how-the-hash-works-in-ruby/"/>
+    <updated>2015-06-16T23:43:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/06/16/how-the-hash-works-in-ruby</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="How the Hash Works in Ruby?" />
+</p>
+
+
+
+
+<p>
+  A brief overview of the hash data structure, how it is implemented in Ruby and a peek at the history of changes made to the hash in MRI Ruby.
+</p>
+
+
+
+
+<p>
+  <strong>What is a Hash?</strong><br/>
+  A Hash is a data structure that organizes data in key-value pairs. It is also referred to as a dictionary or associative array. It stores these key-value pairs of associated data in a way that enables efficient insertion and lookup, in constant O(1) time. These properties of a hash make it is one of the most useful tools in a programmer’s toolbox and it is available in the core libraries of most if not all, programming languages.
+</p>
+
+
+
+
+<p>
+  In Ruby a hash can be declared literally as:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">h</span> <span class="o">=</span> <span class="p">{</span><span class="ss">color</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">black</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="ss">font</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Monaco</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;}</span>
+</span><span class='line'><span class="n">h</span> <span class="o">=</span> <span class="p">{</span><span class="ss">:color</span><span class="o">=&gt;&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">black</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="ss">:font</span><span class="o">=&gt;&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Monaco</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Or declaratively with the new method:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">h</span> <span class="o">=</span> <span class="no">Hash</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">h</span><span class="o">[</span><span class="ss">:color</span><span class="o">]</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">black</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'><span class="n">h</span><span class="o">[</span><span class="ss">:font</span><span class="o">]</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Monoco</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>How does a Hash store data and why is it efficient?</strong><br/>
+  o understand how data is stored in a hash and why it is efficient, let’s revisit the basic linear data structure, the array. An array allows us to randomly access any element that it stores if we know the index of that element beforehand.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="o">]</span>
+</span><span class='line'><span class="nb">puts</span> <span class="n">a</span><span class="o">[</span><span class="mi">2</span><span class="o">]</span>  <span class="c1"># =&gt; 4</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  If the key-value pairs we were trying to store were integers within a limited range such as 1-20 or 1-100, we would simply use an array and our key would be the integer.
+</p>
+
+
+
+
+<p>
+  For example, given that:<br/>
+  - we need to store the names of the students in a classroom with 20 students<br/>
+  - each student has a student id between 1 and 20<br/>
+  - no two students have the same student id.
+</p>
+
+
+
+
+<p>
+  We could simply store their names represented by the table below in an array:
+</p>
+
+
+<table>
+<thead>
+<tr>
+<th>Key </th>
+<th> Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 </td>
+<td> Bunlong</td>
+</tr>
+<tr>
+<td>2 </td>
+<td> Jinglong</td>
+</tr>
+<tr>
+<td>3 </td>
+<td> Mickey Mouse</td>
+</tr>
+</tbody>
+</table>
+
+
+<br/>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">students</span><span class="o">=</span> <span class="o">[&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">Belle</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">Ariel</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">Peter</span> <span class="no">Pan</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">Mickey</span> <span class="no">Mouse</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  But, what if the student id was a 4-digit number? Then we would have to assign a 10000 element table to access the names by the id. To solve this we simplify the key to the last 2 digits of the 4 digit number and use that as the location inside the table, so we can get random access to the record. Now, if we have another student with id “3221”, also ending in “21”, we would have to save two values at that location resulting in a collision.
+</p>
+
+
+<table>
+<thead>
+<tr>
+<th>Key </th>
+<th> Hash(key) = last 2 digits </th>
+<th> Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4221, 3221</td>
+<td> 21 </td>
+<td> Bunlong</td>
+</tr>
+<tr>
+<td>1357 </td>
+<td> 57 </td>
+<td> Jinglong</td>
+</tr>
+<tr>
+<td>4612 </td>
+<td> 12 </td>
+<td> Mickey Mouse </td>
+</tr>
+</tbody>
+</table>
+
+
+<br/>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">students</span><span class="o">=</span> <span class="nb">Array</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+</span><span class='line'><span class="n">students</span><span class="o">[</span><span class="mi">21</span><span class="o">]=[&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">Belle</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">Sofia</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">]</span>
+</span><span class='line'><span class="n">students</span><span class="o">[</span><span class="mi">57</span><span class="o">]=&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">Ariel</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'><span class="n">students</span><span class="o">[</span><span class="mi">12</span><span class="o">]=&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">Peter</span> <span class="no">Pan</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'><span class="n">students</span><span class="o">[</span><span class="mi">14</span><span class="o">]=&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">Mickey</span> <span class="no">Mouse</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  What if the id was a 10-digit number or an alphanumeric string? This gets inefficient and unwieldy quickly. Unfortunately, too simple a hashing strategy can lead to problems.
+</p>
+
+
+
+
+<p>
+  <strong>How Ruby’s hash function works?</strong><br/>
+  So, now we have an understanding that the purpose of a hash function is to convert a given a key into an integer of limited range. In order to reduce the range, a commonly used technique is the division method. In the division method, the key is divided by the size of the storage or table and the remainder is the location inside that table where a record can be stored. Therefore, in the example above, if the table size was 20, the locations would be 1, 17, 12, 14 derived from the computation below.
+</p>
+
+
+
+
+<p>
+  <code>4221 % 20 = 1</code><br/>
+  <code>1357 % 20 = 17</code><br/>
+  <code>4612 % 20 = 12</code><br/>
+  <code>1514 % 20 = 14</code><br/>
+</p>
+
+
+
+
+<p>
+  But in real life programming the keys are not always nice integers, they are strings, objects, or some other data type. This is solved by using a one-way hash function(digest) over the key and then applying the division method to get the location. The hash function is a mathematical function that takes a string of any length and produces a fixed length integer value. The hash data structure derives it’s name from this hashing mechanism. Ruby uses the <a href="https://en.wikipedia.org/wiki/MurmurHash" target="_blank">murmur hash function</a> and then applies the division method with a prime number M, which Ruby determines based on the table size that is needed for storage.
+</p>
+
+
+
+
+<p>
+  <code>murmur_hash(key) % M</code>
+</p>
+
+
+
+
+<p>
+  The code for this can be found in Ruby language’s source code in <a href="https://github.com/ruby/ruby/blob/1b5acebef2d447a3dbed6cf5e146fda74b81f10d/st.c" target="_blank">st.c file</a>.
+</p>
+
+
+
+
+<p>
+  In case two keys return the same number, also known as a hash collision, the value is chained on to the same location or bucket in the table.
+</p>
+
+
+
+
+<p>
+  <strong>How Ruby handles hash collisons and growth?</strong><br/>
+  One of the problems faced by hash functions is distribution. What if most remainders fall into the same bucket? We would have to first find the bucket in the table from computing over the key, and then look through all the chained data in the location to find the matching record. That would defeat the purpose of creating a hash data structure for random access and O(1) time, because now we have to iterate over all these values to find the record which puts us back to O(n) time.
+</p>
+
+
+
+
+<p>
+  It has been found that if divisor M is prime, the results are not as biased and more evenly distributed. But, even with the best divisor, collisions will occur as the number of records being added increases. Ruby adjusts the value of M based the density. Density is the number of records chained at a location in the table. In the above example, the density is 2, since we have 2 records that have the index/location 1.
+</p>
+
+
+
+
+<p>
+  Ruby sets the maximum allowed density value to 5.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;define ST_DEFAULT_MAX_DENSITY 5&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  When the density of the records reaches 5, then Ruby adjusts the value of M, re-computes and adjust the hash for all the records that are in that hash. “The algorithm that computes M is one that generates prime numbers near powers of 2”, from <a href="http://www.amazon.com/Data-Structures-Using-Aaron-Tenenbaum/dp/0131997467" target="_blank">Data Structures using C</a>. Look at the function new_size in <a href="https://github.com/ruby/ruby/blob/1b5acebef2d447a3dbed6cf5e146fda74b81f10d/st.c" target="_blank">st.c</a> at line 158. This is where the size of the new hash is computed.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">new_size</span><span class="p">(</span><span class="n">st_index_t</span> <span class="n">size</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">st_index_t</span> <span class="n">i</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">3</span><span class="p">;</span> <span class="n">i</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="mi">31</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;if ((st_index_t)(1&amp;lt;&amp;lt;i) &amp;gt; size) return 1&amp;lt;&amp;lt;i;</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  }</span>
+</span><span class='line'><span class="sr">  return -1;</span>
+</span><span class='line'><span class="sr">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  This is easier to read in the <a href="https://github.com/jruby/jruby/blob/master/core/src/main/java/org/jruby/RubyHash.java" target="_blank">JRuby’s</a> implementation of Hash where the prepared prime number values are statically used from an int array. As you can see the next values are 11, 19 and so on.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="kp">private</span> <span class="n">static</span> <span class="n">final</span> <span class="n">int</span> <span class="no">MRI_PRIMES</span><span class="o">[]</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'><span class="mi">8</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">16</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">32</span> <span class="o">+</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">64</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">128</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">256</span> <span class="o">+</span> <span class="mi">27</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">hellip</span><span class="p">;</span><span class="o">.</span><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  This rehashing as the data grows larger causes a spike in the performance when the hash reaches certain specific sizes.
+</p>
+
+
+
+
+<p>
+  <strong>Ruby hashes are unique for each process</strong><br/>
+  One interesting thing to note is hashes are unique for each Ruby process. The murmur hash seeds it with a random value, which results in a different hash for a particular key for each Ruby process.
+</p>
+
+
+
+
+<p>
+  <strong>Ruby has packed hashes for up to 6 entries since Ruby 2.0</strong><br/>
+  Another interesting thing to note is that Ruby hashes that are very small(less than or equal to 6) are saved in one bucket and not spread over several buckets based on computed hash of the key. Instead, they are simply an array of values. This was added recently and is referred to as a packed entry in the code in st.c. On the <a href="https://github.com/ruby/ruby/pull/84" target="_blank">pull request</a> in which this change was submitted, the commiter has made the following comment.
+</p>
+
+
+
+
+<p>
+  “Investigation shows, that typical rails application allocates tons of small hashes. Up to 40% of whole allocated hashes never grows bigger than 1 element size.”
+</p>
+
+
+
+
+<p>
+  <strong>Ruby hash keys are ordered</strong><br/>
+  Starting with Ruby 1.9.3, a property of the hash is that the keys are ordered based on how they are inserted into the hash. An interesting question was posted on the <a href="https://www.ruby-forum.com/topic/166075" target="_blank">Ruby-forum</a> questioning the reasoning behind it and how it would effect performance. The reply by Matz, creator of Ruby, on that thread, which explains the change is below.
+</p>
+
+
+
+
+<p>
+  Could anybody explain why this feature was added?
+</p>
+
+
+
+
+<p>
+  "Useful for some cases, especially for keyword arguments."
+</p>
+
+
+
+
+<p>
+  Isn’t it going to slow down the operations on the Hash?
+</p>
+
+
+
+
+<p>
+  "No. hash reference operation does not touch order information, only for iteration. Memory consumption increased a bit."
+</p>
+
+
+
+
+<p>
+  Note: Keyword arguments were added to Ruby in 2.0, and an example is below:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">books</span><span class="p">(</span><span class="ss">title</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">Programming</span> <span class="no">Ruby</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;)</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="n">title</span>
+</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;books # =&gt; &amp;lsquo;Programming Ruby&amp;rsquo;</span>
+</span><span class='line'><span class="sr">books(title: &amp;lsquo;Eloquent Ruby&amp;rsquo;) # =&gt; &amp;lsquo;Eloquent Ruby&amp;rsquo;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>Two potential upcoming changes in Hash</strong><br/>
+  1- The next version of Ruby, will most likely introduce syntax sugar for a literal declaration of the hash that will allow spaces in symbols. Take a look at this commit on <a href="https://bugs.ruby-lang.org/issues/4276" target="_blank">ruby-trunk</a>. You may recall, that the first change from hashrocket to colon was introduced in Ruby 1.9 bringing the syntax closer to JSON’s syntax. With this upcoming change the hash will looks even more so like <a href="https://en.wikipedia.org/wiki/JSON" target="_blank">JSON</a>.
+</p>
+
+
+
+
+<p>
+  Currently we need to declare a symbol with a space using a hash rocket:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">h</span> <span class="o">=</span> <span class="p">{</span><span class="ss">:&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">a</span> <span class="n">perfect</span> <span class="n">color</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="o">=&gt;</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">vermilion</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;}</span> <span class="c1">#=&gt; {:&amp;ldquo;a perfect color&amp;rdquo;=&gt;&amp;ldquo;vermilion&amp;rdquo;}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  With the change it will simply be the symbol within quotes followed by a colon:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">h</span> <span class="o">=</span> <span class="p">{</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">a</span> <span class="n">perfect</span> <span class="n">color</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">vermilion</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  2- Another interesting change that is in the works is a method that will allow returning <a href="https://bugs.ruby-lang.org/issues/10017" target="_blank">default values for missing keys in a hash</a>.
+</p>
+
+
+
+
+<p>
+  Currently you can return the default value of only one key using <code>hash.fetch</code>, however the <code>hash.values_at</code> method allows returning multiple values for keys:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">h</span> <span class="o">=</span> <span class="p">{</span><span class="ss">color</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">black</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="ss">font</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">monaco</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;}</span>
+</span><span class='line'><span class="n">h</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:fontsize</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="mi">12</span><span class="n">pt</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;)</span> <span class="c1">#=&gt; &amp;ldquo;12pt&amp;rdquo;</span>
+</span><span class='line'><span class="n">h</span><span class="o">.</span><span class="n">values_at</span><span class="p">(</span><span class="ss">:color</span><span class="p">,</span> <span class="ss">:font</span><span class="p">)</span> <span class="c1">#=&gt; [&amp;ldquo;black&amp;rdquo;, &amp;ldquo;monaco&amp;rdquo;]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  The change proposed is to combine these two methods into one. It might work something like the <code>fetch_values</code> method shown below. Please note the new method name is still being voted on and the example is hypothetical.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">h</span><span class="o">.</span><span class="n">fetch_values</span><span class="p">(</span><span class="ss">:color</span><span class="p">,</span> <span class="ss">:font</span><span class="p">,</span> <span class="ss">:fontsize</span><span class="p">,</span> <span class="ss">:border</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">k</span><span class="o">|</span>
+</span><span class='line'><span class="n">k</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">fontsize</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="p">?</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="mi">12</span><span class="n">pt</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="c1">#{k} is missing&amp;rdquo;</span>
+</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;=&gt; [&amp;ldquo;black&amp;rdquo;, &amp;ldquo;monaco&amp;rdquo;, &amp;ldquo;12pt&amp;rdquo;, &amp;ldquo;border is missing&amp;rdquo;]&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  So far so good, That's it!!! See ya!!! :)
 </p>
 
 ]]></content>
