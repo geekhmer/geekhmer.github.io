@@ -79,6 +79,199 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/05/05/preload-active-record-associations-in-rails-application/">Preload Active Record Associations in Rails Application</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-05-05T16:26:00+07:00" pubdate data-updated="true">May 5<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="Preload Active Record Associations in Rails Application" />
+</p>
+
+
+
+
+<p>
+  Active Record makes database querying so simple. Chain together a few methods and bam, you’ve saved your self lines and lines of T-SQL. The problem is this simplicity masks the underlying operation and it’s very easy to not realize how inefficient your database calls are.
+</p>
+
+
+
+
+<p>
+  For example:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:posts</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Post</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:comments</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:user</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Comment</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:post</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Let’s say on a users profile page we would like to show a listing of comments from this user.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="vi">@user</span><span class="o">.</span><span class="n">posts</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">post</span><span class="o">|</span>
+</span><span class='line'>   <span class="n">post</span><span class="o">.</span><span class="n">comments</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">comment</span><span class="o">|</span>
+</span><span class='line'>      <span class="o">&lt;%=</span> <span class="n">comment</span><span class="o">.</span><span class="n">message</span> <span class="o">%&gt;</span>
+</span><span class='line'>   <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  What you end up with is something like:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="mi">1</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="sb">`users`</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="sb">`users`</span> <span class="no">WHERE</span> <span class="s1">&#39;id&#39;</span> <span class="o">=</span> <span class="mi">1</span> <span class="no">LIMIT</span> <span class="mi">1</span>
+</span><span class='line'> <span class="no">Post</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">7</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="sb">`posts`</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="sb">`blogs`</span> <span class="no">WHERE</span> <span class="sb">`blogs`</span><span class="o">.</span><span class="n">`user_id</span><span class="sb">` = 2</span>
+</span><span class='line'><span class="sb"> Comment Load (0.7ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` = 43</span>
+</span><span class='line'><span class="sb"> Comment Load (1.7ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` = 55</span>
+</span><span class='line'><span class="sb"> Comment Load (2.2ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` = 32</span>
+</span><span class='line'><span class="sb"> Comment Load (0.9ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` = 66</span>
+</span><span class='line'><span class="sb"> Comment Load (2.2ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` = 56</span>
+</span><span class='line'><span class="sb"> Comment Load (4.8ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` = 65</span>
+</span><span class='line'><span class="sb"> Comment Load (1.8ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` = 68</span>
+</span><span class='line'><span class="sb"> Comment Load (0.8ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` = 71</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The user has commented in 9 different posts, which results in 9 separate queries to the DB. This is a small scale example, but you can see how this can compound into something nasty.
+</p>
+
+
+
+
+<p>
+  he solution is to user includes method:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">:posts</span> <span class="o">=&gt;</span> <span class="ss">:comments</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  When using includes method, Active Record ensures that all of the specified associations are loaded using the minimum possible number of queries. The actual query executed is converted into a more optimal singular query and it is that result set that is iterated over instead of the replicated find(id) style queries.
+</p>
+
+
+
+
+<p>
+  Our query stack list now looks like:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="mi">0</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="sb">`users`</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="sb">`users`</span> <span class="no">WHERE</span> <span class="s1">&#39;id&#39;</span> <span class="o">=</span> <span class="mi">1</span> <span class="no">LIMIT</span> <span class="mi">1</span>
+</span><span class='line'><span class="no">Post</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">4</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="sb">`posts`</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="sb">`posts`</span> <span class="no">WHERE</span> <span class="sb">`posts`</span><span class="o">.</span><span class="n">`user_id</span><span class="sb">` IN (1)</span>
+</span><span class='line'><span class="sb">Comment Load (0.5ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` IN (43, 55, 32, 66, 56, 65, 68, 71)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/05/05/where-does-your-code-go-in-rails-application/">Where Does Your Code Go in Rails Application?</a></h1>
     
     
@@ -2379,262 +2572,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/04/19/ruby-on-rails-web-console/">Ruby on Rails Web Console</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-04-19T08:29:00+07:00" pubdate data-updated="true">Apr 19<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/ruby_on_rails.png" width="400" alt="Ruby on Rails Web Console" />
-</p>
-
-
-
-
-<p>
-  As you know, Ruby on Rails has long included the ability to load up an interactive console environment for your application. Simply running <code>rails c</code> would start this console, which allows you to do things like ActiveRecord queries, troubleshooting, and much more. Since the full Rails stack gets loaded you have access to pretty much anything your application has access to. This is useful to troubleshoot things on the spot.
-</p>
-
-
-
-
-<p>
-  Starting with Ruby on Rails 4.2, developers will have access to a web based version of this console. The good news is that you don&#8217;t have to wait for Ruby on Rails 4.2 to hit in order to take advantage of this awesome capability. You can quickly and easily use the web console in your current Rails application by performing the steps below.
-</p>
-
-
-
-
-<p>
-  <strong>Setup</strong><br/>
-  To use the Rails web console, we need to include the web-console gem. Simply add the line below to your Gemfile, then run a bundle install to install it.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Gemfile </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">group</span> <span class="ss">:development</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">gem</span> <span class="s1">&#39;web-console&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 2.0&#39;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Terminal Commands:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Gemfile </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Next, we need to turn on the web console in our application configuration. To do this, simply add the following line to your development.rb environment file:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>config/environments/development.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">web_console</span><span class="o">.</span><span class="n">automount</span> <span class="o">=</span> <span class="kp">true</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now, let&#8217;s create a controller to play with the console. Run the command below to create a controller that we can use to play around with the console. For this example, we will create a controller called Homes with a method called show.
-</p>
-
-
-
-
-<p>
-  Terminal Commands:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="no">Homes</span> <span class="n">show</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now, open up your routes file and modify it so that it looks like the code listed below:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>config/routes.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;homes#show&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now open up the show view for the Homes controller and add in the code listed below:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/views/homes/show.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">console</span> <span class="o">%&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  If you start a rails server and navigate to your development environment, you&#8217;ll notice that there is a console at the bottom of the screen. You can execute Ruby and Rails code here. The console is running within your Rails application so pretty much anything goes.
-</p>
-
-
-
-
-<p>
-  By default, console application is mounted to http://yoursite/console. However, what if we wish to change the path? We can easily do it by adding the line listed below to our development.rb file:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>config/environments/development.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">web_console</span><span class="o">.</span><span class="n">default_mount_path</span> <span class="o">=</span> <span class="s1">&#39;/your/favorite/path&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Whitelisting IPs</strong><br/>
-  The console by default only works with if you are accessing it locally via 127.0.0.1. If you are on a network or using a VM, you may need to add your ip to a whitelist. You can easily do that by adding the line listed below to your development.rb file. Don&#8217;t forget to restart your Rails server for changes to take effect.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>config/environments/development.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">web_console</span><span class="o">.</span><span class="n">whitelisted_ips</span> <span class="o">=</span>  <span class="sx">%w( 127.0.0.1 192.168.0.100 )</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You can also add an entire subnet. Remember to make sure you add 127.0.0.1 or the local machine won&#8217;t have access.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>config/environments/development.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">web_console</span><span class="o">.</span><span class="n">whitelisted_ips</span> <span class="o">=</span>  <span class="sx">%w( 127.0.0.1 192.168.0.016 )</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Run Other Commands</strong><br/>
-  By default the console runs the rails console. However, you can have it run another command instead. For instance, we can turn the web console into an terminal running bash by adding the following line to our development.rb file:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>config/environments/development.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">web_console</span><span class="o">.</span><span class="n">command</span> <span class="o">=</span> <span class="s1">&#39;sudo /bin/login&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Be aware that passwords sent using this method are sent in plaintext. if that concerns you, you should consider using SSL.
-</p>
-
-
-
-
-<p>
-  <strong>Security Considerations</strong><br/>
-  At this point, it&#8217;s not advisable to run this on production. Exposing the console endpoint in a production environment means anyone can get access to the Rails console and therefore access to the system itself. Stick to the development/test environments. Hopefully in the future the Rails team will provide additional features that will allow console use in a production environment.
-</p>
-
-
-
-
-<p>
-  As mentioned earlier, console information is sent plain text. If this concerns you, consider using SSL or not using the web console.
-</p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/5/">&larr; Older</a>
@@ -2648,8 +2585,19 @@
 <aside class="sidebar">
   
     <section>
+  <h1>Like To NewsArticle</h1>
+  <ul>
+    <li>
+      <div class="fb-page" data-href="https://www.facebook.com/geekhmer" data-small-header="false" data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true" data-show-posts="false"><div class="fb-xfbml-parse-ignore"><blockquote cite="https://www.facebook.com/geekhmer"><a href="https://www.facebook.com/geekhmer">GeeKhmer</a></blockquote></div></div>
+    </li>
+  </ul>
+</section><section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/07/04/wireframing-for-your-designing-process/">Wireframing for Your Designing Process</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/07/04/10-reasons-you-should-design-and-code/">10 Reasons You Should Design and Code</a>
@@ -2673,10 +2621,6 @@
     
       <li class="post">
         <a href="/blog/2015/06/18/the-10-best-project-management-tools-for-freelancers/">The 10 Best Project Management Tools for Freelancers</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/06/17/is-ruby-interpreted-or-compiled/">Is Ruby Interpreted or Compiled?</a>
       </li>
     
   </ul>
@@ -2734,7 +2678,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 25 ]</a>
+        <a href="/blog/categories/other/">Other [ 26 ]</a>
       </li>
     
   </ul>
@@ -2795,13 +2739,6 @@
       <a href="https://developers.facebook.com/" target="_blank">
         <img src="/images/logo_facebook.png" />
       </a>
-    </li>
-  </ul>
-</section><section>
-  <h1>Like To News Article</h1>
-  <ul>
-    <li>
-      <div class="fb-page" data-href="https://www.facebook.com/geekhmer" data-small-header="false" data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true" data-show-posts="false"><div class="fb-xfbml-parse-ignore"><blockquote cite="https://www.facebook.com/geekhmer"><a href="https://www.facebook.com/geekhmer">GeeKhmer</a></blockquote></div></div>
     </li>
   </ul>
 </section>
