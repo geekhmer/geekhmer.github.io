@@ -5,13 +5,13 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Ruby - Check for nil Without Using an Explicit if - GeeKhmer</title>
+  <title>Introduction about Load Balancing - Failover and Shared Storage - GeeKhmer</title>
   <meta name="author" content="Bunlong Van">
   
   
   <meta name="description" content="The biggest website of computer programming, Ruby, Ruby on Rails, Erlang, Chicagoboss and Javascript in Southeast Asia.">
 
-  <meta name="keywords" content="Check for nil Without Using an Explicit if, Ruby, Ruby on Rails, Rails 4, Ruby on Rails 4">
+  <meta name="keywords" content="Introduction about Load Balancing - Failover and Shared Storage, Introduction about Load Balancing, Introduction about Failover, Introduction about Shared Storage">
 
   <!-- http://t.co/dKP3o1e -->
   <meta name="HandheldFriendly" content="True">
@@ -19,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://geekhmer.github.io/blog/2014/12/02/ruby-check-for-nil-without-using-an-explicit-if">
+  <link rel="canonical" href="http://geekhmer.github.io/blog/2015/07/10/introduction-about-load-balancing-failover-and-shared-storage">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="" rel="alternate" title="GeeKhmer" type="application/atom+xml">
@@ -76,7 +76,7 @@
   
   <header>
     
-      <h1 class="entry-title">Ruby - Check for Nil Without Using an Explicit If</h1>
+      <h1 class="entry-title">Introduction About Load Balancing - Failover and Shared Storage</h1>
     
     
       <p class="meta">
@@ -92,7 +92,7 @@
   
 
 
-<time datetime="2014-12-02T00:06:00+07:00" pubdate data-updated="true">Dec 2<span>nd</span>, 2014</time>
+<time datetime="2015-07-10T01:07:00+07:00" pubdate data-updated="true">Jul 10<span>th</span>, 2015</time>
         
       </p>
     
@@ -100,93 +100,118 @@
 
 
 <div class="entry-content"><p>
-  <img src="/images/rights_and_wrongsof_ruby.jpg" width="400" alt="Ruby - Check for nil Without Using an Explicit if" />
+  <img src="/images/load_balancing_failover_shared_storage.jpg" width="500" alt="Introduction about Load Balancing - Failover and Shared Storage" />
 </p>
 
 
 
 
 <p>
-  All checks for nil are a condition, but Ruby provides many ways to check for
-  nil without using an explicit if. Watch out for nil conditional checks behind other syntax:
+  <strong>What is Load Balancing?</strong><br/>
+  Load balancing lets you spread load over multiple servers. You would want to do this if you were maxing out your CPU or disk IO or network capacity on a particular server.
 </p>
 
 
 
 
 <p>
-  <strong>Explicit if with nil?</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">if</span> <span class="n">listing</span><span class="o">.</span><span class="n">nil?</span>
-</span><span class='line'>  <span class="kp">nil</span>
-</span><span class='line'><span class="k">else</span>
-</span><span class='line'>  <span class="n">listing</span><span class="o">.</span><span class="n">name</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Using other syntax:
+  Alternatives to load balancing include &#8216;scaling&#8217; vertically. e.g. getting faster or better hardware such as quicker disks, a faster CPU or a fatter network pipe.
 </p>
 
 
 
 
 <p>
-  <strong>Implicit nil check through truthy conditional</strong>
+  <strong>Implementing Load Balancing</strong><br/>
+  One simple way to implement load balancing is to split services between servers. e.g. running the web server on one server and the database server on another. This way is easy since there are no data replication issues.  e.g. all necessary files are on the web servers, all necessary database data is on the database server.
 </p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">if</span> <span class="n">listing</span>
-</span><span class='line'>  <span class="n">listing</span><span class="o">.</span><span class="n">name</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
 
 
 
 
 <p>
-  <strong>Relies on nil being falsey</strong>
+  Another common load balancing option is to have multiple front end servers.  To distribute requests to multiple servers you could setup multiple IP addresses for a particular domain.  Then clients should get all these addresses and to a random one.  Spreading the load around.
 </p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">listing</span> <span class="o">&amp;&amp;</span> <span class="n">listing</span><span class="o">.</span><span class="n">name</span>
-</span></code></pre></td></tr></table></div></figure>
 
 
 
 
 <p>
-  <strong>Call to try</strong>
+  Another way to distribute requests is to have a single virtual IP (VIP) that all clients use.  And for the computer on that &#8216;virtual&#8217; IP to forward the request to the real servers. eg with haproxy.
 </p>
 
 
 
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">listing</span><span class="o">.</span><span class="n">try</span><span class="p">(</span><span class="ss">:name</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
+<p>
+  People can also implement load balancing via http balancers like mod_proxy_balancer in NGINX or Apache 2.2.
+</p>
 
 
+
+
+<p>
+  <strong>What is Failover?</strong><br/>
+  The goal of failover is to allow work that would normally be done by one server to be done by another server should the regular one fail.
+</p>
+
+
+
+
+<p>
+  For example, Server A responds to all requests unless it has a hardware failure, or someone trips over its network cable, or the data center it is located in burns to the ground.  And if Server A cannot respond to requests, then Server B can take over.
+</p>
+
+
+
+
+<p>
+  Or if you simply need a service to be highly available, failover allows you to perform maintenance on individual servers (nodes) without taking your service off-line.
+</p>
+
+
+
+
+<p>
+  For failover server B would ideally be in a separate data center, or if that wasn&#8217;t possible you would at least want to try and put it on a separate switch than Server A and on a separate power outlet as well. Basically the more physical separation the better.
+</p>
+
+
+
+
+<p>
+  For failover server B would ideally be in a separate data center, or if that wasn&#8217;t possible you would at least want to try and put it on a separate switch than Server A and on a separate power outlet as well. Basically the more physical separation the better.
+</p>
+
+
+
+
+<p>
+  <strong>Implementing Failover</strong><br/>
+  To implement failover you typically need to have your data replicated across multiple machines.  You could do this via rsync+cron for files/directories.  And via something like MySQL replication for databases.
+</p>
+
+
+
+
+<p>
+  One way to trigger the failover is to change the IP address your domain points to.  IP address changes can happen within a few minutes of a DNS server update.  Though if a client PC is caching an IP then it may take a bit longer for that to notice the change.
+</p>
+
+
+
+
+<p>
+  <strong>What about Shared Storage?</strong><br/>
+  In an ideal world you would have a file system that any server could read/write to and where that filesystem was located on disks spread across multiple servers and where any of those servers or disks could fail and that would not affect the file system&#8217;s availability.
+</p>
+
+
+
+
+<p>
+  In the real world to do this you need a clustered file system.  That is a file system that knows it needs to co-ordinate any disk access between other servers in the cluster.  To do that you need to have monitoring software (to check when a device goes down) as well as locking software (e.g. DLMs) that ensure that no two servers are writing to the same place, or that one server is not reading something that another server is in the middle of writing.
+</p>
 
 </div>
 
@@ -210,12 +235,12 @@
   
 
 
-<time datetime="2014-12-02T00:06:00+07:00" pubdate data-updated="true">Dec 2<span>nd</span>, 2014</time>
+<time datetime="2015-07-10T01:07:00+07:00" pubdate data-updated="true">Jul 10<span>th</span>, 2015</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/ruby/'>Ruby</a>
+    <a class='category' href='/blog/categories/other/'>Other</a>
   
 </span>
 
@@ -224,7 +249,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2014/12/02/ruby-check-for-nil-without-using-an-explicit-if/" data-via="" data-counturl="http://geekhmer.github.io/blog/2014/12/02/ruby-check-for-nil-without-using-an-explicit-if/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2015/07/10/introduction-about-load-balancing-failover-and-shared-storage/" data-via="" data-counturl="http://geekhmer.github.io/blog/2015/07/10/introduction-about-load-balancing-failover-and-shared-storage/" >Tweet</a>
   
   
   
@@ -235,10 +260,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/12/01/tips-to-improve-the-performance-of-ruby-on-rails-application/" title="Previous Post: Tips to Improve the Performance of Ruby on Rails Application">&laquo; Tips to Improve the Performance of Ruby on Rails Application</a>
+        <a class="basic-alignment left" href="/blog/2015/07/09/use-helpful-google-search-operators-to-search-faster/" title="Previous Post: Use Helpful Google Search Operators to Search Faster">&laquo; Use Helpful Google Search Operators to Search Faster</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2014/12/06/using-uuid-as-primary-key-in-ruby-on-rails-with-mysql-guide/" title="Next Post: Using UUID as Primary Key in Ruby on Rails with MySQL Guide">Using UUID as Primary Key in Ruby on Rails with MySQL Guide &raquo;</a>
       
     </p>
   </footer>

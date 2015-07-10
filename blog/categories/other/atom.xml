@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Other | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/other/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-07-09T00:46:38+07:00</updated>
+  <updated>2015-07-10T23:13:15+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,128 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Introduction about Load Balancing - Failover and Shared Storage]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/07/10/introduction-about-load-balancing-failover-and-shared-storage/"/>
+    <updated>2015-07-10T01:07:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/07/10/introduction-about-load-balancing-failover-and-shared-storage</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/load_balancing_failover_shared_storage.jpg" width="500" alt="Introduction about Load Balancing - Failover and Shared Storage" />
+</p>
+
+
+
+
+<p>
+  <strong>What is Load Balancing?</strong><br/>
+  Load balancing lets you spread load over multiple servers. You would want to do this if you were maxing out your CPU or disk IO or network capacity on a particular server.
+</p>
+
+
+
+
+<p>
+  Alternatives to load balancing include 'scaling' vertically. e.g. getting faster or better hardware such as quicker disks, a faster CPU or a fatter network pipe.
+</p>
+
+
+
+
+<p>
+  <strong>Implementing Load Balancing</strong><br/>
+  One simple way to implement load balancing is to split services between servers. e.g. running the web server on one server and the database server on another. This way is easy since there are no data replication issues.  e.g. all necessary files are on the web servers, all necessary database data is on the database server.
+</p>
+
+
+
+
+<p>
+  Another common load balancing option is to have multiple front end servers.  To distribute requests to multiple servers you could setup multiple IP addresses for a particular domain.  Then clients should get all these addresses and to a random one.  Spreading the load around.
+</p>
+
+
+
+
+<p>
+  Another way to distribute requests is to have a single virtual IP (VIP) that all clients use.  And for the computer on that 'virtual' IP to forward the request to the real servers. eg with haproxy.
+</p>
+
+
+
+
+<p>
+  People can also implement load balancing via http balancers like mod_proxy_balancer in NGINX or Apache 2.2.
+</p>
+
+
+
+
+<p>
+  <strong>What is Failover?</strong><br/>
+  The goal of failover is to allow work that would normally be done by one server to be done by another server should the regular one fail.
+</p>
+
+
+
+
+<p>
+  For example, Server A responds to all requests unless it has a hardware failure, or someone trips over its network cable, or the data center it is located in burns to the ground.  And if Server A cannot respond to requests, then Server B can take over.
+</p>
+
+
+
+
+<p>
+  Or if you simply need a service to be highly available, failover allows you to perform maintenance on individual servers (nodes) without taking your service off-line.
+</p>
+
+
+
+
+<p>
+  For failover server B would ideally be in a separate data center, or if that wasn't possible you would at least want to try and put it on a separate switch than Server A and on a separate power outlet as well. Basically the more physical separation the better.
+</p>
+
+
+
+
+<p>
+  For failover server B would ideally be in a separate data center, or if that wasn't possible you would at least want to try and put it on a separate switch than Server A and on a separate power outlet as well. Basically the more physical separation the better.
+</p>
+
+
+
+
+<p>
+  <strong>Implementing Failover</strong><br/>
+  To implement failover you typically need to have your data replicated across multiple machines.  You could do this via rsync+cron for files/directories.  And via something like MySQL replication for databases.
+</p>
+
+
+
+
+<p>
+  One way to trigger the failover is to change the IP address your domain points to.  IP address changes can happen within a few minutes of a DNS server update.  Though if a client PC is caching an IP then it may take a bit longer for that to notice the change.
+</p>
+
+
+
+
+<p>
+  <strong>What about Shared Storage?</strong><br/>
+  In an ideal world you would have a file system that any server could read/write to and where that filesystem was located on disks spread across multiple servers and where any of those servers or disks could fail and that would not affect the file system's availability.
+</p>
+
+
+
+
+<p>
+  In the real world to do this you need a clustered file system.  That is a file system that knows it needs to co-ordinate any disk access between other servers in the cluster.  To do that you need to have monitoring software (to check when a device goes down) as well as locking software (e.g. DLMs) that ensure that no two servers are writing to the same place, or that one server is not reading something that another server is in the middle of writing.
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Use Helpful Google Search Operators to Search Faster]]></title>
@@ -788,114 +910,6 @@ Then I should see my dashboard
 
 <p>
   So far so good, That's it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[My Development Stack]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/06/03/my-development-stack/"/>
-    <updated>2015-06-03T23:27:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/06/03/my-development-stack</id>
-    <content type="html"><![CDATA[<p>
-  I always try to improve my development stack in order to gain productivity. And during the last few months, there has been a lot of change.
-</p>
-
-
-
-
-<p>
-  Here is my current development stack that I use to create web apps:
-</p>
-
-
-
-
-<h3>
-  Front-End
-</h3>
-
-
-
-
-<p>
-  <strong>Bootstrap:</strong> A great HTML/CSS framework. It helps you build MVC very fast. Sass: A language compiled into CSS which adds many features such as variables, imports and functions.<br/>
-  <strong>Sass:</strong> A language compiled into CSS which adds many features such as variables, imports and functions.<br/>
-  <strong>Jquery:</strong> Good old Jquery, indeed. I may start to use angular in the next few weeks if I have enough time.
-</p>
-
-
-
-
-<h3>
-  Back-End
-</h3>
-
-
-
-
-<p>
-  <strong>Ruby on Rails:</strong> The most productive web framework I have ever worked with, much faster than any PHP framework, and enforcing many good software engineering practices.<br/>
-  <strong>PostgreSQL:</strong> Faster and most powerful than most RDBMS (including MySQL), and free.
-</p>
-
-
-
-
-<h3>
-  Hosting
-</h3>
-
-
-
-
-<p>
-  <strong>Heroku:</strong> A great PaaS, and free for small apps. I also tried Google App Engine but its lack of flexibility was a problem for me.<br/>
-  <strong>Cloudflare:</strong> It makes your app load faster and gives you a free SSL certificate.<br/>
-  <strong>Mandrill:</strong> Very easy to use, yet powerful, EaaS (Email as a Service). I use it to send transactional emails like welcome messages and password resets.
-</p>
-
-
-
-
-<h3>
-  Deployment
-</h3>
-
-
-
-
-<p>
-  <strong>Git:</strong> I configured it with a pre-commit hook which automatically runs rails tests. And thanks to Heroku a simple push deploys my code. It’s very useful and now I just couldn’t go back.
-</p>
-
-
-
-
-<h3>
-  Monitoring
-</h3>
-
-
-
-
-<p>
-  <strong>Pingdom:</strong> A great tool to receive alerts if your app goes down (and if you add IFTTT you can receive them by SMS).
-</p>
-
-
-
-
-<p>
-  Let’s see what it looks like (with the help of a great website I recently found):
-</p>
-
-
-
-
-<p>
-  <img src="http://geekhmer.github.io/images/my_development_stack.png" alt="My Development Stack" />
 </p>
 
 ]]></content>
