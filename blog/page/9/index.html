@@ -79,6 +79,503 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/02/21/liquid-on-rails/">Liquid on Rails</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-21T22:59:00+07:00" pubdate data-updated="true">Feb 21<span>st</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/move_to_rails.png" alt="Liquid on Rails" />
+</p>
+
+
+
+
+<p>
+  Now you have a basic grasp on the Liquid template engine itself, let&#8217;s learn how to utilize it in our Ruby on Rails application. First you need to add the gem to the Gemfile. Add the following line to the Gemfile:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;liquid&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 2.6.1&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then run <code>bundle install</code> to install the Liquid gem:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then create a model called Page. The Page model will be used to represent a page owned by a specific user. Run the commands below to create this model:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Page</span> <span class="ss">user</span><span class="p">:</span><span class="n">string</span> <span class="ss">template</span><span class="p">:</span><span class="n">text</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then open up your seeds (<code>db/seeds.rb</code>) file and modify it so that it looks somethings like below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>seeds </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Page</span><span class="o">.</span><span class="n">delete_all</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Page</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;JingLong&quot;</span><span class="p">,</span> <span class="ss">template</span><span class="p">:</span> <span class="sx">%{</span>
+</span><span class='line'><span class="sx">  Hello {{ user }}, here is your shopping list.</span>
+</span><span class='line'><span class="sx">  &lt;ul&gt;</span>
+</span><span class='line'><span class="sx">    {% for item in list %}</span>
+</span><span class='line'><span class="sx">      &lt;li&gt;{{ item.name }}&lt;/li&gt;</span>
+</span><span class='line'><span class="sx">    {% endfor %}</span>
+</span><span class='line'><span class="sx">  &lt;/ul&gt;</span>
+</span><span class='line'><span class="sx">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Page</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Bunlong&quot;</span><span class="p">,</span> <span class="ss">template</span><span class="p">:</span> <span class="sx">%{</span>
+</span><span class='line'><span class="sx">  What is up my man? Here is your shopping list.</span>
+</span><span class='line'><span class="sx">  &lt;ul&gt;</span>
+</span><span class='line'><span class="sx">    {% for item in list %}</span>
+</span><span class='line'><span class="sx">      &lt;li&gt;{{ item.name }}&lt;/li&gt;</span>
+</span><span class='line'><span class="sx">    {% endfor %}</span>
+</span><span class='line'><span class="sx">  &lt;/ul&gt;</span>
+</span><span class='line'><span class="sx">}</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Page</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Rubyist&quot;</span><span class="p">,</span> <span class="ss">template</span><span class="p">:</span> <span class="sx">%{</span>
+</span><span class='line'><span class="sx">  HTTP 200:  Shopping List Found</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">  Items in your list:</span>
+</span><span class='line'><span class="sx">  &lt;ul&gt;</span>
+</span><span class='line'><span class="sx">    {% for item in list %}</span>
+</span><span class='line'><span class="sx">      &lt;li&gt;{{ item.name }}&lt;/li&gt;</span>
+</span><span class='line'><span class="sx">    {% endfor %}</span>
+</span><span class='line'><span class="sx">  &lt;/ul&gt;</span>
+</span><span class='line'><span class="sx">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then run <code>rake db:seed</code> command to seed the database with your sample data:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">seed</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then create a homes controller that will allow you to play with liquid. Run the command below to create the homes controller:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="no">Homes</span> <span class="n">show</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then create a pages controller. This controller will be used to display a user&#8217;s page. Run the commands below to create the pages controller:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="no">Pages</span> <span class="n">show</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then modify your routes (<code>config/routes.rb</code>) file so that it looks somethings like below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;homes#show&quot;</span>
+</span><span class='line'><span class="n">resource</span> <span class="ss">:home</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:show</span><span class="o">]</span>
+</span><span class='line'><span class="n">resources</span> <span class="ss">:pages</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:show</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then modify your homes controller (<code>app/controllers/homes_controller.rb</code>) to pull down a list of all the user&#8217;s pages. Open up your homes controller and modify it so that it looks somethings like below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>homes_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">HomesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>    <span class="vi">@pages</span> <span class="o">=</span> <span class="no">Page</span><span class="o">.</span><span class="n">all</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then modify your pages controller (<code>app/controllers/pages_controller.rb</code>) to pull down the correct page for the specified user. Open up your pages controller and modify it so that it looks somethings like below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>pages_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PagesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>    <span class="vi">@page</span> <span class="o">=</span> <span class="no">Page</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then create a few helper (<code>app/helpers/pages_helper.rb</code>) methods for use with this example. Open up your pages helper and modify it so that it looks somethings like below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>pages_helper.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">PagesHelper</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">shopping_list</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span><span class="s2">&quot;user&quot;</span> <span class="o">=&gt;</span> <span class="n">user</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span> <span class="o">=&gt;</span> <span class="n">shopping_list_items</span><span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">shopping_list_items</span>
+</span><span class='line'>    <span class="o">[</span>
+</span><span class='line'>      <span class="p">{</span> <span class="s2">&quot;name&quot;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Apple&#39;</span><span class="p">,</span> <span class="s2">&quot;quantity_needed&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;2&quot;</span><span class="p">},</span>
+</span><span class='line'>      <span class="p">{</span> <span class="s2">&quot;name&quot;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Stoberry&#39;</span><span class="p">,</span> <span class="s2">&quot;quantity_needed&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;1&quot;</span><span class="p">},</span>
+</span><span class='line'>      <span class="p">{</span> <span class="s2">&quot;name&quot;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Cherry&#39;</span><span class="p">,</span> <span class="s2">&quot;quantity_needed&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;3&quot;</span><span class="p">},</span>
+</span><span class='line'>    <span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The codes above gives you some sample data to play around with.
+</p>
+
+
+
+
+<p>
+  Then modify your pages show view (<code>pp/views/pages/show.html.erb</code>) to look somethings like below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>show.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;&lt;</span><span class="sx">%= @page.user %&gt;&#39;s Personal Page&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">&lt;% template =</span> <span class="ss">Liquid</span><span class="p">:</span><span class="ss">:Template</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="vi">@page</span><span class="o">.</span><span class="n">template</span><span class="p">)</span> <span class="sx">%&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">&lt;%= template.render(shopping_list(@page.user)).html_safe %&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The codes above tells Rails to render your template using the Liquid Template Engine. 
+</p>
+
+
+
+
+<p>
+  Finally, open up the show view for your home controller (<code>app/views/homes/show.html.erb</code>) and add in the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>show.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">User</span> <span class="no">Pages</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'><span class="sr">&lt;ul&gt;</span>
+</span><span class='line'><span class="sr">  &lt;% @pages.each do |page| %&gt;</span>
+</span><span class='line'><span class="sr">    &lt;li&gt;&lt;%= link_to &quot;</span><span class="si">#{</span><span class="n">page</span><span class="o">.</span><span class="n">user</span><span class="si">}</span><span class="sr">&#39;s page&quot;, page_path(page) %&gt;&lt;/</span><span class="n">li</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="sx">% end %&gt;</span>
+</span><span class='line'><span class="sx">&lt;/ul&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If you fire up a rails server and visit your development site, you&#8217;ll notice that you can browse each user&#8217;s pages and get a customized version of each one. 
+</p>
+
+
+
+
+<p>
+  However, what if you want to use the Liquid templating engine as a replacement for erb itself? take it easy, first, create a new file in the lib folder called liquid_view.rb (<code>lib/liquid_view.rb</code>) and add in the codes listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>liquid_view.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">LiquidView</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">call</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+</span><span class='line'>    <span class="s2">&quot;LiquidView.new(self).render(</span><span class="si">#{</span><span class="n">template</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">inspect</span><span class="si">}</span><span class="s2">, local_assigns)&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">view</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@view</span> <span class="o">=</span> <span class="n">view</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">local_assigns</span> <span class="o">=</span> <span class="p">{})</span>
+</span><span class='line'>    <span class="vi">@view</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">headers</span><span class="o">[</span><span class="s2">&quot;Content-Type&quot;</span><span class="o">]</span> <span class="o">||=</span> <span class="s1">&#39;text/html; charset=utf-8&#39;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">assigns</span> <span class="o">=</span> <span class="vi">@view</span><span class="o">.</span><span class="n">assigns</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="vi">@view</span><span class="o">.</span><span class="n">content_for?</span><span class="p">(</span><span class="ss">:layout</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">assigns</span><span class="o">[</span><span class="s2">&quot;content_for_layout&quot;</span><span class="o">]</span> <span class="o">=</span> <span class="vi">@view</span><span class="o">.</span><span class="n">content_for</span><span class="p">(</span><span class="ss">:layout</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>    <span class="n">assigns</span><span class="o">.</span><span class="n">merge!</span><span class="p">(</span><span class="n">local_assigns</span><span class="o">.</span><span class="n">stringify_keys</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">controller</span> <span class="o">=</span> <span class="vi">@view</span><span class="o">.</span><span class="n">controller</span>
+</span><span class='line'>    <span class="n">filters</span> <span class="o">=</span> <span class="k">if</span> <span class="n">controller</span><span class="o">.</span><span class="n">respond_to?</span><span class="p">(</span><span class="ss">:liquid_filters</span><span class="p">,</span> <span class="kp">true</span><span class="p">)</span>
+</span><span class='line'>                <span class="n">controller</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="ss">:liquid_filters</span><span class="p">)</span>
+</span><span class='line'>              <span class="k">elsif</span> <span class="n">controller</span><span class="o">.</span><span class="n">respond_to?</span><span class="p">(</span><span class="ss">:master_helper_module</span><span class="p">)</span>
+</span><span class='line'>                <span class="o">[</span><span class="n">controller</span><span class="o">.</span><span class="n">master_helper_module</span><span class="o">]</span>
+</span><span class='line'>              <span class="k">else</span>
+</span><span class='line'>                <span class="o">[</span><span class="n">controller</span><span class="o">.</span><span class="n">_helpers</span><span class="o">]</span>
+</span><span class='line'>              <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">liquid</span> <span class="o">=</span> <span class="ss">Liquid</span><span class="p">:</span><span class="ss">:Template</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">liquid</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">assigns</span><span class="p">,</span> <span class="ss">:filters</span> <span class="o">=&gt;</span> <span class="n">filters</span><span class="p">,</span> <span class="ss">:registers</span> <span class="o">=&gt;</span> <span class="p">{</span><span class="ss">:action_view</span> <span class="o">=&gt;</span> <span class="vi">@view</span><span class="p">,</span> <span class="ss">:controller</span> <span class="o">=&gt;</span> <span class="vi">@view</span><span class="o">.</span><span class="n">controller</span><span class="p">})</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">compilable?</span>
+</span><span class='line'>    <span class="kp">false</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Create an initializer called liquid_template_handler (<code>config/initializers/liquid_template_handler.rb</code>) and add the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>liquid_template_handler.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;liquid_view&#39;</span>
+</span><span class='line'><span class="ss">ActionView</span><span class="p">:</span><span class="ss">:Template</span><span class="o">.</span><span class="n">register_template_handler</span> <span class="ss">:liquid</span><span class="p">,</span> <span class="no">LiquidView</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Let restarting your Rails server you will be able to create actual views with the .liquid extension that uses the liquid templating engine.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it! See ya! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/02/21/liquid-template-engine/">Liquid Template Engine</a></h1>
     
     
@@ -1807,160 +2304,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/11/ruby-on-rails-generate-random-data/">Ruby on Rails Generate Random Data</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-11T19:21:00+07:00" pubdate data-updated="true">Feb 11<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/ruby_on_rails.png" width="400" alt="Ruby on Rails Generate Random Data" />
-</p>
-
-
-
-
-<p>
-  Sometimes we need to programmatically generate text in Ruby on Rails. We may not have any data available to play with or we may need text in order to mock up the user interface. In this article I will cover 2 different methods of generating random text. Let’s run through this with me.
-</p>
-
-
-
-
-<p>
-  <strong>Random Letters</strong><br/>
-  If you just need fill text, you can add this helper to your application helper (<code>app/helpers/application_helper.rb</code>):
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>application_helper.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ApplicationHelper</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">random_string</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">include_uppercase</span> <span class="o">=</span> <span class="kp">true</span><span class="p">,</span> <span class="n">include_lowercase</span> <span class="o">=</span> <span class="kp">true</span><span class="p">,</span> <span class="n">include_numbers</span> <span class="o">=</span> <span class="kp">false</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">l</span> <span class="o">=</span> <span class="o">[]</span>
-</span><span class='line'>    <span class="n">l</span><span class="o">.</span><span class="n">push</span> <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="o">.</span><span class="n">.</span><span class="s1">&#39;z&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">include_uppercase</span>
-</span><span class='line'>    <span class="n">l</span><span class="o">.</span><span class="n">push</span> <span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="o">.</span><span class="n">.</span><span class="s1">&#39;Z&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">include_lowercase</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">l</span><span class="o">.</span><span class="n">push</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="mi">9</span><span class="p">)</span> <span class="k">if</span> <span class="n">include_numbers</span>
-</span><span class='line'>    <span class="n">l</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span> <span class="n">i</span><span class="o">.</span><span class="n">to_a</span> <span class="p">}</span><span class="o">.</span><span class="n">flatten</span>
-</span><span class='line'>    <span class="n">string</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="n">length</span><span class="p">)</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="n">l</span><span class="o">[</span><span class="nb">rand</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">length</span><span class="p">)</span><span class="o">]</span> <span class="p">}</span><span class="o">.</span><span class="n">join</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The helper has 1 required argument is length, which determines the length of the string. To generate a random string of 200 characters, call the helper like below:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">random_string</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span> <span class="o">%&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Forgery Gem</strong><br/>
-  The <a href="https://github.com/sevenwire/forgery" target="_blank">forgery</a> gem provides a great way to generate random data. Not only can forgery generate random words (based off lorem ipsum), but it can also generate random email addresses, and much more. To use forgery, just include the forgery gem in your gemfile:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Gemfile </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;forgery&#39;</span><span class="p">,</span> <span class="s1">&#39;0.6.0&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Then run <code>bundle install</code> to install the Gem.
-</p>
-
-
-
-
-<p>
-  After installing the Gem, you are ready to go to generate words:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="no">Forgery</span><span class="p">(</span><span class="ss">:lorem_ipsum</span><span class="p">)</span><span class="o">.</span><span class="n">words</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="o">%&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  To generate a random email address:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="no">Forgery</span><span class="p">(</span><span class="s1">&#39;internet&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">email_address</span> <span class="o">%&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, I hope all you guys enjoy it. See ya! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/10/">&larr; Older</a>
@@ -1983,6 +2326,10 @@
 </section><section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/07/12/social-network-sharing-buttons-in-rails-app/">Social Network Sharing Buttons in Rails App</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/07/11/rails-server-command-line-options/">Rails Server Command Line Options</a>
@@ -2008,10 +2355,6 @@
         <a href="/blog/2015/06/25/mark-methods-private-when-you-dont-test-them/">Mark Methods Private When You Don’t Test Them</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2015/06/21/use-message-queue-in-rails/">Use Message Queue in Rails</a>
-      </li>
-    
   </ul>
 </section>
 <section>
@@ -2023,7 +2366,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby/">Ruby [ 101 ]</a>
+        <a href="/blog/categories/ruby/">Ruby [ 102 ]</a>
       </li>
     
       <li>
@@ -2031,7 +2374,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 92 ]</a>
+        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 93 ]</a>
       </li>
     
       <li>

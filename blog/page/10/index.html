@@ -79,6 +79,160 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/02/11/ruby-on-rails-generate-random-data/">Ruby on Rails Generate Random Data</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-11T19:21:00+07:00" pubdate data-updated="true">Feb 11<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/ruby_on_rails.png" width="400" alt="Ruby on Rails Generate Random Data" />
+</p>
+
+
+
+
+<p>
+  Sometimes we need to programmatically generate text in Ruby on Rails. We may not have any data available to play with or we may need text in order to mock up the user interface. In this article I will cover 2 different methods of generating random text. Let’s run through this with me.
+</p>
+
+
+
+
+<p>
+  <strong>Random Letters</strong><br/>
+  If you just need fill text, you can add this helper to your application helper (<code>app/helpers/application_helper.rb</code>):
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>application_helper.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ApplicationHelper</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">random_string</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">include_uppercase</span> <span class="o">=</span> <span class="kp">true</span><span class="p">,</span> <span class="n">include_lowercase</span> <span class="o">=</span> <span class="kp">true</span><span class="p">,</span> <span class="n">include_numbers</span> <span class="o">=</span> <span class="kp">false</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">l</span> <span class="o">=</span> <span class="o">[]</span>
+</span><span class='line'>    <span class="n">l</span><span class="o">.</span><span class="n">push</span> <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="o">.</span><span class="n">.</span><span class="s1">&#39;z&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">include_uppercase</span>
+</span><span class='line'>    <span class="n">l</span><span class="o">.</span><span class="n">push</span> <span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="o">.</span><span class="n">.</span><span class="s1">&#39;Z&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">include_lowercase</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">l</span><span class="o">.</span><span class="n">push</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="mi">9</span><span class="p">)</span> <span class="k">if</span> <span class="n">include_numbers</span>
+</span><span class='line'>    <span class="n">l</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span> <span class="n">i</span><span class="o">.</span><span class="n">to_a</span> <span class="p">}</span><span class="o">.</span><span class="n">flatten</span>
+</span><span class='line'>    <span class="n">string</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="n">length</span><span class="p">)</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="n">l</span><span class="o">[</span><span class="nb">rand</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">length</span><span class="p">)</span><span class="o">]</span> <span class="p">}</span><span class="o">.</span><span class="n">join</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The helper has 1 required argument is length, which determines the length of the string. To generate a random string of 200 characters, call the helper like below:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">random_string</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Forgery Gem</strong><br/>
+  The <a href="https://github.com/sevenwire/forgery" target="_blank">forgery</a> gem provides a great way to generate random data. Not only can forgery generate random words (based off lorem ipsum), but it can also generate random email addresses, and much more. To use forgery, just include the forgery gem in your gemfile:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;forgery&#39;</span><span class="p">,</span> <span class="s1">&#39;0.6.0&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then run <code>bundle install</code> to install the Gem.
+</p>
+
+
+
+
+<p>
+  After installing the Gem, you are ready to go to generate words:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="no">Forgery</span><span class="p">(</span><span class="ss">:lorem_ipsum</span><span class="p">)</span><span class="o">.</span><span class="n">words</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  To generate a random email address:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="no">Forgery</span><span class="p">(</span><span class="s1">&#39;internet&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">email_address</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, I hope all you guys enjoy it. See ya! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/02/10/ruby-on-rails-uploads-multiple-files-with-dropzonejs-and-paperclip-gem/">Ruby on Rails Uploads Multiple Files With DropzoneJS and Paperclip Gem</a></h1>
     
     
@@ -3471,196 +3625,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/20/erlang-control-flow-statement/">Erlang Control Flow Statement</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-20T23:17:00+07:00" pubdate data-updated="true">Jan 20<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/logo_erlang.png" alt="Erlang Control Flow Statement" />
-</p>
-
-
-
-
-<p>
-  As we saw in the previous post, pattern matching with different function clauses can be used in order to control the execution flow in Erlang. Erlang also provides the if, case, and receive control flow constructs that can be used in a function body. In this post I will only present the if and casestatements since receive is used for message passing and I will write a dedicated post about the subject. Both if and case are similar to the statements of other programming languages.
-</p>
-
-
-
-
-<p>
-  <strong>If Statement</strong>
-</p>
-
-
-
-
-<p>
-  Syntax:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">if</span>
-</span><span class='line'>  <span class="no">BoolbeanExpression1</span> <span class="o">-&gt;</span>
-</span><span class='line'>    <span class="no">IfBody1</span><span class="p">;</span>
-</span><span class='line'>  <span class="no">BooleanExpression2</span> <span class="o">-&gt;</span>
-</span><span class='line'>    <span class="no">IfBody2</span><span class="p">;</span>
-</span><span class='line'>    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
-</span><span class='line'>  <span class="kp">true</span> <span class="o">-&gt;</span>
-</span><span class='line'>    <span class="no">BodyCathAll</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The different clauses, except the last one are like &#8220;else if&#8221; in other languages, while the last one (true ->) is like the &#8220;else&#8221;; it succeeds when all the previous clauses have failed.
-</p>
-
-
-
-
-<p>
-  Example:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">is_greater_than</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span> <span class="o">-&gt;</span>
-</span><span class='line'>  <span class="k">if</span>
-</span><span class='line'>    <span class="n">X</span> <span class="o">&gt;</span> <span class="n">Y</span> <span class="o">-&gt;</span>
-</span><span class='line'>      <span class="kp">true</span><span class="p">;</span>
-</span><span class='line'>    <span class="kp">true</span> <span class="o">-&gt;</span>
-</span><span class='line'>      <span class="kp">false</span>
-</span><span class='line'>  <span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Case Statement</strong>
-</p>
-
-
-
-
-<p>
-  Syntax:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">case</span> <span class="no">Expression</span> <span class="n">of</span>
-</span><span class='line'>  <span class="no">Value1</span> <span class="o">[</span><span class="k">when</span> <span class="no">Guard1</span><span class="o">]</span> <span class="o">-&gt;</span>
-</span><span class='line'>    <span class="no">CaseBody1</span><span class="p">;</span>
-</span><span class='line'>  <span class="no">Value2</span> <span class="o">[</span><span class="k">when</span> <span class="no">Guard2</span><span class="o">]-&gt;</span>
-</span><span class='line'>    <span class="no">CaseBody2</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">_Other</span> <span class="o">-&gt;</span>
-</span><span class='line'>    <span class="no">CaseBodyCatchAll</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Notice that the last clause (_Other) is like the default clause in other programming languages. The Expression should always return a value (if it is a function call) that will be used to perform the pattern matching.
-</p>
-
-
-
-
-<p>
-  Example:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">check</span><span class="p">(</span><span class="no">List</span><span class="p">)</span> <span class="k">when</span> <span class="n">is_list</span><span class="p">(</span><span class="no">List</span><span class="p">)</span> <span class="o">-&gt;</span>
-</span><span class='line'>  <span class="k">case</span> <span class="ss">lists</span><span class="p">:</span><span class="n">reverse</span><span class="p">(</span><span class="no">List</span><span class="p">)</span> <span class="n">of</span>
-</span><span class='line'>    <span class="no">List</span> <span class="o">-&gt;</span>
-</span><span class='line'>      <span class="kp">true</span><span class="p">;</span>
-</span><span class='line'>    <span class="n">_</span> <span class="o">-&gt;</span>
-</span><span class='line'>      <span class="kp">false</span>
-</span><span class='line'>    <span class="k">end</span><span class="p">;</span>
-</span><span class='line'><span class="n">check</span><span class="p">(</span><span class="n">_</span><span class="p">)</span> <span class="o">-&gt;</span>
-</span><span class='line'>    <span class="p">{</span><span class="n">error</span><span class="p">,</span> <span class="n">arg_not_list</span><span class="p">}</span><span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/11/">&larr; Older</a>
@@ -3683,6 +3647,10 @@
 </section><section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/07/12/social-network-sharing-buttons-in-rails-app/">Social Network Sharing Buttons in Rails App</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/07/11/rails-server-command-line-options/">Rails Server Command Line Options</a>
@@ -3708,10 +3676,6 @@
         <a href="/blog/2015/06/25/mark-methods-private-when-you-dont-test-them/">Mark Methods Private When You Don’t Test Them</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2015/06/21/use-message-queue-in-rails/">Use Message Queue in Rails</a>
-      </li>
-    
   </ul>
 </section>
 <section>
@@ -3723,7 +3687,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby/">Ruby [ 101 ]</a>
+        <a href="/blog/categories/ruby/">Ruby [ 102 ]</a>
       </li>
     
       <li>
@@ -3731,7 +3695,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 92 ]</a>
+        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 93 ]</a>
       </li>
     
       <li>

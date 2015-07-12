@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-07-11T22:50:13+07:00</updated>
+  <updated>2015-07-12T23:41:28+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,236 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Social Network Sharing Buttons in Rails App]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/07/12/social-network-sharing-buttons-in-rails-app/"/>
+    <updated>2015-07-12T22:46:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/07/12/social-network-sharing-buttons-in-rails-app</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="Social Network Sharing Buttons in Rails App" />
+</p>
+
+
+
+
+<p>
+  There are many services that allow you to add social network buttons to your website. The problem with these services is that they are free because they harvest traffic statistics from your site, track your visitors, and in general are a big nuisance. They also have the disadvantage of being slow to load.
+</p>
+
+
+
+
+<p>
+  In this article we will show you how to add social sharing buttons to your website via a gem called Social Share Button. Unlike most services, Social Share Button has buttons that are hosted locally on your site and don&#8217;t go through a third party service. As a result, they are quick to load and extremely customizable.
+</p>
+
+
+
+
+<p>
+  <strong>Setup Application</strong><br/>
+  First we need to add the social-share-button gem to our Gemfile. Open up your Gemfile and add in the line listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;social-share-button&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 0.1.6&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Next, we need to run a bundle install to install the gem:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now we need to run the <code>rails generate social_share_button:install</code> command to install some additional configuration files that the Social Sharing Button gem uses to display the buttons on your site. This includes an initializer called social_share_button.rb in your initializers folder as well as some localization files:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">generate</span> <span class="n">social_share_button</span><span class="ss">:install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Great, Next we need to do is create a simple Home controller in order to test the social sharing button functionality:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="n">homes</span> <span class="n">show</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now let&#8217;s modify our routes file a bit:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">resources</span> <span class="ss">:homes</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:show</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;homes#show&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Great, now we need to add some javascript and CSS includes to make things work. Open up your application.js file and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/assets/javascripts/application.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">jquery</span>
+</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">jquery_ujs</span>
+</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">turbolinks</span>
+</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">social</span><span class="o">-</span><span class="n">share</span><span class="o">-</span><span class="n">button</span>
+</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="n">require_tree</span> <span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Great, now for the application.css file. Open it up and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/assets/stylesheets/application.css </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">/*</span>
+</span><span class='line'><span class="sr"> *= require_tree .</span>
+</span><span class='line'><span class="sr"> *= require social-share-button</span>
+</span><span class='line'><span class="sr"> *= require_self</span>
+</span><span class='line'><span class="sr"> */</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Excellent, now we can add the social sharing buttons to our site. Open up your homes/show view and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/homes/show.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">social_share_button_tag</span><span class="p">(</span><span class="s2">&quot;My Site&quot;</span><span class="p">)</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Great, now if we run rails server and visit http://localhost:3000, we will see the social sharing buttons. However, you&#8217;ll notice that there is a problem. About 15 or so buttons are listed, but we only care about a couple. Luckily we can easily resolve this. Open up the social_share_button initializer and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/initializers/social_share_button.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">SocialShareButton</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">allow_sites</span> <span class="o">=</span> <span class="sx">%w(twitter facebook google_plus delicious tumblr pinterest)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now if you restart your rails server, you&#8217;ll notice that the buttons have been limited to the sites listed above. Note that you can also specify a specific url if needed. Social Share Button detects the current URL by default, but there are times when you may want to customize this. You can do this like so:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= social_share_button_tag(&quot;My Home Page&quot;, :url =</span><span class="o">&gt;</span> <span class="s2">&quot;http://mysite.com/sample&quot;</span><span class="p">)</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  However, what if we want to customize the button look/feel? Luckily this is pretty easy. If you inspect the elements in chrome developer tools you&#8217;ll notice that they each have a unique css class. We can override this CSS class with our own code. For example, to modify the facebook button to look different, we&#8217;d use something like the following CSS (placed into our application.css file):
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">social</span><span class="o">-</span><span class="n">share</span><span class="o">-</span><span class="n">button</span><span class="o">-</span><span class="n">facebook</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nb">display</span><span class="p">:</span> <span class="n">inline</span><span class="o">-</span><span class="n">block</span><span class="p">;</span>
+</span><span class='line'>  <span class="ss">width</span><span class="p">:</span> <span class="mi">16</span><span class="n">px</span><span class="p">;</span>
+</span><span class='line'>  <span class="ss">height</span><span class="p">:</span> <span class="mi">16</span><span class="n">px</span><span class="p">;</span>
+</span><span class='line'>  <span class="ss">background</span><span class="p">:</span> <span class="n">url</span><span class="p">(</span><span class="s2">&quot;/social/facebook.png&quot;</span><span class="p">)</span> <span class="n">no</span><span class="o">-</span><span class="n">repeat</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far go good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Rails Server Command Line Options]]></title>
@@ -5696,65 +5926,6 @@
 
 <p>
   So far so good, That it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[5 Tips to Scale Your Ruby on Rails Application]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/05/19/5-tips-to-scale-your-ruby-on-rails-application/"/>
-    <updated>2015-05-19T11:39:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/05/19/5-tips-to-scale-your-ruby-on-rails-application</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="5 Tips to Scale Your Ruby on Rails Application" />
-</p>
-
-
-
-
-<p>
-  There are lots of resources on the web that explain how to scale web applications and how to scale Rails. Here&#8217;s a quick summary of just five of the basic strategies for a scalable Ruby on Rails web application. Some of them are specific to Ruby on Rails; others generalize to any shared-nothing application server architecture.
-</p>
-
-
-
-
-<p>
-  <strong>1. Cache, cache, cache and More Cache</strong><br/>
-  Cache at the client and use Ajax libraries like JQuery to stream in data to the browser on demand. Use gateway /reverse proxy caches to cache HTTP responses at your website, and learn how to use expiration and etags. Take full advantage of Rails&#8217; built-in action, page and fragment caching. Use memcache to cache results that you&#8217;d otherwise pull from your database.
-</p>
-
-
-
-
-<p>
-  <strong>2. Segregate Data and Data Serving</strong><br/>
-  Don&#8217;t munge all your data storage into a single database &#8220;for convenience.&#8221; Datasets that are independent should go into separate databases. Serve static assets from a separate tier, or use Amazon S3 or a CDN like Akamai to serve those assets. It&#8217;s more expensive, but it simplifies scaling. Relational databases scale up, not out, so sit down and have a heart to heart talk with your DBA over whether you really need a relational data model for all your data stores. Maybe you can get away with a simpler key-value data store for some of your simpler data. There are ruby clients, so use Hadoop for scaling the storage and analysis of large amounts of unstructured data. Also know the scalability limitations of whatever file system you&#8217;re using. If you have heavy data reporting needs, do your reporting from a copy of your main database, not from your production database.
-</p>
-
-
-
-
-<p>
-  <strong>3. Minimize & Handle External Dependencies</strong><br/>
-  Watch for dependencies on external services like ad serving networks or RSS feeds. If a service isn&#8217;t responding or can&#8217;t handle your growing request load, make sure that you have a fallback strategy.
-</p>
-
-
-
-
-<p>
-  <strong>4. Tend Your Database and Your Job Handlers</strong><br/>
-  Any ORM, including Rails&#8217; ActiveRecord can generate SQL queries that cause database performance issues. Make sure you&#8217;re looking at your slow query log after each major integration to make sure you don&#8217;t have &#8220;missing&#8221; database indices, and haven&#8217;t written inappropriate find-all&#8217;s in your Rails code. Scrub your database periodically for indices that are no longer being used. Similarly, watch the resource consumption of your background and scheduled jobs. As your user base grows jobs can start to overlap, and daily log processing can start to take more than 24 hrs! This kind of thing can sneak up on you easily. Ideally, segregate your jobs in a separate tier. And, as you grow, look at moving to a message based job handler.
-</p>
-
-
-
-
-<p>
-  <strong>5. Shard Your Unavoidably Relational Data</strong><br/>
-  At high scaling levels, your MySQL database will have to be sharded. Sharding involves breaking up your datasets into independent pieces based on a key. For many consumer-oriented Rails sites, that can mean sharding based on userid&#8217;s, but other sharding schemes use data-age, or access-frequency (if that&#8217;s predictable).
 </p>
 
 ]]></content>
