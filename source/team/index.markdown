@@ -9,7 +9,7 @@ layout: page
   <div class="team-content">
     <p>
       <strong>Bunlong VAN</strong><br/>
-      Software Engineer, Ruby/Rails Developer, Editor & Programming Article Writer.<br/><br/>
+      Software Craftsman, Software Engineer & Ruby/Rails Developer.<br/><br/>
     </p>
   </div>
 </div>
