@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Javascript | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/javascript/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-07-12T23:41:28+07:00</updated>
+  <updated>2015-07-13T23:13:11+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,291 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Using the Page Visibility API for Detecting Your Page is Being Viewed by the End User or Not]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/07/13/using-the-page-visibility-api-for-detecting-your-page-is-being-viewed-by-the-end-user-or-not/"/>
+    <updated>2015-07-13T22:51:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/07/13/using-the-page-visibility-api-for-detecting-your-page-is-being-viewed-by-the-end-user-or-not</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/page_visibility_api.jpg" width="400" alt="Using the Page Visibility API for Detecting Your Page is Being Viewed by the End User or Not" />
+</p>
+
+
+
+
+<p>
+  HTML5 have many new features. One such feature is the new visibility API. This API allows you to easily detect your page is active, and in addition, you can perform specific events if it's active. In this article we will show you how implement this feature in your application.
+</p>
+
+
+
+
+<p>
+  <strong>Visibility API</strong><br/>
+  Without worrying about browser compatibility for the moment. There is an event called <code>visibilitychange</code> that gets fired every time window focus changes. In addition, there is a property called <code>document.hidden</code> that will tell your page is visible or not.
+</p>
+
+
+
+
+<p>
+  For example, the following script will change the document title based on your page is active or not:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">document</span><span class="o">.</span><span class="n">addEventListener</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">visibilitychange</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="n">function</span><span class="p">(</span><span class="n">event</span><span class="p">){</span>
+</span><span class='line'>  <span class="k">if</span><span class="p">(</span><span class="n">document</span><span class="o">.</span><span class="n">hidden</span><span class="p">)</span> <span class="p">{</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;document.title = &quot;My Page - Inactive&quot;;</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  }</span>
+</span><span class='line'><span class="sr">  else {&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">document</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;My Page - Active&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Some browsers still require prefixing, such as the Android 4.4 browser. For these browsers, a bit more code is required.
+</p>
+
+
+
+
+<p>
+  We need some code to detect whether a prefixed version of the property. The code below does exactly that. It loops through each vendor prefix and sees if it is present in the document object. If so, it returns the correct prefixed version:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">function</span> <span class="n">getHiddenProperty</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">var</span> <span class="n">prefixes</span> <span class="o">=</span> <span class="o">[&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">webkit</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">moz</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">ms</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">o</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">]</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  if (&amp;lsquo;hidden&amp;rsquo; in document) return &amp;lsquo;hidden&amp;rsquo;;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">for</span><span class="p">(</span><span class="n">var</span> <span class="n">prefix</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">prefix</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="n">prefixes</span><span class="o">.</span><span class="n">length</span><span class="p">;</span> <span class="n">prefixes</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;if ((prefixes[prefix] + &quot;Hidden&quot;) in document) {</span>
+</span><span class='line'><span class="sr">  return prefixes[i] + &#39;Hidden&#39;;</span>
+</span><span class='line'><span class="sr">}</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  }</span>
+</span><span class='line'><span class="sr">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Next, we create a simple wrapper function that returns true if hidden and false if not:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">function</span> <span class="n">isHidden</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">document</span><span class="o">[</span><span class="n">getHiddenProperty</span><span class="p">()</span><span class="o">]</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Well now we can write a third function to get the name of the event to use by using the visibility change event:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">function</span> <span class="n">getVisibilityChangeEvent</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">var</span> <span class="n">visProp</span> <span class="o">=</span> <span class="n">getHiddenProperty</span><span class="p">();</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  if ( visProp ) {&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">var</span> <span class="n">eventName</span> <span class="o">=</span> <span class="n">visProp</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sr">/[H|h]idden/</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;visibilitychange&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="k">return</span> <span class="n">eventName</span><span class="p">;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Now can modify our original function to use the functions:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">document</span><span class="o">.</span><span class="n">addEventListener</span><span class="p">(</span><span class="n">getVisibilityChangeEvent</span><span class="p">(),</span> <span class="n">function</span><span class="p">(</span><span class="n">event</span><span class="p">){</span>
+</span><span class='line'>  <span class="k">if</span><span class="p">(</span><span class="n">isHidden</span><span class="p">())</span> <span class="p">{</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;document.title = &quot;My Page - Inactive&quot;;</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  }</span>
+</span><span class='line'><span class="sr">  else {&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">document</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;My Page - Active&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>The Complete Codes.</strong>
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">function</span> <span class="n">getHiddenProperty</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">var</span> <span class="n">prefixes</span> <span class="o">=</span> <span class="o">[&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">webkit</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">moz</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">ms</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">o</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">]</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  if (&amp;lsquo;hidden&amp;rsquo; in document) return &amp;lsquo;hidden&amp;rsquo;;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">for</span><span class="p">(</span><span class="n">var</span> <span class="n">prefix</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">prefix</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="n">prefixes</span><span class="o">.</span><span class="n">length</span><span class="p">;</span> <span class="n">prefixes</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;if((prefixes[prefix] + &quot;Hidden&quot;) in document ) {</span>
+</span><span class='line'><span class="sr">  return prefixes[i] + &#39;Hidden&#39;;</span>
+</span><span class='line'><span class="sr">}</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  }</span>
+</span><span class='line'><span class="sr">}&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">function</span> <span class="n">isHidden</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">document</span><span class="o">[</span><span class="n">getHiddenProperty</span><span class="p">()</span><span class="o">]</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;function getVisibilityChangeEvent() {</span>
+</span><span class='line'><span class="sr">  var visProp = getHiddenProperty();&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">if</span> <span class="p">(</span><span class="n">visProp</span><span class="p">)</span> <span class="p">{</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;var eventName = visProp.replace(/</span><span class="o">[</span><span class="n">H</span><span class="o">|</span><span class="n">h</span><span class="o">]</span><span class="n">idden</span><span class="o">/</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;visibilitychange&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="k">return</span> <span class="n">eventName</span><span class="p">;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;document.addEventListener(getVisibilityChangeEvent(), function(event){</span>
+</span><span class='line'><span class="sr">  if(isHidden()) {&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">document</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;My Page - Inactive&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">else</span> <span class="p">{</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;document.title = &quot;My Page - Active&quot;;</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  }</span>
+</span><span class='line'><span class="sr">});</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  So far so good, That's it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AngularJS on Rails]]></title>
@@ -1339,195 +1624,6 @@
 
 <p>
   You can download the <a href="https://github.com/Bunlong/jsrender" target="_blank">source code</a> and try it out.
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Tokeninput Jquery Multiple Select Item]]></title>
-    <link href="http://geekhmer.github.io/blog/2014/05/22/tokeninput-jquery-multiple-select-item/"/>
-    <updated>2014-05-22T16:46:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2014/05/22/tokeninput-jquery-multiple-select-item</id>
-    <content type="html"><![CDATA[<p>
-  <strong>What is Tokeninput?</strong><br/>
-  Tokeninput is a jQuery plugin which allows your users to select multiple items from a predefined list, using autocompletion as they type to find each item. You may have seen a similar type of text entry when filling in the recipients field sending messages on facebook.
-</p>
-
-
-
-
-<p>
-  <a class="fancybox" href="http://geekhmer.github.io/images/tokeninput_jquery.png"><img src="http://geekhmer.github.io/images/tokeninput_jquery.png" alt="" width="680" /></a>
-</p>
-
-
-
-
-<p>
-  <strong>Practice</strong>
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>demo.html </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;src/jquery.tokeninput.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">link</span> <span class="nx">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;styles/token-input.css&quot;</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="o">/&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">link</span> <span class="nx">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;styles/token-input-facebook.css&quot;</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="o">/&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/head&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">h2</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;theme&quot;</span><span class="o">&gt;</span><span class="nx">Json</span> <span class="nx">local</span><span class="o">&lt;</span><span class="err">/h2&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;&lt;</span><span class="err">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="nx">input</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;input-local&quot;</span> <span class="o">/&amp;</span><span class="nx">gt</span><span class="p">;</span>
-</span><span class='line'><span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&amp;</span><span class="nx">gt</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;#input-local&quot;</span><span class="p">).</span><span class="nx">tokenInput</span><span class="p">([</span>
-</span><span class='line'>        <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="s2">&quot;856&quot;</span><span class="p">,</span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="s2">&quot;House&quot;</span><span class="p">},</span>
-</span><span class='line'>        <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="s2">&quot;1035&quot;</span><span class="p">,</span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="s2">&quot;Desperate Housewives&quot;</span><span class="p">}</span>
-</span><span class='line'>      <span class="p">],</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">theme</span><span class="o">:</span> <span class="s2">&quot;facebook&quot;</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'><span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="err">/script&amp;gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="err">/div&gt;&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="nx">h2</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;theme&quot;</span><span class="o">&gt;</span><span class="nx">Json</span> <span class="nx">local</span> <span class="o">&amp;</span><span class="nx">ndash</span><span class="p">;</span> <span class="nx">no</span> <span class="nx">duplicates</span><span class="o">&lt;</span><span class="err">/h2&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;&lt;</span><span class="err">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="nx">input</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;input-local-prevent-duplicates&quot;</span> <span class="o">/&amp;</span><span class="nx">gt</span><span class="p">;</span>
-</span><span class='line'><span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&amp;</span><span class="nx">gt</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;#input-local-prevent-duplicates&quot;</span><span class="p">).</span><span class="nx">tokenInput</span><span class="p">([</span>
-</span><span class='line'>        <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="s2">&quot;856&quot;</span><span class="p">,</span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="s2">&quot;House&quot;</span><span class="p">},</span>
-</span><span class='line'>        <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="s2">&quot;1035&quot;</span><span class="p">,</span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="s2">&quot;Desperate Housewives&quot;</span><span class="p">}</span>
-</span><span class='line'>      <span class="p">],</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">theme</span><span class="o">:</span> <span class="s2">&quot;facebook&quot;</span><span class="p">,</span>
-</span><span class='line'>      <span class="nx">preventDuplicates</span><span class="o">:</span> <span class="kc">true</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'><span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="err">/script&amp;gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="err">/div&gt;&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="nx">h2</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;theme&quot;</span><span class="o">&gt;</span><span class="nx">Json</span> <span class="nx">server</span><span class="o">&lt;</span><span class="err">/h2&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;&lt;</span><span class="err">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="nx">input</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;input-server&quot;</span> <span class="o">/&amp;</span><span class="nx">gt</span><span class="p">;</span>
-</span><span class='line'><span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&amp;</span><span class="nx">gt</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;#input-server&quot;</span><span class="p">).</span><span class="nx">tokenInput</span><span class="p">(</span><span class="s2">&quot;http://shell.loopj.com/tokeninput/tvshows.php&quot;</span><span class="p">,</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">theme</span><span class="o">:</span> <span class="s2">&quot;facebook&quot;</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'><span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="err">/script&amp;gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="err">/div&gt;&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="nx">h2</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;prevent-duplicates&quot;</span><span class="o">&gt;</span><span class="nx">Json</span> <span class="nx">server</span> <span class="o">&amp;</span><span class="nx">ndash</span><span class="p">;</span> <span class="nx">no</span> <span class="nx">duplicates</span><span class="o">&lt;</span><span class="err">/h2&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;&lt;</span><span class="err">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="nx">input</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;input-server-prevent-duplicates&quot;</span> <span class="o">/&amp;</span><span class="nx">gt</span><span class="p">;</span>
-</span><span class='line'><span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&amp;</span><span class="nx">gt</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;#input-server-prevent-duplicates&quot;</span><span class="p">).</span><span class="nx">tokenInput</span><span class="p">(</span><span class="s2">&quot;http://shell.loopj.com/tokeninput/tvshows.php&quot;</span><span class="p">,</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">theme</span><span class="o">:</span> <span class="s2">&quot;facebook&quot;</span><span class="p">,</span>
-</span><span class='line'>      <span class="nx">preventDuplicates</span><span class="o">:</span> <span class="kc">true</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'><span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="err">/script&amp;gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="err">/div&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/body&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/html&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  You can download the <a href="https://github.com/Bunlong/tokeninput_jquery" target="_blank">source code</a> and try it out.
 </p>
 
 ]]></content>

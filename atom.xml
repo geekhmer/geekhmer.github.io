@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-07-12T23:41:28+07:00</updated>
+  <updated>2015-07-13T23:13:11+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,261 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Using the Page Visibility API for Detecting Your Page is Being Viewed by the End User or Not]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/07/13/using-the-page-visibility-api-for-detecting-your-page-is-being-viewed-by-the-end-user-or-not/"/>
+    <updated>2015-07-13T22:51:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/07/13/using-the-page-visibility-api-for-detecting-your-page-is-being-viewed-by-the-end-user-or-not</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/page_visibility_api.jpg" width="400" alt="Using the Page Visibility API for Detecting Your Page is Being Viewed by the End User or Not" />
+</p>
+
+
+
+
+<p>
+  HTML5 have many new features. One such feature is the new visibility API. This API allows you to easily detect your page is active, and in addition, you can perform specific events if it&#8217;s active. In this article we will show you how implement this feature in your application.
+</p>
+
+
+
+
+<p>
+  <strong>Visibility API</strong><br/>
+  Without worrying about browser compatibility for the moment. There is an event called <code>visibilitychange</code> that gets fired every time window focus changes. In addition, there is a property called <code>document.hidden</code> that will tell your page is visible or not.
+</p>
+
+
+
+
+<p>
+  For example, the following script will change the document title based on your page is active or not:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">document</span><span class="o">.</span><span class="n">addEventListener</span><span class="p">(</span><span class="s2">&quot;visibilitychange&quot;</span><span class="p">,</span> <span class="n">function</span><span class="p">(</span><span class="n">event</span><span class="p">){</span>
+</span><span class='line'>  <span class="k">if</span><span class="p">(</span><span class="n">document</span><span class="o">.</span><span class="n">hidden</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">document</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;My Page - Inactive&quot;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">document</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;My Page - Active&quot;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Some browsers still require prefixing, such as the Android 4.4 browser. For these browsers, a bit more code is required.
+</p>
+
+
+
+
+<p>
+  We need some code to detect whether a prefixed version of the property. The code below does exactly that. It loops through each vendor prefix and sees if it is present in the document object. If so, it returns the correct prefixed version:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">function</span> <span class="n">getHiddenProperty</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">var</span> <span class="n">prefixes</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;webkit&#39;</span><span class="p">,</span><span class="s1">&#39;moz&#39;</span><span class="p">,</span><span class="s1">&#39;ms&#39;</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="o">]</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;hidden&#39;</span> <span class="k">in</span> <span class="n">document</span><span class="p">)</span> <span class="k">return</span> <span class="s1">&#39;hidden&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">for</span><span class="p">(</span><span class="n">var</span> <span class="n">prefix</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">prefix</span> <span class="o">&lt;</span> <span class="n">prefixes</span><span class="o">.</span><span class="n">length</span><span class="p">;</span> <span class="n">prefixes</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">((</span><span class="n">prefixes</span><span class="o">[</span><span class="n">prefix</span><span class="o">]</span> <span class="o">+</span> <span class="s2">&quot;Hidden&quot;</span><span class="p">)</span> <span class="k">in</span> <span class="n">document</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">prefixes</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">+</span> <span class="s1">&#39;Hidden&#39;</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Next, we create a simple wrapper function that returns true if hidden and false if not:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">function</span> <span class="n">isHidden</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">document</span><span class="o">[</span><span class="n">getHiddenProperty</span><span class="p">()</span><span class="o">]</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Well now we can write a third function to get the name of the event to use by using the visibility change event:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">function</span> <span class="n">getVisibilityChangeEvent</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">var</span> <span class="n">visProp</span> <span class="o">=</span> <span class="n">getHiddenProperty</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span> <span class="n">visProp</span> <span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">var</span> <span class="n">eventName</span> <span class="o">=</span> <span class="n">visProp</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sr">/[H|h]idden/</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;visibilitychange&#39;</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">eventName</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now can modify our original function to use the functions:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">document</span><span class="o">.</span><span class="n">addEventListener</span><span class="p">(</span><span class="n">getVisibilityChangeEvent</span><span class="p">(),</span> <span class="n">function</span><span class="p">(</span><span class="n">event</span><span class="p">){</span>
+</span><span class='line'>  <span class="k">if</span><span class="p">(</span><span class="n">isHidden</span><span class="p">())</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">document</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;My Page - Inactive&quot;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">document</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;My Page - Active&quot;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>The Complete Codes.</strong>
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">function</span> <span class="n">getHiddenProperty</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">var</span> <span class="n">prefixes</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;webkit&#39;</span><span class="p">,</span><span class="s1">&#39;moz&#39;</span><span class="p">,</span><span class="s1">&#39;ms&#39;</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="o">]</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;hidden&#39;</span> <span class="k">in</span> <span class="n">document</span><span class="p">)</span> <span class="k">return</span> <span class="s1">&#39;hidden&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">for</span><span class="p">(</span><span class="n">var</span> <span class="n">prefix</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">prefix</span> <span class="o">&lt;</span> <span class="n">prefixes</span><span class="o">.</span><span class="n">length</span><span class="p">;</span> <span class="n">prefixes</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span><span class="p">((</span><span class="n">prefixes</span><span class="o">[</span><span class="n">prefix</span><span class="o">]</span> <span class="o">+</span> <span class="s2">&quot;Hidden&quot;</span><span class="p">)</span> <span class="k">in</span> <span class="n">document</span> <span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">prefixes</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">+</span> <span class="s1">&#39;Hidden&#39;</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">function</span> <span class="n">isHidden</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">document</span><span class="o">[</span><span class="n">getHiddenProperty</span><span class="p">()</span><span class="o">]</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">function</span> <span class="n">getVisibilityChangeEvent</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">var</span> <span class="n">visProp</span> <span class="o">=</span> <span class="n">getHiddenProperty</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="n">visProp</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">var</span> <span class="n">eventName</span> <span class="o">=</span> <span class="n">visProp</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sr">/[H|h]idden/</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;visibilitychange&#39;</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">eventName</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">document</span><span class="o">.</span><span class="n">addEventListener</span><span class="p">(</span><span class="n">getVisibilityChangeEvent</span><span class="p">(),</span> <span class="n">function</span><span class="p">(</span><span class="n">event</span><span class="p">){</span>
+</span><span class='line'>  <span class="k">if</span><span class="p">(</span><span class="n">isHidden</span><span class="p">())</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">document</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;My Page - Inactive&quot;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">document</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;My Page - Active&quot;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Social Network Sharing Buttons in Rails App]]></title>
@@ -5608,324 +5863,6 @@
 
 <p>
   The article merely introduces the sites, does not go into technicalities. The purpose was to show you that there are many strong web platform that use the Ruby on Rails. If you are interested to use Ruby on Rails for your next project, you can choose Ruby on Rails and for that
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[How Technology Company Make Money?]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/05/20/how-technology-company-make-money/"/>
-    <updated>2015-05-20T17:22:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/05/20/how-technology-company-make-money</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/how_tech_company_make_money.png" width="400" alt="How Technology Company Make Money?" />
-</p>
-
-
-
-
-<p>
-  Have you ever wonder how the companies that offer free services make money? Such as Instagram, Evernote, Facebook, Twitter, LinkedIn, Google Maps, so on&#8230; or if it is even profitable to keep free users using their services. We would go through several revenue models and hopefully, it will throw you some light next time you decide to roll your own startup.
-</p>
-
-
-
-
-<p>
-  <strong>Revenues Models</strong><br/>
-  Let’s start first giving some perspective what models are actually giving the most revenues. In 2013, App Store, reported that free apps brought the 71% of the revenue! Even more than paid apps&#8230; how’s that even possible?
-</p>
-
-
-
-
-<p>
-  Ok, let’s discuss some revenue models to understand this. There are 8 main models.
-</p>
-
-
-
-
-<p>
-  <strong>Freemium:</strong> apps are free to download and use. However, quite often some different features are sold separately (e.g. new levels, specialized functions, remove ads, more capacity, and so on). E.g. Pandora, Hulu, Google Docs.
-</p>
-
-
-
-
-<p>
-  <strong>Premium:</strong> users paid upfront a fixed price for the application. After you pay for it, you are able to download it. Usually new software updates are free. E.g. MS Office 365.
-</p>
-
-
-
-
-<p>
-  <strong>Subscription:</strong> users paid a fixed price which is automatically charged every certain time. Magazines in the iOS Newsstand are a good example of this subscription based model. Subscriptions have generally lower prices than premium accounts. E.g. Netfix.
-</p>
-
-
-
-
-<p>
-  Freemium is not as &#8220;free&#8221; as it might seem in the surface, there are indirect ways of getting revenues from it.
-</p>
-
-
-
-
-<p>
-  <strong>Advertising:</strong> the application/service is free to use, but it contains ads or interruption banners for an couple of minutes in order to raise revenue. This model is usually applied along with freemium apps and to remove the ads users have to pay a subscription. E.g. Spotify.
-</p>
-
-
-
-
-<p>
-  <strong>Selling data:</strong> user information and behavior inside the application is sell to interested 3rd-parties. Usually used with freemium apps and specified in the terms of used.
-</p>
-
-
-
-
-<p>
-  <strong>Transaction:</strong> the application is free to use generally and charges a percentage or fixed fee with every users’ transaction made. For example, it allows you to publish your item on their site for free but when you sell it, it charges you a fee. Or publish a project in a site and when it reaches certain goal a percentage fee is applied. E.g. eBay, Kickstarter.
-</p>
-
-
-
-
-<p>
-  <strong>Online lead generation:</strong> collects user’s information sometimes in an exchange of a product or service and then resell the information to companies interested indirectly. It’s different from the selling data model because the information is not sold to 3rd party directly, but indirectly. Influencing users desitions based on 3rd party companies affiliated and users’ interests, likes and behaviors. E.g. Mint, LinkedIn.
-</p>
-
-
-
-
-<p>
-  <strong>Donations:</strong> (it’s self-explanatory) Services/apps are free, but it encourages users to contribute throughout donations to support the development.
-</p>
-
-
-
-
-<p>
-  After reading these, you might have more clues why free apps are so much win nowadays. They helped to create those million-dollar-per-day games! (remembered FlappyBird, Candycrush, Farmville…) In a market where there is enough competition, having a free option will take you to large numbers of users quicker and broader, because of the low barrier to entry. For instance, Whatsapp had at certain point 10k of daily downloads, after moving it to $1 it download rate drops 10 times, they finally opted for yearly subscriptions.
-</p>
-
-
-
-
-<p>
-  Subscription-based revenue are also a model worth doing a special mention. It brings a steady flow of income to companies and usually comes in different tiers to fulfill users need. But, it has to be flexible enough, because it might limit hard core users which might be willing to pay more for taking the product to a new level.
-</p>
-
-
-
-
-<p>
-  <strong>How does Instagram make money?</strong><br/>
-  Freemium: Before selling to Facebook they were not making money. They are trying to incorporate Ads.
-</p>
-
-
-
-
-<p>
-  <strong>How does Facebook make money?</strong><br/>
-  Advertising & Freemium: Advertising is the main source of revenue but also some small percentage comes from payments, web apps and other sources.
-</p>
-
-
-
-
-<p>
-  <strong>How does Whatsapp make money?</strong><br/>
-  Freemium & Subscribers: The company is based on Freemium model for firt year. Later, it has a subscription of $1 per year.
-</p>
-
-
-
-
-<p>
-  <strong>How does Twitter make money?</strong><br/>
-  Advertising & Freemium: Mostly on corporate advertising and payments from &#8216;promoted&#8217; tweets.
-</p>
-
-
-
-
-<p>
-  <strong>How does Kickstarter make money?</strong><br/>
-  Transactions/Royalties: Charges a 5% for successfully funded projects.
-</p>
-
-
-
-
-<p>
-  <strong>How does Skype make money?</strong><br/>
-  Freemium & Subscribers: Skype-to-skype calls are free, but users can buy additional features.
-</p>
-
-
-
-
-<p>
-  <strong>How does Groupon make money?</strong><br/>
-  Freemium & Transactions/Royalties: Groupon takes charges a fee to seller for every deal sold. It&#8217;s one of the fastest growing company in the world. Going from $30.5 million in year one to $713.4 million in year two.
-</p>
-
-
-
-
-<p>
-  <strong>How does Mint make money?</strong><br/>
-  Lead Gen: Mint get paid a small fee when user switch to a new bank or company.
-</p>
-
-
-
-
-<p>
-  <strong>How does Linkedin make money?</strong><br/>
-  Advertising, Freemium, Subscribers & Selling Data: Sells user&#8217;s data to companies and recruiters.
-</p>
-
-
-
-
-<p>
-  <strong>How does Amazon Kindle make money?</strong><br/>
-  Premium: Amazon loses money with Kindle but at the same time makes money selling digital content on it.
-</p>
-
-
-
-
-<p>
-  <strong>How does Microsoft Xbox Kindle make money?</strong><br/>
-  Advertising, Freemium, Subscribers, Premium & Transactions/Royalties: Xbox console and games cost money (premium), charges $50 annually (subscribers) in addition to ads.
-</p>
-
-
-
-
-<p>
-  <strong>How does Stack Overflow make money?</strong><br/>
-  Advertising: Ads, banners and sponsored results.
-</p>
-
-
-
-
-<p>
-  <strong>How does Netflix make money?</strong><br/>
-  Subscribers: Just subscribers.
-</p>
-
-
-
-
-<p>
-  <strong>How does Pandora make money?</strong><br/>
-  Advertising, Freemium & Subscribers: For free users presents adds, for subscribers does not.
-</p>
-
-
-
-
-<p>
-  <strong>How does Pandora make money?</strong><br/>
-  Advertising, Freemium & Subscribers: For free users presents adds, for subscribers does not.
-</p>
-
-
-
-
-<p>
-  <strong>How does Spotify make money?</strong><br/>
-  Advertising, Freemium & Subscribers: It has been reporting loses for a couple of years due to royalty payments.
-</p>
-
-
-
-
-<p>
-  <strong>How does Firefox make money?</strong><br/>
-  Transactions/Royalties: Most of the income comes from royalties from the Firefox search box. Their search partners includes Google, Bing, Yahoo, Yandex, Amazon, eBay and others. Also donations and grants.
-</p>
-
-
-
-
-<p>
-  <strong>How does Craigslist make money?</strong><br/>
-  Advertising, Freemium & Transactions/Royalties: Ads and charging users for posting in selected categories.
-</p>
-
-
-
-
-<p>
-  <strong>How does Dropbox make money?</strong><br/>
-  Freemium, Subscribers & Transactions/Royalties: A fixed capacity for free, to increase it users have to subscribe.
-</p>
-
-
-
-
-<p>
-  <strong>How does Google make money?</strong><br/>
-  Advertising: Ad products is their main source of revenue (AdSense and AdWords).
-</p>
-
-
-
-
-<p>
-  <strong>How does Shopify make money?</strong><br/>
-  Subscribers & Transactions/Royalties: Ad products is their main source of revenue (AdSense and AdWords).
-</p>
-
-
-
-
-<p>
-  <strong>How does Airbnb make money?</strong><br/>
-  Subscribers & Transactions/Royalties: Charge to travelers a fee of 6-12% and hosts pay a 3% for every booking on their site.
-</p>
-
-
-
-
-<p>
-  <strong>How does Zynga make money?</strong><br/>
-  Advertising & Freemium: Zynga makes money through people purchasing credits for games and also throught partnerships.
-</p>
-
-
-
-
-<p>
-  <strong>How does World Of Warcraft make money?</strong><br/>
-  Advertising & Subscribers: Charges $15 per month to users. They also sends expasions packs and discs.
-</p>
-
-
-
-
-<p>
-  <strong>How does Hulu make money?</strong><br/>
-  Advertising & Subscribers: Free service has Ads, limitations and restrictions, which are removed for subscribed users.
-</p>
-
-
-
-
-<p>
-  So far so good, That it!!! See ya!!! :)
 </p>
 
 ]]></content>
