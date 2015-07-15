@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-07-13T23:13:11+07:00</updated>
+  <updated>2015-07-15T22:25:30+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,287 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Using reCAPTCHA in Ruby on Rails Application]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/07/14/using-recaptcha-in-ruby-on-rails-application/"/>
+    <updated>2015-07-14T23:44:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/07/14/using-recaptcha-in-ruby-on-rails-application</id>
+    <content type="html"><![CDATA[<p>
+  For a site with lots of user generated content, fighting spammers can be a never ending battle. Luckily, we can use a service called reCAPTCHA to help keep spammers off our site. reCAPTCHA works by displaying an image on screen and asking the user to type what they see in the image. This works because, the spammer's spambots are unable to read the image and unable to proceed with filling out the form. reCAPTCHA is just one of a number of tools we can use to prevent spammers from abusing our websites.
+</p>
+
+
+
+
+<p>
+  <strong>Setup Account</strong><br/>
+  First, we need to create a reCAPTCHA account. Visit the <a href="http://www.google.com/recaptcha/intro/index.html" target="_blank">reCAPTCHA</a> website and click the button that says 'Get reCAPTCHA'.
+</p>
+
+
+
+
+<p>
+  <img src="http://geekhmer.github.io/images/reCAPTCHA_1.png" width="600" alt="Using reCAPTCHA in Ruby on Rails Application" />
+</p>
+
+
+
+
+<p>
+  On the next screen enter your label, domain, owners and check the box that says 'Get alerts about this site' then click the 'Register' button.
+</p>
+
+
+
+
+<p>
+  <img src="http://geekhmer.github.io/images/reCAPTCHA_2.png" width="600" alt="Using reCAPTCHA in Ruby on Rails Application" />
+</p>
+
+
+
+
+<p>
+  Make sure you copy the public key and private key and save it somewhere, you will need this information when adding reCAPTCHA to your Rails application.
+</p>
+
+
+
+
+<p>
+  <strong>Setup Rails Application</strong><br/>
+  Now we have an account, it's time to set up our Ruby on Rails application. The first thing we will need to do is include the recaptcha gem in our Gemfile. Add the following lines to your gemfile. Note that the bcrypt-ruby gem is used for our example user signup form. You don't have to include this in your application if you aren't using it for user authentication.
+</p>
+
+
+<p>{% codeblock Gemfile lang:ruby %}
+gem &lsquo;recaptcha&rsquo;, &lsquo;~> 0.3.5&rsquo;
+gem &lsquo;bcrypt-ruby&rsquo;, &lsquo;~> 3.1.2&rsquo;
+{% endcodeblock %}</p>
+
+<p>
+  Next run a bundle install to install the gem:
+</p>
+
+
+<p>{% codeblock lang:ruby %}
+bundle install
+{% endcodeblock %}</p>
+
+<p>
+  Next create an initializer for recaptcha that will contain the public and private keys we mentioned earlier. Create a new initializer called recaptcha.rb and add the code listed below, make sure to modify it to contain your public and private keys.
+</p>
+
+
+<p>{% codeblock config/initializers.rb lang:ruby %}
+Recaptcha.configure do |config|
+  config.public_key  = &lsquo;Replace with your public key&rsquo;
+  config.private_key = &lsquo;Replace with your private key&rsquo;
+end
+{% endcodeblock %}</p>
+
+<p>
+  Next create a model called User that we will use to test the reCAPTCHA functionality. Run the following commands to create the user model:
+</p>
+
+
+<p>{% codeblock lang:ruby %}
+rails g model user name email password_digest
+rake db:migrate
+{% endcodeblock %}</p>
+
+<p>
+  Next, open your User model and modify it:
+</p>
+
+
+<p>{% codeblock app/models/user.rb lang:ruby %}
+class User &lt; ActiveRecord::Base
+  has_secure_password
+  validates_presence_of :password, on: :create
+  validates :email, uniqueness: true, presence: true
+end
+{% endcodeblock %}</p>
+
+<p>
+  Next create a couple controllers that will handle our user input. The first controller, Home, will provide a simple landing page that contains a sign up link. The second controller, Users, will process the actual user signup request. Run the commands below to create the controllers.
+</p>
+
+
+<p>{% codeblock lang:ruby %}
+rails g controller Home show
+rails g controller Users new create
+{% endcodeblock %}</p>
+
+<p>
+  Now edit our routes file to set up a few routes for the controllers we just created. Modify the routes file so that it looks like the code listed below, being sure not to overwrite your application name on the first line:
+</p>
+
+
+<p>{% codeblock config/routes.rb lang:ruby %}
+ReCAPTCHAExample::Application.routes.draw do
+  resource :home, only: [:show], controller: :home
+  resource :users, only: [:new, :create]
+  root to: &ldquo;home#show&rdquo;
+end
+{% endcodeblock %}</p>
+
+<p>
+  Next open up your home/show view and modify it so that it looks like the code listed below:
+</p>
+
+
+<p>{% codeblock app/views/home/show.html.erb lang:ruby %}</p>
+
+<h3>Welcome!</h3>
+
+
+<p>
+Click the link below to sign up for an account.
+</p>
+
+
+<p>&lt;%= link_to &ldquo;Sign Up!&rdquo;, new_users_path %>
+{% endcodeblock %}</p>
+
+<p>
+  Next open up the users/new view and modify it so that it looks like the code listed below:
+</p>
+
+
+<p>{% codeblock app/views/users/new.html.erb lang:ruby %}</p>
+
+<h3>New User Sign Up</h3>
+
+
+<p>&lt;% if !@user.errors.empty? %>
+  <ul></p>
+
+<pre><code>&lt;% @user.errors.full_messages.each do |message| %&gt;
+  &lt;li&gt;&lt;%= message %&gt;&lt;/li&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>  </ul>
+&lt;% end %>
+&lt;%= form_for User.new do |f| %>
+  <div></p>
+
+<pre><code>&lt;%= f.label :name %&gt;
+&lt;%= f.text_field :name %&gt;
+</code></pre>
+
+<p>  </div>
+  <div></p>
+
+<pre><code>&lt;%= f.label :email %&gt;
+&lt;%= f.text_field :email %&gt;
+</code></pre>
+
+<p>  </div>
+  <div></p>
+
+<pre><code>&lt;%= f.label :password %&gt;
+&lt;%= f.password_field :password %&gt;
+</code></pre>
+
+<p>  </div>
+  <div></p>
+
+<pre><code>&lt;%= f.label :password_confirmation %&gt;
+&lt;%= f.password_field :password_confirmation %&gt;
+</code></pre>
+
+<p>  </div>
+  <div></p>
+
+<pre><code>&lt;%= recaptcha_tags %&gt;
+</code></pre>
+
+<p>  </div>
+  <div></p>
+
+<pre><code>&lt;%= f.submit "Sign Up" %&gt;
+</code></pre>
+
+<p>  </div>
+&lt;% end %>
+{% endcodeblock %}</p>
+
+<p>
+  Most of the code is self explanatory, however, you'll notice the recaptcha_tags method being called. This method is responsible for rendering the reCAPTCHA.
+</p>
+
+
+
+
+<p>
+  Next open up our users controller and add some code to handle the request. Modify your users controller so that it looks like the code listed below.
+</p>
+
+
+<p>{% codeblock app/controllers/users_controller.rb lang:ruby %}
+class UsersController &lt; ApplicationController
+  def new</p>
+
+<pre><code>@user = User.new
+</code></pre>
+
+<p>  end</p>
+
+<p>  def create</p>
+
+<pre><code>captcha_message = "The data you entered for the CAPTCHA wasn't correct.  Please try again"
+@user = User.new(user_params)
+if !verify_recaptcha(model: @user, message: captcha_message) || !@user.save
+  render "new"
+end
+</code></pre>
+
+<p>  end</p>
+
+<p>  private
+  def user_params</p>
+
+<pre><code>params.require(:user).permit(:name, :email, :password, :password_confirmation)
+</code></pre>
+
+<p>  end
+end
+{% endcodeblock %}</p>
+
+<p>
+  Almost done! Now lets open up our users/create view and add the following code.
+</p>
+
+
+<p>{% codeblock app/views/users/create.html.erb lang:ruby %}</p>
+
+<h3>Thank You!</h3>
+
+
+<p>
+Thanks for signing up!
+</p>
+
+
+<p>{% endcodeblock %}</p>
+
+<p>
+  Now if you start a rails server and navigate to http://localhost:3000 we will see a sign up link. if you click on the sign up link you will be presented with a sign up form, complete with a captcha to fill out. You'll notice that filling out the captcha wrongly results in a validation error message, and filling out the correct information allows the user signup to proceed.
+</p>
+
+
+
+
+<p>
+  So far so good, That's it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Social Network Sharing Buttons in Rails App]]></title>
@@ -45,141 +326,117 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Gemfile </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">social</span><span class="o">-</span><span class="n">share</span><span class="o">-</span><span class="n">button</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">~&gt;</span> <span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">6</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock Gemfile lang:ruby %}
+gem &lsquo;social-share-button&rsquo;, &lsquo;~> 0.1.6&rsquo;
+{% endcodeblock %}</p>
 
 <p>
   Next, we need to run a bundle install to install the gem:
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}
+bundle install
+{% endcodeblock %}</p>
 
 <p>
   Now we need to run the <code>rails generate social_share_button:install</code> command to install some additional configuration files that the Social Sharing Button gem uses to display the buttons on your site. This includes an initializer called social_share_button.rb in your initializers folder as well as some localization files:
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">generate</span> <span class="n">social_share_button</span><span class="ss">:install</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}
+rails generate social_share_button:install
+{% endcodeblock %}</p>
 
 <p>
   Great, Next we need to do is create a simple Home controller in order to test the social sharing button functionality:
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="n">homes</span> <span class="n">show</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}
+rails g controller homes show
+{% endcodeblock %}</p>
 
 <p>
   Now let's modify our routes file a bit:
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/routes.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">resources</span> <span class="ss">:homes</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:show</span><span class="o">]</span>
-</span><span class='line'>  <span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">homes</span><span class="c1">#show&amp;rdquo;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock config/routes.rb lang:ruby %}
+Rails.application.routes.draw do
+  resources :homes, only: [:show]
+  root to: &ldquo;homes#show&rdquo;
+end
+{% endcodeblock %}</p>
 
 <p>
   Great, now we need to add some javascript and CSS includes to make things work. Open up your application.js file and modify it so that it looks like the code listed below:
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/assets/javascripts/application.js </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">jquery</span>
-</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">jquery_ujs</span>
-</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">turbolinks</span>
-</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">social</span><span class="o">-</span><span class="n">share</span><span class="o">-</span><span class="n">button</span>
-</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="n">require_tree</span> <span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock app/assets/javascripts/application.js lang:ruby %}
+//= require jquery
+//= require jquery_ujs
+//= require turbolinks
+//= require social-share-button
+//= require_tree .
+{% endcodeblock %}</p>
 
 <p>
   Great, now for the application.css file. Open it up and modify it so that it looks like the code listed below:
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/assets/stylesheets/application.css </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">/&lt;em&gt;</span>
-</span><span class='line'><span class="sr"> &lt;/em</span><span class="o">&gt;=</span> <span class="n">require_tree</span> <span class="o">.</span>
-</span><span class='line'> <span class="o">&lt;</span><span class="n">em</span><span class="o">&gt;=</span> <span class="nb">require</span> <span class="n">social</span><span class="o">-</span><span class="n">share</span><span class="o">-</span><span class="n">button</span>
-</span><span class='line'> <span class="o">&lt;</span><span class="sr">/em&gt;= require_self</span>
-</span><span class='line'><span class="sr"> */</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock app/assets/stylesheets/application.css lang:ruby %}
+/<em>
+ </em>= require_tree .
+ <em>= require social-share-button
+ </em>= require_self
+ */
+{% endcodeblock %}</p>
 
 <p>
   Excellent, now we can add the social sharing buttons to our site. Open up your homes/show view and modify it so that it looks like the code listed below:
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/views/homes/show.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%=</span> <span class="n">social_share_button_tag</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">My</span> <span class="no">Site</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;)</span> <span class="o">%&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock app/views/homes/show.html.erb lang:ruby %}
+&lt;%= social_share_button_tag(&ldquo;My Site&rdquo;) %>
+{% endcodeblock %}</p>
 
 <p>
   Great, now if we run rails server and visit http://localhost:3000, we will see the social sharing buttons. However, you'll notice that there is a problem. About 15 or so buttons are listed, but we only care about a couple. Luckily we can easily resolve this. Open up the social_share_button initializer and modify it so that it looks like the code listed below:
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/initializers/social_share_button.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">SocialShareButton</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
-</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">allow_sites</span> <span class="o">=</span> <span class="sx">%w(twitter facebook google_plus delicious tumblr pinterest)</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock config/initializers/social_share_button.rb lang:ruby %}
+SocialShareButton.configure do |config|
+  config.allow_sites = %w(twitter facebook google_plus delicious tumblr pinterest)
+end
+{% endcodeblock %}</p>
 
 <p>
   Now if you restart your rails server, you'll notice that the buttons have been limited to the sites listed above. Note that you can also specify a specific url if needed. Social Share Button detects the current URL by default, but there are times when you may want to customize this. You can do this like so:
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="sx">%= social_share_button_tag(&amp;ldquo;My Home Page&amp;rdquo;, :url =</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;http://mysite.com/sample&quot;</span><span class="o">&gt;</span><span class="ss">http</span><span class="p">:</span><span class="sr">//m</span><span class="n">ysite</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">sample</span><span class="o">&lt;</span><span class="sr">/a&gt;&amp;rdquo;) %&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}
+&lt;%= social_share_button_tag(&ldquo;My Home Page&rdquo;, :url => &ldquo;<a href="http://mysite.com/sample">http://mysite.com/sample</a>&rdquo;) %>
+{% endcodeblock %}</p>
 
 <p>
   However, what if we want to customize the button look/feel? Luckily this is pretty easy. If you inspect the elements in chrome developer tools you'll notice that they each have a unique css class. We can override this CSS class with our own code. For example, to modify the facebook button to look different, we'd use something like the following CSS (placed into our application.css file):
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">social</span><span class="o">-</span><span class="n">share</span><span class="o">-</span><span class="n">button</span><span class="o">-</span><span class="n">facebook</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nb">display</span><span class="p">:</span> <span class="n">inline</span><span class="o">-</span><span class="n">block</span><span class="p">;</span>
-</span><span class='line'>  <span class="ss">width</span><span class="p">:</span> <span class="mi">16</span><span class="n">px</span><span class="p">;</span>
-</span><span class='line'>  <span class="ss">height</span><span class="p">:</span> <span class="mi">16</span><span class="n">px</span><span class="p">;</span>
-</span><span class='line'>  <span class="ss">background</span><span class="p">:</span> <span class="n">url</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">/</span><span class="n">social</span><span class="o">/</span><span class="n">facebook</span><span class="o">.</span><span class="n">png</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;)</span> <span class="n">no</span><span class="o">-</span><span class="n">repeat</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}
+.social-share-button-facebook {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background: url(&ldquo;/social/facebook.png&rdquo;) no-repeat;
+}
+{% endcodeblock %}</p>
 
 <p>
   So far go good, That's it!!! See ya!!! :)
@@ -205,9 +462,9 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="o">[</span><span class="n">options</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}
+rails [options]
+{% endcodeblock %}</p>
 
 <p>
   Options:<br/>
@@ -226,9 +483,9 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">s</span> <span class="o">-</span><span class="n">b</span> <span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}
+rails s -b 0.0.0.0
+{% endcodeblock %}</p>
 
 <p>
   <strong>Use a Different Port</strong><br/>
@@ -236,9 +493,9 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">s</span> <span class="o">-</span><span class="nb">p</span> <span class="mi">3001</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}
+rails s -p 3001
+{% endcodeblock %}</p>
 
 <p>
   This command line tells rails to start the server on port 3001 instead of 3000.
@@ -253,9 +510,9 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">s</span> <span class="o">-</span><span class="n">e</span> <span class="n">production</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}
+rails s -e production
+{% endcodeblock %}</p>
 
 <p>
   The code above starts the Rails server in the production environment. Very handy when you have custom environments or need to debug something.
@@ -310,68 +567,56 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Painting</span> <span class="o">=</span> <span class="no">Struct</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span> <span class="ss">:year</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}
+Painting = Struct.new(:name, :year)
+{% endcodeblock %}</p>
 
 <p>
   Now I can create a list of three paintings in a Minitest::Spec file like this:
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">let</span><span class="p">(</span><span class="ss">:one</span><span class="p">)</span> <span class="p">{</span> <span class="no">Painting</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Spanish</span> <span class="no">Couple</span> <span class="no">In</span> <span class="no">Front</span> <span class="no">Of</span> <span class="no">Inn</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="mi">1900</span><span class="p">)</span> <span class="p">}</span>
-</span><span class='line'><span class="n">let</span><span class="p">(</span><span class="ss">:two</span><span class="p">)</span> <span class="p">{</span> <span class="no">Painting</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Guernica</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="mi">1937</span><span class="p">)</span> <span class="p">}</span>
-</span><span class='line'><span class="n">let</span><span class="p">(</span><span class="ss">:three</span><span class="p">)</span> <span class="p">{</span> <span class="no">Painting</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Petite</span> <span class="no">Fleurs</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="mi">1958</span><span class="p">)</span> <span class="p">}</span>
-</span><span class='line'><span class="n">let</span><span class="p">(</span><span class="ss">:paintings</span><span class="p">)</span> <span class="p">{</span> <span class="o">[</span><span class="n">one</span><span class="p">,</span> <span class="n">two</span><span class="p">,</span> <span class="n">three</span><span class="o">]</span> <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}
+let(:one) { Painting.new(&ldquo;Spanish Couple In Front Of Inn&rdquo;, 1900) }
+let(:two) { Painting.new(&ldquo;Guernica&rdquo;, 1937) }
+let(:three) { Painting.new(&ldquo;Petite Fleurs&rdquo;, 1958) }
+let(:paintings) { [one, two, three] }
+{% endcodeblock %}</p>
 
 <p>
   Suppose my first requirement is to return the first painting from the list. Simple enough:
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">list</span><span class="o">.</span><span class="n">first</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}
+def first(list)
+  list.first
+end
+{% endcodeblock %}</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">should</span> <span class="k">return</span> <span class="n">the</span> <span class="n">first</span> <span class="n">element</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">first</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">must_equal</span> <span class="n">one</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}
+it &ldquo;should return the first element&rdquo; do
+  first(paintings).must_equal one
+end
+{% endcodeblock %}</p>
 
 <p>
   I just call Array#first and I’m done. Returning the rest of the list is slightly more interesting:
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">rest</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">_</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span> <span class="o">=</span> <span class="n">list</span>
-</span><span class='line'>  <span class="n">rest</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}
+def rest(list)
+  _, *rest = list
+  rest
+end
+{% endcodeblock %}</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">returns</span> <span class="n">the</span> <span class="n">rest</span> <span class="n">of</span> <span class="n">the</span> <span class="n">elements</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">rest</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">must_equal</span> <span class="o">[</span><span class="n">two</span><span class="p">,</span> <span class="n">three</span><span class="o">]</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}
+it &ldquo;returns the rest of the elements&rdquo; do
+  rest(paintings).must_equal [two, three]
+end
+{% endcodeblock %}</p>
 
 <p>
   Rest always returns an array even if the input list was empty or had only one element. So far, so good. I’ve written two methods and two tests:
@@ -393,76 +638,51 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">list</span><span class="o">.</span><span class="n">sort</span> <span class="k">do</span> <span class="o">|</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">|&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;p1.name &amp;lt;=&amp;gt; p2.name</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end.first</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}
+def first(list)
+  list.sort do |p1, p2|</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">should</span> <span class="k">return</span> <span class="n">the</span> <span class="n">first</span> <span class="n">element</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">first</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">must_equal</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Guernica</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>p1.name &lt;=&gt; p2.name
+</code></pre>
+
+<p>  end.first
+end
+{% endcodeblock %}</p>
+
+<p>{% codeblock lang:ruby %}
+it &ldquo;should return the first element&rdquo; do
+  first(paintings).name.must_equal &ldquo;Guernica&rdquo;
+end
+{% endcodeblock %}</p>
 
 <p>
   And I need rest to use the same sort order, so I repeat the call to sort:
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">rest</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">_</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span> <span class="o">=</span> <span class="n">list</span><span class="o">.</span><span class="n">sort</span> <span class="k">do</span> <span class="o">|</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">|&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;p1.name &amp;lt;=&amp;gt; p2.name</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span><span class='line'><span class="sr">  rest</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}
+def rest(list)
+  _, *rest = list.sort do |p1, p2|</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">returns</span> <span class="n">the</span> <span class="n">rest</span> <span class="n">of</span> <span class="n">the</span> <span class="n">elements</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">rest</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="ss">:name</span><span class="p">)</span><span class="o">.</span><span class="n">must_equal</span> <span class="o">[&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;&quot;Petite Fleurs&quot;,</span>
-</span><span class='line'><span class="sr">&quot;Spanish Couple In Front Of Inn&quot;</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  ]</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>p1.name &lt;=&gt; p2.name
+</code></pre>
+
+<p>  end
+  rest
+end
+{% endcodeblock %}</p>
+
+<p>{% codeblock lang:ruby %}
+it &ldquo;returns the rest of the elements&rdquo; do
+  rest(paintings).map(&amp;:name).must_equal [</p>
+
+<pre><code>"Petite Fleurs",
+"Spanish Couple In Front Of Inn"
+</code></pre>
+
+<p>  ]
+end
+{% endcodeblock %}</p>
 
 <p>
   I’ve implemented new behavior, but still have two methods and two tests:
@@ -484,69 +704,41 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">sorted_by_name</span><span class="p">(</span><span class="n">list</span><span class="p">)</span><span class="o">.</span><span class="n">first</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;def rest(list)</span>
-</span><span class='line'><span class="sr">  _, *rest = sorted_by_name(list)</span>
-</span><span class='line'><span class="sr">  rest</span>
-</span><span class='line'><span class="sr">end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="k">def</span> <span class="nf">sorted_by_name</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">list</span><span class="o">.</span><span class="n">sort</span> <span class="k">do</span> <span class="o">|</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">|&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;p1.name &amp;lt;=&amp;gt; p2.name</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}
+def first(list)
+  sorted_by_name(list).first
+end</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">returns</span> <span class="n">the</span> <span class="n">element</span> <span class="n">with</span> <span class="n">the</span> <span class="n">first</span> <span class="nb">name</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">first</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">must_equal</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Guernica</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;it &amp;ldquo;returns the rest after the first name&amp;rdquo; do</span>
-</span><span class='line'><span class="sr">  rest(paintings).map(&amp;amp;:name).must_equal [&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="s2">&quot;Petite Fleurs&quot;</span><span class="p">,</span>
-</span><span class='line'><span class="s2">&quot;Spanish Couple In Front Of Inn&quot;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="o">]</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>def rest(list)
+  _, *rest = sorted_by_name(list)
+  rest
+end</p>
+
+<p>def sorted_by_name(list)
+  list.sort do |p1, p2|</p>
+
+<pre><code>p1.name &lt;=&gt; p2.name
+</code></pre>
+
+<p>  end
+end
+{% endcodeblock %}</p>
+
+<p>{% codeblock lang:ruby %}
+it &ldquo;returns the element with the first name&rdquo; do
+  first(paintings).name.must_equal &ldquo;Guernica&rdquo;
+end</p>
+
+<p>it &ldquo;returns the rest after the first name&rdquo; do
+  rest(paintings).map(&amp;:name).must_equal [</p>
+
+<pre><code>"Petite Fleurs",
+"Spanish Couple In Front Of Inn"
+</code></pre>
+
+<p>  ]
+end
+{% endcodeblock %}</p>
 
 <p>
   Here I’ve simply moved the call to sort into a utility method called sorted_by_name. Now first and rest both call sorted_by_name, making the code a bit clearer and DRY-er. But now I have three methods and only two tests:
@@ -575,71 +767,42 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">sorted_by_name</span><span class="p">(</span><span class="n">list</span><span class="p">)</span><span class="o">.</span><span class="n">first</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;def rest(list)</span>
-</span><span class='line'><span class="sr">  _, *rest = sorted_by_name(list)</span>
-</span><span class='line'><span class="sr">  rest</span>
-</span><span class='line'><span class="sr">end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="kp">private</span>
-</span><span class='line'><span class="k">def</span> <span class="nf">sorted_by_name</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">list</span><span class="o">.</span><span class="n">sort</span> <span class="k">do</span> <span class="o">|</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">|&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;p1.name &amp;lt;=&amp;gt; p2.name</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}
+def first(list)
+  sorted_by_name(list).first
+end</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">returns</span> <span class="n">the</span> <span class="n">element</span> <span class="n">with</span> <span class="n">the</span> <span class="n">first</span> <span class="nb">name</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">first</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">must_equal</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Guernica</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;it &amp;ldquo;returns the rest after the first name&amp;rdquo; do</span>
-</span><span class='line'><span class="sr">  rest(paintings).map(&amp;amp;:name).must_equal [&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="s2">&quot;Petite Fleurs&quot;</span><span class="p">,</span>
-</span><span class='line'><span class="s2">&quot;Spanish Couple In Front Of Inn&quot;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="o">]</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>def rest(list)
+  _, *rest = sorted_by_name(list)
+  rest
+end</p>
+
+<p>private
+def sorted_by_name(list)
+  list.sort do |p1, p2|</p>
+
+<pre><code>p1.name &lt;=&gt; p2.name
+</code></pre>
+
+<p>  end
+end
+{% endcodeblock %}</p>
+
+<p>{% codeblock lang:ruby %}
+it &ldquo;returns the element with the first name&rdquo; do
+  first(paintings).name.must_equal &ldquo;Guernica&rdquo;
+end</p>
+
+<p>it &ldquo;returns the rest after the first name&rdquo; do
+  rest(paintings).map(&amp;:name).must_equal [</p>
+
+<pre><code>"Petite Fleurs",
+"Spanish Couple In Front Of Inn"
+</code></pre>
+
+<p>  ]
+end
+{% endcodeblock %}</p>
 
 <p>
   The private keyword here reminds me I’ve already tested sorted_by_name, that I don’t need to write new tests for it. Now private is helping me organize my code; it’s helping me remember which methods I don’t need to test… and which methods are missing important tests.
@@ -874,146 +1037,80 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;Gemfile&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">bunny</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;an initializer&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">connection</span> <span class="o">=</span> <span class="no">Bunny</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">host</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">localhost</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;)</span>
-</span><span class='line'><span class="n">connection</span><span class="o">.</span><span class="n">start</span>
-</span><span class='line'><span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">create_channel</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;a service&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="k">class</span> <span class="nc">RabbitPublisher</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  def initialize(channel)&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="nb">self</span><span class="o">.</span><span class="n">channel</span> <span class="o">=</span> <span class="n">channel</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  def publish(exchange_name, message)&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">exchange</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="n">fanout</span><span class="p">(</span><span class="n">exchange_name</span><span class="p">,</span> <span class="ss">durable</span><span class="p">:</span> <span class="kp">true</span><span class="p">)</span>
-</span><span class='line'><span class="n">exchange</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">to_json</span><span class="p">)</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  private</span>
-</span><span class='line'><span class="sr">  attr_accessor :channel</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}</p>
+
+<h1>Gemfile</h1>
+
+<p>gem &lsquo;bunny&rsquo;</p>
+
+<h1>an initializer</h1>
+
+<p>connection = Bunny.new(host: &lsquo;localhost&rsquo;)
+connection.start
+channel = connection.create_channel</p>
+
+<h1>a service</h1>
+
+<p>class RabbitPublisher</p>
+
+<p>  def initialize(channel)</p>
+
+<pre><code>self.channel = channel
+</code></pre>
+
+<p>  end</p>
+
+<p>  def publish(exchange_name, message)</p>
+
+<pre><code>exchange = channel.fanout(exchange_name, durable: true)
+exchange.publish(message.to_json)
+</code></pre>
+
+<p>  end</p>
+
+<p>  private
+  attr_accessor :channel
+end
+{% endcodeblock %}</p>
 
 <h3>
   Receiving
 </h3>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;Gemfile&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">sneakers</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;an initializer&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="no">Sneakers</span><span class="o">.</span><span class="n">configure</span>  <span class="ss">daemonize</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;                amqp: &quot;amqp:/</span><span class="o">/</span><span class="n">localhost</span><span class="s2">&quot;,</span>
-</span><span class='line'><span class="s2">                log: &quot;</span><span class="n">log</span><span class="o">/</span><span class="n">sneakers</span><span class="o">.</span><span class="n">log</span><span class="s2">&quot;,</span>
-</span><span class='line'><span class="s2">                pid_path: &quot;</span><span class="n">tmp</span><span class="o">/</span><span class="n">pids</span><span class="o">/</span><span class="n">sneakers</span><span class="o">.</span><span class="n">pid</span><span class="s2">&quot;,</span>
-</span><span class='line'><span class="s2">                threads: 1,</span>
-</span><span class='line'><span class="s2">                workers: 1</span>
-</span><span class='line'><span class="s2">&lt;/code&gt;&lt;/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;h1&gt;app/workers/events_worker.rb&lt;/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;p&gt;class EventsWorker</span>
-</span><span class='line'><span class="s2">  include Sneakers::Worker</span>
-</span><span class='line'><span class="s2">  from_queue &amp;ldquo;events&amp;rdquo;, env: nil&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;p&gt;  def work(raw_event)&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;pre&gt;&lt;code&gt;event_params = JSON.parse(raw_event)</span>
-</span><span class='line'><span class="s2">SomeWiseService.build.call(event_params)</span>
-</span><span class='line'><span class="s2">ack!</span>
-</span><span class='line'><span class="s2">&lt;/code&gt;&lt;/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;p&gt;  end</span>
-</span><span class='line'><span class="s2">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}</p>
+
+<h1>Gemfile</h1>
+
+<p>gem &lsquo;sneakers&rsquo;</p>
+
+<h1>an initializer</h1>
+
+<p>Sneakers.configure  daemonize: true,</p>
+
+<pre><code>                amqp: "amqp://localhost",
+                log: "log/sneakers.log",
+                pid_path: "tmp/pids/sneakers.pid",
+                threads: 1,
+                workers: 1
+</code></pre>
+
+<h1>app/workers/events_worker.rb</h1>
+
+<p>class EventsWorker
+  include Sneakers::Worker
+  from_queue &ldquo;events&rdquo;, env: nil</p>
+
+<p>  def work(raw_event)</p>
+
+<pre><code>event_params = JSON.parse(raw_event)
+SomeWiseService.build.call(event_params)
+ack!
+</code></pre>
+
+<p>  end
+end
+{% endcodeblock %}</p>
 
 <p>
   For details refer to documentation of <a href="https://github.com/ruby-amqp/bunny" target="_blank">bunny</a> and <a href="https://github.com/jondot/sneakers" target="_blank">sneakers</a>.
@@ -1033,543 +1130,6 @@
   So far so good, That's it!!! See ya!!! :)
 </p>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ajax on Rails]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/06/19/ajax-on-rails/"/>
-    <updated>2015-06-19T11:37:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/06/19/ajax-on-rails</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/ajax_on_rails.png" width="400" alt="Ajax on Rails" />
-</p>
-
-
-
-
-<p>
-  This is a tutorial for ajax use with Rails conventions. For illustrative purposes, we’ll build a single-page Product list app.
-</p>
-
-
-
-
-<p>
-  <strong>About Ajax</strong><br/>
-  Ajax (Asynchronous JavaScript and XML) is used as a mechanism for sending and retrieving data asynchronously (in the background). While XML can certainly be used with ajax, it is not limited to this format. The JSON format, for example, is more commonly used today, especially in the Rails community. There are significant advantages in using Ajax, which include better user interactivity. Ajax allows content on a page to be updated without having to re-render the entire page, making it a "seamless" experience.
-</p>
-
-
-
-
-<p>
-  <strong>Create a New Product on the Index Page</strong><br/>
-  Before we start, let’s take a quick look at our schema so that we know what we’re working with:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Schema</span><span class="o">.</span><span class="n">define</span><span class="p">(</span><span class="ss">version</span><span class="p">:</span> <span class="mi">20140620130316</span><span class="p">)</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">create_table</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">products</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="ss">force</span><span class="p">:</span> <span class="kp">true</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;t.datetime &quot;created_at&quot;,  null: false</span>
-</span><span class='line'><span class="sr">t.datetime &quot;updated_at&quot;,  null: false</span>
-</span><span class='line'><span class="sr">t.string   &quot;name&quot;,        null: false</span>
-</span><span class='line'><span class="sr">t.string   &quot;description&quot;, null: false</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  After creating a Product model and then create some products to play with, our Product Controller should look like this:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>products_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ProductsController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="no">ApplicationController</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@products = Product.all</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Instead of creating <code>new.html.erb</code>, let’s add a button somewhere on our <code>index.html.erb</code> that users can use to display a hidden form:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>index.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">hellip</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;&amp;lt;%= link_to &amp;lsquo;New Product&amp;rsquo;, new_product_path, remote: true %&gt;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;&amp;</span><span class="n">hellip</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Here we pass the <code>remote: true</code> option to disable the default Rails mechanism that would have otherwise navigated us to <code>/products/new</code>.
-</p>
-
-
-
-
-<p>
-  Before moving on, let’s quickly revisit our Product Controller and set it up to create new products with ajax:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>products_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ProductsController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="no">ApplicationController</span>
-</span><span class='line'>  <span class="n">before_action</span> <span class="ss">:all_product</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:index</span><span class="p">,</span> <span class="ss">:create</span><span class="o">]&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  # index action has been removed&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">def</span> <span class="nf">new</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@product = Product.new</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">def</span> <span class="nf">create</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@product  = Product.create(product_params)</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="kp">private</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">all_products</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@products = Product.all</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">def</span> <span class="nf">product_params</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;params.require(:product).permit(:name, :description)</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  I have removed the index action because I created a <code>before_action</code> filter that creates the <code>@products</code> instance variable for us automatically. Because we no longer have any logic in our index action, it is not necessary. Rails will automatically render the correct template, even without the presence of the action.
-</p>
-
-
-
-
-<p>
-  Noteworthy here is the <code>respond_to</code> method invoked near the top that will allow us to render both html and javascript responses with all of our controller actions. The respond_to method provides the ability to respond to the requests with many formats(i.e. csv, xml, etc…). This can be done for one or all actions in a controller. If we wanted to provide json only in our index action, we would write something like this:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">index</span>
-</span><span class='line'>  <span class="vi">@products</span> <span class="o">=</span> <span class="no">Product</span><span class="o">.</span><span class="n">all</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  respond_to do |format|&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="nb">format</span><span class="o">.</span><span class="n">html</span>
-</span><span class='line'><span class="nb">format</span><span class="o">.</span><span class="n">json</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Now, choose a place on the index page to hide your form by passing a style attribute with the following:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>index.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">hellip</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;div id=&quot;product-form&quot; style=&quot;display:none;&quot;&gt;&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;&amp;</span><span class="n">hellip</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  which will hide our form when the page is initially visited.
-</p>
-
-
-
-
-<p>
-  Next, create <code>new.js.erb</code>:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>new.js.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="c1">#product-form&amp;rsquo;).html(&amp;ldquo;&amp;lt;%= j (render &amp;lsquo;form&amp;rsquo;) %&gt;&amp;rdquo;);</span>
-</span><span class='line'><span class="err">$</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="c1">#product-form&amp;rsquo;).slideDown(350);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  This is just an ERB template that generates Javascript instead of the HTML we’re used to. It basically translates to: "Find the element with an id attribute of product-form and at that point render the html in the form partial." We typically do this in <code>new.html.erb</code> with:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>new.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%=</span> <span class="n">render</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">form</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span> <span class="o">%&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><p>
-  Since render is a Rails method, JavaScript doesn’t understand it and it has to be interpreted with ERB. The &lsquo;j&rsquo; is syntactic sugar for <code>&lt;%= escape_javascript (render &lsquo;form&rsquo;) %></code>
-</p></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>_form.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="sx">%= simple_form_for @product, remote: true do |f| %&gt;</span>
-</span><span class='line'><span class="sx">  &amp;lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">input</span>  <span class="ss">:description</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">  &amp;lt;%= f.input  :deadline %&gt;</span>
-</span><span class='line'>  <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%=</span> <span class="n">f</span><span class="o">.</span><span class="n">button</span> <span class="ss">:submit</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">&amp;lt;% end %&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><p>
-  This is the &lsquo;form&rsquo; being rendered in <code>new.js.erb</code> with a <code>remote: true</code> option being passed in. In our form partial, we also pass the <code>remote: true</code> option that will execute an ajax POST request.
-</p></p>
-
-<p><p>
-  Finally, we can wrap things up by rendering our new Product list and hiding our form. This final step includes identifying where to render our list. Using the rai-jax app as an example, let’s look at what our final <code>index.html.erb</code> should look like at this stage:
-</p></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>index.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;row&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-md-5 col-md-offset-1&quot;</span><span class="o">&gt;&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;&amp;lt;h2&amp;gt;Products&amp;lt;/</span><span class="n">h2</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="sr">/div&gt;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-md-2 col-md-offset-4&quot;</span><span class="o">&gt;&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;&amp;lt;%= link_to new_product_path, remote: true do %&amp;gt;</span>
-</span><span class='line'><span class="sr">  &amp;lt;button class=&quot;btn btn-default&quot;&amp;gt;New&amp;lt;/</span><span class="n">button</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
-</span><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%</span> <span class="k">end</span> <span class="sx">%&amp;gt;</span>
-</span><span class='line'><span class="sx">&lt;/code&gt;&lt;/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sx">&lt;p&gt;  &lt;/div&gt;</span>
-</span><span class='line'><span class="sx">&lt;/div&gt;&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sx">&lt;p&gt;&lt;div class=&quot;row&quot;&gt;</span>
-</span><span class='line'><span class="sx">  &lt;div class=&quot;col-md-6 col-md-offset-2&quot; id=&quot;product-form&quot; style=&quot;display:none;&quot;&gt;&lt;/div&gt;</span>
-</span><span class='line'><span class="sx">&lt;/div&gt;&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sx">&lt;p&gt;&lt;div class=&quot;row&quot;&gt;</span>
-</span><span class='line'><span class="sx">  &lt;div class=&quot;col-md-7 col-md-offset-1&quot; id=&quot;products&quot;&gt;&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%=</span> <span class="n">render</span> <span class="vi">@products</span> <span class="sx">%&gt;&lt;/div&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><p>
-  And we update our product list and hide our form with <code>create.js.erb</code>:
-</p></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>create.js.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="c1">#products&amp;rsquo;).html(&amp;ldquo;&amp;lt;%= j (render @products) %&gt;&amp;rdquo;);</span>
-</span><span class='line'><span class="err">$</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="c1">#product-form&amp;rsquo;).slideUp(350);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><p>
-  <strong>Update a Product on the Index Page</strong><br/>
-  As in Part One, let’s start by visiting our Product Controller and setting it up for updates:
-</p></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>products_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ProductsController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="no">ApplicationController</span>
-</span><span class='line'>  <span class="n">before_action</span> <span class="ss">:all_products</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:index</span><span class="p">,</span> <span class="ss">:create</span><span class="p">,</span> <span class="ss">:update</span><span class="o">]</span>
-</span><span class='line'>  <span class="n">before_action</span> <span class="ss">:set_products</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:edit</span><span class="p">,</span> <span class="ss">:update</span><span class="o">]&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  &amp;hellip;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">def</span> <span class="nf">update</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@product.update_attributes(product_params)</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="o">&amp;</span><span class="n">hellip</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  private</span>
-</span><span class='line'><span class="sr">  &amp;hellip;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">def</span> <span class="nf">set_products</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@product = Product.find(params[:id])</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">def</span> <span class="nf">product_params</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;params.require(:product).permit(:name, :description)</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><p>
-  Similar to Part One, we add an edit button with a <code>remote:</code> true option:
-</p></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>_product.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">hellip</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  &amp;lt;%= link_to edit_product_path(product), remote: true do %&gt;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">button</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="no">Edit</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">/</span><span class="n">button</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%</span> <span class="k">end</span> <span class="sx">%&gt;&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;&amp;</span><span class="n">hellip</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><p>
-  And, finally, our <code>edit.js.erb</code> and <code>update.js.erb</code> are the same as our new and update templates: <code>edit.js.erb</code> corresponds to <code>new.js.erb</code> and <code>create.js.erb</code> corresponds to <code>update.js.erb</code>.
-</p></p>
-
-<p><p>
-  <strong>Delete a Product on the Index Page</strong><br/>
-  Our final updates to our Product Controller involves us providing the destroy action:
-</p></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>product_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ProductsController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="no">ApplicationController</span>
-</span><span class='line'>  <span class="n">before_action</span> <span class="ss">:all_products</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:index</span><span class="p">,</span> <span class="ss">:create</span><span class="p">,</span> <span class="ss">:update</span><span class="p">,</span> <span class="ss">:destroy</span><span class="o">]</span>
-</span><span class='line'>  <span class="n">before_action</span> <span class="ss">:set_products</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:edit</span><span class="p">,</span> <span class="ss">:update</span><span class="p">,</span> <span class="ss">:destroy</span><span class="o">]&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  &amp;hellip;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">def</span> <span class="nf">destroy</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@product.destroy</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><p>
-  When adding our delete button, two additional steps are required:
-</p></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>_product.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">hellip</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;&amp;lt;%= link_to product, remote: true, method: :delete,  data: { confirm: &amp;lsquo;Are you sure?&amp;rsquo; } do %&gt;</span>
-</span><span class='line'><span class="sr">  &lt;button&gt;Delete!&lt;/</span><span class="n">button</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%</span> <span class="k">end</span> <span class="sx">%&gt;&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;&amp;</span><span class="n">hellip</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><p>
-  First, we pass in a <code>method: :delete</code> option; Second, we provide a courtesy confirmation to the user making sure they don’t delete anything by accident.
-</p></p>
-
-<p><p>
-  The last file we’ll create is <code>destroy.js.erb</code> and it will contain one line:
-</p></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>destroy.js.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="c1">#products&amp;rsquo;).html(&amp;ldquo;&amp;lt;%= j (render @products) %&gt;&amp;rdquo;);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><p>
-  Seriously, Rails makes ajax easy. As I mentioned above.
-</p></p>
-
-<p><p>
-  So far so good, That&rsquo;s it!!! See ya!!! :)
-</p></p>
 ]]></content>
   </entry>
   
