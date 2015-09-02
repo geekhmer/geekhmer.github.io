@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-07-26T00:25:40+07:00</updated>
+  <updated>2015-09-02T20:41:37+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,56 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Open Sourcing a Gem]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/09/02/open-sourcing-a-gem/"/>
+    <updated>2015-09-02T20:24:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/09/02/open-sourcing-a-gem</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/rubygems_logo.png" alt="Open Sourcing a Gem" />
+</p>
+
+
+
+
+<p>
+  <strong>Considerations when Open Sourcing</strong><br/>
+  When open sourcing a gem (or any project, this post can be generalized to not just focus on gems), there are a number of things to consider. The first check is to ensure that the use case is general enough that it is likely to be helpful to other parties. Though the project might never gain many external users, it is a good sanity check before taking on the work to open source the project. Following this there are a number of things to think out, with the purpose of determining a track of work that needs to be taken (if any) before the gem can be open sourced.
+</p>
+
+
+
+
+<p>
+  <strong>Generalize the implementation</strong><br/>
+  - Remove coupled business logic and application specific code.<br/>
+  - Ensure no keys/account information were stored in the repo (even in past commits). Typically not considered a good practice, but it is something to be aware of when releasing the source of a project publicly.
+</p>
+
+
+
+
+<p>
+  <strong>Set bounds on the responsibilities</strong><br/>
+  - What is the purpose of this gem and what needs is it fulfilling?<br/>
+  - Take a step back from how you currently use the library. What other potential use cases might others use it for? Is it worth generalizing the implementation to aid these other use cases?<br/>
+  - Set bounds on the responsibilities that the gem will take care of.<br/>
+  - What will the gem provide and what is left up to the user? In the case of Signalman, we allow users to customize the URL of the Signalman admin page, but it is up to the user to provide additional authentication besides obscurity. Signalman is a gem designed to aid with A/B testing, not authentication.<br/>
+  - Try to stick to the gem's core competencies. Do not add features at a whim to quell user requests. This can cause a gem to grow out of control and become hard to manage or even discern its original purpose/intent.
+</p>
+
+
+
+
+<p>
+  <strong>Consider strategies to manage repository ownership</strong><br/>
+  - Like it or not, becoming a maintainer is a big responsibility. If you are open sourcing a project with a team, this will greatly ease the burden, but you must still consider processes to manage external pull requests and issues that arise.<br/>
+  - Giving the user power and encouraging pull requests and a community that supports each other's issues can also relieve the burden of being a project maintainer. You can help this process by adding documentation for contributing and making it easy for other parties to contribute to the project. This also means providing help to newer developers; you never know who might become a leading contributor in the future.
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Using reCAPTCHA in Ruby on Rails Application]]></title>
@@ -1066,373 +1116,6 @@
 
 <p>
   f my tests don’t need to know about sorted_by_name, then certainly other developers don’t. It should be private. Marking it private reminds me that it is being tested indirectly, that I didn’t just forget to write a test for it. Marking it private tells other developers about what I’ve learned from my own test suite.
-</p>
-
-
-
-
-<p>
-  So far so good, That's it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Use Message Queue in Rails]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/06/21/use-message-queue-in-rails/"/>
-    <updated>2015-06-21T10:53:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/06/21/use-message-queue-in-rails</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/message_queue .png" width="400" alt="Use Message Queue in Rails" />
-</p>
-
-
-
-
-<p>
-  This article describes the application architecture pattern which is (in general) nothing new, but (from my experience) rarely applied in the Rails world. I’m talking about the nice and simple abstraction – message queue. But let me start by describing the goals I want to achieve and some alternative solutions.
-</p>
-
-
-
-
-<h3>
-  Goals
-</h3>
-
-
-
-
-<p>
-  <strong>Split</strong> application into a few smaller applications<br/>
-  Smaller applications are easier to reason about. You don’t have to go through 50 classes, you can just read 10, because it’s all you’ve got. When a new developer joins the team he has nice onboarding if you can tell him: “hey, start with this small piece of code, everything you need to know to implement this new feature is encapsulated here”.
-</p>
-
-
-
-
-<p>
-  <strong>Separate</strong> code for concepts which are not logically connected<br/>
-  Smaller applications are easier to reason about. You don’t have to go through 50 classes, you can just read 10, because it’s all you’ve got. When a new developer joins the team he has nice onboarding if you can tell him: "hey, start with this small piece of code, everything you need to know to implement this new feature is encapsulated here".
-</p>
-
-
-
-
-<p>
-  Use <strong>new</strong> languages and frameworks<br/>
-  We, developers, want to try and learn new languages, libraries, frameworks and technologies. If you make a small application with a shiny new tool and fail – the consequences are less severe, because you can quickly rewrite this small application. If you are going to make one big application, you will think twice before introducing a new tool. So, in some way, smaller applications minimize the risk.
-</p>
-
-
-
-
-<h3>
-  Solution1 - One database, multiple apps
-</h3>
-
-
-
-
-<p>
-  This is the very first idea which may come to your mind – just point multiple applications to the one shared database. Been there, done that, won’t do that again! Data is associated with validation logic. Either you duplicate this logic in every app or you extract it to Rails engine gem. Both solutions are hard to maintain (think about running migrations…) and you still have strong coupling in your system.
-</p>
-
-
-
-
-<p>
-  One case when this approach may work – one read-write app and many read-only apps, but I haven’t tried it.
-</p>
-
-
-
-
-<h3>
-  Solution2 - Expose REST API
-</h3>
-
-
-
-
-<p>
-  As Rails devs we are pretty familiar with REST, so we can expose REST API in one of our apps and call this API in the other. This approach has many solid use cases so here I’m just listing some weak points to take into consideration:
-</p>
-
-
-
-
-<p>
-  - Usually requests in Ruby are blocking – calling app has to wait for the response even if it’s not interested in it.<br/>
-  - Requires authentication – we have to somehow ensure that our internal API is not used… well, externally.<br/>
-  - Everything happens in server process – if you are calling your internal API you may end up using the same server process which is used for handling requests of your “real users”. You would like to give your “real users” priority.<br/>
-  - Calling app has knowledge about receiving app – you have to know which endpoints should be called and which parameters be passed. This introduces coupling.<br/>
-</p>
-
-
-
-
-<h3>
-  Solution3 - Message queue
-</h3>
-
-
-
-
-<p>
-  Message queue is a really nice abstraction. Publisher just leaves messages at one end of the "pipe", consumer reads messages from the other end of the "pipe". It is asynchronous, because publisher does not wait for his message to be processed. Moreover, it decouples publisher from consumer, because publisher does not care what happens with his message and who will read it.
-</p>
-
-
-
-
-<p>
-  This architecture is also resistant to outages, at least when we assume that the queue service rarely breaks. If the consumer is not processing messages, nothing prevents publisher from adding more of them to the queue. When consumer starts to function again, it will process messages from the buffer (if they didn’t take all of your memory).
-</p>
-
-
-
-
-<h3>
-  When it shines?
-</h3>
-
-
-
-
-<p>
-  Message queue is really useful if we have some processing which happens out of the main business flow and the main business flow does not have to wait for the results of this processing. The most common example is custom event tracking – own analytics module. We just publish an event and continue execution without slowing anything down.
-</p>
-
-
-
-
-<h3>
-  RabbitMQ
-</h3>
-
-
-
-
-<p>
-  RabbitMQ is a popular choice for message queue service, especially in Rails world. Honestly, I haven’t tried different implementations, because RabbitMQ really has everything I need.
-</p>
-
-
-
-
-<p>
-  There are Ruby gems for communicating with RabbitMQ and it’s also easy to install and configure.
-</p>
-
-
-
-
-<p>
-  <img src="http://geekhmer.github.io/images/rabbitmq_concepts.png" width="400" alt="Use Message Queue in Rails" />
-</p>
-
-
-
-
-<p>
-  In this diagram there are presented some concepts introduced by RabbitMQ. Publisher leaves messages in the exchange. Then they are routed from the exchange to multiple queues. There are many routing algorithms available – <a href="https://www.rabbitmq.com/tutorials/amqp-concepts.html#exchanges" target="_blank">https://www.rabbitmq.com/tutorials/amqp-concepts.html#exchanges</a>
-</p>
-
-
-
-
-<p>
-  Workers grab messages from queue. If there are multiple workers connected to one queue, they will be load balanced and the message will be delivered only to one of them.
-</p>
-
-
-
-
-<h3>
-  Easy case
-</h3>
-
-
-
-
-<p>
-  If you feel overwhelmed – don’t worry. Here is what you should start with:
-</p>
-
-
-
-
-<p>
-  <img src="http://geekhmer.github.io/images/rabbitmq_easy_case.png" width="400" alt="Use Message Queue in Rails" />
-</p>
-
-
-
-
-<h3>
-  Publishing
-</h3>
-
-
-
-
-<p>
-  Now it’s time for some code. It’s really simple, because integration with RabbitMQ is simple. We will use two gems – <code>bunny</code> and <code>sneakers</code>.
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;Gemfile&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">bunny</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;an initializer&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">connection</span> <span class="o">=</span> <span class="no">Bunny</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">host</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">localhost</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;)</span>
-</span><span class='line'><span class="n">connection</span><span class="o">.</span><span class="n">start</span>
-</span><span class='line'><span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">create_channel</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;a service&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="k">class</span> <span class="nc">RabbitPublisher</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  def initialize(channel)&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="nb">self</span><span class="o">.</span><span class="n">channel</span> <span class="o">=</span> <span class="n">channel</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  def publish(exchange_name, message)&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">exchange</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="n">fanout</span><span class="p">(</span><span class="n">exchange_name</span><span class="p">,</span> <span class="ss">durable</span><span class="p">:</span> <span class="kp">true</span><span class="p">)</span>
-</span><span class='line'><span class="n">exchange</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">to_json</span><span class="p">)</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  private</span>
-</span><span class='line'><span class="sr">  attr_accessor :channel</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<h3>
-  Receiving
-</h3>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;Gemfile&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">sneakers</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;an initializer&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="no">Sneakers</span><span class="o">.</span><span class="n">configure</span>  <span class="ss">daemonize</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;                amqp: &quot;amqp:/</span><span class="o">/</span><span class="n">localhost</span><span class="s2">&quot;,</span>
-</span><span class='line'><span class="s2">                log: &quot;</span><span class="n">log</span><span class="o">/</span><span class="n">sneakers</span><span class="o">.</span><span class="n">log</span><span class="s2">&quot;,</span>
-</span><span class='line'><span class="s2">                pid_path: &quot;</span><span class="n">tmp</span><span class="o">/</span><span class="n">pids</span><span class="o">/</span><span class="n">sneakers</span><span class="o">.</span><span class="n">pid</span><span class="s2">&quot;,</span>
-</span><span class='line'><span class="s2">                threads: 1,</span>
-</span><span class='line'><span class="s2">                workers: 1</span>
-</span><span class='line'><span class="s2">&lt;/code&gt;&lt;/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;h1&gt;app/workers/events_worker.rb&lt;/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;p&gt;class EventsWorker</span>
-</span><span class='line'><span class="s2">  include Sneakers::Worker</span>
-</span><span class='line'><span class="s2">  from_queue &amp;ldquo;events&amp;rdquo;, env: nil&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;p&gt;  def work(raw_event)&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;pre&gt;&lt;code&gt;event_params = JSON.parse(raw_event)</span>
-</span><span class='line'><span class="s2">SomeWiseService.build.call(event_params)</span>
-</span><span class='line'><span class="s2">ack!</span>
-</span><span class='line'><span class="s2">&lt;/code&gt;&lt;/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&lt;p&gt;  end</span>
-</span><span class='line'><span class="s2">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  For details refer to documentation of <a href="https://github.com/ruby-amqp/bunny" target="_blank">bunny</a> and <a href="https://github.com/jondot/sneakers" target="_blank">sneakers</a>.
-</p>
-
-
-
-
-<p>
-  If you enjoyed this article you can consider ping me for more details.
 </p>
 
 
