@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby on Rails | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby-on-rails/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-09-02T20:41:37+07:00</updated>
+  <updated>2015-10-26T23:03:26+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,165 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[10 Tips to Speed Up Rails on the Front]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/10/26/10-tips-to-speed-up-rails-on-the-front/"/>
+    <updated>2015-10-26T22:12:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/10/26/10-tips-to-speed-up-rails-on-the-front</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/rails_artwork.jpg" alt="10 Tips to Speed Up Rails on the Front" />
+</p>
+
+
+
+
+<p>
+  Is your Rails website performing poorly? Are clients and users complaining about 5-10 second pageloads, timeouts on mobile devices, or images that take forever to display? In some cases the solution lies on the backend — caching requests, speeding up DB queries, etc — but often, there are front-end optimizations you can look at first, that could have a huge effect on how fast a site feels. 
+</p>
+
+
+
+
+<p>
+  <h3>Evaluating front-end Performance</h3>
+  Check out <a href="http://www.webpagetest.org/" target="_blank">www.webpagetest.org</a>. For a quick glance at your site, look at the grades in the top right for immediate problems, and also check the two "Speed Index" measurements for first and repeat views. Since webpagetest saves all your tests, you can re-run after making some changes to easily see what's improved.
+</p>
+
+
+
+
+<p>
+  <h3>Avoiding Premature Optimization</h3>
+  Performance optimization takes time and resources, both of which are often in short supply. It’s hard to find the point where optimizations start to cost more than they save, and every site and team have their own unique challenges. I’ve ordered the notes in this post in order of payoff: if you want to start optimizing but don’t know where to begin, the first few ideas on this list will probably give you the biggest bang for you buck.
+</p>
+
+
+
+
+<p>
+  <h3>GZIP</h3>
+  The biggest, easiest performance you can implement is gzipping HTML/JSON/JS/CSS/font file responses. It can drastically reduce the size of transferred files, but it’s easy to forget and isn’t in most default configs.<br/>
+  - <a href="https://robots.thoughtbot.com/content-compression-with-rack-deflater" target="_blank">Using Rack:Deflater</a><br/>
+  - <a href="https://richonrails.com/articles/enabling-compression-for-nginx" target="_blank">Using nginx config</a><br/>
+  - <a href="http://www.phpied.com/gzip-your-font-face-files/" target="_blank">Gzipping font files</a>
+</p>
+
+
+
+
+<p>
+  <h3>keep-alive</h3>
+  <a href="https://en.wikipedia.org/wiki/HTTP_persistent_connection" target="_blank"><a> is another easy win that speeds up asset delivery by reusing the existing connection between client and server. <a href="http://www.feedthebot.com/pagespeed/keep-alive.html" target="_blank">Turning it</a> on should be a no-brainer.
+</p>
+
+
+
+
+<p>
+  <h3>Optimize user-uploaded Images</h3>
+  You generally want to convert all uploaded images to JPGs, strip metadata, and optimize them as much as you can without heavy quality loss. Without this step, an admin or user can easily tank the pagesize by uploading a 24-bit PNG or similarly uncompressed image. I recommend <a href="https://github.com/markevans/dragonfly" target="_blank">Dragonfly</a> for on-the-fly image optimization — it lets front-end developers and designers fiddle with image details without needing to go back and update all your existing images on production after the change.
+</p>
+
+
+
+
+<p>
+  <h3>Caching and CDNs</h3>
+  <strong>Cache expiration</strong><br/>
+  Set all assets (JS, CSS, images, fonts) to expire in a year, using either far-future expires or max-age Cache-Control headers. There are a lot of simple instructions available for setting this on <a href="https://viget.com/extend/http:/http:/guides.rubyonrails.org/asset_pipeline.html#far-future-expires-header" target="_blank">the asset pipeline</a> and for <a href="http://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Expiration.html" target="_blank">CDN assets</a>.
+</p>
+
+
+
+
+<p>
+  <strong>Fingerprinting</strong><br/>
+  If you set far-future caching, you need unique, fingerprinted filenames. The asset pipeline’s precompile command will already handle this, but in most cases it won’t happen automatically for user-uploaded assets. For example, if a user edits their avatar image locally and re-uploads it to the server with the same name, and you’re serving it with far-future expires headers, you’ll have a problem. If you’re uploading files with something like <a href="https://github.com/carrierwaveuploader/carrierwave/issues/182#issuecomment-601021" target="_blank">Carrierwave</a> or <a href="https://github.com/thoughtbot/paperclip#md5-checksum--fingerprint" target="_blank">Paperclip</a>, make sure you’re taking this step.
+</p>
+
+
+
+
+<p>
+  <strong>CDN</strong><br/>
+  Migrating user-uploaded images and Rails assets to a CDN can improve download time by moving asset servers “closer” to the user. Both caching and fingerprinting rules still apply to CDNs.
+</p>
+
+
+
+
+<p>
+  <h3>SPDY</h3>
+  SPDY is a networking protocol that can speed up page performance considerably, especially on pages with a lot of assets (<a href="http://www.httpvshttps.com/" target="_blank">example</a>). It’s available in the <a href="https://viget.com/extend/http:/http:/caniuse.com/#feat=spdy" target="_blank">majority of browsers</a> and ready for production use. It requires that you set up SSL, which is admittedly a hassle, but <a href="https://bugsnag.com/blog/spdy-on-rails" target="_blank">it isn’t much work beyond that</a>.
+</p>
+
+
+
+
+<p>
+  <h3>Inlining assets</h3>
+  (Note: If you're using SPDY, it's recommended that you DON'T inline your assets — <a href="http://dev.chromium.org/spdy/spdy-best-practices" target="_blank">see SPDY best practices</a>. <a href="http://viget.com/extend/rails-front-end-performance#comment-1775457785" target="_blank">Thanks Robert Fletcher!</a>)
+</p>
+
+
+
+
+<p>
+  <strong>JS</strong><br/>
+  As a general rule, loading JS in the <head> is a bad idea — <a href="https://developer.yahoo.com/blogs/ydn/high-performance-sites-rule-6-move-scripts-bottom-7200.html" target="_blank">you want to move it to the bottom of the body<a>. However, in some cases moving it isn’t possible. If a design relies on Modernizr to add classes to the body as early as possible to create a consistent visual experience, Modernizr <a href="https://github.com/Modernizr/Modernizr/issues/878#issuecomment-41448059" target="_blank">needs to remain in the head</a>. In this case, try inlining the JS in a script tag instead of creating an extra, blocking request. This technique trades a faster initial pageload for slower subsequent pageloads (since subsequent loads will no longer load the file from browser cache). In a lot of cases the other pageloads are just barely slower, and it’s a good tradeoff.
+</p>
+
+
+
+
+<p>
+  <strong>CSS</strong><br/>
+  As a site grows, it becomes unreasonable to bundle all styles into a single application.css file. Users can end up viewing pages that load 100% of a site’s styles but only use 5-10%. In cases like this, you can break up page-specific styles into individual files and load them with <a href="https://gist.github.com/averyvery/45cede57d335fe0b6b55" target="_blank">a scheme that uses the controller/action to find CSS files</a>.
+</p>
+
+
+
+
+<p>
+  Taking it further, there’s a good chance that if your view-specific CSS is small and users aren’t visiting many instances of the same view, making them request a second stylesheet isn’t necessary — just like with JS, you can inline them onto the page. <a href="https://gist.github.com/averyvery/6e4576023b395de1aaf5" target="_blank">Check out this gist for the setup I've used to inline CSS and JS assets in the past</a>.
+</p>
+
+
+
+
+<p>
+  <strong>Images</strong><br/>
+  If you have pretty small images or single unique images on a view, it could be worthwhile to inline them as base64 strings instead of sending them as separate requests, using <a href="http://ruby-doc.org/stdlib-2.2.0/libdoc/base64/rdoc/Base64.html#strict_encode64-method" target="_blank">Ruby’s Base64 module</a>. (Warning: in IE8, your base64-encoded images need to be 32kb or smaller, or they simply won’t display.)
+</p>
+
+
+
+
+<p>
+  <h3>jQuery and UJS</h3>
+  Rails ships with jQuery 1.9.x and jquery-ujs built into application.js, but jQuery is a pretty big library, and presents some optimization opportunities:<br/>
+  - <b>Switch to jQuery 2.x</b> — it’s smaller, but means dropping support for IE8. You could also use browser conditionals to load 1.9 for IE8 and below and 2.x for above, but you still want to combine jQuery into a single file with your other scripts, so you might end up with something like application-oldjquery.js and application.js.<br/>
+  - <b>Cut UJS, or cut them both</b> — if you’re not using any UJS features, you can remove it, which might make jQuery an unnecessary dependency.
+</p>
+
+
+
+
+<p>
+  At the time of this writing there’s no jQuery-less alternative for UJS, but it sounds like <a href="http://www.reddit.com/r/rails/comments/2fzk5z/what_does_rails_use_jquery_for_it_is_possible_to/ckeduvo" target="_blank">the team has considered the idea</a>.
+</p>
+
+
+
+
+<p>
+  <h3>Pagespeed</h3>
+  <a href="https://developers.google.com/speed/pagespeed/module" target="_blank">Google’s pagespeed module</a> gives you a number of tools that can speed up front-end performance by making minor tweaks (trimming the domain out of local URLs, inserting DNS prefetch tags, collapsing whitespace) or major ones (lazy-loading images). I encourage you to <a href="https://viget.com/extend/http:/https:/developers.google.com/speed/pagespeed/module/download" target="_blank">install it</a> and investigate <a href="https://developers.google.com/speed/pagespeed/module/filters" target="_blank">some of the filters</a>. Each filter has documented "Risks" that are worth reading before you implement — some of them, like <a href="https://developers.google.com/speed/pagespeed/module/filter-quote-remove" target="_blank">remove quotes</a> are low-risk filters that you could probably implement today with no downside.
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Using reCAPTCHA in Ruby on Rails Application]]></title>
@@ -1422,404 +1581,6 @@
 
 <p>
   So far so good, That's it!!! for this introduction to AngularJS and Rails. See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Mark Methods Private When You Don’t Test Them]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/06/25/mark-methods-private-when-you-dont-test-them/"/>
-    <updated>2015-06-25T20:58:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/06/25/mark-methods-private-when-you-dont-test-them</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="Mark Methods Private When You Don’t Test Them" />
-</p>
-
-
-
-
-<p>
-  In Ruby and many other languages, you write private methods to implement internal logic you don’t want to expose. You want the freedom to rename, repurpose or even delete them without worrying about impacting anything else. The <code>private</code> keyword signals other developers: Don’t rely on this; don’t call it; it might change. This is especially important when writing framework or library code that many other developers will use.
-</p>
-
-
-
-
-<p>
-  But which methods should you make private? Sometimes this is obvious; sometimes it isn't. A good rule of thumb to use is: If you’re not testing a method, it should be private.
-</p>
-
-
-
-
-<p>
-  But wait a minute! Aren't we supposed to test everything? Isn't 100% code coverage the every Ruby developer seeks? Let me clarify. You should mark methods private when you test them indirectly by calling the other, public methods in the same class. Use the <code>private</code> keyword to help organize your code, to remind yourself what you still need to test, and what you don't.
-</p>
-
-
-
-
-<p>
-  <strong>Three Paintings</strong><br/>
-  A simple example will make this clear. Suppose I have a class that describes a painting:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Painting</span> <span class="o">=</span> <span class="no">Struct</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span> <span class="ss">:year</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Now I can create a list of three paintings in a Minitest::Spec file like this:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">let</span><span class="p">(</span><span class="ss">:one</span><span class="p">)</span> <span class="p">{</span> <span class="no">Painting</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Spanish</span> <span class="no">Couple</span> <span class="no">In</span> <span class="no">Front</span> <span class="no">Of</span> <span class="no">Inn</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="mi">1900</span><span class="p">)</span> <span class="p">}</span>
-</span><span class='line'><span class="n">let</span><span class="p">(</span><span class="ss">:two</span><span class="p">)</span> <span class="p">{</span> <span class="no">Painting</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Guernica</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="mi">1937</span><span class="p">)</span> <span class="p">}</span>
-</span><span class='line'><span class="n">let</span><span class="p">(</span><span class="ss">:three</span><span class="p">)</span> <span class="p">{</span> <span class="no">Painting</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Petite</span> <span class="no">Fleurs</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="mi">1958</span><span class="p">)</span> <span class="p">}</span>
-</span><span class='line'><span class="n">let</span><span class="p">(</span><span class="ss">:paintings</span><span class="p">)</span> <span class="p">{</span> <span class="o">[</span><span class="n">one</span><span class="p">,</span> <span class="n">two</span><span class="p">,</span> <span class="n">three</span><span class="o">]</span> <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Suppose my first requirement is to return the first painting from the list. Simple enough:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">list</span><span class="o">.</span><span class="n">first</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">should</span> <span class="k">return</span> <span class="n">the</span> <span class="n">first</span> <span class="n">element</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">first</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">must_equal</span> <span class="n">one</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  I just call Array#first and I’m done. Returning the rest of the list is slightly more interesting:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">rest</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">_</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span> <span class="o">=</span> <span class="n">list</span>
-</span><span class='line'>  <span class="n">rest</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">returns</span> <span class="n">the</span> <span class="n">rest</span> <span class="n">of</span> <span class="n">the</span> <span class="n">elements</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">rest</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">must_equal</span> <span class="o">[</span><span class="n">two</span><span class="p">,</span> <span class="n">three</span><span class="o">]</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Rest always returns an array even if the input list was empty or had only one element. So far, so good. I’ve written two methods and two tests:
-</p>
-
-
-
-
-<p>
-  <img src="http://geekhmer.github.io/images/two_tests.png" width="400" alt="Mark Methods Private When You Don’t Test Them" />
-</p>
-
-
-
-
-<p>
-  <strong>A New Requirement</strong><br/>
-  Now suppose my business requirement changes slightly and I instead need to return the first painting sorted alphabetically by name. Once again, it’s not hard to do:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">list</span><span class="o">.</span><span class="n">sort</span> <span class="k">do</span> <span class="o">|</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">|&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;p1.name &amp;lt;=&amp;gt; p2.name</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end.first</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">should</span> <span class="k">return</span> <span class="n">the</span> <span class="n">first</span> <span class="n">element</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">first</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">must_equal</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Guernica</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  And I need rest to use the same sort order, so I repeat the call to sort:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">rest</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">_</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span> <span class="o">=</span> <span class="n">list</span><span class="o">.</span><span class="n">sort</span> <span class="k">do</span> <span class="o">|</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">|&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;p1.name &amp;lt;=&amp;gt; p2.name</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span><span class='line'><span class="sr">  rest</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">returns</span> <span class="n">the</span> <span class="n">rest</span> <span class="n">of</span> <span class="n">the</span> <span class="n">elements</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">rest</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="ss">:name</span><span class="p">)</span><span class="o">.</span><span class="n">must_equal</span> <span class="o">[&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;&quot;Petite Fleurs&quot;,</span>
-</span><span class='line'><span class="sr">&quot;Spanish Couple In Front Of Inn&quot;</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  ]</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  I’ve implemented new behavior, but still have two methods and two tests:
-</p>
-
-
-
-
-<p>
-  <img src="http://geekhmer.github.io/images/two_tests.png" width="400" alt="Mark Methods Private When You Don’t Test Them" />
-</p>
-
-
-
-
-<p>
-  <strong>Extracting a Method</strong><br/>
-  Because both of my methods are covered by tests, I’m free to refactor them. I decide to extract a new method, sorted_by_name:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">sorted_by_name</span><span class="p">(</span><span class="n">list</span><span class="p">)</span><span class="o">.</span><span class="n">first</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;def rest(list)</span>
-</span><span class='line'><span class="sr">  _, *rest = sorted_by_name(list)</span>
-</span><span class='line'><span class="sr">  rest</span>
-</span><span class='line'><span class="sr">end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="k">def</span> <span class="nf">sorted_by_name</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">list</span><span class="o">.</span><span class="n">sort</span> <span class="k">do</span> <span class="o">|</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">|&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;p1.name &amp;lt;=&amp;gt; p2.name</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">returns</span> <span class="n">the</span> <span class="n">element</span> <span class="n">with</span> <span class="n">the</span> <span class="n">first</span> <span class="nb">name</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">first</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">must_equal</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Guernica</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;it &amp;ldquo;returns the rest after the first name&amp;rdquo; do</span>
-</span><span class='line'><span class="sr">  rest(paintings).map(&amp;amp;:name).must_equal [&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="s2">&quot;Petite Fleurs&quot;</span><span class="p">,</span>
-</span><span class='line'><span class="s2">&quot;Spanish Couple In Front Of Inn&quot;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="o">]</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Here I’ve simply moved the call to sort into a utility method called sorted_by_name. Now first and rest both call sorted_by_name, making the code a bit clearer and DRY-er. But now I have three methods and only two tests:
-</p>
-
-
-
-
-<p>
-  <img src="http://geekhmer.github.io/images/two_tests_three_methods.png" width="400" alt="Mark Methods Private When You Don’t Test Them" />
-</p>
-
-
-
-
-<p>
-  <strong>Mark Methods Private When You Don’t Test Them</strong><br/>
-  Notice I didn’t bother writing a test for sorted_by_name. I know it works because my other tests still pass. The existing tests are sufficient; I am testing sorted_by_name indirectly. Because I extracted sorted_by_name from first and rest, because I refactored my code without adding any new behavior, no new test were required.
-</p>
-
-
-
-
-<p>
-  In this scenario, take the time to mark the new, untested method as private:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">sorted_by_name</span><span class="p">(</span><span class="n">list</span><span class="p">)</span><span class="o">.</span><span class="n">first</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;def rest(list)</span>
-</span><span class='line'><span class="sr">  _, *rest = sorted_by_name(list)</span>
-</span><span class='line'><span class="sr">  rest</span>
-</span><span class='line'><span class="sr">end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="kp">private</span>
-</span><span class='line'><span class="k">def</span> <span class="nf">sorted_by_name</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">list</span><span class="o">.</span><span class="n">sort</span> <span class="k">do</span> <span class="o">|</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">|&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;p1.name &amp;lt;=&amp;gt; p2.name</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">returns</span> <span class="n">the</span> <span class="n">element</span> <span class="n">with</span> <span class="n">the</span> <span class="n">first</span> <span class="nb">name</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">first</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">must_equal</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Guernica</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;it &amp;ldquo;returns the rest after the first name&amp;rdquo; do</span>
-</span><span class='line'><span class="sr">  rest(paintings).map(&amp;amp;:name).must_equal [&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="s2">&quot;Petite Fleurs&quot;</span><span class="p">,</span>
-</span><span class='line'><span class="s2">&quot;Spanish Couple In Front Of Inn&quot;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="o">]</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  The private keyword here reminds me I’ve already tested sorted_by_name, that I don’t need to write new tests for it. Now private is helping me organize my code; it’s helping me remember which methods I don’t need to test… and which methods are missing important tests.
-</p>
-
-
-
-
-<p>
-  <img src="http://geekhmer.github.io/images/two_tests_three_methods_private.png" width="400" alt="Mark Methods Private When You Don’t Test Them" />
-</p>
-
-
-
-
-<p>
-  f my tests don’t need to know about sorted_by_name, then certainly other developers don’t. It should be private. Marking it private reminds me that it is being tested indirectly, that I didn’t just forget to write a test for it. Marking it private tells other developers about what I’ve learned from my own test suite.
-</p>
-
-
-
-
-<p>
-  So far so good, That's it!!! See ya!!! :)
 </p>
 
 ]]></content>
