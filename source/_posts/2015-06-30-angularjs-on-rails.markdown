@@ -270,7 +270,9 @@ visitorCenter.controller("visitorsController", function($scope, Visitor) {
   ow that we've written the JavaScript application, we need to create our view to tie everything together. Open up the index view for your <code>Visitors</code> controller and modify it so that it looks like the code listed below:
 </p>
 
-{% codeblock index.html.erb lang:ruby %}
+
+{% raw %}
+```
 <div class="container" ng-app="VisitorCenter">
   <h1>Visitors</h1>
 
@@ -326,7 +328,8 @@ visitorCenter.controller("visitorsController", function($scope, Visitor) {
     </table>
   </div>
 </div>
-{% endcodeblock %}
+```
+{% endraw %}
 
 <p>
   Let's break this down a bit:

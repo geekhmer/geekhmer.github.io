@@ -121,7 +121,7 @@ function isHidden() {
 function getVisibilityChangeEvent() {
   var visProp = getHiddenProperty();
 
-  if (visProp) {
+  if(visProp) {
     var eventName = visProp.replace(/[H|h]idden/,'') + 'visibilitychange';
     return eventName;
   }
