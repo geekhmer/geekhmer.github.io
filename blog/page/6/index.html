@@ -79,6 +79,210 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/04/20/ruby-on-rails-build-a-simple-rake-task/">Ruby on Rails Build a Simple Rake Task</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-20T10:46:00+07:00" pubdate data-updated="true">Apr 20<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/ruby_on_rails.png" width="400" alt="Ruby on Rails Build a Simple Rake Task" />
+</p>
+
+
+
+
+<p>
+  There are many tasks that need to be performed outside of your website that are related to your web application. An example would be cleaning up temporary files. You wouldn&#8217;t want to have this code running in a web page. Fortunately rails includes a mechanism for doing this. Rake tasks make it easy to automate various aspects of your application.
+</p>
+
+
+
+
+<p>
+  First, we need to create a couple models for our sample. In this sample we will have 2 models. Our first model, Product, will store product information. Our second model, Review, will be a review of the product. Run the commands below to generate these 2 models:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Product</span> <span class="nb">name</span> <span class="n">average_rating</span><span class="ss">:float</span> <span class="ss">price</span><span class="p">:</span><span class="n">decimal</span><span class="p">{</span><span class="mi">12</span><span class="p">,</span><span class="mi">2</span><span class="p">}</span> <span class="ss">active</span><span class="p">:</span><span class="n">boolean</span>
+</span><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Review</span> <span class="ss">product</span><span class="p">:</span><span class="n">references</span> <span class="n">user</span> <span class="ss">rating</span><span class="p">:</span><span class="n">integer</span> <span class="ss">body</span><span class="p">:</span><span class="n">text</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Next, we need some seed data. Open up your seeds.rb file and add the following code:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>db/seeds.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Product</span><span class="o">.</span><span class="n">delete_all</span>
+</span><span class='line'><span class="no">Review</span><span class="o">.</span><span class="n">delete_all</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Product</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="o">[</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;Die Hard - Blu-Ray&quot;</span><span class="p">,</span> <span class="ss">price</span><span class="p">:</span> <span class="mi">9</span><span class="o">.</span><span class="mi">95</span><span class="p">,</span> <span class="ss">active</span><span class="p">:</span> <span class="kp">true</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;Iron Man 3 - Blu-Ray&quot;</span><span class="p">,</span> <span class="ss">price</span><span class="p">:</span> <span class="mi">24</span><span class="o">.</span><span class="mi">95</span><span class="p">,</span> <span class="ss">active</span><span class="p">:</span> <span class="kp">true</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;Star Trek - Into Darkness - Blu-Ray&quot;</span><span class="p">,</span> <span class="ss">price</span><span class="p">:</span> <span class="mi">19</span><span class="o">.</span><span class="mi">95</span><span class="p">,</span> <span class="ss">active</span><span class="p">:</span> <span class="kp">true</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;The Little Mermaid - Blu-Ray&quot;</span><span class="p">,</span> <span class="ss">price</span><span class="p">:</span> <span class="mi">29</span><span class="o">.</span><span class="mi">95</span><span class="p">,</span> <span class="ss">active</span><span class="p">:</span> <span class="kp">true</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;This is the End - Blu-Ray&quot;</span><span class="p">,</span> <span class="ss">price</span><span class="p">:</span> <span class="mi">17</span><span class="o">.</span><span class="mi">95</span><span class="p">,</span> <span class="ss">active</span><span class="p">:</span> <span class="kp">true</span><span class="p">}</span>
+</span><span class='line'><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Review</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="o">[</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Dan&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;Epic Action Flick&quot;</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Will&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;The Stunts were AMAZING!&quot;</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;James&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;I didn&#39;t like it as much as the first one.&quot;</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Lisa&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;Epic!&quot;</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Linda&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;A classic revived!  Well worth watching again.&quot;</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Kathy&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;This movie is hilarious!&quot;</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Jim&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;Really cheesy.&quot;</span><span class="p">}</span>
+</span><span class='line'><span class="o">]</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then run rake db:seed
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">seed</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now, lets open up the Product model so that we can add an association to reviews. Modify the Product model so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/models/product.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Product</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:reviews</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then create a file called calculate_averages.rake in the lib/tasks folder and add the following code:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>lib/tasks/calculate_averages.rake </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;rake&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">task</span> <span class="ss">:calculate_averages</span> <span class="o">=&gt;</span> <span class="ss">:environment</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">products</span> <span class="o">=</span> <span class="no">Product</span><span class="o">.</span><span class="n">all</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">products</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">product</span><span class="o">|</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;Calculating average rating for </span><span class="si">#{</span><span class="n">product</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">...&quot;</span>
+</span><span class='line'>    <span class="n">product</span><span class="o">.</span><span class="n">update_attribute</span><span class="p">(</span><span class="ss">:average_rating</span><span class="p">,</span> <span class="n">product</span><span class="o">.</span><span class="n">reviews</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="s2">&quot;rating&quot;</span><span class="p">))</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now, if we run our rake command we will see that the averages are updated in the database.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="n">calculate_averages</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/04/19/add-google-analytics-to-ruby-on-rails-application/">Add Google Analytics to Ruby on Rails Application</a></h1>
     
     
@@ -1548,255 +1752,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/04/15/respond-with-json-in-ruby-on-rails-application/">Respond With JSON in Ruby on Rails Application</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-04-15T15:06:00+07:00" pubdate data-updated="true">Apr 15<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/ruby_on_rails.png" width="400" alt="Translate Your Ruby on Rails Application" />
-</p>
-
-
-
-
-<p>
-  When building a RESTful API in Rails application, there are many different options and gems you can use to format your JSON responses. This isn&#8217;t a post about how to build an API, but rather about some of the different popular options on how to define and structure JSON.
-</p>
-
-
-
-
-<p>
-  <strong>RABL</strong><br/>
-  <a href="http://www.leighhalliday.com/responding-with-json-in-rails" target="_blank">RABL</a> is a DSL for generating both JSON and XML. In my mind it has a similar feel to Jbuilder, which I&#8217;ll discuss below. It&#8217;s works by creating a view with the extension .rabl, and defining which attributes, nodes, and relations you wish to include in the JSON response.
-</p>
-
-
-
-
-<p>
-  Here&#8217;s an example:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/views/posts/index.rabl </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">collection</span> <span class="vi">@posts</span>
-</span><span class='line'><span class="n">attributes</span> <span class="ss">:id</span><span class="p">,</span> <span class="ss">:title</span><span class="p">,</span> <span class="ss">:subject</span>
-</span><span class='line'><span class="n">child</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="p">{</span> <span class="n">attributes</span> <span class="ss">:full_name</span> <span class="p">}</span>
-</span><span class='line'><span class="n">node</span><span class="p">(</span><span class="ss">:read</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">post</span><span class="o">|</span> <span class="n">post</span><span class="o">.</span><span class="n">read_by?</span><span class="p">(</span><span class="vi">@user</span><span class="p">)</span> <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Active Model Serializer</strong><br/>
-  <a href="https://github.com/rails-api/active_model_serializers" target="_blank">Active Model Serializer</a> is a great way to build JSON responses using an object oriented approach. The objects have a very similar feel to how your ActiveModel object is set up in terms of attributes and relationships. It also allows you to choose your adapter-to decide what type of JSON structure is produced-or to build your own. Popular supported formats are JSON-API and JSON-HAL.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostSerializer</span> <span class="o">&lt;</span> <span class="ss">ActiveModel</span><span class="p">:</span><span class="ss">:Serializer</span>
-</span><span class='line'>  <span class="n">attributes</span> <span class="ss">:title</span><span class="p">,</span> <span class="ss">:body</span>
-</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:comments</span>
-</span><span class='line'>  <span class="n">url</span> <span class="ss">:post</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Jbuilder</strong><br/>
-  <a href="https://github.com/rails/jbuilder" target="_blank">jbuilder</a> provides a very similar DSL to RABL. Jbuilder is included with Rails, so it is used quite a bit. Rails Casts has a free episode which goes into greater detail about Jbuilder. It&#8217;s very easy to use and provides a lot of flexibility in defining exactly what attributes are included in and how the response is formatted and nested.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/views/message/show.json.jbuilder </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">json</span><span class="o">.</span><span class="n">content</span> <span class="n">format_content</span><span class="p">(</span><span class="vi">@message</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-</span><span class='line'><span class="n">json</span><span class="o">.</span><span class="p">(</span><span class="vi">@message</span><span class="p">,</span> <span class="ss">:created_at</span><span class="p">,</span> <span class="ss">:updated_at</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">json</span><span class="o">.</span><span class="n">author</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">json</span><span class="o">.</span><span class="n">name</span> <span class="vi">@message</span><span class="o">.</span><span class="n">creator</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">familiar</span>
-</span><span class='line'>  <span class="n">json</span><span class="o">.</span><span class="n">email_address</span> <span class="vi">@message</span><span class="o">.</span><span class="n">creator</span><span class="o">.</span><span class="n">email_address_with_name</span>
-</span><span class='line'>  <span class="n">json</span><span class="o">.</span><span class="n">url</span> <span class="n">url_for</span><span class="p">(</span><span class="vi">@message</span><span class="o">.</span><span class="n">creator</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="ss">:json</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Grape Entity</strong><br/>
-  <a href="https://github.com/intridea/grape-entity" target="_blank">Grape Entity</a> was extracted from Grape, which is a popular gem used for building RESTful APIs. Similarly to RABL and Jbuilder, it provides a DSL for defining entities which are the structure of your JSON response.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">API</span>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">Entities</span>
-</span><span class='line'>    <span class="k">class</span> <span class="nc">Status</span> <span class="o">&lt;</span> <span class="ss">Grape</span><span class="p">:</span><span class="ss">:Entity</span>
-</span><span class='line'>      <span class="n">expose</span> <span class="ss">:user_name</span>
-</span><span class='line'>      <span class="n">expose</span> <span class="ss">:text</span><span class="p">,</span> <span class="ss">documentation</span><span class="p">:</span> <span class="p">{</span> <span class="ss">type</span><span class="p">:</span> <span class="s2">&quot;String&quot;</span><span class="p">,</span> <span class="ss">desc</span><span class="p">:</span> <span class="s2">&quot;Status update text.&quot;</span> <span class="p">}</span>
-</span><span class='line'>      <span class="n">expose</span> <span class="ss">:ip</span><span class="p">,</span> <span class="k">if</span><span class="p">:</span> <span class="p">{</span> <span class="ss">type</span><span class="p">:</span> <span class="ss">:full</span> <span class="p">}</span>
-</span><span class='line'>      <span class="n">expose</span> <span class="ss">:user_type</span><span class="p">,</span> <span class="ss">:user_id</span><span class="p">,</span> <span class="k">if</span><span class="p">:</span> <span class="nb">lambda</span> <span class="p">{</span> <span class="o">|</span><span class="n">status</span><span class="p">,</span> <span class="n">options</span><span class="o">|</span> <span class="n">status</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">public?</span> <span class="p">}</span>
-</span><span class='line'>      <span class="n">expose</span> <span class="ss">:contact_info</span> <span class="k">do</span>
-</span><span class='line'>        <span class="n">expose</span> <span class="ss">:phone</span>
-</span><span class='line'>        <span class="n">expose</span> <span class="ss">:address</span><span class="p">,</span> <span class="ss">using</span><span class="p">:</span> <span class="ss">API</span><span class="p">:</span><span class="ss">:Address</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>ROAR</strong><br/>
-  <a href="https://github.com/apotonick/roar" target="_blank">ROAR</a> allows you to build presenter classes to represent your data. It comes with support for JSON, JSON-HAL, JSON-API, and XML.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;roar/json&#39;</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">module</span> <span class="nn">SongRepresenter</span>
-</span><span class='line'>  <span class="kp">include</span> <span class="ss">Roar</span><span class="p">:</span><span class="ss">:JSON</span>
-</span><span class='line'>  <span class="n">property</span> <span class="ss">:title</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>ActiveModel or Hash</strong><br/>
-  This may seem like a strange thing to point out, but for very simple cases, you can simply call the to_json method on either an ActiveModel object or a native Ruby Hash.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Using an @organization model</span>
-</span><span class='line'><span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
-</span><span class='line'>  <span class="nb">format</span><span class="o">.</span><span class="n">json</span> <span class="k">do</span>
-</span><span class='line'>    <span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="vi">@organization</span><span class="o">.</span><span class="n">to_json</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Using a plain Ruby Hash</span>
-</span><span class='line'><span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
-</span><span class='line'>  <span class="nb">format</span><span class="o">.</span><span class="n">json</span> <span class="k">do</span>
-</span><span class='line'>    <span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nb">name</span><span class="p">:</span> <span class="vi">@user</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-</span><span class='line'>      <span class="ss">email</span><span class="p">:</span> <span class="vi">@user</span><span class="o">.</span><span class="n">email</span>
-</span><span class='line'>    <span class="p">}</span><span class="o">.</span><span class="n">to_json</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/7/">&larr; Older</a>
@@ -1821,6 +1776,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/11/09/reactjs-properties/">ReactJS Properties</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/11/07/reactjs-jsx/">ReactJS JSX</a>
       </li>
     
@@ -1842,10 +1801,6 @@
     
       <li class="post">
         <a href="/blog/2015/09/02/open-sourcing-a-gem/">Open Sourcing a Gem</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/07/25/web-notifications-api/">Web Notifications API</a>
       </li>
     
   </ul>
@@ -1891,7 +1846,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/javascript/">Javascript [ 11 ]</a>
+        <a href="/blog/categories/javascript/">Javascript [ 12 ]</a>
       </li>
     
       <li>
@@ -1907,7 +1862,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/reactjs/">Reactjs [ 4 ]</a>
+        <a href="/blog/categories/reactjs/">Reactjs [ 5 ]</a>
       </li>
     
   </ul>
