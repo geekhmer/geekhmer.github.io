@@ -79,6 +79,403 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/05/08/ruby-on-rails-pagination-with-kaminari/">Ruby on Rails Pagination With Kaminari</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-05-08T14:53:00+07:00" pubdate data-updated="true">May 8<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="Ruby on Rails Pagination with Kaminari" />
+</p>
+
+
+
+
+<p>
+  The <a href="https://github.com/mislav/will_paginate" target="_blank">will_paginate</a> gem has long since been the most popular gem used when it comes to pagination. However it is not the only gem out there. <a href="https://github.com/amatsuda/kaminari" target="_blank">Kaminari</a> is another very popular pagination gem. In this article we will show you how to use it in your application.
+</p>
+
+
+
+
+<p>
+  <strong>Setup Rails Application</strong><br/>
+  To begin using the kaminari gem, we must first add it to our Gemfile. Open up your Gemfile and add in the line listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;kaminari&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now run a bundle install to install the gem.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Next, create a model called Post. The post model in this example will represent a blog post. Run the commands below to create the post model:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Post</span> <span class="n">title</span> <span class="ss">body</span><span class="p">:</span><span class="n">string</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We need some seed data. Open your <code>db/seeds.rb</code> file and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>db/seeds.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span>
+</span><span class='line'>  <span class="no">Post</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="ss">title</span><span class="p">:</span> <span class="s2">&quot;Lipsum Post </span><span class="si">#{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="sx">%{</span>
+</span><span class='line'><span class="sx">      Nullam hendrerit iaculis sodales. Curabitur varius nibh arcu, id molestie nibh fermentum vitae. Cras quis semper dui. Cras porttitor urna sit amet risus vehicula tempor. Maecenas quis tempor ligula. Donec et nibh eu leo volutpat placerat. Fusce vulputate elit in nisi pretium, vel fermentum mi fermentum. Mauris scelerisque, lectus non luctus ultricies, urna eros tincidunt risus, at varius sapien diam id erat.</span>
+</span><span class='line'><span class="sx">  }</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now run a rake db:seed to add the seed data:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">seed</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We need to add a controller called Posts that we will use to render the posts. Run the command below to create this controller now:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="no">Posts</span> <span class="n">index</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Let&#8217;s modify our routes file to set a site root. Open up your config/routes.rb file and modify it so that it looks like the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;posts#index&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Open up your Posts controller and modify it so that it looks like the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/controllers/posts_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>    <span class="vi">@posts</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">page</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:page</span><span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">per</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  As you can see, the first bit of our pagination code is here. The <code>page</code> method tells kaminari what page we are on. The <code>per</code> method tells kaminari how many items we wish to have per page.
+</p>
+
+
+
+
+<p>
+  Let&#8217;s open up the <code>index</code> view for our <code>Posts</code> controller and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/posts/index.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Posts</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'><span class="sr">&lt;hr /</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% @posts.each </span><span class="k">do</span> <span class="o">|</span><span class="n">post</span><span class="o">|</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;h2&gt;</span><span class="o">&lt;</span><span class="sx">%= post.title %&gt;&lt;/h2&gt;</span>
+</span><span class='line'><span class="sx">  &lt;p&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%=</span> <span class="n">post</span><span class="o">.</span><span class="n">body</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;/p&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% end %&gt;</span>
+</span><span class='line'><span class="sx">&lt;hr /&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">%= paginate @posts %&gt;</span>
+</span><span class='line'><span class="sx">&lt;%=</span> <span class="n">page_entries_info</span> <span class="vi">@posts</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The <code>paginate</code> helper is the line actually responsible for rendering the pagination links. The <code>page_entries_info</code> helper displays a line similar to Displaying posts 1 - 10 of 100 in total. This can be extremely helpful in letting the user know how many items there are in the list.
+</p>
+
+
+
+
+<p>
+  <strong>Global Configuration</strong><br/>
+  You can also specify global defaults for Kaminari. First, run the following command to generate an initializer file for Kaminari:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="ss">kaminari</span><span class="p">:</span><span class="n">config</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If you open up the <code>config/initializers/kaminari_config.rb</code> file you&#8217;ll see something similar to the following:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/initializers/kaminari_config.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Kaminari</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+</span><span class='line'>  <span class="c1"># config.default_per_page = 25</span>
+</span><span class='line'>  <span class="c1"># config.max_per_page = nil</span>
+</span><span class='line'>  <span class="c1"># config.window = 4</span>
+</span><span class='line'>  <span class="c1"># config.outer_window = 0</span>
+</span><span class='line'>  <span class="c1"># config.left = 0</span>
+</span><span class='line'>  <span class="c1"># config.right = 0</span>
+</span><span class='line'>  <span class="c1"># config.page_method_name = :page</span>
+</span><span class='line'>  <span class="c1"># config.param_name = :page</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  A description of these options can be found below:
+</p>
+
+
+<table>
+<thead>
+<tr>
+<th>Config </th>
+<th> Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>config.default_per_page </td>
+<td> Specifies the default amount of items to display per page.</td>
+</tr>
+<tr>
+<td>config.max_per_page </td>
+<td> The maximum amount of items to display per page.</td>
+</tr>
+<tr>
+<td>config.window </td>
+<td> Specifies the inner window size. The inner window is the number of items in the middle of the pagination block. e.g. « First ‹ Prev &hellip; 1 2 3 4 &hellip; Next › Last », in the previous example, 1 2 3 4 would be considered the inner window.</td>
+</tr>
+<tr>
+<td>config.outer_window </td>
+<td> Specifies how many items to display in the outer window. For example: 1 2 3 4 &hellip; 8 9 10 11, numbers visible on the outside are the outer window.</td>
+</tr>
+<tr>
+<td>config.left </td>
+<td> Specifies how many items should be displayed in the left outer window.</td>
+</tr>
+<tr>
+<td>config.right </td>
+<td> Specifies how many items should be displayed in the right outer window.</td>
+</tr>
+<tr>
+<td>config.page_method_name </td>
+<td> Changes the page method name from page to whatever you want. Can be used to avoid conflict with other gems that use page.</td>
+</tr>
+<tr>
+<td>config.param_name </td>
+<td> The default parameter to use when looking for the page number.</td>
+</tr>
+</tbody>
+</table>
+
+
+<br/>
+
+
+
+
+<p>
+  <strong>I18N</strong><br/>
+  Kaminari can be configured via I18N. The default I18N configuration file looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">en</span><span class="p">:</span>
+</span><span class='line'>  <span class="ss">views</span><span class="p">:</span>
+</span><span class='line'>    <span class="ss">pagination</span><span class="p">:</span>
+</span><span class='line'>      <span class="ss">first</span><span class="p">:</span> <span class="s2">&quot;&amp;laquo; First&quot;</span>
+</span><span class='line'>      <span class="ss">last</span><span class="p">:</span> <span class="s2">&quot;Last &amp;raquo;&quot;</span>
+</span><span class='line'>      <span class="ss">previous</span><span class="p">:</span> <span class="s2">&quot;&amp;lsaquo; Prev&quot;</span>
+</span><span class='line'>      <span class="k">next</span><span class="p">:</span> <span class="s2">&quot;Next &amp;rsaquo;&quot;</span>
+</span><span class='line'>      <span class="ss">truncate</span><span class="p">:</span> <span class="s2">&quot;&amp;hellip;&quot;</span>
+</span><span class='line'>  <span class="ss">helpers</span><span class="p">:</span>
+</span><span class='line'>    <span class="n">page_entries_info</span><span class="p">:</span>
+</span><span class='line'>      <span class="n">one_page</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">display_entries</span><span class="p">:</span>
+</span><span class='line'>          <span class="ss">zero</span><span class="p">:</span> <span class="s2">&quot;No %{entry_name} found&quot;</span>
+</span><span class='line'>          <span class="ss">one</span><span class="p">:</span> <span class="s2">&quot;Displaying &lt;b&gt;1&lt;/b&gt; %{entry_name}&quot;</span>
+</span><span class='line'>          <span class="ss">other</span><span class="p">:</span> <span class="s2">&quot;Displaying &lt;b&gt;all %{count}&lt;/b&gt; %{entry_name}&quot;</span>
+</span><span class='line'>      <span class="n">more_pages</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">display_entries</span><span class="p">:</span> <span class="s2">&quot;Displaying %{entry_name} &lt;b&gt;%{first}&amp;nbsp;-&amp;nbsp;%{last}&lt;/b&gt; of &lt;b&gt;%{total}&lt;/b&gt; in total&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  To override it, simply modify your locale files under <code>config/locales</code>.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/05/07/ruby-slash-ruby-on-rails-mistakes/">Ruby/Ruby on Rails Mistakes</a></h1>
     
     
@@ -3122,260 +3519,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/04/24/how-to-install-rails-and-nginx-with-passenger-on-ubuntu/">How to Install Rails and Nginx With Passenger on Ubuntu?</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-04-24T20:32:00+07:00" pubdate data-updated="true">Apr 24<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/ruby_on_rails.png" width="400" alt="How To Install Rails and Nginx with Passenger on Ubuntu?" />
-</p>
-
-
-
-
-<p>
-  Ruby on Rails is an open source web application framework which runs on the Ruby programming language. It allows the developers creating pages and applications that gather information from the web server, talk to or query the database, and render templates out of the box directly to the internet browsers.
-</p>
-
-
-
-
-<p>
-  As a result, Rails features a routing system that is independent of the web server. The web server is used to render the content only. The choice for that would be Nginx. Nginx is fast webserver with a strong focus on high concurrency, high performance and low memory usage.
-</p>
-
-
-
-
-<h3>
-  Install Ruby and Rails
-</h3>
-
-
-
-
-<p>
-  Before we proceed with installation, we should make sure that our system repositories are up to date:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Once we are up to date with the latest available packages, the next step is to install Ruby Version Manager. It is application that allows to manage several different ruby versions easily, we can install RVM and then load it with:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">curl</span> <span class="o">-</span><span class="n">L</span> <span class="n">get</span><span class="o">.</span><span class="n">rvm</span><span class="o">.</span><span class="n">io</span> <span class="o">|</span> <span class="n">bash</span> <span class="o">-</span><span class="n">s</span> <span class="n">stable</span>
-</span><span class='line'><span class="n">source</span> <span class="sr">/usr/</span><span class="n">local</span><span class="o">/</span><span class="n">rvm</span><span class="o">/</span><span class="n">scripts</span><span class="o">/</span><span class="n">rvm</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  We must make sure that we have all dependencies from RVM. To make sure that we have all required dependencies, we execute the following command:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rvm</span> <span class="n">requirements</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  It will make sure that we are up to date and install the missing requirements (if any). Once we have RVM installed and configured, we can proceed to install and configure Ruby.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rvm</span> <span class="n">install</span> <span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">1</span>
-</span><span class='line'><span class="n">rvm</span> <span class="n">use</span> <span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">1</span> <span class="o">--</span><span class="n">default</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  These two commands will install Ruby and set the system to use version 2.2.1 by default. The next step is to make sure we have all components for Ruby on Rails. Ruby Gems is a package manager for the Ruby programming language that provides a standard format for distributing Ruby programs and libraries, a tool designed to easily manage the installation of gems, and a server for distributing them, we can install it with this command and then use it to install Rails:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rvm</span> <span class="n">rubygems</span> <span class="n">current</span>
-</span><span class='line'><span class="n">gem</span> <span class="n">install</span> <span class="n">rails</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  This process could take some time, but after it finish, Ruby on Rails is installed.
-</p>
-
-
-
-
-<h3>
-  Install Passenger and Nginx
-</h3>
-
-
-
-
-<p>
-  We need to make sure that we can easily deploy Ruby on rails to any web server. We will install and use Passenger for that. It will serve as interface or bridge for communication between Ruby and the web server, you can install it with the following command:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="n">install</span> <span class="n">passenger</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Once passenger is installed, the rest of the required setup is fully automated. We execute the command:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rvmsudo</span> <span class="n">passenger</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">nginx</span><span class="o">-</span><span class="n">module</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Once we do this, it checks for all dependencies automatically and install those that are missing. If some manual user action is required, Passenger will tell us, as well as give us detailed instructions how to do it.
-</p>
-
-
-
-
-<p>
-  Now we need to configure nginx to “talk” to Passenger. In order to do that, we need to open the nginx configuration file (/opt/nginx/conf/nginx.conf), using our favorite editor and add the following:
-</p>
-
-
-<p></p>
-
-<figure class='code'><figcaption><span>nginx.conf </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">server</span> <span class="p">{</span>
-</span><span class='line'>  <span class="n">listen</span> <span class="mi">80</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">server_name</span> <span class="n">example</span><span class="o">.</span><span class="n">com</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">passenger_enabled</span> <span class="n">on</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">root</span> <span class="sr">/var/</span><span class="n">www</span><span class="o">/</span><span class="n">rails_app</span><span class="o">/</span><span class="kp">public</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  In order to create our rails app, we need to install Node.js first:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">nodejs</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Once that is that, we should go to our directory (in this case it is /var/www/rails_app/public) and create the application. After all this is installed and configured, we simply need to start Nginx.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="kp">new</span> <span class="n">my_first_rails_app</span>
-</span><span class='line'><span class="n">sudo</span> <span class="n">service</span> <span class="n">nginx</span> <span class="n">start</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  We can try and access our new Ruby on Rails application using our browser. It seems that it was much easier to setup the environment and create our first Ruby on Rails project than we thought.
-</p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/6/">&larr; Older</a>
@@ -3400,6 +3543,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/11/14/reactjs-state/">ReactJS State</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/11/14/reactjs-proptypes/">ReactJS PropTypes</a>
       </li>
     
@@ -3421,10 +3568,6 @@
     
       <li class="post">
         <a href="/blog/2015/10/26/10-tips-to-speed-up-rails-on-the-front/">10 Tips to Speed Up Rails on the Front</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/09/02/open-sourcing-a-gem/">Open Sourcing a Gem</a>
       </li>
     
   </ul>
@@ -3470,7 +3613,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/javascript/">Javascript [ 12 ]</a>
+        <a href="/blog/categories/javascript/">Javascript [ 13 ]</a>
       </li>
     
       <li>
@@ -3486,7 +3629,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/reactjs/">Reactjs [ 5 ]</a>
+        <a href="/blog/categories/reactjs/">Reactjs [ 6 ]</a>
       </li>
     
   </ul>
