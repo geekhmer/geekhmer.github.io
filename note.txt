@@ -3,9 +3,11 @@ https://github.com/carlosbrando/octopress.tmbundle/blob/master/Tests/test.markdo
 bundle exec rake generate
 bundle exec rake preview
 bundle exec rake new_post["Title"]
-bundle exec rake new_post["ReactJS JSX"]
+bundle exec rake new_post["ReactJS Component Lifecycle Mounting"]
 bundle exec rake deploy
 bundle exec rake new_page["Title"]
+http://buildwithreact.com/tutorial/state
+http://arkency.com/
 ================================================================================================
 http://trigonakis.com/blog/2011/02/27/introduction-to-erlang-post-series/
 http://www.erlang.org/doc/reference_manual/data_types.html
@@ -57,3 +59,199 @@ https://www.airpair.com/ruby-on-rails/posts/ruby-on-rails-the-modular-way
 ============================================================================
 https://github.com/imathis/octopress/wiki/3rd-party-plugins
 ======================================================
+
+======================================================
+ReactJS
+======================================================
+http://ricostacruz.com/cheatsheets/react.html
+https://medium.com/react-tutorials/react-properties-ef11cd55caa0
+======================================================
+
+=======================================================================
+
+/*
+ * Components
+ */
+
+
+var ContactForm = React.createClass({
+  propTypes: {
+    value: React.PropTypes.object.isRequired,
+    onChange: React.PropTypes.func.isRequired,
+    onSubmit: React.PropTypes.func.isRequired,
+  },
+
+  onEmailInput: function(e) {
+    this.props.onChange(Object.assign({}, this.props.value, {email: e.target.value}));
+  },
+
+  onNameInput: function(e) {
+    this.props.onChange(Object.assign({}, this.props.value, {name: e.target.value}));
+  },
+
+  onSubmit: function(e) {
+    e.preventDefault();
+    this.refs.email.focus();
+    this.props.onSubmit();
+  },
+  
+  componentDidUpdate: function(prevProps) {
+    var value = this.props.value;
+    var prevValue = prevProps.value;
+    
+    if (this.isMounted && value.errors && value.errors != prevValue.errors) {
+      if (value.errors.email) {
+        this.refs.email.focus();
+      }
+      else if (value.errors.name) {
+        this.refs.name.focus();
+      }
+    }
+  },
+
+  render: function() {
+    var errors = this.props.value.errors || {};
+
+    return (
+      React.createElement('form', {onSubmit: this.onSubmit, className: 'ContactForm', noValidate: true},
+        React.createElement('input', {
+          type: 'email',
+          className: errors.email && 'ContactForm-error',
+          placeholder: 'Email',
+          onInput: this.onEmailInput,
+          value: this.props.value.email,
+          ref: 'email',
+          autoFocus: true,
+        }),
+        React.createElement('input', {
+          type: 'text',
+          className: errors.name && 'ContactForm-error',
+          placeholder: 'Name',
+          onInput: this.onNameInput,
+          value: this.props.value.name,
+          ref: 'name',
+        }),
+        React.createElement('button', {type: 'submit'}, "Add Contact")
+      )
+    );
+  },
+});
+
+
+var ContactItem = React.createClass({
+  propTypes: {
+    name: React.PropTypes.string.isRequired,
+    email: React.PropTypes.string.isRequired,
+  },
+
+  render: function() {
+    return (
+      React.createElement('li', {className: 'ContactItem'},
+        React.createElement('h2', {className: 'ContactItem-email'}, this.props.email),
+        React.createElement('span', {className: 'ContactItem-name'}, this.props.name)
+      )
+    );
+  },
+});
+
+
+var ContactView = React.createClass({
+  propTypes: {
+    contacts: React.PropTypes.array.isRequired,
+    newContact: React.PropTypes.object.isRequired,
+    onNewContactChange: React.PropTypes.func.isRequired,
+    onNewContactSubmit: React.PropTypes.func.isRequired,
+  },
+
+  render: function() {
+    var contactItemElements = this.props.contacts
+      .map(function(contact) { return React.createElement(ContactItem, contact); });
+
+    return (
+      React.createElement('div', {className: 'ContactView'},
+        React.createElement('h1', {className: 'ContactView-title'}, "Contacts"),
+        React.createElement('ul', {className: 'ContactView-list'}, contactItemElements),
+        React.createElement(ContactForm, {
+          value: this.props.newContact,
+          onChange: this.props.onNewContactChange,
+          onSubmit: this.props.onNewContactSubmit,
+        })
+      )
+    );
+  },
+});
+
+
+
+/*
+ * Constants
+ */
+
+
+var CONTACT_TEMPLATE = {name: "", email: "", description: "", errors: null};
+
+
+
+
+/*
+ * Model
+ */
+
+
+// The app's complete current state
+var state = {};
+
+// Make the given changes to the state and perform any required housekeeping
+function setState(changes) {
+  Object.assign(state, changes);
+  
+  ReactDOM.render(
+    React.createElement(ContactView, Object.assign({}, state, {
+      onNewContactChange: updateNewContact,
+      onNewContactSubmit: submitNewContact,
+    })),
+    document.getElementById('react-app')
+  );
+}
+
+// Set initial data
+setState({
+  contacts: [
+    {key: 1, name: "James K Nelson - Front End Unicorn", email: "james@jamesknelson.com"},
+    {key: 2, name: "Jim", email: "jim@example.com"},
+  ],
+  newContact: Object.assign({}, CONTACT_TEMPLATE),
+});
+
+
+
+/*
+ * Actions
+ */
+
+
+function updateNewContact(contact) {
+  setState({ newContact: contact });
+}
+
+
+function submitNewContact() {
+  var contact = Object.assign({}, state.newContact, {key: state.contacts.length + 1, errors: {}});
+
+  if (!/.+@.+\..+/.test(contact.email)) {
+    contact.errors.email = ["Please enter your new contact's email"];
+  }
+  if (!contact.name) {
+    contact.errors.name = ["Please enter your new contact's name"];
+  }
+  
+  setState(
+    Object.keys(contact.errors).length === 0
+    ? {
+        newContact: Object.assign({}, CONTACT_TEMPLATE),
+        contacts: state.contacts.slice(0).concat(contact),
+      }
+    : { newContact: contact }
+  );
+}
+======================================================================================
