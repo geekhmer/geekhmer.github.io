@@ -79,6 +79,614 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/11/21/reactjs-component-lifecycle-unmounting/">ReactJS Component Lifecycle Unmounting</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-11-21T11:53:00+07:00" pubdate data-updated="true">Nov 21<span>st</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/reactjs.png" width="600" alt="ReactJS Component Lifecycle Unmounting" />
+</p>
+
+
+
+
+<p>
+  ReactJS mounting have 1 methods:<br/>
+  - <code>componentWillUnmount()</code>: is invoked immediately before a component is unmounted and destroyed. Cleanup should go here.
+</p>
+
+
+
+
+<p>
+  Example:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">meta</span> <span class="nx">charset</span><span class="o">=</span><span class="s2">&quot;UTF-8&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;&lt;</span><span class="err">/title&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;http://fb.me/react-0.12.2.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;http://fb.me/JSXTransformer-0.12.2.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/head&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/jsx&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">Button</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
+</span><span class='line'>      <span class="nx">getInitialState</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="p">{</span>
+</span><span class='line'>          <span class="nx">val</span><span class="o">:</span> <span class="mi">0</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">handleUpdate</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span><span class="nx">val</span><span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">val</span> <span class="o">+</span> <span class="mi">1</span><span class="p">}</span>
+</span><span class='line'>        <span class="p">);</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">componentWillMount</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;mounting&#39;</span><span class="p">);</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;rendering&#39;</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">return</span> <span class="p">(</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+</span><span class='line'>            <span class="o">&lt;</span><span class="nx">button</span> <span class="nx">onClick</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">handleUpdate</span><span class="p">}</span><span class="o">&gt;</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">val</span><span class="p">}</span><span class="o">&lt;</span><span class="err">/button&gt;</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="err">/div&gt;</span>
+</span><span class='line'>        <span class="p">);</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">componentDidMount</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;mounted&#39;</span><span class="p">);</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">componentWillUnmount</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;bye!&#39;</span><span class="p">);</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">App</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
+</span><span class='line'>      <span class="nx">handleMount</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">React</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="o">&lt;</span><span class="nx">Button</span> <span class="o">/&gt;</span><span class="p">,</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;app&#39;</span><span class="p">));</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">handleUnmount</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">React</span><span class="p">.</span><span class="nx">unmountComponentAtNode</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;app&#39;</span><span class="p">));</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span><span class="p">(</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+</span><span class='line'>            <span class="o">&lt;</span><span class="nx">button</span> <span class="nx">onClick</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">handleMount</span><span class="p">}</span><span class="o">&gt;</span><span class="nx">Mount</span><span class="o">&lt;</span><span class="err">/button&gt;</span>
+</span><span class='line'>            <span class="o">&lt;</span><span class="nx">button</span> <span class="nx">onClick</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">handleUnmount</span><span class="p">}</span><span class="o">&gt;</span><span class="nx">Unmount</span><span class="o">&lt;</span><span class="err">/button&gt;</span>
+</span><span class='line'>            <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;app&quot;</span><span class="o">&gt;&lt;</span><span class="err">/div&gt;</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="err">/div&gt;</span>
+</span><span class='line'>        <span class="p">);</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">React</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="o">&lt;</span><span class="nx">App</span> <span class="o">/&gt;</span><span class="p">,</span> <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">);</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="err">/script&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/body&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  In Button component <code>getInitialState()</code> method initial <code>val: 0</code> by default.
+</p>
+
+
+
+
+<p>
+  When you click on Mount button, <code>componentWillMount()</code> method is invoked immediately before mounting occurs, and <code>render()</code> method render button into body DOM, and then <code>componentDidMount()</code> method is invoked immediately after mounting occurs.
+</p>
+
+
+
+
+<p>
+  When you click on Unmount button, <code>componentWillUnmount()</code> is invoked immediately before a component is unmounted and destroyed.
+</p>
+
+
+
+
+<p>
+  So far go good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/11/21/reactjs-component-lifecycle-updating/">ReactJS Component Lifecycle Updating</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-11-21T11:36:00+07:00" pubdate data-updated="true">Nov 21<span>st</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/reactjs.png" width="600" alt="ReactJS Component Lifecycle Updating" />
+</p>
+
+
+
+
+<p>
+  ReactJS mounting have 4 methods:<br/>
+  - <code>componentWillReceiveProps(object nextProps)</code>: is invoked when a mounted component receives new props. This method should be used to compare <code>this.props</code> and nextProps to perform state transitions using <code>this.setState()</code>.<br/>
+  - <code>shouldComponentUpdate(object nextProps, object nextState): boolean</code>: is invoked when a component decides whether any changes warrant an update to the DOM. Implement this as an optimization to compare <code>this.props</code> with <code>nextProps</code> and <code>this.state</code> with <code>nextState</code> and return <code>false</code> if React should skip updating.<br/>
+  - <code>componentWillUpdate(object nextProps, object nextState)</code>: is invoked immediately before updating occurs. You cannot call <code>this.setState()</code> here.<br/>
+  - <code>componentDidUpdate(object prevProps, object prevState)</code>: is invoked immediately after updating occurs.
+</p>
+
+
+
+
+<p>
+  Example:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">meta</span> <span class="nx">charset</span><span class="o">=</span><span class="s2">&quot;UTF-8&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;&lt;</span><span class="err">/title&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;http://fb.me/react-0.12.2.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;http://fb.me/JSXTransformer-0.12.2.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/head&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/jsx&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">Button</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
+</span><span class='line'>      <span class="nx">getInitialState</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="p">{</span><span class="nx">increasing</span><span class="o">:</span> <span class="kc">false</span><span class="p">}</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">handleUpdate</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">this</span><span class="p">.</span><span class="nx">setProps</span><span class="p">({</span><span class="nx">val</span><span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">val</span><span class="o">+</span><span class="mi">1</span><span class="p">});</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">componentWillReceiveProps</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">nextProps</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span><span class="nx">increasing</span><span class="o">:</span> <span class="nx">nextProps</span><span class="p">.</span><span class="nx">val</span> <span class="o">&gt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">val</span><span class="p">});</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">shouldComponentUpdate</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">nextProps</span><span class="p">,</span> <span class="nx">nextState</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="nx">nextProps</span><span class="p">.</span><span class="nx">val</span> <span class="o">%</span> <span class="mi">5</span> <span class="o">===</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">increasing</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">return</span><span class="p">(</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+</span><span class='line'>            <span class="o">&lt;</span><span class="nx">button</span> <span class="nx">onClick</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">handleUpdate</span><span class="p">}</span><span class="o">&gt;</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">val</span><span class="p">}</span><span class="o">&lt;</span><span class="err">/button&gt;</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="err">/div&gt;</span>
+</span><span class='line'>        <span class="p">);</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">componentDidUpdate</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">prevProps</span><span class="p">,</span> <span class="nx">prevState</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;prevProps&#39;</span><span class="p">,</span> <span class="nx">prevProps</span><span class="p">);</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">ReactDOM</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="o">&lt;</span><span class="nx">Button</span> <span class="nx">val</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">}</span> <span class="o">/&gt;</span><span class="p">,</span> <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">);</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="err">/script&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/body&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/11/20/reactjs-component-lifecycle-mounting/">ReactJS Component Lifecycle Mounting</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-11-20T16:59:00+07:00" pubdate data-updated="true">Nov 20<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/reactjs.png" width="600" alt="ReactJS Component Lifecycle Mounting" />
+</p>
+
+
+
+
+<p>
+  ReactJS mounting have 3 methods:<br/>
+  - <code>getInitialState()</code>: object is invoked before a component is mounted. Stateful components should implement this and return the initial state data.<br/>
+  - <code>componentWillMount()</code>: is invoked immediately before mounting occurs.<br/>
+  - <code>componentDidMount()</code>: is invoked immediately after mounting occurs. Initialization that requires DOM nodes should go here.
+</p>
+
+
+
+
+<p>
+  Example:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">meta</span> <span class="nx">charset</span><span class="o">=</span><span class="s2">&quot;UTF-8&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;&lt;</span><span class="err">/title&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;http://fb.me/react-0.12.2.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;http://fb.me/JSXTransformer-0.12.2.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/head&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/jsx&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">Button</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
+</span><span class='line'>      <span class="nx">getInitialState</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="p">{</span>
+</span><span class='line'>          <span class="nx">val</span><span class="o">:</span> <span class="mi">0</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">handleUpdate</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span><span class="nx">val</span><span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">val</span> <span class="o">+</span> <span class="mi">1</span><span class="p">}</span>
+</span><span class='line'>        <span class="p">);</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">componentWillMount</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;mounting&#39;</span><span class="p">);</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;rendering&#39;</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">return</span> <span class="p">(</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+</span><span class='line'>            <span class="o">&lt;</span><span class="nx">button</span> <span class="nx">onClick</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">handleUpdate</span><span class="p">}</span><span class="o">&gt;</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">val</span><span class="p">}</span><span class="o">&lt;</span><span class="err">/button&gt;</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="err">/div&gt;</span>
+</span><span class='line'>        <span class="p">);</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">componentDidMount</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;mounted&#39;</span><span class="p">);</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">App</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
+</span><span class='line'>      <span class="nx">handleMount</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">React</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="o">&lt;</span><span class="nx">Button</span> <span class="o">/&gt;</span><span class="p">,</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;app&#39;</span><span class="p">));</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span><span class="p">(</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+</span><span class='line'>            <span class="o">&lt;</span><span class="nx">button</span> <span class="nx">onClick</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">handleMount</span><span class="p">}</span><span class="o">&gt;</span><span class="nx">Mount</span><span class="o">&lt;</span><span class="err">/button&gt;</span>
+</span><span class='line'>            <span class="o">&lt;</span><span class="nx">button</span> <span class="nx">onClick</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">handleUnmount</span><span class="p">}</span><span class="o">&gt;</span><span class="nx">Unmount</span><span class="o">&lt;</span><span class="err">/button&gt;</span>
+</span><span class='line'>            <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;app&quot;</span><span class="o">&gt;&lt;</span><span class="err">/div&gt;</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="err">/div&gt;</span>
+</span><span class='line'>        <span class="p">);</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">ReactDOM</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="o">&lt;</span><span class="nx">App</span> <span class="o">/&gt;</span><span class="p">,</span> <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">);</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="err">/script&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/body&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  In Button component <code>getInitialState()</code> method initial <code>val: 0</code> by default.
+</p>
+
+
+
+
+<p>
+  When you click on Mount button, <code>componentWillMount()</code> method is invoked immediately before mounting occurs, and <code>render()</code> method render button into body DOM, and then <code>componentDidMount()</code> method is invoked immediately after mounting occurs.
+</p>
+
+
+
+
+<p>
+  So far go good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/11/20/reactjs-component-lifecycle/">ReactJS Component Lifecycle</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-11-20T16:49:00+07:00" pubdate data-updated="true">Nov 20<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/reactjs.png" width="600" alt="ReactJS Component Lifecycle" />
+</p>
+
+
+
+
+<p>
+  ReactJS components have three main parts of their lifecycle:<br/>
+  - <strong><a href="/blog/2015/11/20/reactjs-component-lifecycle-mounting/">Mounting</a></strong>: A component is being inserted into the DOM.<br/>
+  - <strong><a href="/blog/2015/11/21/reactjs-component-lifecycle-updating/">Updating</a></strong>: A component is being re-rendered to determine if the DOM should be updated.<br/>
+  - <strong><a href="/blog/2015/11/21/reactjs-component-lifecycle-unmounting/">Unmounting</a></strong>: A component is being removed from the DOM.
+</p>
+
+
+
+
+<p>
+  ReactJS provides lifecycle methods that you can specify to hook into this process. We provide <code>will</code> methods, which are called right before something happens, and <code>did</code> methods which are called right after something happens.
+</p>
+
+
+
+
+<p>
+  So far go good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/11/20/reactjs-accessing-child-properties/">ReactJS Accessing Child Properties</a></h1>
     
     
@@ -188,7 +796,7 @@
 </span><span class='line'>
 </span><span class='line'>    <span class="kd">var</span> <span class="nx">Button</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
 </span><span class='line'>      <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">return</span> <span class="p">(</span>
+</span><span class='line'>        <span class="k">return</span><span class="p">(</span>
 </span><span class='line'>          <span class="o">&lt;</span><span class="nx">button</span><span class="o">&gt;</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">children</span><span class="p">}</span><span class="o">&lt;</span><span class="err">/button&gt;</span>
 </span><span class='line'>        <span class="p">);</span>
 </span><span class='line'>      <span class="p">}</span>
@@ -1267,1096 +1875,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/11/06/reactjs-getting-start-with-hello-world/">ReactJS Getting Start With Hello World</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-11-06T23:03:00+07:00" pubdate data-updated="true">Nov 6<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/reactjs.png" width="600" alt="ReactJS Getting Start with Hello World" />
-</p>
-
-
-
-
-<p>
-  <a href="https://facebook.github.io/react/" target="_blank">React</a> is built around the concept of components. This is in contrast to frameworks like Angular and Ember, which use two-way data bindings to update the HTML of the page. In my opinion React is easier to learn than Angular and Ember – it is much smaller and plays nicely with jQuery and other frameworks. It is also extremely fast, because it uses a virtual DOM, and syncs only the changed parts with the underlying page.
-</p>
-
-
-
-
-<p>
-  <strong>How to use?</strong><br/>
-  To start using the ReactJS library, you need to download a single javascript file from <a href="https://facebook.github.io/react/docs/getting-started.html" target="_blank">Facebook Starter Kit</a> and include in header tag:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;react.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The ReactJS library can also be used directly from the <a href="https://cdnjs.com/libraries/react/" target="_blank">Facebook CDN</a> to increase the performance of the page load by including the link below in header tag:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/react/0.14.2/react.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Hello World</strong><br/>
-  Create a helloworld.html file with the following contents:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>helloworld.html </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">meta</span> <span class="nx">charset</span><span class="o">=</span><span class="s2">&quot;UTF-8&quot;</span> <span class="o">/&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;</span><span class="nx">Hello</span> <span class="nx">World</span><span class="o">&lt;</span><span class="err">/title&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;react.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="err">/head&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>      <span class="kd">var</span> <span class="nx">App</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
-</span><span class='line'>        <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>          <span class="k">return</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s2">&quot;h1&quot;</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="s2">&quot;Hello World&quot;</span><span class="p">)</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>      <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="nx">React</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="nx">React</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="nx">App</span><span class="p">),</span> <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">);</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="err">/body&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/html&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The primary type in React is the ReactElement. It has four properties: type, props, key   and ref. It has no methods and nothing on the prototype. We can create a element through <code>React.createElement</code>.
-</p>
-
-
-
-
-<p>
-  To render a new tree into the DOM, we create <code>ReactElements</code> and pass them to <code>React.render</code> along with a regular DOM Element.
-</p>
-
-
-
-
-<p>
-  In codes above we create a <code>h1 element</code> in <code>App component</code> and render it in body DOM.
-</p>
-
-
-
-
-<p>
-  <strong>Hello World - Separate File</strong><br/>
-  Create a helloworld.js file with the following contents:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>helloworld.js </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">App</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
-</span><span class='line'>  <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">return</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s2">&quot;h1&quot;</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="s2">&quot;Hello World&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">React</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="nx">React</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="nx">App</span><span class="p">),</span> <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  And update HTML file as below:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>helloworld.html </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">meta</span> <span class="nx">charset</span><span class="o">=</span><span class="s2">&quot;UTF-8&quot;</span> <span class="o">/&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;</span><span class="nx">Hello</span> <span class="nx">World</span><span class="o">&lt;</span><span class="err">/title&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;react.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="err">/head&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;helloworld.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="err">/body&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/html&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/10/30/reactjs-concepts-and-getting-start/">ReactJS Concepts and Getting Start</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-10-30T21:17:00+07:00" pubdate data-updated="true">Oct 30<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/reactjs.png" width="600" alt="ReactJS Concepts and Getting Start" />
-</p>
-
-
-
-
-<p>
-  Well, before we start building anything meaningful, its important that we cover some base concepts first, so lets getting start.
-</p>
-
-
-
-
-<p>
-  <h3>What is React?</h3>
-  <a href="https://facebook.github.io/react/" target="_blank">React</a> is a UI library developed at Facebook to facilitate the creation of interactive, stateful and reusable UI components. It is used at Facebook in production, and Instagram.com is written in React.
-</p>
-
-
-
-
-<p>
-  One of it’s unique points is that not only does it perform on the client side, but it can also be rendered server side, and they can work together inter-operably.
-</p>
-
-
-
-
-<p>
-  <h3>Concepts</h3>
-</p>
-
-
-
-
-<p>
-  React has quite a small API. This makes it fun to use, easy to learn, and simple to understand. However, being simple does not mean it&#8217;s familiar. There are a few concepts to cover before getting started. Let&#8217;s look at each in turn:
-</p>
-
-
-
-
-<p>
-  <strong>React Elements</strong><br/>
-  React elements are JavasScript objects which represent HTML elements. They don&#8217;t exist in the browser. They represent browser elements such as an h1, div or section.
-</p>
-
-
-
-
-<p>
-  <strong>JSX</strong><br/>
-  JSX is a technique for creating React elements and components.
-</p>
-
-
-
-
-<p>
-  <strong>Virtual DOM</strong><br/>
-  The Virtual DOM is a JavaScript tree of React elements and components. React render the Virtual DOM to the browser to make the user interface visible. React observes the Virtual DOM for changes and automatically mutates browser DOM to mach the Virtual DOM.
-</p>
-
-
-
-
-<p>
-  With a small understanding of these concepts we can move to using React. We will build a series of user interfaces, each adding a layer of functionality on the previous. We will build a photo stream similar to instagram.
-</p>
-
-
-
-
-<p>
-  <strong>Rendering</strong><br/>
-  The first order of business is rendering a virtual element (a React element or component). Remember, since a virtual element exists only in JavaScript memory, we must explicitly tell React to render it to the browser DOM.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">React</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="o">&lt;</span><span class="nx">img</span> <span class="nx">src</span><span class="o">=</span><span class="s1">&#39;http://geekhmer.github.io/logo.png&#39;</span> <span class="o">/&gt;</span><span class="p">,</span> <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The render function accepts two arguments, a virtual element and a real DOM node. React takes the virtual element and inserts it into the given DOM node.
-</p>
-
-
-
-
-<p>
-  <strong>Components</strong><br/>
-  Components are the heart and soul of React. They are custom React elements. They are usually extended with unique functionality and structure.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">Photo</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
-</span><span class='line'>  <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">return</span> <span class="o">&lt;</span><span class="nx">img</span> <span class="nx">src</span><span class="o">=</span><span class="s1">&#39;http://geekhmer.github.io/logo.png&#39;</span> <span class="o">/&gt;</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">React</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="o">&lt;</span><span class="nx">Photo</span> <span class="o">/&gt;</span><span class="p">,</span> <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The createClass function accepts an object which implements a render function.
-</p>
-
-
-
-
-<p>
-  The Photo component is constructed and rendered to the document body.
-</p>
-
-
-
-
-<p>
-  This component does nothing more than the previous React image element but it&#8217;s ready to be extended with custom functionality and structure.
-</p>
-
-
-
-
-<p>
-  <strong>Props</strong><br/>
-  Props can be thought of as a component&#8217;s options. They are given as arguments to a component and look exactly like HTML attributes.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">Photo</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
-</span><span class='line'>  <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">return</span> <span class="p">(</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="s1">&#39;photo&#39;</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">img</span> <span class="nx">src</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">imageURL</span><span class="p">}</span> <span class="o">/&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">span</span><span class="o">&gt;</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">caption</span><span class="p">}</span><span class="o">&lt;</span><span class="err">/span&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="err">/div&gt;</span>
-</span><span class='line'>    <span class="p">);</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">React</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="o">&lt;</span><span class="nx">Photo</span> <span class="nx">imageURL</span><span class="o">=</span><span class="s1">&#39;http://geekhmer.github.io/logo.png&#39;</span> <span class="nx">caption</span><span class="o">=</span><span class="s1">&#39;Phnom Penh, Cambodia&#39;</span> <span class="o">/&gt;</span><span class="p">,</span> <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Specs, Lifecycle & State</strong><br/>
-  The render method is the only required spec for creating a component, but there are serveral lifecycle methods & specs we can use that are mighty helpful when you actually want your component to do anything.
-</p>
-
-
-
-
-<p>
-  Lifecycle Methods:><br/>
-  - <code>componentWillMount</code> - Invoked once, on both client & server before rendering occurs.<br/>
-  - <code>componentDidMount</code> - Invoked once, only on the client, after rendering occurs.<br/>
-  - <code>shouldComponentUpdate</code> - Return value determines whether component should update.<br/>
-  - <code>componentWillUnmount</code> - invoked prior to unmounting component.
-</p>
-
-
-
-
-<p>
-  Specs:<br/>
-  - <code>getInitialState</code> - Return value is the initial value for state.<br/>
-  - <code>getDefaultProps</code> - Sets fallback props values if props are not supplied.<br/>
-  - <code>mixins</code> - An array of objects, used to extend the current component&#8217;s functionality.
-</p>
-
-
-
-
-<p>
-  State<br/>
-  The state object is internal to a component. It holds data which can change over time.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">Photo</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
-</span><span class='line'>  <span class="nx">getInitialState</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">return</span> <span class="p">{</span><span class="nx">liked</span><span class="o">:</span> <span class="kc">false</span><span class="p">};</span>
-</span><span class='line'>  <span class="p">},</span>
-</span><span class='line'>  <span class="nx">toggleLiked</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span><span class="nx">liked</span><span class="o">:</span> <span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">liked</span><span class="p">});</span>
-</span><span class='line'>  <span class="p">},</span>
-</span><span class='line'>  <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">buttonClass</span><span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">liked</span> <span class="o">?</span> <span class="s1">&#39;active&#39;</span> <span class="o">:</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">return</span> <span class="p">(</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="s1">&#39;photo&#39;</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">img</span> <span class="nx">src</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">src</span><span class="p">}</span> <span class="o">/&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="o">&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="nx">button</span> <span class="nx">onClick</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">toggleLiked</span><span class="p">}</span> <span class="nx">className</span><span class="o">=</span><span class="p">{</span><span class="nx">buttonClass</span><span class="p">}</span><span class="o">&gt;</span><span class="nx">Heart</span><span class="o">&lt;</span><span class="err">/button&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="nx">span</span><span class="o">&gt;</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">caption</span><span class="p">}</span><span class="o">&lt;</span><span class="err">/span&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="err">/div&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="err">/div&gt;</span>
-</span><span class='line'>    <span class="p">);</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">React</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="nx">Photo</span> <span class="nx">src</span><span class="o">=</span><span class="s1">&#39;http://geekhmer.github.io/logo.png&#39;</span> <span class="nx">caption</span><span class="o">=</span><span class="s1">&#39;Phnom Penh, Cambodia&#39;</span><span class="p">,</span> <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Having state in a component introduces a bit more complexity.
-</p>
-
-
-
-
-<p>
-  The component has a new function getInitialState. React calls this function when the component is initialised. The returned object is set as the component&#8217;s initial state (as the function name implies).
-</p>
-
-
-
-
-<p>
-  The component has another new function toggleLiked. This function calls setState on the component which toggles the liked value.
-</p>
-
-
-
-
-<p>
-  Within the component&#8217;s render function a variable buttonClass is assigned either &#8216;active&#8217; or nothing &#8211; depending on the liked state.
-</p>
-
-
-
-
-<p>
-  buttonClass is used as a class name on the React button element. The button also has an onclick event handler set to the toggleLiked function.
-</p>
-
-
-
-
-<p>
-Here&#8217;s what happens when the component is rendered to the browser DOM:<br/>
-- When the component&#8217;s button is clicked, toggleLiked is called.<br/>
-- The liked state is changed.<br/>
-- React re-renders the component to the virtual DOM.<br/>
-- The new virtual DOm is compared with previous virtual DOM.<br/>
-- React isolates what has changed and updates the browser DOM.
-</p>
-
-
-
-
-<p>
-  <strong>Composition</strong><br/>
-  Composition means combining smaller components to form a larger whole. For example the Photo component could be used inside a PhotoGallery component.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">Photo</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
-</span><span class='line'>  <span class="nx">toggleLiked</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span><span class="nx">liked</span><span class="o">:</span> <span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">liked</span><span class="p">});</span>
-</span><span class='line'>  <span class="p">},</span>
-</span><span class='line'>  <span class="nx">getInitialState</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">return</span> <span class="p">{</span><span class="nx">liked</span><span class="o">:</span> <span class="kc">false</span><span class="p">}</span>
-</span><span class='line'>  <span class="p">},</span>
-</span><span class='line'>  <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">buttonClass</span><span class="o">=</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">liked</span> <span class="o">?</span> <span class="s1">&#39;active&#39;</span> <span class="o">:</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">return</span> <span class="p">(</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="s1">&#39;photo&#39;</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">img</span> <span class="nx">src</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">src</span><span class="p">}</span> <span class="o">/&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="o">&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="nx">button</span> <span class="nx">onClick</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">toggleLiked</span><span class="p">}</span> <span class="nx">className</span><span class="o">=</span><span class="p">{</span><span class="nx">buttonClass</span><span class="p">}</span><span class="o">&gt;</span><span class="nx">Heart</span><span class="o">&lt;</span><span class="err">/button&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="nx">span</span><span class="o">&gt;</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">caption</span><span class="p">}</span><span class="o">&lt;</span><span class="err">/span&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="err">/div&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="err">/div&gt;</span>
-</span><span class='line'>    <span class="p">);</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">PhotoGallery</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
-</span><span class='line'>  <span class="nx">getDataFromServer</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">return</span> <span class="p">[</span>
-</span><span class='line'>      <span class="p">{</span>
-</span><span class='line'>        <span class="nx">url</span><span class="o">:</span> <span class="s1">&#39;http://geekhmer.github.io/phnom_penh.png&#39;</span><span class="p">,</span>
-</span><span class='line'>        <span class="nx">caption</span><span class="o">:</span> <span class="s1">&#39;Phnom Penh&#39;</span>
-</span><span class='line'>      <span class="p">},</span>
-</span><span class='line'>      <span class="p">{</span>
-</span><span class='line'>        <span class="nx">url</span><span class="o">:</span> <span class="s1">&#39;http://geekhmer.github.io/sr.png&#39;</span><span class="p">,</span>
-</span><span class='line'>        <span class="nx">caption</span><span class="o">:</span> <span class="s1">&#39;SR&#39;</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>    <span class="p">];</span>
-</span><span class='line'>  <span class="p">},</span>
-</span><span class='line'>  <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">data</span><span class="o">=</span><span class="k">this</span><span class="p">.</span><span class="nx">getDataFromServer</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">photos</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">photo</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="k">return</span> <span class="o">&lt;</span><span class="nx">Photo</span> <span class="nx">src</span><span class="o">=</span><span class="p">{</span><span class="nx">photo</span><span class="p">.</span><span class="nx">url</span><span class="p">}</span> <span class="nx">caption</span><span class="o">=</span><span class="p">{</span><span class="nx">photo</span><span class="p">.</span><span class="nx">caption</span><span class="p">}</span> <span class="o">/&gt;</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">return</span> <span class="p">(</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="s1">&#39;photo-gallery&#39;</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="p">{</span><span class="nx">photos</span><span class="p">}</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="err">/div&gt;</span>
-</span><span class='line'>    <span class="p">);</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">React</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="o">&lt;</span><span class="nx">PhotoGallery</span> <span class="o">/&gt;</span><span class="p">,</span> <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The Photo component is exactly the same as before.
-</p>
-
-
-
-
-<p>
-  There&#8217;s a new PhotoGallery component which generates Photo components. In this case there&#8217;s some fake server data which return an array of 2 objects, each with a url and caption.
-</p>
-
-
-
-
-<p>
-  The data is looped over and will generates 2 Photo components which are inserted into the return value of the component&#8217;s render function.
-</p>
-
-
-
-
-<p>
-  <strong>Events</strong><br/>
-  React also has a built in cross browser events system. The events are attached as properties of components and can trigger methods. Lets make our count increment below using events:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">Counter</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
-</span><span class='line'>  <span class="nx">incrementCount</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">setSate</span><span class="p">({</span><span class="nx">count</span><span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">});</span>
-</span><span class='line'>  <span class="p">},</span>
-</span><span class='line'>  <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">return</span> <span class="p">(</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="nx">div</span> <span class="kr">class</span><span class="o">=</span><span class="s2">&quot;my-component&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">h1</span><span class="o">&gt;</span><span class="nx">Count</span><span class="o">:</span> <span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">count</span><span class="p">}</span><span class="o">&lt;</span><span class="err">/h1&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">button</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;button&quot;</span> <span class="nx">onClick</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">incrementCount</span><span class="p">}</span><span class="o">&gt;</span><span class="nx">Increment</span><span class="o">&lt;</span><span class="err">/button&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="err">/div&gt;</span>
-</span><span class='line'>    <span class="p">);</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">React</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="o">&lt;</span><span class="nx">Counter</span> <span class="o">/&gt;</span><span class="p">,</span> <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-React events:<br/>
-- Clipboard Events - <code>onCopy</code> <code>onCut</code> <code>onPaste</code><br/>
-- Keyboard Events - <code>onKeyDown</code> <code>onKeyPress</code> <code>onKeyUp</code><br/>
-- Focus Events - <code>onFocus</code> <code>onBlur</code><br/>
-- Mouse Events - <code>onClick</code> <code>onDoubleClick</code> <code>onDrag</code> <code>onDragEnd</code> <code>onDragEnter</code> <code>onDragExit</code> <code>onDragLeave</code> <code>onDragOver</code> <code>onDragStart</code> <code>onDrop</code> <code>onMouseDown</code> <code>onMouseEnter</code> <code>onMouseLeave</code> <code>onMouseMove</code> <code>onMouseOut</code> <code>onMouseOver</code> <code>onMouseUp</code><br/>
-- Touch events - <code>onTouchCancel</code> <code>onTouchEnd</code> <code>onTouchMove</code> <code>onTouchStart</code><br/>
-- UI Events - <code>onScroll</code> <code>onWheel</code><br/>
-- Form Events - <code>onChange</code> <code>onInput</code> <code>onSubmit</code>
-</p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/10/29/why-you-should-use-reactjs-for-your-next-project/">Why You Should Use ReactJS for Your Next Project?</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-10-29T21:09:00+07:00" pubdate data-updated="true">Oct 29<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/reactjs.png" width="600" alt="Why you should use ReactJS for your next project?" />
-</p>
-
-
-
-
-<p>
-  <a href="https://facebook.github.io/react/" target="_blank">React</a>, developed by Facebook, is an open source library for building User Interfaces. As the front end world moves too fast. I am a big fan of AngularJS and a few months back I started trying React. The biggest reason for me to try React was to create apps that render on both client and server (with a little help from other libraries as well). In this article I am going to share the best reasons to use React in your next project:
-</p>
-
-
-
-
-<p>
-  <strong>1. Can Render on Both Client and Server</strong><br/>
-  Well, React uses a concept called Virtual DOM (discussed subsequently) that gives your UI a great performance boost. You can build the UI using React and render it on both server and client. This has a strong advantage over traditional SPAs (Single Page Apps). While SPAs are great for building rich AJAX based web apps. SEO is the biggest challenge. With React what you can do is take a hybrid approach and create apps. The initial request to your app should be a server side rendered version. The subsequent user interactions should use client side rendering. With this approach your app takes advantage of all the features of SPAs while still being search engine friendly. You don&#8217;t need the techniques to pre-render your pages anymore.
-</p>
-
-
-
-
-<p>
-  <strong>2. Component Oriented Development is Good</strong><br/>
-  React takes a component oriented approach. You can break your whole UI in terms of reusable components. As the components are well encapsulated, reusing and testing.
-</p>
-
-
-
-
-<p>
-  <strong>3. Separation of Concerns</strong><br/>
-  By expressing your UI in terms of well encapsulated and reusable components you achieve separation of concerns. A component shouldn&#8217;t try to do more than one thing. Rather it should do only one job and anytime you need to separate the concerns you build new components.
-</p>
-
-
-
-
-<p>
-  <strong>4. Simple and Declarative</strong><br/>
-  Your components represent how your app looks at any given time. Simply feed some data to your components and React takes care of refreshing the components when the underlying data changes.
-</p>
-
-
-
-
-<p>
-  <strong>5. Virtual DOM is Fast</strong><br/>
-  React creates a fake DOM for you. Most of the times you will be working with this virtual DOM as it&#8217;s way faster than manipulating the actual DOM. React keeps an in memory copy of the DOM and your components describe how the DOM looks at any given time. So, React is fast in computing the Diff and knows which parts to update. In short React decides what&#8217;s the fastest way to update the UI and this technique is definitely performant.
-</p>
-
-
-
-
-<p>
-  <strong>6. JSX is Cool and Simple</strong><br/>
-  JSX is known as JavaScript XML transform. You create your components with JSX which are then compiled into JavaScript. Don&#8217;t worry! React provides tools which continuously watch your source directory and re build whenever there is a code change. JSX, on the other hand, has 2 simple benefits such as:<br/>
-  - It&#8217;s easier to visualize the DOM with JSX syntax.<br/>
-  - Designers can be very comfortable with JSX.
-</p>
-
-
-
-
-<p>
-  <strong>7. Reactive Updates</strong><br/>
-  React&#8217;s philosophy is based on Reactive Updates. Traditionally what we do is watch the data and update our UI whenever the data changes. On the other hand React components have a render method which describes how the DOM should look like at any point. React caches the value obtained from the last call to render and compares it each time render is re-run. So, it knows exactly which part of your component needs to be updated and refreshes the UI accordingly.
-</p>
-
-
-
-
-<p>
-  <strong>8. Event Handling Done Right</strong><br/>
-  React takes care to bubble and capture events according to W3C spec. It uses a synthetic event system to ensure all the events work consistently across the browsers IE 8+. So, you should not be afraid of the inconsistent DOM APIs anymore.
-</p>
-
-
-
-
-<p>
-  <strong>9. React Addons</strong><br/>
-  React Addons offer additional utilities that can help you write better UIs. For example, you can use the Animation and Two way data binding Addons. You can also use the testing addon to test React components using test framework of your choice.
-</p>
-
-
-
-
-<p>
-  <strong>10. Facebook has Created Something Awesome</strong><br/>
-  React is being used in large websites such as Facebook, Instagram, The New York Times and many others. Clearly, React is doing a great job.
-</p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/10/26/10-tips-to-speed-up-rails-on-the-front/">10 Tips to Speed Up Rails on the Front</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-10-26T22:12:00+07:00" pubdate data-updated="true">Oct 26<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/rails_artwork.jpg" alt="10 Tips to Speed Up Rails on the Front" />
-</p>
-
-
-
-
-<p>
-  Is your Rails website performing poorly? Are clients and users complaining about 5-10 second pageloads, timeouts on mobile devices, or images that take forever to display? In some cases the solution lies on the backend — caching requests, speeding up DB queries, etc — but often, there are front-end optimizations you can look at first, that could have a huge effect on how fast a site feels. 
-</p>
-
-
-
-
-<p>
-  <h3>Evaluating front-end Performance</h3>
-  Check out <a href="http://www.webpagetest.org/" target="_blank">www.webpagetest.org</a>. For a quick glance at your site, look at the grades in the top right for immediate problems, and also check the two &#8220;Speed Index&#8221; measurements for first and repeat views. Since webpagetest saves all your tests, you can re-run after making some changes to easily see what&#8217;s improved.
-</p>
-
-
-
-
-<p>
-  <h3>Avoiding Premature Optimization</h3>
-  Performance optimization takes time and resources, both of which are often in short supply. It’s hard to find the point where optimizations start to cost more than they save, and every site and team have their own unique challenges. I’ve ordered the notes in this post in order of payoff: if you want to start optimizing but don’t know where to begin, the first few ideas on this list will probably give you the biggest bang for you buck.
-</p>
-
-
-
-
-<p>
-  <h3>GZIP</h3>
-  The biggest, easiest performance you can implement is gzipping HTML/JSON/JS/CSS/font file responses. It can drastically reduce the size of transferred files, but it’s easy to forget and isn’t in most default configs.<br/>
-  - <a href="https://robots.thoughtbot.com/content-compression-with-rack-deflater" target="_blank">Using Rack:Deflater</a><br/>
-  - <a href="https://richonrails.com/articles/enabling-compression-for-nginx" target="_blank">Using nginx config</a><br/>
-  - <a href="http://www.phpied.com/gzip-your-font-face-files/" target="_blank">Gzipping font files</a>
-</p>
-
-
-
-
-<p>
-  <h3>keep-alive</h3>
-  <a href="https://en.wikipedia.org/wiki/HTTP_persistent_connection" target="_blank">keep-alive</a> is another easy win that speeds up asset delivery by reusing the existing connection between client and server. <a href="http://www.feedthebot.com/pagespeed/keep-alive.html" target="_blank">Turning it</a> on should be a no-brainer.
-</p>
-
-
-
-
-<p>
-  <h3>Optimize user-uploaded Images</h3>
-  You generally want to convert all uploaded images to JPGs, strip metadata, and optimize them as much as you can without heavy quality loss. Without this step, an admin or user can easily tank the pagesize by uploading a 24-bit PNG or similarly uncompressed image. I recommend <a href="https://github.com/markevans/dragonfly" target="_blank">Dragonfly</a> for on-the-fly image optimization — it lets front-end developers and designers fiddle with image details without needing to go back and update all your existing images on production after the change.
-</p>
-
-
-
-
-<p>
-  <h3>Caching and CDNs</h3>
-  <strong>Cache expiration</strong><br/>
-  Set all assets (JS, CSS, images, fonts) to expire in a year, using either far-future expires or max-age Cache-Control headers. There are a lot of simple instructions available for setting this on <a href="https://viget.com/extend/http:/http:/guides.rubyonrails.org/asset_pipeline.html#far-future-expires-header" target="_blank">the asset pipeline</a> and for <a href="http://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Expiration.html" target="_blank">CDN assets</a>.
-</p>
-
-
-
-
-<p>
-  <strong>Fingerprinting</strong><br/>
-  If you set far-future caching, you need unique, fingerprinted filenames. The asset pipeline’s precompile command will already handle this, but in most cases it won’t happen automatically for user-uploaded assets. For example, if a user edits their avatar image locally and re-uploads it to the server with the same name, and you’re serving it with far-future expires headers, you’ll have a problem. If you’re uploading files with something like <a href="https://github.com/carrierwaveuploader/carrierwave/issues/182#issuecomment-601021" target="_blank">Carrierwave</a> or <a href="https://github.com/thoughtbot/paperclip#md5-checksum--fingerprint" target="_blank">Paperclip</a>, make sure you’re taking this step.
-</p>
-
-
-
-
-<p>
-  <strong>CDN</strong><br/>
-  Migrating user-uploaded images and Rails assets to a CDN can improve download time by moving asset servers “closer” to the user. Both caching and fingerprinting rules still apply to CDNs.
-</p>
-
-
-
-
-<p>
-  <h3>SPDY</h3>
-  SPDY is a networking protocol that can speed up page performance considerably, especially on pages with a lot of assets (<a href="http://www.httpvshttps.com/" target="_blank">example</a>). It’s available in the <a href="https://viget.com/extend/http:/http:/caniuse.com/#feat=spdy" target="_blank">majority of browsers</a> and ready for production use. It requires that you set up SSL, which is admittedly a hassle, but <a href="https://bugsnag.com/blog/spdy-on-rails" target="_blank">it isn’t much work beyond that</a>.
-</p>
-
-
-
-
-<p>
-  <h3>Inlining assets</h3>
-  (Note: If you&#8217;re using SPDY, it&#8217;s recommended that you DON&#8217;T inline your assets — <a href="http://dev.chromium.org/spdy/spdy-best-practices" target="_blank">see SPDY best practices</a>. <a href="http://viget.com/extend/rails-front-end-performance#comment-1775457785" target="_blank">Thanks Robert Fletcher!</a>)
-</p>
-
-
-
-
-<p>
-  <strong>JS</strong><br/>
-  As a general rule, loading JS in the head is a bad idea — <a href="https://developer.yahoo.com/blogs/ydn/high-performance-sites-rule-6-move-scripts-bottom-7200.html" target="_blank">you want to move it to the bottom of the body</a>. However, in some cases moving it isn’t possible. If a design relies on Modernizr to add classes to the body as early as possible to create a consistent visual experience, Modernizr <a href="https://github.com/Modernizr/Modernizr/issues/878#issuecomment-41448059" target="_blank">needs to remain in the head</a>. In this case, try inlining the JS in a script tag instead of creating an extra, blocking request. This technique trades a faster initial pageload for slower subsequent pageloads (since subsequent loads will no longer load the file from browser cache). In a lot of cases the other pageloads are just barely slower, and it’s a good tradeoff.
-</p>
-
-
-
-
-<p>
-  <strong>CSS</strong><br/>
-  As a site grows, it becomes unreasonable to bundle all styles into a single application.css file. Users can end up viewing pages that load 100% of a site’s styles but only use 5-10%. In cases like this, you can break up page-specific styles into individual files and load them with <a href="https://gist.github.com/averyvery/45cede57d335fe0b6b55" target="_blank">a scheme that uses the controller/action to find CSS files</a>.
-</p>
-
-
-
-
-<p>
-  Taking it further, there’s a good chance that if your view-specific CSS is small and users aren’t visiting many instances of the same view, making them request a second stylesheet isn’t necessary — just like with JS, you can inline them onto the page. <a href="https://gist.github.com/averyvery/6e4576023b395de1aaf5" target="_blank">Check out this gist for the setup I&#8217;ve used to inline CSS and JS assets in the past</a>.
-</p>
-
-
-
-
-<p>
-  <strong>Images</strong><br/>
-  If you have pretty small images or single unique images on a view, it could be worthwhile to inline them as base64 strings instead of sending them as separate requests, using <a href="http://ruby-doc.org/stdlib-2.2.0/libdoc/base64/rdoc/Base64.html#strict_encode64-method" target="_blank">Ruby’s Base64 module</a>. (Warning: in IE8, your base64-encoded images need to be 32kb or smaller, or they simply won’t display.)
-</p>
-
-
-
-
-<p>
-  <h3>jQuery and UJS</h3>
-  Rails ships with jQuery 1.9.x and jquery-ujs built into application.js, but jQuery is a pretty big library, and presents some optimization opportunities:<br/>
-  - Switch to jQuery 2.x — it’s smaller, but means dropping support for IE8. You could also use browser conditionals to load 1.9 for IE8 and below and 2.x for above, but you still want to combine jQuery into a single file with your other scripts, so you might end up with something like application-oldjquery.js and application.js.<br/>
-  - Cut UJS, or cut them both — if you’re not using any UJS features, you can remove it, which might make jQuery an unnecessary dependency.
-</p>
-
-
-
-
-<p>
-  At the time of this writing there’s no jQuery-less alternative for UJS, but it sounds like <a href="http://www.reddit.com/r/rails/comments/2fzk5z/what_does_rails_use_jquery_for_it_is_possible_to/ckeduvo" target="_blank">the team has considered the idea</a>.
-</p>
-
-
-
-
-<p>
-  <h3>Pagespeed</h3>
-  <a href="https://developers.google.com/speed/pagespeed/module" target="_blank">Google’s pagespeed module</a> gives you a number of tools that can speed up front-end performance by making minor tweaks (trimming the domain out of local URLs, inserting DNS prefetch tags, collapsing whitespace) or major ones (lazy-loading images). I encourage you to <a href="https://viget.com/extend/http:/https:/developers.google.com/speed/pagespeed/module/download" target="_blank">install it</a> and investigate <a href="https://developers.google.com/speed/pagespeed/module/filters" target="_blank">some of the filters</a>. Each filter has documented &#8220;Risks&#8221; that are worth reading before you implement — some of them, like <a href="https://developers.google.com/speed/pagespeed/module/filter-quote-remove" target="_blank">remove quotes</a> are low-risk filters that you could probably implement today with no downside.
-</p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -2379,6 +1897,22 @@ React events:<br/>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/11/21/reactjs-component-lifecycle-unmounting/">ReactJS Component Lifecycle Unmounting</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/21/reactjs-component-lifecycle-updating/">ReactJS Component Lifecycle Updating</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/20/reactjs-component-lifecycle-mounting/">ReactJS Component Lifecycle Mounting</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/20/reactjs-component-lifecycle/">ReactJS Component Lifecycle</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/11/20/reactjs-accessing-child-properties/">ReactJS Accessing Child Properties</a>
       </li>
     
@@ -2388,22 +1922,6 @@ React events:<br/>
     
       <li class="post">
         <a href="/blog/2015/11/18/reactjs-ownership/">ReactJS Ownership</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/14/reactjs-state/">ReactJS State</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/14/reactjs-proptypes/">ReactJS PropTypes</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/07/reactjs-jsx/">ReactJS JSX</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/06/reactjs-getting-start-with-hello-world/">ReactJS Getting Start With Hello World</a>
       </li>
     
   </ul>
@@ -2449,7 +1967,7 @@ React events:<br/>
       </li>
     
       <li>
-        <a href="/blog/categories/javascript/">Javascript [ 16 ]</a>
+        <a href="/blog/categories/javascript/">Javascript [ 20 ]</a>
       </li>
     
       <li>
@@ -2465,7 +1983,7 @@ React events:<br/>
       </li>
     
       <li>
-        <a href="/blog/categories/reactjs/">Reactjs [ 9 ]</a>
+        <a href="/blog/categories/reactjs/">Reactjs [ 13 ]</a>
       </li>
     
   </ul>

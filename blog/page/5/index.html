@@ -79,6 +79,712 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/05/14/code-concerns-in-rails-4-models/">Code Concerns in Rails 4 Models</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-05-14T12:48:00+07:00" pubdate data-updated="true">May 14<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="Code Concerns in Rails 4 Models" />
+</p>
+
+
+
+
+<p>
+  You may have noticed that Rails 4 creates a new folder called concerns. Concerns are pieces of code that allow you to better organize the code that you write. This feature has actually been around for a long time prior to Rails 4, Rails 4 merely creates the folders for you and sets up the environment. In this article, we focus primarily on Rails 4.0, but it should apply equally to 3.2.x or even 3.0.x and earlier.
+</p>
+
+
+
+
+<p>
+  Here is a simple example, lets say we have a model called user. In this model we would typically have something like this:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">has_secure_password</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">authenticate</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="n">find_by_email</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">user</span> <span class="k">if</span> <span class="o">!</span><span class="n">user</span><span class="o">.</span><span class="n">nil?</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create_password_reset_token</span>
+</span><span class='line'>    <span class="n">logger</span><span class="o">.</span><span class="n">warn</span> <span class="s2">&quot;Create password reset token code goes here.&quot;</span>
+</span><span class='line'>    <span class="kp">false</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We can create a a file in the app/models/concerns folder called authentication.rb (app/models/concerns/authentication.rb) and place the following code in it:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Authentication</span>
+</span><span class='line'>  <span class="kp">extend</span> <span class="ss">ActiveSupport</span><span class="p">:</span><span class="ss">:Concern</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">included</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">has_secure_password</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">module</span> <span class="nn">ClassMethods</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">authenticate</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">user</span> <span class="o">=</span> <span class="n">find_by_email</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">user</span> <span class="k">if</span> <span class="n">user</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create_password_reset_token</span>
+</span><span class='line'>    <span class="n">logger</span><span class="o">.</span><span class="n">warn</span> <span class="s2">&quot;Create password reset token code goes here.&quot;</span>
+</span><span class='line'>    <span class="kp">false</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now, lets refactor the User model to use the new code. Change the users model (app/models/user.rb) so that it looks like this:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Authentication</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now if you start the rails server and attempt to authenticate, you&#8217;ll notice that the functionality hasn&#8217;t changed at all. That&#8217;s the idea! You can use this method for organizing and DRYing up your code.
+</p>
+
+
+
+
+<p>
+  The extend <code>ActiveSupport::Concern</code> tells rails that we are creating a concern.
+</p>
+
+
+
+
+<p>
+  The code contained within the included block will be executed within the context of the class that is including the module. This is perfect for including functionality provided by 3rd party gems, etc.
+</p>
+
+
+
+
+<p>
+  Next you will notice the <code>module ClassMethods</code> block. The code contained within this block will be added to the Class itself. For example, the code above adds an authenticate function to the User class. This allows you to do User.authenticate(email, password) instead of User.find_by_email(email).authenticate(password).
+</p>
+
+
+
+
+<p>
+  Finally you will see the last bit of code, the <code>create_password_reset_token</code> function. Code not included in the <code>ClassMethods</code> block or the <code>included</code> block will be included as instance methods. For example, You could do <code>@user = User.find(params[:id])</code> and then do <code>@user.create_password_reset_token</code> to create a password reset token for the specified user.
+</p>
+
+
+
+
+<p>
+  Now, all of this is great, but what benefit do you get from organizing your code in this fashion? Well, lets look at a good example of how utilizing this functionality of Rails can save you time and make your code much cleaner. Lets say we have a number of different models, BlogPosts, Articles, Comments, etc and we want to add tagging functionality that will allow the user to tag each object as something. Utilizing concerns we can quickly and easily do this:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Taggable</span>
+</span><span class='line'>  <span class="kp">extend</span> <span class="ss">ActiveSupport</span><span class="p">:</span><span class="ss">:Concern</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">included</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">has_many</span> <span class="ss">:taggings</span><span class="p">,</span> <span class="ss">as</span><span class="p">:</span> <span class="ss">:taggable</span><span class="p">,</span> <span class="ss">dependent</span><span class="p">:</span> <span class="ss">:destroy</span>
+</span><span class='line'>    <span class="n">has_many</span> <span class="ss">:tags</span><span class="p">,</span> <span class="ss">through</span><span class="p">:</span> <span class="ss">:taggings</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">tag_names</span>
+</span><span class='line'>    <span class="n">tags</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:name</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  In this simple example, you&#8217;ll see that simply including Taggable on your modules will (with the database structure in place of course) make your models taggable. This code can quickly and easily be spread upon as many models as needed. Well that&#8217;s it! Concerns are a great way to keep your code organized and DRY.
+</p>
+
+
+
+
+<p>
+  So far so good, That it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/05/13/awesome-jquery-tricks/">Awesome jQuery Tricks</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-05-13T12:30:00+07:00" pubdate data-updated="true">May 13<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/jquery_logo.png" width="500" alt="Awesome jQuery Tricks" />
+</p>
+
+
+
+
+<p>
+  As we all know, jQuery is an awesome library and has transformed the internet as we know it. In this article we will cover 5 extremely useful jQuery tricks that you can use in your sites. Let&#8217;s get started.
+</p>
+
+
+
+
+<p>
+  <strong>Gracefully Degrade Broken Images</strong><br/>
+  Broken images can be a pain to deal with. They degrade the user experience and can be difficult to find without scanning your site regularly with a 3rd party tool. Luckily it&#8217;s easy to substitute broken images with an image that you specify using jQuery. the <code>error</code> callback of an image gets fired any time an image can&#8217;t be successfully loaded by the browser. For example:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;img&#39;</span><span class="p">).</span><span class="nx">error</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+</span><span class='line'>  <span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;src&#39;</span><span class="p">,</span> <span class="err">&#39;</span><span class="nx">images</span><span class="o">/</span><span class="nx">missing</span><span class="p">.</span><span class="nx">png</span><span class="err">’</span><span class="p">);</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The code above would replace any broken images with an image in the images folder called missing.png. You could also do something like make an AJAX request to your server to log the location of the broken image.
+</p>
+
+
+
+
+<p>
+  <strong>Wait For an Image to Be Loaded</strong><br/>
+  Sometimes you need to wait for an image to be loaded before continuing to process events. This is most often useful with libraries like the <a href="http://masonry.desandro.com/" target="_blank">jQuery Masonry library</a>, where images can affect the size of the overall content. Fortunately this is easy with the load callback. For example:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;img&#39;</span><span class="p">).</span><span class="nx">load</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="c1">// Do stuff here...</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The above code would wait for the image to be loaded and then execute the code specified in the callback.
+</p>
+
+
+
+
+<p>
+  <strong>Zebra Stripe a Table</strong><br/>
+  Sometimes we want our tables to alternating odd/even colors. While this is possible using CSS3, older browsers don&#8217;t support most CSS3 features. Using this script allows our tables to be striped across all browsers.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;table tr:even&#39;</span><span class="p">).</span><span class="nx">css</span><span class="p">(</span><span class="s1">&#39;background&#39;</span><span class="p">,</span> <span class="s1">&#39;#f7f7f7&#39;</span><span class="p">);</span> <span class="c1">// Strip every even row</span>
+</span><span class='line'><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;table tr:odd&#39;</span><span class="p">).</span><span class="nx">css</span><span class="p">(</span><span class="s1">&#39;background&#39;</span><span class="p">,</span> <span class="s1">&#39;#f7f7f7&#39;</span><span class="p">);</span> <span class="c1">// Stripe every odd row</span>
+</span><span class='line'><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;table &gt; tbody &gt; tr:even&#39;</span><span class="p">).</span><span class="nx">css</span><span class="p">(</span><span class="s1">&#39;background&#39;</span><span class="p">,</span> <span class="s1">&#39;#f7f7f7&#39;</span><span class="p">);</span> <span class="c1">// Only stripe the table body</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The above code will do striping as noted in the comments.
+</p>
+
+
+
+
+<p>
+  <strong>Preloading Images</strong><br/>
+  If your page uses a lot of images that aren&#8217;t visible initially, it might be worth it to preload them. This simple script listed below does exactly that.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">$</span><span class="p">.</span><span class="nx">preloadImages</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;&lt;img /&gt;&quot;</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;src&quot;</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">[</span><span class="nx">i</span><span class="p">]);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">$</span><span class="p">.</span><span class="nx">preloadImages</span><span class="p">(</span><span class="s2">&quot;images/myimage1.jpg&quot;</span><span class="p">,</span><span class="s2">&quot;images/myimage2.jpg&quot;</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Detect Mobile Devices</strong><br/>
+  Sometimes we need a &#8216;check all&#8217; checkbox for our web pages that selects every checkbox in a fieldset. The code below lets you easily accomplish this.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.checkall&#39;</span><span class="p">).</span><span class="nx">click</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">parents</span><span class="p">(</span><span class="s1">&#39;fieldset:eq(0)&#39;</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;:checkbox&#39;</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;checked&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">checked</span><span class="p">);</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/05/11/ruby-on-rails-with-bootstrap-sass/">Ruby on Rails With Bootstrap-Sass</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-05-11T16:41:00+07:00" pubdate data-updated="true">May 11<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/bootstrap.png" alt="Ruby on Rails with Bootstrap-Sass" />
+</p>
+
+
+
+
+<p>
+  Twitter Bootstrap is an insanely popular CSS framework that is used to quickly and easily throw together great looking websites. Many websites (including this one) are built on this framework, and with good reason; the power and ease of use rival that of most other frameworks.
+</p>
+
+
+
+
+<p>
+  In this tutorial we will show you how to add the framework using the bootstrap-sass gem. We will also show you how to override the bootstrap styles using the various scss variables provided by the bootstrap framework. Finally we will show you how to use the will_paginate-bootstrap gem to style your pagination using bootstrap&#8217;s pagination styles.
+</p>
+
+
+
+
+<p>
+  <strong>Setup Project</strong><br/>
+  In an existing or new project, add the following line to Gemfile:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;bootstrap-sass&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 2.3&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Run a <code>bundle install</code> and start your <code>rails server</code>. Now that the gem is installed you are ready to to start using bootstrap.
+</p>
+
+
+
+
+<p>
+  The first thing we will need to do is create a new SCSS file to store our bootstrap configuration. Create a file called <code>bootstrap_config.scss</code> in the <code>app/assets/stylesheets</code> folder.  This file will be used to store bootstrap specific configuration. Next, we will need to tell Rails to actually include bootstrap in this file. Open <code>app/assets/stylesheets/bootstrap_config.scss</code> and add the following line:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/assets/stylesheets/bootstrap_config.scss </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@import</span> <span class="s2">&quot;bootstrap&quot;</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If you want a responsive layout, also add the following line:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/assets/stylesheets/bootstrap_config.scss </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@import</span> <span class="s2">&quot;bootstrap-responsive&quot;</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  This will include bootstrap in your application. Now, any views you create will automatically include bootstrap as long as they use the main application layout. We aren&#8217;t quite done yet though, if you are on Rails 4 (Rails 3.2 users don&#8217;t need to do this) you will need to perform one more step. Open up the <code>config/application.rb</code> file and add the following line to your application&#8217;s configuration:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/application.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">assets</span><span class="o">.</span><span class="n">precompile</span> <span class="o">+=</span> <span class="sx">%w(*.png *.jpg *.jpeg *.gif)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  This is due to rails no longer compiling images in vendor assets by default.
+</p>
+
+
+
+
+<p>
+  Now go ahead and create a controller and try it out. If you aren&#8217;t familiar with the framework itself, the absolute best place to learn about it is at <a href="http://getbootstrap.com/" target="_blank">The Official Twitter Boostrap Site</a>. That&#8217;s all there is to setting it up!
+</p>
+
+
+
+
+<p>
+  <strong>Bootstrap Variables</strong><br/>
+  The bootstrap-sass gem, much like it&#8217;s official LESS-based cousin, has a number of variables that you can override to change the look and feel of various styles. Lets try it out. Suppose we want to change the background color of our website. To do this we just need to open up <code>app/assets/stylesheets/bootstrap_config.scss</code> and add the following line to the very top of the file:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/assets/stylesheets/bootstrap_config.scss </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vg">$bodyBackground</span><span class="p">:</span> <span class="c1">#e0e0e0;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now, if you refresh the page you will notice that the body background has changed to a light gray color. 
+</p>
+
+
+
+
+<p>
+  <strong>Will Paginate</strong><br/>
+  One pitfall that rails users often run into is utilizing will_paginate in a twitter bootstrap project. Luckily the will_paginate-bootstrap gem makes this very easy. Add the following line to your gemfile and then run a <code>bundle install</code> and restart your rails server:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;will_paginate-bootstrap&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now, open up the view where you are using will_paginate, find any will_paginate lines and add <code>:renderer => BootstrapPagination::Rails</code> to the end of them so they look like this:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= will_paginate @products, :renderer =</span><span class="o">&gt;</span> <span class="ss">BootstrapPagination</span><span class="p">:</span><span class="ss">:Rails</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now if you refresh the page, you&#8217;ll see that that will_paginate is now styled using bootstrap.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/05/11/enable-compression-for-nginx/">Enable Compression for Nginx</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-05-11T15:08:00+07:00" pubdate data-updated="true">May 11<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/nginx-plus.png" width="500" alt="Enable Compression for Nginx" />
+</p>
+
+
+
+
+<p>
+  Using Nginx for your Rails app? Use this trick to speed up your site. If you are using Nginx, you can quickly and easily speed up your site by enabling gzip compression for your application. Gzip compression compresses files and assets before they are sent to the client, resulting in a nice little speed boost. A sample of how to do this is listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>nginx.conf </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">server</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">listen</span> <span class="mi">80</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">server_name</span> <span class="n">mysite</span><span class="o">.</span><span class="n">com</span> <span class="n">www</span><span class="o">.</span><span class="n">mysite</span><span class="o">.</span><span class="n">com</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">root</span> <span class="sr">/opt/m</span><span class="n">ysite</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">current</span><span class="o">/</span><span class="kp">public</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">passenger_enabled</span> <span class="n">on</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">gzip</span> <span class="n">on</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">gzip_http_version</span> <span class="mi">1</span><span class="o">.</span><span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">gzip_vary</span> <span class="n">on</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">gzip_comp_level</span> <span class="mi">6</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">gzip_proxied</span> <span class="n">any</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">gzip_types</span> <span class="n">text</span><span class="o">/</span><span class="n">plain</span> <span class="n">text</span><span class="o">/</span><span class="n">html</span> <span class="n">text</span><span class="o">/</span><span class="n">css</span> <span class="n">application</span><span class="o">/</span><span class="n">json</span> <span class="n">application</span><span class="o">/</span><span class="n">javascript</span> <span class="n">application</span><span class="o">/</span><span class="n">x</span><span class="o">-</span><span class="n">javascript</span> <span class="n">text</span><span class="o">/</span><span class="n">javascript</span> <span class="n">text</span><span class="o">/</span><span class="n">xml</span> <span class="n">application</span><span class="o">/</span><span class="n">xml</span> <span class="n">application</span><span class="o">/</span><span class="n">rss</span><span class="o">+</span><span class="n">xml</span> <span class="n">application</span><span class="o">/</span><span class="n">atom</span><span class="o">+</span><span class="n">xml</span> <span class="n">application</span><span class="o">/</span><span class="n">rdf</span><span class="o">+</span><span class="n">xml</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The gzip types specifies the mime types that will be compressed using the gzip protocol. You can exclude and include other mime types using this particular list. It&#8217;s best not to include things such as images and/or media files.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/05/09/rails-4-friendlyid/">Rails 4 FriendlyId</a></h1>
     
     
@@ -2281,1463 +2987,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/05/06/fast-rails-api/">Fast Rails API</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-05-06T10:41:00+07:00" pubdate data-updated="true">May 6<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/fast_rails_api.png" alt="Fast Rails API" />
-</p>
-
-
-
-
-<p>
-  Rendering JSON is pretty easy in Rails.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="vi">@statuses</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  It works well if there are small number of records to be returned. But what happens when we need to return 10,000 records at once? Things slow down dramatically and the most time-consuming parts are JSON serialization and database operations.
-</p>
-
-
-
-
-<p>
-  <strong>Include only Required Attributes</strong><br/>
-  The first obvious thing is generating JSON with only attributes that we need.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="vi">@statuses</span><span class="p">,</span> <span class="nb">methods</span><span class="p">:</span> <span class="o">[</span><span class="ss">:latitude</span><span class="p">,</span> <span class="ss">:longitude</span><span class="p">,</span> <span class="ss">:timestamp</span><span class="p">,</span> <span class="ss">:virtual_odometer</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Tidying JSON gives over 20% performance
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">default</span>    <span class="mi">5</span><span class="o">.</span><span class="mi">940000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">080000</span>   <span class="mi">6</span><span class="o">.</span><span class="mo">020000</span> <span class="p">(</span>  <span class="mi">6</span><span class="o">.</span><span class="mi">094221</span><span class="p">)</span>
-</span><span class='line'><span class="n">attrs</span>      <span class="mi">4</span><span class="o">.</span><span class="mi">820000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">4</span><span class="o">.</span><span class="mi">830000</span> <span class="p">(</span>  <span class="mi">4</span><span class="o">.</span><span class="mi">932337</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Select only Required Columns</strong><br/>
-  Second, we should consider selecting only required columns when we don’t need all of them.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="vi">@statuses</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">[</span><span class="ss">:latitude</span><span class="p">,</span> <span class="ss">:longitude</span><span class="p">,</span> <span class="ss">:timestamp</span><span class="p">,</span> <span class="ss">:virtual_odometer</span><span class="o">]</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  It’ll help us to avoid transferring a huge amount of data to the application from the database and gives 2x speed up.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">default</span>    <span class="mi">5</span><span class="o">.</span><span class="mi">940000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">080000</span>   <span class="mi">6</span><span class="o">.</span><span class="mo">020000</span> <span class="p">(</span>  <span class="mi">6</span><span class="o">.</span><span class="mi">094221</span><span class="p">)</span>
-</span><span class='line'><span class="n">attrs</span>      <span class="mi">4</span><span class="o">.</span><span class="mi">820000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">4</span><span class="o">.</span><span class="mi">830000</span> <span class="p">(</span>  <span class="mi">4</span><span class="o">.</span><span class="mi">932337</span><span class="p">)</span>
-</span><span class='line'><span class="nb">select</span>     <span class="mi">2</span><span class="o">.</span><span class="mi">170000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">020000</span>   <span class="mi">2</span><span class="o">.</span><span class="mi">190000</span> <span class="p">(</span>  <span class="mi">2</span><span class="o">.</span><span class="mi">222277</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Don’t Instantiate ActiveRecord Objects If Possible</strong><br/>
-  Let’s implement a method to return “lightning” array of hashes instead of ActiveRecord instances.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">lightning</span>
-</span><span class='line'>  <span class="n">connection</span><span class="o">.</span><span class="n">select_all</span><span class="p">(</span><span class="nb">select</span><span class="p">(</span><span class="o">[</span><span class="ss">:latitude</span><span class="p">,</span> <span class="ss">:longitude</span><span class="p">,</span> <span class="ss">:timestamp</span><span class="p">,</span> <span class="ss">:virtual_odometer</span><span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">arel</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">attrs</span><span class="o">|</span>
-</span><span class='line'>    <span class="n">attrs</span><span class="o">.</span><span class="n">each_key</span> <span class="k">do</span> <span class="o">|</span><span class="kp">attr</span><span class="o">|</span>
-</span><span class='line'>      <span class="n">attrs</span><span class="o">[</span><span class="kp">attr</span><span class="o">]</span> <span class="o">=</span> <span class="n">type_cast_attribute</span><span class="p">(</span><span class="kp">attr</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Returns array of hashes instead of array of single column values. Invoke a new method in controller.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="vi">@statuses</span><span class="o">.</span><span class="n">lightning</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Using lightweight hashes makes JSON rendering 2x faster.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">default</span>    <span class="mi">5</span><span class="o">.</span><span class="mi">940000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">080000</span>   <span class="mi">6</span><span class="o">.</span><span class="mo">020000</span> <span class="p">(</span>  <span class="mi">6</span><span class="o">.</span><span class="mi">094221</span><span class="p">)</span>
-</span><span class='line'><span class="n">attrs</span>      <span class="mi">4</span><span class="o">.</span><span class="mi">820000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">4</span><span class="o">.</span><span class="mi">830000</span> <span class="p">(</span>  <span class="mi">4</span><span class="o">.</span><span class="mi">932337</span><span class="p">)</span>
-</span><span class='line'><span class="nb">select</span>     <span class="mi">2</span><span class="o">.</span><span class="mi">170000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">020000</span>   <span class="mi">2</span><span class="o">.</span><span class="mi">190000</span> <span class="p">(</span>  <span class="mi">2</span><span class="o">.</span><span class="mi">222277</span><span class="p">)</span>
-</span><span class='line'><span class="n">lightning</span>  <span class="mi">1</span><span class="o">.</span><span class="mi">120000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">1</span><span class="o">.</span><span class="mi">130000</span> <span class="p">(</span>  <span class="mi">1</span><span class="o">.</span><span class="mi">148763</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<h3>
-  Fastest JSON
-</h3>
-
-
-
-
-<p>
-  There are several JSON libraries available:<br/>
-  - <a href="https://github.com/flori/json" target="_blank">JSON</a> - The default JSON gem with C-extensions (ships with Ruby 1.9).<br/>
-  - <a href="https://github.com/brianmario/yajl-ruby" target="_blank">YAJL</a> - Yet Another JSON Library.<br/>
-  - <a href="https://github.com/ohler55/oj" target="_blank">OJ</a> - Optimized JSON.
-</p>
-
-
-
-
-<p>
-  It’s a good idea to use the fastest dumper of them.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">json</span>       <span class="mi">0</span><span class="o">.</span><span class="mi">810000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">020000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">830000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mi">841307</span><span class="p">)</span>
-</span><span class='line'><span class="n">yajl</span>       <span class="mi">0</span><span class="o">.</span><span class="mi">760000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">020000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">780000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mi">809903</span><span class="p">)</span>
-</span><span class='line'><span class="n">oj</span>         <span class="mi">0</span><span class="o">.</span><span class="mi">640000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">650000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mi">666230</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  But we prefer <a href="https://github.com/rails-api/active_model_serializers" target="_blank">active_model_serializers</a> which it run faster than OJ.
-</p>
-
-
-
-
-<p>
-  Summarized benchmark results are:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">user</span>     <span class="nb">system</span>      <span class="n">total</span>        <span class="n">real</span>
-</span><span class='line'><span class="n">default</span>    <span class="mi">5</span><span class="o">.</span><span class="mi">940000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">080000</span>   <span class="mi">6</span><span class="o">.</span><span class="mo">020000</span> <span class="p">(</span>  <span class="mi">6</span><span class="o">.</span><span class="mi">094221</span><span class="p">)</span>
-</span><span class='line'><span class="n">attrs</span>      <span class="mi">4</span><span class="o">.</span><span class="mi">820000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">4</span><span class="o">.</span><span class="mi">830000</span> <span class="p">(</span>  <span class="mi">4</span><span class="o">.</span><span class="mi">932337</span><span class="p">)</span>
-</span><span class='line'><span class="nb">select</span>     <span class="mi">2</span><span class="o">.</span><span class="mi">170000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">020000</span>   <span class="mi">2</span><span class="o">.</span><span class="mi">190000</span> <span class="p">(</span>  <span class="mi">2</span><span class="o">.</span><span class="mi">222277</span><span class="p">)</span>
-</span><span class='line'><span class="n">lightning</span>  <span class="mi">1</span><span class="o">.</span><span class="mi">120000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">1</span><span class="o">.</span><span class="mi">130000</span> <span class="p">(</span>  <span class="mi">1</span><span class="o">.</span><span class="mi">148763</span><span class="p">)</span>
-</span><span class='line'><span class="n">json</span>       <span class="mi">0</span><span class="o">.</span><span class="mi">810000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">020000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">830000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mi">841307</span><span class="p">)</span>
-</span><span class='line'><span class="n">yajl</span>       <span class="mi">0</span><span class="o">.</span><span class="mi">760000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">020000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">780000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mi">809903</span><span class="p">)</span>
-</span><span class='line'><span class="n">oj</span>         <span class="mi">0</span><span class="o">.</span><span class="mi">640000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">650000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mi">666230</span><span class="p">)</span>
-</span><span class='line'><span class="n">ams</span>        <span class="mi">0</span><span class="o">.</span><span class="mi">270000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">000000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">270000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mi">272239</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/05/05/preload-active-record-associations-in-rails-application/">Preload Active Record Associations in Rails Application</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-05-05T16:26:00+07:00" pubdate data-updated="true">May 5<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="Preload Active Record Associations in Rails Application" />
-</p>
-
-
-
-
-<p>
-  Active Record makes database querying so simple. Chain together a few methods and bam, you’ve saved your self lines and lines of T-SQL. The problem is this simplicity masks the underlying operation and it’s very easy to not realize how inefficient your database calls are.
-</p>
-
-
-
-
-<p>
-  For example:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:posts</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Post</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:comments</span>
-</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:user</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Comment</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:post</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Let’s say on a users profile page we would like to show a listing of comments from this user.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="vi">@user</span><span class="o">.</span><span class="n">posts</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">post</span><span class="o">|</span>
-</span><span class='line'>   <span class="n">post</span><span class="o">.</span><span class="n">comments</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">comment</span><span class="o">|</span>
-</span><span class='line'>      <span class="o">&lt;%=</span> <span class="n">comment</span><span class="o">.</span><span class="n">message</span> <span class="o">%&gt;</span>
-</span><span class='line'>   <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  What you end up with is something like:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="mi">1</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="sb">`users`</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="sb">`users`</span> <span class="no">WHERE</span> <span class="s1">&#39;id&#39;</span> <span class="o">=</span> <span class="mi">1</span> <span class="no">LIMIT</span> <span class="mi">1</span>
-</span><span class='line'> <span class="no">Post</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">7</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="sb">`posts`</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="sb">`blogs`</span> <span class="no">WHERE</span> <span class="sb">`blogs`</span><span class="o">.</span><span class="n">`user_id</span><span class="sb">` = 2</span>
-</span><span class='line'><span class="sb"> Comment Load (0.7ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` = 43</span>
-</span><span class='line'><span class="sb"> Comment Load (1.7ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` = 55</span>
-</span><span class='line'><span class="sb"> Comment Load (2.2ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` = 32</span>
-</span><span class='line'><span class="sb"> Comment Load (0.9ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` = 66</span>
-</span><span class='line'><span class="sb"> Comment Load (2.2ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` = 56</span>
-</span><span class='line'><span class="sb"> Comment Load (4.8ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` = 65</span>
-</span><span class='line'><span class="sb"> Comment Load (1.8ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` = 68</span>
-</span><span class='line'><span class="sb"> Comment Load (0.8ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` = 71</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The user has commented in 9 different posts, which results in 9 separate queries to the DB. This is a small scale example, but you can see how this can compound into something nasty.
-</p>
-
-
-
-
-<p>
-  he solution is to user includes method:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">:posts</span> <span class="o">=&gt;</span> <span class="ss">:comments</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  When using includes method, Active Record ensures that all of the specified associations are loaded using the minimum possible number of queries. The actual query executed is converted into a more optimal singular query and it is that result set that is iterated over instead of the replicated find(id) style queries.
-</p>
-
-
-
-
-<p>
-  Our query stack list now looks like:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="mi">0</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="sb">`users`</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="sb">`users`</span> <span class="no">WHERE</span> <span class="s1">&#39;id&#39;</span> <span class="o">=</span> <span class="mi">1</span> <span class="no">LIMIT</span> <span class="mi">1</span>
-</span><span class='line'><span class="no">Post</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">4</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="sb">`posts`</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="sb">`posts`</span> <span class="no">WHERE</span> <span class="sb">`posts`</span><span class="o">.</span><span class="n">`user_id</span><span class="sb">` IN (1)</span>
-</span><span class='line'><span class="sb">Comment Load (0.5ms)  SELECT `</span><span class="n">comments</span><span class="sb">`.* FROM `</span><span class="n">comments</span><span class="sb">` WHERE `</span><span class="n">comments</span><span class="sb">`.`</span><span class="n">post_id</span><span class="sb">` IN (43, 55, 32, 66, 56, 65, 68, 71)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/05/05/where-does-your-code-go-in-rails-application/">Where Does Your Code Go in Rails Application?</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-05-05T08:50:00+07:00" pubdate data-updated="true">May 5<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/ruby_on_rails.png" width="400" alt="Where Does Your Code Go in Rails Application?" />
-</p>
-
-
-
-
-<p>
-  After you finish the Rails tutorials and start your own app, things get confusing something like where does your non-CRUD and general logic go?
-</p>
-
-
-
-
-<p>
-  You can&#8217;t build the app you&#8217;ve been dreaming of without some general, non-Rails logic. So where do you put your code, and still keep things simple?
-</p>
-
-
-
-
-<p>
-  <strong>The Easy Place to Start</strong><br/>
-  when I have logic that feels related to an existing ActiveRecord model, I&#8217;ll start by putting it into that model. For example if I had a Game model and I want to import a bunch of games from CSV files, I would put that method right onto the Game class.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/models/game.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Game</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">parse_from_csv</span><span class="p">(</span><span class="n">csv_string</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">games</span> <span class="o">=</span> <span class="o">[]</span>
-</span><span class='line'>    <span class="no">CSV</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">csv_string</span><span class="p">,</span> <span class="n">quote_char</span><span class="p">:</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">row</span><span class="o">|</span>
-</span><span class='line'>      <span class="n">games</span> <span class="o">&lt;&lt;</span> <span class="no">Game</span><span class="o">.</span><span class="n">from_csv_row</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">row</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">==</span> <span class="s1">&#39;G&#39;</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>    <span class="n">games</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">from_csv_row</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-</span><span class='line'>    <span class="no">Game</span><span class="o">.</span><span class="n">new</span><span class="p">({</span>
-</span><span class='line'>      <span class="n">dgs_game_id</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span><span class="p">,</span>
-</span><span class='line'>      <span class="n">opponent_name</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">2</span><span class="o">]</span><span class="p">,</span>
-</span><span class='line'>      <span class="n">created_at</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">4</span><span class="o">]</span><span class="p">,</span>
-</span><span class='line'>      <span class="n">updated_at</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">4</span><span class="o">]</span><span class="p">,</span>
-</span><span class='line'>    <span class="p">})</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You have all the information your methods need right at hand. it&#8217;s easily testable. And it&#8217;s probably where a new contributor world look for that logic first.
-</p>
-
-
-
-
-<p>
-  But if you keep adding and changing that model, it&#8217;ll get big and complicated. Different parts of the model will interact in strange ways. The more you change it, the harder it will be to change.
-</p>
-
-
-
-
-<p>
-  In that case, you would probably want to refactor that code out to a non-ActiveRecord model.
-</p>
-
-
-
-
-<p>
-  <strong>Non-ActiveRecord Models</strong><br/>
-  You can write your own Ruby code, in plain Ruby objects, and use them in your Rails app. These objects can still be called models, because they&#8217;re modeling part of your problem. They just don&#8217;t have an ActiveRecord database storing their data.
-</p>
-
-
-
-
-<p>
-  The next time I worked on that game CSV parser, the Game class was getting a little too big. So I moved the parser logic into its own GameCSVParser class.
-</p>
-
-
-
-
-<p>
-  Non-ActiveRecord class looks like:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/models/game_csv_parser.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">GameCSVParser</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">csv_string</span><span class="p">)</span>
-</span><span class='line'>    <span class="vi">@rows</span> <span class="o">=</span> <span class="no">CSV</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">csv_string</span><span class="p">,</span> <span class="n">quote_char</span><span class="p">:</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">games</span>
-</span><span class='line'>    <span class="n">game_rows</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">row</span><span class="o">|</span> <span class="no">Game</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">game_attributes</span><span class="p">(</span><span class="n">row</span><span class="p">))</span> <span class="p">}</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kp">private</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">game_rows</span>
-</span><span class='line'>    <span class="vi">@rows</span><span class="o">.</span><span class="n">select</span> <span class="p">{</span> <span class="o">|</span><span class="n">row</span><span class="o">|</span> <span class="n">is_game_row?</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="p">}</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">game_attributes</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-</span><span class='line'>    <span class="p">{</span>
-</span><span class='line'>      <span class="n">dgs_game_id</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span><span class="p">,</span>
-</span><span class='line'>      <span class="n">opponent_name</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">2</span><span class="o">]</span><span class="p">,</span>
-</span><span class='line'>      <span class="n">created_at</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">4</span><span class="o">]</span><span class="p">,</span>
-</span><span class='line'>      <span class="n">updated_at</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">4</span><span class="o">]</span><span class="p">,</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">is_game_row?</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">row</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">==</span> <span class="s1">&#39;G&#39;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  I will go right to creating a new plain Ruby object if the logic I&#8217;m adding doesn&#8217;t feel related to any specific ActiveRecord model. Of if the code seems like it should be a part of a thing that doesn&#8217;t exist yet in the app. Otherwise, they mostly pop up through refactoring.
-</p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/05/02/ruby-on-rails-charting-with-chartkick-gem/">Ruby on Rails Charting With Chartkick Gem</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-05-02T20:30:00+07:00" pubdate data-updated="true">May 2<span>nd</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/chartkick.png" alt="Ruby on Rails Charting with Chartkick Gem" />
-</p>
-
-
-
-
-<p>
-  Chartkick is a charting library for Ruby on Rails that allows you to easily create nice looking charts. Chartkick is compatible with all major browsers and can easily be used to give your Ruby on Rails application some additional flair. In this article we will cover the basics of using Chartkick.
-</p>
-
-
-
-
-<p>
-  <strong>Rails Application Setup</strong><br/>
-  Before we can use Chartkick, we will need to add it to our Gemfile. Open up your Gemfile and add the following code.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Gemfile </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;chartkick&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 1.2.4&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  In addition, let&#8217;s include a couple of helper gems that will make life easier when dealing with data. Add the following gems to your Gemfile.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Gemfile </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;groupdate&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 2.1.1&#39;</span>
-</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;active_median&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 0.1.0&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now let&#8217;s run a bundle install to install all three gems.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now we need to create a model that we will use with our charts. For this example app we will create a simple model called Visit. This model will represent a single user&#8217;s &#8216;visit&#8217; to a website. Run the command below to create this model now.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Visit</span> <span class="ss">country</span><span class="p">:</span><span class="n">string</span> <span class="n">visited_at</span><span class="ss">:datetime</span> <span class="n">load_time</span><span class="ss">:decimal</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now let&#8217;s run a rake db:migrate to create the table associated with this model.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now we need to add some data to our seeds file in order to give us some data to play with. Open up your seeds.rb file and add in the code listed below.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>db/seeds.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">delete_all</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;United States&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">3</span><span class="o">.</span><span class="mi">5</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;United States&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">1</span><span class="o">.</span><span class="mi">5</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;United States&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">1</span><span class="o">.</span><span class="mi">0</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;United States&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">1</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">4</span><span class="o">.</span><span class="mi">5</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;United States&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">1</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">4</span><span class="o">.</span><span class="mi">0</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;United States&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">2</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">3</span><span class="o">.</span><span class="mi">5</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;United States&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">2</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">1</span><span class="o">.</span><span class="mi">0</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;United States&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">2</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">3</span><span class="o">.</span><span class="mi">5</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;United States&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">3</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">4</span><span class="o">.</span><span class="mi">5</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;United States&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">3</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">3</span><span class="o">.</span><span class="mi">0</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;Germany&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">1</span><span class="o">.</span><span class="mi">0</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;Germany&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">2</span><span class="o">.</span><span class="mi">0</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;Germany&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">1</span><span class="o">.</span><span class="mi">0</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;Germany&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">3</span><span class="o">.</span><span class="mi">0</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;Germany&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">1</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">4</span><span class="o">.</span><span class="mi">0</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;Germany&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">2</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">2</span><span class="o">.</span><span class="mi">0</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;Germany&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">2</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">1</span><span class="o">.</span><span class="mi">0</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;Germany&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">2</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">3</span><span class="o">.</span><span class="mi">0</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;Germany&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">3</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">3</span><span class="o">.</span><span class="mi">5</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;South Korea&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">2</span><span class="o">.</span><span class="mi">0</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;South Korea&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">2</span><span class="o">.</span><span class="mi">5</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;South Korea&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">1</span><span class="o">.</span><span class="mi">0</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;South Korea&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">1</span><span class="o">.</span><span class="mi">5</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;South Korea&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">1</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">2</span><span class="o">.</span><span class="mi">5</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;South Korea&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">1</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">4</span><span class="o">.</span><span class="mi">0</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;South Korea&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">1</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">3</span><span class="o">.</span><span class="mi">0</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;South Korea&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">2</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">1</span><span class="o">.</span><span class="mi">0</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;South Korea&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">3</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">5</span><span class="o">.</span><span class="mi">0</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;South Korea&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">3</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">4</span><span class="o">.</span><span class="mi">0</span>
-</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;South Korea&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">3</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">5</span><span class="o">.</span><span class="mi">0</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now let&#8217;s run a rake db:seed to seed our database.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">seed</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now let&#8217;s create a controller to give us a place to play around. Run the commands below to create the Homes controller.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="n">homes</span> <span class="n">show</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now open up your routes file and add in the route listed below.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;homes#show&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Next, open up your homes controller and modify it so that it looks like the code listed below.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/controllers/homes_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">HomesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
-</span><span class='line'>    <span class="vi">@visits</span> <span class="o">=</span> <span class="no">Visit</span><span class="o">.</span><span class="n">all</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Finally, we need to modify our application layout. Open up your application&#8217;s layout and modify it so that it looks like the following code. Note the inclusion of the Google API javascript file below. Chartkick can use either Google Charts or Highcharts for charting. In this example we use Google Charts. We also utilize Bootstrap for a cleaner look and feel.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/views/layouts/application.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;!</span><span class="no">DOCTYPE</span> <span class="n">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="n">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="n">head</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">title</span><span class="o">&gt;</span><span class="no">ChartKickExample</span><span class="o">&lt;</span><span class="sr">/title&gt;</span>
-</span><span class='line'><span class="sr">  </span>
-</span><span class='line'><span class="sr">  &lt;%= stylesheet_link_tag    &#39;application&#39;, media: &#39;all&#39; %&gt;</span>
-</span><span class='line'><span class="sr">  &lt;%= javascript_include_tag &#39;application&#39; %&gt;</span>
-</span><span class='line'><span class="sr">  &lt;%= javascript_include_tag &quot;http:/</span><span class="o">/</span><span class="n">www</span><span class="o">.</span><span class="n">google</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">jsapi</span><span class="s2">&quot;, &quot;</span><span class="n">chartkick</span><span class="s2">&quot; %&gt;</span>
-</span><span class='line'><span class="s2">  &lt;%= stylesheet_link_tag &#39;http://yandex.st/bootstrap/3.1.1/css/bootstrap.min.css&#39; %&gt;</span>
-</span><span class='line'><span class="s2">  &lt;%= javascript_include_tag &#39;http://yandex.st/bootstrap/3.1.1/js/bootstrap.min.js&#39; %&gt;</span>
-</span><span class='line'><span class="s2">  </span>
-</span><span class='line'><span class="s2">  &lt;%= csrf_meta_tags %&gt;</span>
-</span><span class='line'><span class="s2">&lt;/head&gt;</span>
-</span><span class='line'><span class="s2">&lt;body&gt;</span>
-</span><span class='line'><span class="s2">  &lt;div class=&quot;</span><span class="n">container</span><span class="s2">&quot;&gt;</span>
-</span><span class='line'><span class="s2">    &lt;%= yield %&gt;</span>
-</span><span class='line'><span class="s2">  &lt;/div&gt;</span>
-</span><span class='line'><span class="s2">&lt;/body&gt;</span>
-</span><span class='line'><span class="s2">&lt;/html&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Line Charts</strong><br/>
-  The first chart type we will work with is the line charts Line charts are handy for doing things like plotting out events over time. Open up your show view for the Homes controller and modify it so that it looks like the code listed below.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/views/homes/show.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;row&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">&lt;!--</span> <span class="no">Line</span> <span class="no">Chart</span> <span class="o">-</span> <span class="no">Single</span> <span class="no">Series</span> <span class="o">--&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Visits</span> <span class="no">By</span> <span class="no">Day</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
-</span><span class='line'><span class="sr">    &lt;%= line_chart @visits.group_by_day(:visited_at, format: &quot;%B %d, %Y&quot;).count, discrete: true %&gt;</span>
-</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now if you start a <code>rails s</code> and navigate to http://localhost:3000 you will see a chart being rendered showing the number of vists by day.
-</p>
-
-
-
-
-<p>
-  Great, now lets make a slightly more complex line chart. Open up the show view again and modify it so that it looks like the code listed below.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/views/homes/show.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;row&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">&lt;!--</span> <span class="no">Line</span> <span class="no">Chart</span> <span class="o">-</span> <span class="no">Single</span> <span class="no">Series</span> <span class="o">--&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Visits</span> <span class="no">By</span> <span class="no">Day</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
-</span><span class='line'><span class="sr">    &lt;%= line_chart @visits.group_by_day(:visited_at, format: &quot;%B %d, %Y&quot;).count, discrete: true %&gt;</span>
-</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">&lt;!--</span> <span class="no">Line</span> <span class="no">Chart</span> <span class="o">-</span> <span class="no">Multiple</span> <span class="no">Series</span> <span class="o">--&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Visits</span> <span class="no">By</span> <span class="no">Country</span> <span class="no">Per</span> <span class="no">Day</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
-</span><span class='line'><span class="sr">    &lt;%= line_chart   Visit.pluck(&quot;country&quot;).uniq.map { |c| { name: c, data: @visits.where(country: c).group_by_day(:visited_at, format: &quot;%B %d, %Y&quot;).count }  }, discrete: true %&gt;</span>
-</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Refreshing the page results in a new line chart with multiple series listed. You see a line for each country with each point corresponding to the number of visits for that day.
-</p>
-
-
-
-
-<p>
-  <strong>Pie Charts and Area Charts</strong><br/>
-  We can also render a pie chart. Open up your show view again and append the following code to the end of the view.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/views/homes/show.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;row&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Total</span> <span class="no">Visits</span> <span class="n">by</span> <span class="no">Country</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
-</span><span class='line'><span class="sr">    &lt;%= pie_chart @visits.group(:country).count %&gt;</span>
-</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  If you refresh the page a pie chart will render with each slice representing the visits for that particular country. This information can also be represented via a geo chart. Modify your homes view to look like the code listed below.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/views/homes/show.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;row&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">&lt;!--</span> <span class="no">Line</span> <span class="no">Chart</span> <span class="o">-</span> <span class="no">Single</span> <span class="no">Series</span> <span class="o">--&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Visits</span> <span class="no">By</span> <span class="no">Day</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
-</span><span class='line'><span class="sr">    &lt;%= line_chart @visits.group_by_day(:visited_at, format: &quot;%B %d, %Y&quot;).count, discrete: true %&gt;</span>
-</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">&lt;!--</span> <span class="no">Line</span> <span class="no">Chart</span> <span class="o">-</span> <span class="no">Multiple</span> <span class="no">Series</span> <span class="o">--&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Visits</span> <span class="no">By</span> <span class="no">Country</span> <span class="no">Per</span> <span class="no">Day</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
-</span><span class='line'><span class="sr">    &lt;%= line_chart   Visit.pluck(&quot;country&quot;).uniq.map { |c| { name: c, data: @visits.where(country: c).group_by_day(:visited_at, format: &quot;%B %d, %Y&quot;).count }  }, discrete: true %&gt;</span>
-</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;div class=&quot;row&quot;&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">  &lt;!-- Pie Chart --&gt;</span>
-</span><span class='line'><span class="sr">  &lt;div class=&quot;col-xs-6&quot;&gt;</span>
-</span><span class='line'><span class="sr">    &lt;h3&gt;Total Visits by Country&lt;/</span><span class="n">h3</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="sx">%= pie_chart @visits.group(:country).count %&gt;</span>
-</span><span class='line'><span class="sx">  &lt;/div&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sx">  &lt;!-- Geo Chart --&gt; </span>
-</span><span class='line'><span class="sx">  &lt;div class=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Visits</span> <span class="no">By</span> <span class="no">Day</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
-</span><span class='line'><span class="sr">    &lt;%= geo_chart @visits.group(:country).count %&gt;</span>
-</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Awesome! Now if you refresh the page, you&#8217;ll notice a geo chart in the bottom right.
-</p>
-
-
-
-
-<p>
-  <strong>Area Charts</strong><br/>
-  You can also create an area chart. Add the code listed below to the end of your homes/show view.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/views/homes/show.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;!--</span> <span class="n">area</span> <span class="n">chart</span> <span class="o">--&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;row&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-12&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Total</span> <span class="no">Load</span> <span class="no">Time</span> <span class="no">By</span> <span class="no">Day</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
-</span><span class='line'><span class="sr">    &lt;%= area_chart @visits.group_by_day(:visited_at).maximum(:load_time) %&gt;</span>
-</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Great, now if you refresh the page you will see that the area chart has been added.
-</p>
-
-
-
-
-<p>
-  <strong>Bar Charts and Column Charts</strong><br/>
-  Both bar charts and column charts can be easily created. Modify your homes/show view so that it looks like the code listed below.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/views/homes/show.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;row&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">&lt;!--</span> <span class="no">Line</span> <span class="no">Chart</span> <span class="o">-</span> <span class="no">Single</span> <span class="no">Series</span> <span class="o">--&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Visits</span> <span class="no">By</span> <span class="no">Day</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
-</span><span class='line'><span class="sr">    &lt;%= line_chart @visits.group_by_day(:visited_at, format: &quot;%B %d, %Y&quot;).count, discrete: true %&gt;</span>
-</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">&lt;!--</span> <span class="no">Line</span> <span class="no">Chart</span> <span class="o">-</span> <span class="no">Multiple</span> <span class="no">Series</span> <span class="o">--&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Visits</span> <span class="no">By</span> <span class="no">Country</span> <span class="no">Per</span> <span class="no">Day</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
-</span><span class='line'><span class="sr">    &lt;%= line_chart   Visit.pluck(&quot;country&quot;).uniq.map { |c| { name: c, data: @visits.where(country: c).group_by_day(:visited_at, format: &quot;%B %d, %Y&quot;).count }  }, discrete: true %&gt;</span>
-</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;div class=&quot;row&quot;&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">  &lt;!-- Pie Chart --&gt;</span>
-</span><span class='line'><span class="sr">  &lt;div class=&quot;col-xs-6&quot;&gt;</span>
-</span><span class='line'><span class="sr">    &lt;h3&gt;Total Visits by Country&lt;/</span><span class="n">h3</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="sx">%= pie_chart @visits.group(:country).count %&gt;</span>
-</span><span class='line'><span class="sx">  &lt;/div&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sx">  &lt;!-- Geo Chart --&gt; </span>
-</span><span class='line'><span class="sx">  &lt;div class=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Visits</span> <span class="no">By</span> <span class="no">Day</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
-</span><span class='line'><span class="sr">    &lt;%= geo_chart @visits.group(:country).count %&gt;</span>
-</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;!-- area chart --&gt; </span>
-</span><span class='line'><span class="sr">&lt;div class=&quot;row&quot;&gt;</span>
-</span><span class='line'><span class="sr">  &lt;div class=&quot;col-xs-12&quot;&gt;</span>
-</span><span class='line'><span class="sr">    &lt;h3&gt;Total Load Time By Day&lt;/</span><span class="n">h3</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="sx">%= area_chart @visits.group_by_day(:visited_at).maximum(:load_time) %&gt;</span>
-</span><span class='line'><span class="sx">  &lt;/div&gt;</span>
-</span><span class='line'><span class="sx">&lt;/div&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sx">&lt;div class=</span><span class="s2">&quot;row&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;!--</span> <span class="no">Column</span> <span class="no">Chart</span> <span class="o">--&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Total</span> <span class="no">Visits</span> <span class="no">Per</span> <span class="no">Country</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
-</span><span class='line'><span class="sr">    &lt;%= column_chart @visits.group(:country).count %&gt;</span>
-</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;!--</span> <span class="no">Bar</span> <span class="no">Chart</span> <span class="o">--&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Total</span> <span class="no">Visits</span> <span class="no">Per</span> <span class="no">Country</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
-</span><span class='line'><span class="sr">    &lt;%= bar_chart @visits.group(:country).count %&gt;</span>
-</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  If you refresh the page you&#8217;ll see both column and bar charts at the bottom.
-</p>
-
-
-
-
-<p>
-  <strong>Remote Charts</strong><br/>
-  You can quickly and easily build remote AJAX driven charts. Let&#8217;s create a simple series chart. First, we will create a new method on your homes controller called visits_by_day. Open up your homes controller and modify it so that it looks like the code listed below.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/controllers/homes_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">HomesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
-</span><span class='line'>    <span class="vi">@visits</span> <span class="o">=</span> <span class="no">Visit</span><span class="o">.</span><span class="n">all</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">visits_by_day</span>
-</span><span class='line'>   <span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="no">Visit</span><span class="o">.</span><span class="n">group_by_day</span><span class="p">(</span><span class="ss">:visited_at</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s2">&quot;%B %d, %Y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Next, add in the code listed below to your homes/show view.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/views/homes/show.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;!--</span> <span class="no">Line</span> <span class="no">Chart</span> <span class="o">-</span> <span class="no">Single</span> <span class="no">Series</span> <span class="o">--&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-12&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Visits</span> <span class="no">By</span> <span class="no">Day</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
-</span><span class='line'><span class="sr">  &lt;%= line_chart visits_by_day_home_path %&gt;</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  If you refresh the page, you&#8217;ll notice that the new chart has been rendered. A quick look at your browser&#8217;s developer console will show you that the visits_by_day data is pulled down via AJAX and then the site is rendered.
-</p>
-
-
-
-
-<p>
-  <strong>Global Options</strong><br/>
-  You can customize the global options for ChartKick. Create an initializer called chartkick.rb and add in the code listed below.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>config/initializers/chartkick.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Chartkick</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>  <span class="ss">height</span><span class="p">:</span> <span class="s2">&quot;300px&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="ss">colors</span><span class="p">:</span> <span class="o">[</span><span class="s2">&quot;#ff0000&quot;</span><span class="p">,</span> <span class="s2">&quot;#00ff00&quot;</span><span class="p">,</span> <span class="s2">&quot;#0000ff&quot;</span><span class="p">,</span> <span class="s2">&quot;#ffff00&quot;</span><span class="p">,</span> <span class="s2">&quot;#ff00ff&quot;</span><span class="p">,</span> <span class="s2">&quot;0000ff&quot;</span><span class="o">]</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  If you restart your Rails server and refresh the page, you will notice that the colors have changed.
-</p>
-
-
-
-
-<p>
-  For more information on ChartKick you can check <a href="http://www.chartkick.com" target="_blank">Chartkick</a>.
-</p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/6/">&larr; Older</a>
@@ -3762,6 +3011,22 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/11/21/reactjs-component-lifecycle-unmounting/">ReactJS Component Lifecycle Unmounting</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/21/reactjs-component-lifecycle-updating/">ReactJS Component Lifecycle Updating</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/20/reactjs-component-lifecycle-mounting/">ReactJS Component Lifecycle Mounting</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/20/reactjs-component-lifecycle/">ReactJS Component Lifecycle</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/11/20/reactjs-accessing-child-properties/">ReactJS Accessing Child Properties</a>
       </li>
     
@@ -3771,22 +3036,6 @@
     
       <li class="post">
         <a href="/blog/2015/11/18/reactjs-ownership/">ReactJS Ownership</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/14/reactjs-state/">ReactJS State</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/14/reactjs-proptypes/">ReactJS PropTypes</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/07/reactjs-jsx/">ReactJS JSX</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/06/reactjs-getting-start-with-hello-world/">ReactJS Getting Start With Hello World</a>
       </li>
     
   </ul>
@@ -3832,7 +3081,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/javascript/">Javascript [ 16 ]</a>
+        <a href="/blog/categories/javascript/">Javascript [ 20 ]</a>
       </li>
     
       <li>
@@ -3848,7 +3097,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/reactjs/">Reactjs [ 9 ]</a>
+        <a href="/blog/categories/reactjs/">Reactjs [ 13 ]</a>
       </li>
     
   </ul>

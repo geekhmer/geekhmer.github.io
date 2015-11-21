@@ -79,6 +79,1101 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2014/07/22/decorator-design-pattern/">Decorator Design Pattern</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-22T20:10:00+07:00" pubdate data-updated="true">Jul 22<span>nd</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  In the object-oriented world, simple applications usually require small classes with static behaviors. Adding, modifying, and sharing those behaviors can be achieved by mixing in modules or inheriting from other classes at compile time.
+</p>
+
+
+
+
+<p>
+  However, more complex applications might require a particular instance of a class to gain additional functionality at runtime. To modify the behavior of an object dynamically, we can utilize the decorator design pattern.
+</p>
+
+
+
+
+<p>
+  <strong>When to Decorate</strong><br/>
+  Decoration can be used to add behavior to any individual object without affecting the behavior of other objects of the same class. Essentially the existing object is being wrapped with additional functionality. 
+</p>
+
+
+
+
+<p>
+  <strong>Some practical problems that can be solved by decoration are</strong><br/>
+  - applying one or more UI elements to a specific UI widget at runtime.<br/>
+  - saving an ActiveRecord model in various ways based on conditionals in a Rails controller.<br/>
+  - adding additional information to data streams by pre/appending with additional stream data.
+</p>
+
+
+
+
+<p>
+  <strong>Implementations of Decorators in Ruby</strong><br/>
+  There are several ways to implement the decorator pattern in Ruby, but I cover my 4 favorite ways:<br/>
+  - Class + Method Missing decorator<br/>
+  - Module + Extend + Super decorator<br/>
+  - Plain Old Ruby Object decorator<br/>
+  - SimpleDelegator + Super + Getobj decorator
+</p>
+
+
+
+
+<p>
+  <strong>Class + Method Missing Decorator</strong><br/>
+  The benefits of this implementation are:<br/>
+  - can be wrapped infinitely using Ruby instantiation.<br/>
+  - delegates through all decorators.<br/>
+  - can use the same decorator more than once on the same component.<br/>
+  - transparently uses component&#8217;s original interface.
+</p>
+
+
+
+
+<p>
+  The drawbacks of this implementation are:<br/>
+  - uses method_missing.<br/>
+  - the class of the decorated object is the decorator.
+</p>
+
+
+
+
+<p>
+  Sample example
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>sample.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Decorator</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">decorated</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@decorated</span> <span class="o">=</span> <span class="n">decorated</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">method_missing</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="vi">@decorated</span><span class="o">.</span><span class="n">respond_to?</span><span class="p">(</span><span class="n">meth</span><span class="p">)</span>
+</span><span class='line'>      <span class="vi">@decorated</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="k">super</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">respond_to?</span><span class="p">(</span><span class="n">meth</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@decorated</span><span class="o">.</span><span class="n">respond_to?</span><span class="p">(</span><span class="n">meth</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Coffee</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="mi">2</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Milk</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Decorator</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="vi">@decorated</span><span class="o">.</span><span class="n">cost</span> <span class="o">+</span> <span class="mi">0</span><span class="o">.</span><span class="mi">4</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Whip</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Decorator</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="vi">@decorated</span><span class="o">.</span><span class="n">cost</span> <span class="o">+</span> <span class="mi">0</span><span class="o">.</span><span class="mi">2</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Sprinkles</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Decorator</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="vi">@decorated</span><span class="o">.</span><span class="n">cost</span> <span class="o">+</span> <span class="mi">0</span><span class="o">.</span><span class="mi">3</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Whip</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Coffee</span><span class="o">.</span><span class="n">new</span><span class="p">)</span><span class="o">.</span><span class="n">cost</span> <span class="c1">#=&gt; 2.2</span>
+</span><span class='line'><span class="no">Sprinkles</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Whip</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Milk</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Coffee</span><span class="o">.</span><span class="n">new</span><span class="p">)))</span><span class="o">.</span><span class="n">cost</span> <span class="c1">#=&gt; 2.9</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Factory class</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">CoffeeFactory</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">cappuccino</span>
+</span><span class='line'>    <span class="no">Sprinkles</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Cream</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Milk</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Coffee</span><span class="o">.</span><span class="n">new</span><span class="p">)))</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">CoffeeFactory</span><span class="o">.</span><span class="n">cappucino</span><span class="o">.</span><span class="n">kind_of?</span> <span class="no">Coffee</span> <span class="c1">#=&gt; true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Module + Extend + Super Decorator</strong><br/>
+  The benefits of this implementation are:<br/>
+  - it delegates through all decorators.<br/>
+  - has all of the original interface because it is the original object.
+</p>
+
+
+
+
+<p>
+  The drawbacks of this implementation are:<br/>
+  - can not use the same decorator more than once on the same object.<br/>
+  - difficult to tell which decorator added the functionality.
+</p>
+
+
+
+
+<p>
+  Sample example
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>sample.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Coffee</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="mi">2</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">module</span> <span class="nn">Milk</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="k">super</span> <span class="o">+</span> <span class="mi">0</span><span class="o">.</span><span class="mi">4</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">module</span> <span class="nn">Sugar</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="k">super</span> <span class="o">+</span> <span class="mi">0</span><span class="o">.</span><span class="mi">2</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">coffee</span> <span class="o">=</span> <span class="no">Coffee</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">coffee</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="no">Milk</span><span class="p">)</span>
+</span><span class='line'><span class="n">coffee</span><span class="o">.</span><span class="n">cost</span>   <span class="c1">#=&gt; 2.4</span>
+</span><span class='line'><span class="n">coffee</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="no">Sugar</span><span class="p">)</span>
+</span><span class='line'><span class="n">coffee</span><span class="o">.</span><span class="n">cost</span>   <span class="c1">#=&gt; 2.6</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Plain Old Ruby Object Decorator</strong><br/>
+  The benefits of this implementation are:<br/>
+  - can be wrapped infinitely using Ruby instantiation.<br/>
+  - delegates through all decorators.<br/>
+  - can use same decorator more than once on component.
+</p>
+
+
+
+
+<p>
+  The drawbacks of this implementation are:<br/>
+  - cannot transparently use component&#8217;s original interface.
+</p>
+
+
+
+
+<p>
+  Sample example
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>sample.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Coffee</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="mi">2</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">origin</span>
+</span><span class='line'>    <span class="s2">&quot;Cambodia&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Sugar</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@component</span> <span class="o">=</span> <span class="n">component</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="vi">@component</span><span class="o">.</span><span class="n">cost</span> <span class="o">+</span> <span class="mi">0</span><span class="o">.</span><span class="mi">2</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Milk</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@component</span> <span class="o">=</span> <span class="n">component</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="vi">@component</span><span class="o">.</span><span class="n">cost</span> <span class="o">+</span> <span class="mi">0</span><span class="o">.</span><span class="mi">4</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">coffee</span> <span class="o">=</span> <span class="no">Coffee</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="no">Sugar</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Milk</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">coffee</span><span class="p">))</span><span class="o">.</span><span class="n">cost</span>  <span class="c1">#=&gt; 2.6</span>
+</span><span class='line'><span class="no">Sugar</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Sugar</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">coffee</span><span class="p">))</span><span class="o">.</span><span class="n">cost</span> <span class="c1">#=&gt; 2.4</span>
+</span><span class='line'><span class="no">Sugar</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Milk</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">coffee</span><span class="p">))</span><span class="o">.</span><span class="n">class</span> <span class="c1">#=&gt; Sugar</span>
+</span><span class='line'><span class="no">Milk</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">coffee</span><span class="p">)</span><span class="o">.</span><span class="n">origin</span>           <span class="c1">#=&gt; NoMethodError</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>SimpleDelegator + Super + Getobj</strong><br/>
+  The benefits of this implementation are:<br/>
+  - can be wrapped infinitely using Ruby instantiation.<br/>
+  - delegates through all decorators.<br/>
+  - can use same decorator more than once on component.<br/>
+  - transparently uses component&#8217;s original interface.<br/>
+  - class if the component.
+</p>
+
+
+
+
+<p>
+  The drawbacks of this implementation are:<br/>
+  - it redefines class.
+</p>
+
+
+
+
+<p>
+  Sample example
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>sample.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Coffee</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="mi">2</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">origin</span>
+</span><span class='line'>    <span class="s1">&#39;Cambodia&#39;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;delegate&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Decorator</span> <span class="o">&lt;</span> <span class="no">SimpleDelegator</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">class</span>
+</span><span class='line'>    <span class="n">__getobj__</span><span class="o">.</span><span class="n">class</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Milk</span> <span class="o">&lt;</span> <span class="no">Decorator</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="k">super</span> <span class="o">+</span> <span class="mi">0</span><span class="o">.</span><span class="mi">4</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, Let decorate your way with Decorator Design Pattern. :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/21/deploy-ruby-on-rails-4-to-heroku-on-ubuntu/">Deploy Ruby on Rails 4 to Heroku on Ubuntu</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-21T21:20:00+07:00" pubdate data-updated="true">Jul 21<span>st</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  Ruby on Rails is a popular web framework written in Ruby. In this artical covers using Rails 4 on Heroku. The many step for deploying Rails 4 to Heroku below:
+</p>
+
+
+
+
+<p>
+  <strong>1. Installation heroku environment <a href="https://toolbelt.heroku.com/">(www.toolbelt.heroku.com)</a></strong> &#8211; if you not yet have<br/>
+  Open your terminal and type command below:
+</p>
+
+
+
+
+<p>
+  1. <code>wget -qO- https://toolbelt.heroku.com/install.sh | sh</code><br/>
+  2. <code>gem install heroku foreman</code><br/>
+  3. <code>heroku login</code>
+</p>
+
+
+
+
+<p>
+  <strong>2. Installation git</strong> &#8211; if you not yet have<br/>
+  Open your terminal and type command below:
+</p>
+
+
+
+
+<p>
+  1. <code>sudo apt-get install git-core</code><br/>
+  2. <code>sudo apt-get install expat openssl zlib1g zlib1g-dev</code>
+</p>
+
+
+
+
+<p>
+  <strong>3. Create Ruby on Rails project<br/></strong>
+  Open your terminal and type command below:
+</p>
+
+
+
+
+<p>
+  <code>rails new app_name -d postgresql</code>
+</p>
+
+
+
+
+<p>
+  Go into you project, Open your terminal and type command below:
+</p>
+
+
+
+
+<p>
+  <code>cd app_name</code>
+</p>
+
+
+
+
+<p>
+  We will first create a controller called welcome for our home page to live, Open your terminal and type command below:
+</p>
+
+
+
+
+<p>
+  <code>rails generate controller welcome</code>
+</p>
+
+
+
+
+<p>
+   Next then add an index page in directory app/views/welcome/index.html.erb
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>index.html.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;h2&gt;</span>Hello World<span class="nt">&lt;/h2&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;p&gt;</span>
+</span><span class='line'>  The time is now: <span class="err">&lt;</span>%= Time.now %&gt;
+</span><span class='line'><span class="nt">&lt;/p&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We need to have Rails route to index action. We’ll edit config/routes.rb
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">root</span> <span class="s1">&#39;welcome#index&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Let run the rails app and visiting http://localhost:3000 in your browser, Open your terminal and type command below:
+</p>
+
+
+
+
+<p>
+  <code>rails server</code>
+</p>
+
+
+
+
+<p>
+  Then open Gemfile and add gems below at the end:
+</p>
+
+
+
+
+<p>
+  <code>gem 'heroku'</code><br/>
+  <code>gem 'thin'</code><br/>
+  <code>gem 'rails_12factor', group: :production</code>
+</p>
+
+
+
+
+<p>
+  Then open your terminal and type command below:
+</p>
+
+
+
+
+<p>
+  <code>bundle install</code>
+</p>
+
+
+
+
+<p>
+  Rails 4 requires Ruby 1.9.3 or above. Heroku has a recent version of Ruby installed, however you can specify an exact version by using the ruby DSL in your Gemfile by adding ruby &#8220;2.1.1&#8221; at the end of Gemfile. 
+</p>
+
+
+
+
+<p>
+  <code>ruby "2.1.1"</code>
+</p>
+
+
+
+
+<p>
+  <strong>4. Deploy to heroku<br/></strong>
+  Open your terminal and type command below:
+</p>
+
+
+
+
+<p>
+  1. <code>cd project_name</code><br/>
+  2. <code>git init</code><br/>
+  3. <code>git add .</code><br/>
+  4. <code>git commit -m “my first commit”</code><br/>
+  5. <code>heroku create heroku_app_name</code><br/>
+  6. <code>heroku git:remote -a heroku_app_name</code><br/>
+  7. <code>git push heroku master</code>
+</p>
+
+
+
+
+<p>
+  <strong>Each time you wish to deploy to Heroku<br/></strong>
+  Open your terminal and type command below:
+</p>
+
+
+
+
+<p>
+  1. <code>git add -A</code><br/>
+  2. <code>git commit -m “commit for deploy to heroku”</code><br/>
+  3. <code>git push -f heroku</code>
+</p>
+
+
+
+
+<p>
+  So far so good, You now have your first application deployed to Heroku. The next step is to deploy your own application. :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/17/useful-best-coding-in-ruby-on-rails-project/">Useful Best Coding in Ruby on Rails Project</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-17T22:24:00+07:00" pubdate data-updated="true">Jul 17<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  While a lot of techniques and libraries have come and gone as the community&#8217;s preferred way of doing something, there are some best practices that remain, and can lead to writing the clean code, most secure and maintainable Ruby on Rails code possible.<br/><br/>
+  Listed here there are the most popular and useful best coding you can use as a Ruby on Rails developer:
+</p>
+
+
+
+
+<p>
+  <strong>Fat Model - Thin Controller</strong><br/>
+  The most important ways to write clear and concise cod in Ruby on Rails is &#8220;Fat Model - Thin Controller&#8221;. Model and Controller are parts of MVC(Model - View - Controller), many logic should go in the Model, and Controller is a nice interface between the view and Model.<br/><br/>
+  In priactice, We should move any logic that isn&#8217;t about the response(setting a flash message, redirect, render view) to the model instead of the controller, anyway we can reuse it where possible and make it possible for testing outside of the Controller.
+</p>
+
+
+
+
+<p>
+  Let look at sample example we have code in brands_controller.rb:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>brands_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>  <span class="vi">@brands</span> <span class="o">=</span> <span class="no">Brand</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">:products</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">&#39;products.category_uuid = ?&#39;</span><span class="p">,</span> <span class="s1">&#39;AA43D840-C70B-11E3-9C51-B888E33867FC&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">uniq</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We can refactor it like this:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>brands_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>  <span class="vi">@brands</span> <span class="o">=</span> <span class="no">Brand</span><span class="o">.</span><span class="n">find_brands_by_category</span><span class="p">(</span><span class="s1">&#39;AA43D840-C70B-11E3-9C51-B888E33867FC&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then we can move the logic into model brand.rb:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>brand.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">find_brands_by_category</span><span class="p">(</span><span class="n">uuid</span><span class="p">)</span>
+</span><span class='line'>  <span class="no">Brand</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">:products</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">&#39;products.category_uuid = ?&#39;</span><span class="p">,</span> <span class="n">uuid</span><span class="p">)</span><span class="o">.</span><span class="n">uniq</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  With the methods Brand.find_brands_by_category, we’ve not only made it simpler to test our code, we’ve also made it possible to reuse that same set of conditions in another location. But as we’ll see shortly, even this is still not ideal.
+</p>
+
+
+
+
+<p>
+  <strong>Reusable Scopes and Relations</strong><br/>
+  Ruby on Rails provides a better way &#8211; scopes to avoid duplication condition in another methods.
+</p>
+
+
+
+
+<p>
+  Let look at sample example we have code in brands.rb:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>brand.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">scope</span> <span class="ss">:under_portal</span><span class="p">,</span> <span class="nb">lambda</span><span class="p">{</span> <span class="o">|</span><span class="n">portal_uuid</span><span class="o">|</span> <span class="n">where</span><span class="p">(</span><span class="n">portal_uuid</span><span class="p">:</span> <span class="n">portal_uuid</span><span class="p">)</span> <span class="k">unless</span> <span class="n">portal_uuid</span><span class="o">.</span><span class="n">blank?</span> <span class="p">}</span>
+</span><span class='line'><span class="n">scope</span> <span class="ss">:under_listing</span><span class="p">,</span> <span class="nb">lambda</span><span class="p">{</span> <span class="o">|</span><span class="n">alias_id</span><span class="o">|</span> <span class="n">where</span><span class="p">(</span><span class="n">listing_alias_id</span><span class="p">:</span> <span class="n">alias_id</span><span class="p">)</span> <span class="k">unless</span> <span class="n">alias_id</span><span class="o">.</span><span class="n">blank?</span> <span class="p">}</span>
+</span><span class='line'><span class="n">scope</span> <span class="ss">:under_category</span><span class="p">,</span> <span class="nb">lambda</span><span class="p">{</span> <span class="o">|</span><span class="n">category_uuid</span><span class="o">|</span> <span class="n">where</span><span class="p">(</span><span class="n">category_uuid</span><span class="p">:</span> <span class="n">category_uuid</span><span class="p">)</span> <span class="k">unless</span> <span class="n">category_uuid</span><span class="o">.</span><span class="n">blank?</span> <span class="p">}</span>
+</span><span class='line'><span class="n">scope</span> <span class="ss">:under_brand</span><span class="p">,</span> <span class="nb">lambda</span><span class="p">{</span> <span class="o">|</span><span class="n">brand_uuid</span><span class="o">|</span> <span class="n">where</span><span class="p">(</span><span class="n">brand_uuid</span><span class="p">:</span> <span class="n">brand_uuid</span><span class="p">)</span> <span class="k">unless</span> <span class="n">brand_uuid</span><span class="o">.</span><span class="n">blank?</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">set_scope</span><span class="p">(</span><span class="n">portal_uuid</span><span class="p">,</span> <span class="n">listing_alias_id</span><span class="p">,</span> <span class="n">category_uuid</span><span class="o">=</span><span class="kp">nil</span><span class="p">,</span> <span class="n">brand_uuid</span><span class="o">=</span><span class="kp">nil</span><span class="p">)</span>
+</span><span class='line'>  <span class="nb">self</span><span class="o">.</span><span class="n">under_portal</span><span class="p">(</span><span class="n">portal_uuid</span><span class="p">)</span><span class="o">.</span><span class="n">under_listing</span><span class="p">(</span><span class="n">listing_alias_id</span><span class="p">)</span><span class="o">.</span><span class="n">under_category</span><span class="p">(</span><span class="n">category_uuid</span><span class="p">)</span><span class="o">.</span><span class="n">under_brand</span><span class="p">(</span><span class="n">brand_uuid</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Virtual Attributes</strong><br/>
+  If you find that you’re manipulating data before passing it to a model (for example, converting the type of an object), it’s likely time you started structuring your code to take advantage of virtual attributes.
+</p>
+
+
+
+
+<p>
+  Virtual attributes are a very simple idea—essentially, all you’re doing is defining your own getter and setter methods.
+</p>
+
+
+
+
+<p>
+  Let look at sample example we have code:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>brand.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'><span class="vi">@user</span><span class="o">.</span><span class="n">first_name</span><span class="p">,</span> <span class="vi">@user</span><span class="o">.</span><span class="n">last_name</span> <span class="o">=</span> <span class="n">params</span><span class="o">[</span><span class="ss">:user</span><span class="o">][</span><span class="ss">:full_name</span><span class="o">].</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We could remove the second line, and instead add the following to our User model:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>brand.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">full_name</span><span class="o">=</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</span><span class='line'>  <span class="nb">self</span><span class="o">.</span><span class="n">first_name</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="n">last_name</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Use the Built-in Ruby Duck Typing Methods</strong><br/>
+  Ruby uses several conventions that can make development easier like implementing a to_s instance method on an object will give you a standard way of getting a string representation of your object.
+</p>
+
+
+
+
+<p>
+  By implementing these standard type conversions—in addition to to_s, there’s also to_i for integers, let have a look at the following string interpolation:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>brand.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="s2">&quot;Hello there, </span><span class="si">#{</span><span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Use Non-database-backed Models</strong><br/>
+  Although models in Rails are mostly based on ActiveRecord::Base or some other type of object mapper for a database, it’s important to remember that in MVC, the M isn’t restricted to database-backed models.
+</p>
+
+
+
+
+<p>
+  Using non-database-backed models can help to organize logic which might otherwise become muddy. For example, there are libraries that give you anActiveRecord-like interface for contact form emails.
+</p>
+
+
+
+
+<p>
+  When it comes time to interact with these models in your controller code, your code will be that much cleaner, as you can use the exact same approach as with database-backed models.
+</p>
+
+
+
+
+<p>
+  <strong>Package Your Code into Gems</strong><br/>
+  I you&#8217;ve used Ruby on Rails, you&#8217;ve noticed the wealth of rubygems available to Rails developers.
+  When you write code you think is general enough—which usually just means you’ve written it more than once before in another application, let extract it into a gem suitable for a wider range of purposes.
+</p>
+
+
+
+
+<p>
+  So far so good, there are hundreds of coding practices or techniques that can make your life as a Ruby on Rails developer easier, but I’ve tried to pick out some. :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/30/gems-for-helping-speed-up-your-ruby-on-rails-application/">Gems for Helping Speed Up Your Ruby on Rails Application</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-30T10:55:00+07:00" pubdate data-updated="true">Jun 30<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <strong>1. rails-footnotes</strong><br/>
+  Description: This gem allows you to display footnotes in your application on pertinent information such as database queries, request parameters, etc. You can also create your own custom footnotes for objects in your application.<br/>
+  Helping: It’s helpful for debugging your application and showing you how long your database query took.<br/>
+  Source: <a href="https://github.com/josevalim/rails-footnotes" target="_blank">https://github.com/josevalim/rails-footnotes</a>
+</p>
+
+
+
+
+<p>
+  <strong>2. bullet</strong><br/>
+  Description: This gem watches your database queries and alerts you when it thinks you should use eager loading, when you’re using eager loading unnecessarily, and when to consider using counter cache.<br/>
+  Helping: Unnecessary database queries slow down your application’s performance. Using eager loading and counter cache are two easy things you can implement for a performance boost. For high traffic websites, database queries can be the bottleneck for performance.<br/>
+  Source: <a href="https://github.com/flyerhzm/bullet" target="_blank">https://github.com/flyerhzm/bullet</a>
+</p>
+
+
+
+
+<p>
+  <strong>3. request-log-analyzer</strong><br/>
+  Description: This gem outputs a performance report based on your application’s database request log file(s). It includes metrics such as average server time (the average time a server needs to respond to a user request) and cumulative server time (the sum of all the server time needed to handle all the requests for a given action on the server, i.e., the “load” on a server).<br/>
+  Helping: It uses your log files to tell you how your server is responding to database requests and points you in the direction of code to optimize in your application.<br/>
+  Source: <a href="https://github.com/wvanbergen/request-log-analyzer" target="_blank">https://github.com/wvanbergen/request-log-analyzer</a>
+</p>
+
+
+
+
+<p>
+  <strong>4. ruby-prof</strong><br/>
+  Description: This is a code profiling tool for MRI ruby implementations. It can generate graphical reports and gives information on call times, memory usage, and object allocation.<br/>
+  Helping: It can help you figure out where your “slow code” is in your rails application.<br/>
+  Source: <a href="https://github.com/ruby-prof/ruby-prof" target="_blank">https://github.com/ruby-prof/ruby-prof</a>
+</p>
+
+
+
+
+<p>
+  <strong>5. rack-mini-profiler</strong><br/>
+  Description: This is originally a .NET tool ported over to Ruby that displays a speed profile badge on each html page you navigate to.<br/>
+  Helping: If a page feels “slow”, MiniProfiler can give you a good idea of where the bottleneck is. It also lets you know which “sessions” you have not seen and displays them to you the next time you access your user interface. It allows you to easily see how much time you’re spending on database queries versus other non-SQL related bottlenecks.<br/>
+  Source: <a href="https://github.com/MiniProfiler/rack-mini-profiler" target="_blank">https://github.com/MiniProfiler/rack-mini-profiler</a>
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2014/06/28/using-strong-parameters-with-fields-for-and-nested-forms-in-rails-4/">Using Strong Parameters With Fields for &amp; Nested Forms in Rails 4</a></h1>
     
     
@@ -1252,618 +2347,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/02/jsrender/">JSRender</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-02T17:08:00+07:00" pubdate data-updated="true">Jun 2<span>nd</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <strong>What is JsRender?</strong><br/>
-  Many development platforms use templates to reduce code and simplify maintenance, and HTML5 and JavaScript are no exception. JsRender is a JavaScript library that allows you to define a boilerplate structure once and reuse it to generate HTML dynamically. JsRender brings a new templating library to HTML5 development that has a codeless tag syntax and high performance, has no dependency on jQuery nor on the Document Object Model (DOM), supports creating custom functions and uses pure string-based rendering.
-</p>
-
-
-
-
-<p>
-  <strong>Why Templates?</strong><br/>
-  Using templates with JavaScript reduces and simplifies code. Without templates, adding a series of list items and other HTML elements for a set of data might require manipulating a browser’s DOM. This is where templating using a plug-in such as JsRender can be quite useful to do the heavy lifting.
-</p>
-
-
-
-
-<p>
-  <strong>Practice</strong>
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>demo.html </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;js/jquery.min.js&quot;</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;js/jsrender.js&quot;</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">link</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;css/bootstrap.min.css&quot;</span> <span class="nx">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="o">/&gt;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;book_template&quot;</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/x-jsrender&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">tr</span><span class="o">&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="nx">td</span><span class="o">&gt;</span><span class="p">{</span> <span class="p">{</span><span class="o">:</span><span class="err">#</span><span class="nx">index</span><span class="o">+</span><span class="mi">1</span><span class="p">}</span> <span class="p">}</span> <span class="o">&lt;</span><span class="err">/td&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="nx">td</span><span class="o">&gt;</span><span class="p">{</span> <span class="p">{</span><span class="o">&gt;</span><span class="nx">name</span><span class="p">}</span> <span class="p">}</span><span class="o">&lt;</span><span class="err">/td&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="nx">td</span><span class="o">&gt;</span><span class="p">{</span> <span class="p">{</span><span class="o">&gt;</span><span class="nx">releaseYear</span><span class="p">}</span> <span class="p">}</span><span class="o">&lt;</span><span class="err">/td&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="err">/tr&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>      <span class="kd">var</span> <span class="nx">books</span> <span class="o">=</span> <span class="p">[</span>
-</span><span class='line'>        <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="s2">&quot;Erlang&quot;</span><span class="p">,</span> <span class="nx">releaseYear</span><span class="o">:</span> <span class="s2">&quot;1986&quot;</span> <span class="p">},</span>
-</span><span class='line'>        <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="s2">&quot;Ruby&quot;</span><span class="p">,</span> <span class="nx">releaseYear</span><span class="o">:</span> <span class="s2">&quot;1998&quot;</span> <span class="p">},</span>
-</span><span class='line'>        <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="s2">&quot;Ruby on Rails&quot;</span><span class="p">,</span> <span class="nx">releaseYear</span><span class="o">:</span> <span class="s2">&quot;1999&quot;</span> <span class="p">},</span>
-</span><span class='line'>        <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="s2">&quot;Javascript&quot;</span><span class="p">,</span> <span class="nx">releaseYear</span><span class="o">:</span> <span class="s2">&quot;1976&quot;</span> <span class="p">}</span>
-</span><span class='line'>      <span class="p">];</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;#book_list&quot;</span><span class="p">).</span><span class="nx">html</span><span class="p">(</span>
-</span><span class='line'>        <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;#book_template&quot;</span><span class="p">).</span><span class="nx">render</span><span class="p">(</span><span class="nx">books</span><span class="p">)</span>
-</span><span class='line'>      <span class="p">);</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/head&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">div</span> <span class="kr">class</span><span class="o">=</span><span class="s2">&quot;container&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">section</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;fluidGridSystem&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="nx">div</span> <span class="kr">class</span><span class="o">=</span><span class="s2">&quot;page-header&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">h3</span><span class="o">&gt;</span><span class="nx">Render</span> <span class="nx">template</span> <span class="nx">against</span> <span class="nx">local</span> <span class="nx">data</span><span class="o">&lt;</span><span class="err">/h3&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="err">/div&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="nx">div</span> <span class="kr">class</span><span class="o">=</span><span class="s2">&quot;row-fluid show-grid&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">table</span> <span class="kr">class</span><span class="o">=</span><span class="s2">&quot;table table-bordered&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="nx">thead</span><span class="o">&gt;</span>
-</span><span class='line'>            <span class="o">&lt;</span><span class="nx">tr</span><span class="o">&gt;</span>
-</span><span class='line'>              <span class="o">&lt;</span><span class="nx">th</span><span class="o">&gt;</span><span class="nx">No</span><span class="o">&lt;</span><span class="err">/th&gt;</span>
-</span><span class='line'>              <span class="o">&lt;</span><span class="nx">th</span><span class="o">&gt;</span><span class="nx">Name</span><span class="o">&lt;</span><span class="err">/th&gt;</span>
-</span><span class='line'>              <span class="o">&lt;</span><span class="nx">th</span><span class="o">&gt;</span><span class="nx">Release</span> <span class="nx">Year</span><span class="o">&lt;</span><span class="err">/th&gt;</span>
-</span><span class='line'>            <span class="o">&lt;</span><span class="err">/tr&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="err">/thead&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="nx">tbody</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;book_list&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="err">/tbody&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="err">/table&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="err">/div&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="err">/section&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="err">/div&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/body&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/html&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You can download the <a href="https://github.com/Bunlong/jsrender" target="_blank">source code</a> and try it out.
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/22/tokeninput-jquery-multiple-select-item/">Tokeninput Jquery Multiple Select Item</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-22T16:46:00+07:00" pubdate data-updated="true">May 22<span>nd</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <strong>What is Tokeninput?</strong><br/>
-  Tokeninput is a jQuery plugin which allows your users to select multiple items from a predefined list, using autocompletion as they type to find each item. You may have seen a similar type of text entry when filling in the recipients field sending messages on facebook.
-</p>
-
-
-
-
-<p>
-  <a class="fancybox" href="/images/tokeninput_jquery.png"><img src="/images/tokeninput_jquery.png" alt="" width="680" /></a>
-</p>
-
-
-
-
-<p>
-  <strong>Practice</strong>
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>demo.html </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;src/jquery.tokeninput.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">link</span> <span class="nx">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;styles/token-input.css&quot;</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="o">/&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">link</span> <span class="nx">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;styles/token-input-facebook.css&quot;</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="o">/&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/head&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">h2</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;theme&quot;</span><span class="o">&gt;</span><span class="nx">Json</span> <span class="nx">local</span><span class="o">&lt;</span><span class="err">/h2&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;input-local&quot;</span> <span class="o">/&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>      <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;#input-local&quot;</span><span class="p">).</span><span class="nx">tokenInput</span><span class="p">([</span>
-</span><span class='line'>            <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="s2">&quot;856&quot;</span><span class="p">,</span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="s2">&quot;House&quot;</span><span class="p">},</span>
-</span><span class='line'>            <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="s2">&quot;1035&quot;</span><span class="p">,</span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="s2">&quot;Desperate Housewives&quot;</span><span class="p">}</span>
-</span><span class='line'>          <span class="p">],</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nx">theme</span><span class="o">:</span> <span class="s2">&quot;facebook&quot;</span>
-</span><span class='line'>        <span class="p">});</span>
-</span><span class='line'>      <span class="p">});</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="err">/div&gt;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">h2</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;theme&quot;</span><span class="o">&gt;</span><span class="nx">Json</span> <span class="nx">local</span> <span class="o">-</span> <span class="nx">no</span> <span class="nx">duplicates</span><span class="o">&lt;</span><span class="err">/h2&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;input-local-prevent-duplicates&quot;</span> <span class="o">/&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>      <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;#input-local-prevent-duplicates&quot;</span><span class="p">).</span><span class="nx">tokenInput</span><span class="p">([</span>
-</span><span class='line'>            <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="s2">&quot;856&quot;</span><span class="p">,</span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="s2">&quot;House&quot;</span><span class="p">},</span>
-</span><span class='line'>            <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="s2">&quot;1035&quot;</span><span class="p">,</span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="s2">&quot;Desperate Housewives&quot;</span><span class="p">}</span>
-</span><span class='line'>          <span class="p">],</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nx">theme</span><span class="o">:</span> <span class="s2">&quot;facebook&quot;</span><span class="p">,</span>
-</span><span class='line'>          <span class="nx">preventDuplicates</span><span class="o">:</span> <span class="kc">true</span>
-</span><span class='line'>        <span class="p">});</span>
-</span><span class='line'>      <span class="p">});</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="err">/div&gt;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">h2</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;theme&quot;</span><span class="o">&gt;</span><span class="nx">Json</span> <span class="nx">server</span><span class="o">&lt;</span><span class="err">/h2&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;input-server&quot;</span> <span class="o">/&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>      <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;#input-server&quot;</span><span class="p">).</span><span class="nx">tokenInput</span><span class="p">(</span><span class="s2">&quot;http://shell.loopj.com/tokeninput/tvshows.php&quot;</span><span class="p">,</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nx">theme</span><span class="o">:</span> <span class="s2">&quot;facebook&quot;</span>
-</span><span class='line'>        <span class="p">});</span>
-</span><span class='line'>      <span class="p">});</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="err">/div&gt;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">h2</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;prevent-duplicates&quot;</span><span class="o">&gt;</span><span class="nx">Json</span> <span class="nx">server</span> <span class="o">-</span> <span class="nx">no</span> <span class="nx">duplicates</span><span class="o">&lt;</span><span class="err">/h2&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;input-server-prevent-duplicates&quot;</span> <span class="o">/&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>      <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;#input-server-prevent-duplicates&quot;</span><span class="p">).</span><span class="nx">tokenInput</span><span class="p">(</span><span class="s2">&quot;http://shell.loopj.com/tokeninput/tvshows.php&quot;</span><span class="p">,</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nx">theme</span><span class="o">:</span> <span class="s2">&quot;facebook&quot;</span><span class="p">,</span>
-</span><span class='line'>          <span class="nx">preventDuplicates</span><span class="o">:</span> <span class="kc">true</span>
-</span><span class='line'>        <span class="p">});</span>
-</span><span class='line'>      <span class="p">});</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="err">/div&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/body&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/html&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You can download the <a href="https://github.com/Bunlong/tokeninput_jquery" target="_blank">source code</a> and try it out.
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/04/24/autoload-all-files-in-lib-directory-ruby-on-rails/">Autoload All Files in Lib Directory Ruby on Rails</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-24T21:59:00+07:00" pubdate data-updated="true">Apr 24<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  In Ruby on Rails to create your own ruby library you have to create ruby library in /lib directory, so far so good to autoload all ruby library in /lib directory you have to add some code below in /config/application.rb.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>application.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">config</span><span class="p">.</span><span class="nx">autoload_paths</span> <span class="o">+=</span> <span class="o">%</span><span class="nx">W</span><span class="p">(</span><span class="err">#</span><span class="p">{</span><span class="nx">config</span><span class="p">.</span><span class="nx">root</span><span class="p">}</span><span class="o">/</span><span class="nx">lib</span><span class="p">)</span>
-</span><span class='line'><span class="nx">config</span><span class="p">.</span><span class="nx">autoload_paths</span> <span class="o">+=</span> <span class="nx">Dir</span><span class="p">[</span><span class="s2">&quot;#{config.root}/lib/**/&quot;</span><span class="p">]</span>
-</span><span class='line'><span class="nx">config</span><span class="p">.</span><span class="nx">autoload_paths</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot;#{config.root}/lib&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/03/22/reduce-duplication-in-database-dot-yml-configuration-in-ruby-on-rails-project/">Reduce Duplication in database.yml Configuration in Ruby on Rails Project</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-03-22T00:03:00+07:00" pubdate data-updated="true">Mar 22<span>nd</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  By default rails generate database.yml that have the same attributes in each environment. So to reduce duplication we use aliasing to essentially perform a hash merge on the fly in the code.<br/>
-  So far so good please take a look the below code.
-</p>
-
-
-
-
-<p>
-  <strong>Before refactor</strong>
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>database.yml </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">development</span><span class="o">:</span>
-</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_development</span>
-</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
-</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
-</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
-</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
-</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
-</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">test</span><span class="o">:</span>
-</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_test</span>
-</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
-</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
-</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
-</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
-</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
-</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">staging</span><span class="o">:</span>
-</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_staging</span>
-</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
-</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
-</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
-</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
-</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
-</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">production</span><span class="o">:</span>
-</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_production</span>
-</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
-</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
-</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
-</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
-</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
-</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>After refactor</strong>
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>database.yml </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">defaults</span><span class="o">:</span> <span class="o">&amp;</span><span class="nx">defaults</span>
-</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
-</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
-</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
-</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
-</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">development</span><span class="o">:</span>
-</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_development</span>
-</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
-</span><span class='line'>  <span class="o">&lt;&lt;:</span> <span class="o">*</span><span class="nx">defaults</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">test</span><span class="o">:</span>
-</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_test</span>
-</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
-</span><span class='line'>  <span class="o">&lt;&lt;:</span> <span class="o">*</span><span class="nx">defaults</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">staging</span><span class="o">:</span>
-</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_staging</span>
-</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
-</span><span class='line'>  <span class="o">&lt;&lt;:</span> <span class="o">*</span><span class="nx">defaults</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">production</span><span class="o">:</span>
-</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_production</span>
-</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
-</span><span class='line'>  <span class="o">&lt;&lt;:</span> <span class="o">*</span><span class="nx">defaults</span>
-</span></code></pre></td></tr></table></div></figure>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/18/">&larr; Older</a>
@@ -1888,6 +2371,22 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/11/21/reactjs-component-lifecycle-unmounting/">ReactJS Component Lifecycle Unmounting</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/21/reactjs-component-lifecycle-updating/">ReactJS Component Lifecycle Updating</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/20/reactjs-component-lifecycle-mounting/">ReactJS Component Lifecycle Mounting</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/20/reactjs-component-lifecycle/">ReactJS Component Lifecycle</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/11/20/reactjs-accessing-child-properties/">ReactJS Accessing Child Properties</a>
       </li>
     
@@ -1897,22 +2396,6 @@
     
       <li class="post">
         <a href="/blog/2015/11/18/reactjs-ownership/">ReactJS Ownership</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/14/reactjs-state/">ReactJS State</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/14/reactjs-proptypes/">ReactJS PropTypes</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/07/reactjs-jsx/">ReactJS JSX</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/06/reactjs-getting-start-with-hello-world/">ReactJS Getting Start With Hello World</a>
       </li>
     
   </ul>
@@ -1958,7 +2441,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/javascript/">Javascript [ 16 ]</a>
+        <a href="/blog/categories/javascript/">Javascript [ 20 ]</a>
       </li>
     
       <li>
@@ -1974,7 +2457,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/reactjs/">Reactjs [ 9 ]</a>
+        <a href="/blog/categories/reactjs/">Reactjs [ 13 ]</a>
       </li>
     
   </ul>
