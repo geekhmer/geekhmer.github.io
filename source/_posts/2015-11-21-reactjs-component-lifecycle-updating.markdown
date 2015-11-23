@@ -65,3 +65,7 @@ keywords: ReactJS Component Lifecycle Updating
 </body>
 </html>
 {% endcodeblock %}
+
+<p>
+  So far go good, That's it!!! See ya!!! :)
+</p>
