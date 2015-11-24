@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ReactJS | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/reactjs/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2015-11-23T13:34:15+07:00</updated>
+  <updated>2015-11-24T12:40:13+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,257 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ReactJS Flux in Practice]]></title>
+    <link href="http://geekhmer.github.io/blog/2015/11/24/reactjs-flux-in-practice/"/>
+    <updated>2015-11-24T09:40:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2015/11/24/reactjs-flux-in-practice</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/react_flux.jpg" width="600" alt="ReactJS Flux in Practice" />
+</p>
+
+
+
+
+<p>
+  To build a ReactJS application with Flux I have deviced a little library called flux-react.
+</p>
+
+
+
+
+<p>
+  <strong>Actions</strong><br/>
+  Actions are what links your components (and anything else that wants to change state) with your stores. You define them just by naming them. When calling an action the arguments will be deepCloned to avoid later mutation of complex objects passed to the store.
+</p>
+
+
+<p>{% codeblock lang:javascript %}
+var Actions = flux.createActions([
+  &lsquo;addItem&rsquo;]
+);
+{% endcodeblock %}</p>
+
+<p>
+  <strong>Stores</strong><br/>
+  Stores are where you define your application state, update it and notify components about changes.
+</p>
+
+
+<p>{% codeblock lang:javascript %}
+var Store = flux.createStore({
+  // We put the state directly on the store object
+  lists: [],
+  // Then we point to the actions we want to react to in this store
+  actions: [</p>
+
+<pre><code>Actions.addItem
+</code></pre>
+
+<p>  ],
+  // The action maps directly to a method. So action addItem maps to the
+  // method addItem()
+  addItem: function (item) {</p>
+
+<pre><code>this.lists.push(item);
+this.emit('list.add');
+</code></pre>
+
+<p>  },
+  // The methods that components can use to get state information
+  // from the store. The context of the methods is the store itself.
+  // The returned values are deepcloned, which means
+  // that the state of the store is immutable
+  exports: {</p>
+
+<pre><code>getLists: function () {
+  return this.lists;
+}
+</code></pre>
+
+<p>  }
+});
+{% endcodeblock %}</p>
+
+<p>
+  Lets see how this is used in a component before going over the concept:
+</p>
+
+
+<p>{% codeblock lang:javascript %}
+var ComponentList = React.createClass({
+  getInitialState: function () {</p>
+
+<pre><code>return {
+  lists: Store.getLists()
+};
+</code></pre>
+
+<p>  },
+  triggerAction: function () {</p>
+
+<pre><code>Actions.addItem("Item added");
+</code></pre>
+
+<p>  },
+  onChange: function () {</p>
+
+<pre><code>this.setState({
+  lists: Store.getLists()
+});
+</code></pre>
+
+<p>  },
+  componentWillMount: function () {</p>
+
+<pre><code>Store.on('lists.add', this.onChange);
+</code></pre>
+
+<p>  },
+  componentWillUnmount: function () {</p>
+
+<pre><code>Store.off('lists.add', this.onChange);
+</code></pre>
+
+<p>  },
+  render: function () {</p>
+
+<pre><code>return (
+  &lt;div&gt;
+    &lt;button onClick={this.triggerAction}&gt;Click&lt;/button&gt;
+    &lt;br/&gt;&lt;br/&gt;
+    {JSON.stringify(this.state.lists)}
+  &lt;/div&gt;
+);
+</code></pre>
+
+<p>  }
+});
+{% endcodeblock %}</p>
+
+<p>
+  Okay. So what I noticed was that my actions always mapped directly to a method. If the action was called "addItem", the method handling that action in my store was also called "addItem". That is why actions in "flux-react" map directly to a method.
+</p>
+
+
+
+
+<p>
+  An other concept is the "exports". You only want to expose a set of getter methods that your components can use. Three things happens with exports:<br/>
+  - The exports object is the object that is returned when creating a store.<br/>
+  - All methods in exports are bound to the store, letting you use "this" to point to the state in the store.<br/>
+  - Exported values are automatically deep cloned.
+</p>
+
+
+
+
+<p>
+  Now that last part needs a bit more explenation. The state, in your store should only be changed inside the store. ex. returning a list of todos to a component should not allow that component to do changes there that is reflected in the store. This is because of debugging. If lots of different components starts to change state directly in your store you will get into trouble. So instead the "flux-react" store makes sure that any value returned from exports is deep cloned, right out of the box. The same goes for complex objects passed as arguments to an action. We do not want them to be changed later outside of the store and by doing so change the state of the store.
+</p>
+
+
+
+
+<p>
+  How about performance? Well, the thing is that values you return from a store are not big, neither are values you pass as arguments. Yes, maybe you have a phonebook of 10.000 people in your store, but your interface will never show all 10.000 of them. You may grab the 50 first of them and the rest requires searching or pagination. In that case it is only the search result, or next page, that is deep cloned. Never all the 10.000 people.
+</p>
+
+
+
+
+<p>
+  Full codes:
+</p>
+
+
+<p>{% codeblock lang:javascript %}
+&lt;!DOCTYPE html>
+<html>
+  <head></p>
+
+<pre><code>&lt;script type="text/javascript" src="http://fb.me/react-0.12.2.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="http://fb.me/JSXTransformer-0.12.2.js"&gt;&lt;/script&gt;
+&lt;script src="flux-react.js"&gt;&lt;/script&gt;
+</code></pre>
+
+<p>  </head>
+<body>
+  <script type="text/jsx"></p>
+
+<pre><code>var Actions = flux.createActions([
+  'addItem']
+);
+
+var Store = flux.createStore({
+  lists: [],
+  actions: [
+    Actions.addItem
+  ],
+  addItem: function (item) {
+    this.lists.push(item);
+    this.emit('lists.add');
+  },
+  exports: {
+    getLists: function () {
+      return this.lists;
+    }
+  }
+});
+
+var ComponentList = React.createClass({
+  getInitialState: function () {
+    return {
+      lists: Store.getLists()
+    };
+  },
+  triggerAction: function () {
+    Actions.addItem("Item added");
+  },
+  onChange: function () {
+    this.setState({
+      lists: Store.getLists()
+    });
+  },
+  componentWillMount: function () {
+    Store.on('lists.add', this.onChange);
+  },
+  componentWillUnmount: function () {
+    Store.off('lists.add', this.onChange);
+  },
+  render: function () {
+    return(
+      &lt;div&gt;
+        &lt;button onClick={this.triggerAction}&gt;Click&lt;/button&gt;
+        &lt;br/&gt;&lt;br/&gt;
+        {JSON.stringify(this.state.lists)}
+      &lt;/div&gt;
+    );
+  }
+});
+
+ReactDOM.renderComponent(&lt;ComponentList /&gt;, document.body);
+</code></pre>
+
+<p>  </script>
+</body>
+</html>
+{% endcodeblock %}</p>
+
+<p>
+  You can download the source code <a href="https://github.com/Bunlong/reactjs_flux_in_practice" target="_blank">here</a>.
+</p>
+
+
+
+
+<p>
+  So far go good, That's it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[What is Flux?]]></title>
@@ -450,87 +701,6 @@ React.render(&lt;App /&gt;, document.body);
 
 
 
-
-<p>
-  So far go good, That's it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[ReactJS Component Lifecycle Updating]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/11/21/reactjs-component-lifecycle-updating/"/>
-    <updated>2015-11-21T11:36:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/11/21/reactjs-component-lifecycle-updating</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/reactjs.png" width="600" alt="ReactJS Component Lifecycle Updating" />
-</p>
-
-
-
-
-<p>
-  ReactJS mounting have 4 methods:<br/>
-  - <code>componentWillReceiveProps(object nextProps)</code>: is invoked when a mounted component receives new props. This method should be used to compare <code>this.props</code> and nextProps to perform state transitions using <code>this.setState()</code>.<br/>
-  - <code>shouldComponentUpdate(object nextProps, object nextState): boolean</code>: is invoked when a component decides whether any changes warrant an update to the DOM. Implement this as an optimization to compare <code>this.props</code> with <code>nextProps</code> and <code>this.state</code> with <code>nextState</code> and return <code>false</code> if React should skip updating.<br/>
-  - <code>componentWillUpdate(object nextProps, object nextState)</code>: is invoked immediately before updating occurs. You cannot call <code>this.setState()</code> here.<br/>
-  - <code>componentDidUpdate(object prevProps, object prevState)</code>: is invoked immediately after updating occurs.
-</p>
-
-
-
-
-<p>
-  Example:
-</p>
-
-
-<p>{% codeblock lang:javascript %}
-&lt;!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title></title>
-  <script type="text/javascript" src="http://fb.me/react-0.12.2.js"></script>
-  <script type="text/javascript" src="http://fb.me/JSXTransformer-0.12.2.js"></script>
-</head>
-<body>
-  <script type="text/jsx"></p>
-
-<pre><code>var Button = React.createClass({
-  getInitialState: function() {
-    return {increasing: false}
-  },
-  handleUpdate: function() {
-    this.setProps({val: this.props.val+1});
-  },
-  componentWillReceiveProps: function(nextProps) {
-    this.setState({increasing: nextProps.val &gt; this.props.val});
-  },
-  shouldComponentUpdate: function(nextProps, nextState) {
-    return nextProps.val % 5 === 0;
-  },
-  render: function() {
-    console.log(this.state.increasing);
-    return(
-      &lt;div&gt;
-        &lt;button onClick={this.handleUpdate}&gt;{this.props.val}&lt;/button&gt;
-      &lt;/div&gt;
-    );
-  },
-  componentDidUpdate: function(prevProps, prevState) {
-    console.log('prevProps', prevProps);
-  }
-});
-
-ReactDOM.render(&lt;Button val={0} /&gt;, document.body);
-</code></pre>
-
-<p>  </script>
-</body>
-</html>
-{% endcodeblock %}</p>
 
 <p>
   So far go good, That's it!!! See ya!!! :)
