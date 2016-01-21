@@ -79,6 +79,200 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2014/06/30/gems-for-helping-speed-up-your-ruby-on-rails-application/">Gems for Helping Speed Up Your Ruby on Rails Application</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-30T10:55:00+07:00" pubdate data-updated="true">Jun 30<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <strong>1. rails-footnotes</strong><br/>
+  Description: This gem allows you to display footnotes in your application on pertinent information such as database queries, request parameters, etc. You can also create your own custom footnotes for objects in your application.<br/>
+  Helping: It’s helpful for debugging your application and showing you how long your database query took.<br/>
+  Source: <a href="https://github.com/josevalim/rails-footnotes" target="_blank">https://github.com/josevalim/rails-footnotes</a>
+</p>
+
+
+
+
+<p>
+  <strong>2. bullet</strong><br/>
+  Description: This gem watches your database queries and alerts you when it thinks you should use eager loading, when you’re using eager loading unnecessarily, and when to consider using counter cache.<br/>
+  Helping: Unnecessary database queries slow down your application’s performance. Using eager loading and counter cache are two easy things you can implement for a performance boost. For high traffic websites, database queries can be the bottleneck for performance.<br/>
+  Source: <a href="https://github.com/flyerhzm/bullet" target="_blank">https://github.com/flyerhzm/bullet</a>
+</p>
+
+
+
+
+<p>
+  <strong>3. request-log-analyzer</strong><br/>
+  Description: This gem outputs a performance report based on your application’s database request log file(s). It includes metrics such as average server time (the average time a server needs to respond to a user request) and cumulative server time (the sum of all the server time needed to handle all the requests for a given action on the server, i.e., the “load” on a server).<br/>
+  Helping: It uses your log files to tell you how your server is responding to database requests and points you in the direction of code to optimize in your application.<br/>
+  Source: <a href="https://github.com/wvanbergen/request-log-analyzer" target="_blank">https://github.com/wvanbergen/request-log-analyzer</a>
+</p>
+
+
+
+
+<p>
+  <strong>4. ruby-prof</strong><br/>
+  Description: This is a code profiling tool for MRI ruby implementations. It can generate graphical reports and gives information on call times, memory usage, and object allocation.<br/>
+  Helping: It can help you figure out where your “slow code” is in your rails application.<br/>
+  Source: <a href="https://github.com/ruby-prof/ruby-prof" target="_blank">https://github.com/ruby-prof/ruby-prof</a>
+</p>
+
+
+
+
+<p>
+  <strong>5. rack-mini-profiler</strong><br/>
+  Description: This is originally a .NET tool ported over to Ruby that displays a speed profile badge on each html page you navigate to.<br/>
+  Helping: If a page feels “slow”, MiniProfiler can give you a good idea of where the bottleneck is. It also lets you know which “sessions” you have not seen and displays them to you the next time you access your user interface. It allows you to easily see how much time you’re spending on database queries versus other non-SQL related bottlenecks.<br/>
+  Source: <a href="https://github.com/MiniProfiler/rack-mini-profiler" target="_blank">https://github.com/MiniProfiler/rack-mini-profiler</a>
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/28/using-strong-parameters-with-fields-for-and-nested-forms-in-rails-4/">Using Strong Parameters With Fields for &amp; Nested Forms in Rails 4</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-28T11:48:00+07:00" pubdate data-updated="true">Jun 28<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  With strong_parameters becoming the standard way of handling security in Rails 4, I played around with it. It works great except the documentation isn’t clear on how to handle nested forms inside Rails, specifically with the accepts_nested_attributes_for in the model and fields_for in views.<br/>
+  So far so good, let take a look a short example below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>account.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Account</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:people</span>
+</span><span class='line'>  <span class="n">accepts_nested_attributes_for</span> <span class="ss">:people</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>person.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Person</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:account</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>accounts_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AccountsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">new</span>
+</span><span class='line'>    <span class="vi">@account</span> <span class="o">=</span> <span class="no">Account</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>    <span class="vi">@account</span><span class="o">.</span><span class="n">people</span><span class="o">.</span><span class="n">build</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="vi">@account</span> <span class="o">=</span> <span class="no">Account</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">new_account_params</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="vi">@account</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'>      <span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+</span><span class='line'>        <span class="nb">format</span><span class="o">.</span><span class="n">html</span> <span class="p">{</span><span class="n">redirect_to</span> <span class="n">root_path</span><span class="p">,</span> <span class="ss">notice</span><span class="p">:</span> <span class="s2">&quot;Account created successfully.&quot;</span><span class="p">}</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">new_account_params</span>
+</span><span class='line'>    <span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:account</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:id</span><span class="p">,</span> <span class="ss">:name</span><span class="p">,</span> <span class="n">people_attributes</span><span class="p">:</span> <span class="o">[</span><span class="ss">:id</span><span class="p">,</span> <span class="ss">:email</span><span class="p">,</span> <span class="ss">:password</span><span class="p">,</span> <span class="ss">:password_confirmation</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2014/06/28/why-ruby/">Why Ruby?</a></h1>
     
     
@@ -1564,321 +1758,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/03/22/reduce-duplication-in-database-dot-yml-configuration-in-ruby-on-rails-project/">Reduce Duplication in database.yml Configuration in Ruby on Rails Project</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-03-22T00:03:00+07:00" pubdate data-updated="true">Mar 22<span>nd</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  By default rails generate database.yml that have the same attributes in each environment. So to reduce duplication we use aliasing to essentially perform a hash merge on the fly in the code.<br/>
-  So far so good please take a look the below code.
-</p>
-
-
-
-
-<p>
-  <strong>Before refactor</strong>
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>database.yml </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">development</span><span class="o">:</span>
-</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_development</span>
-</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
-</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
-</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
-</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
-</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
-</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">test</span><span class="o">:</span>
-</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_test</span>
-</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
-</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
-</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
-</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
-</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
-</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">staging</span><span class="o">:</span>
-</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_staging</span>
-</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
-</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
-</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
-</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
-</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
-</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">production</span><span class="o">:</span>
-</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_production</span>
-</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
-</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
-</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
-</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
-</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
-</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>After refactor</strong>
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>database.yml </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">defaults</span><span class="o">:</span> <span class="o">&amp;</span><span class="nx">defaults</span>
-</span><span class='line'>  <span class="nx">username</span><span class="o">:</span> <span class="nx">your_database_username</span>
-</span><span class='line'>  <span class="nx">password</span><span class="o">:</span> <span class="nx">your_database_password</span>
-</span><span class='line'>  <span class="nx">adapter</span><span class="o">:</span> <span class="nx">mysql2</span>
-</span><span class='line'>  <span class="nx">encoding</span><span class="o">:</span> <span class="nx">utf8</span>
-</span><span class='line'>  <span class="nx">collation</span><span class="o">:</span> <span class="nx">utf8_unicode_ci</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">development</span><span class="o">:</span>
-</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_development</span>
-</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
-</span><span class='line'>  <span class="o">&lt;&lt;:</span> <span class="o">*</span><span class="nx">defaults</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">test</span><span class="o">:</span>
-</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_test</span>
-</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
-</span><span class='line'>  <span class="o">&lt;&lt;:</span> <span class="o">*</span><span class="nx">defaults</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">staging</span><span class="o">:</span>
-</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_staging</span>
-</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
-</span><span class='line'>  <span class="o">&lt;&lt;:</span> <span class="o">*</span><span class="nx">defaults</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">production</span><span class="o">:</span>
-</span><span class='line'>  <span class="nx">database</span><span class="o">:</span> <span class="nx">blog_production</span>
-</span><span class='line'>  <span class="nx">host</span><span class="o">:</span> <span class="nx">localhost</span>
-</span><span class='line'>  <span class="o">&lt;&lt;:</span> <span class="o">*</span><span class="nx">defaults</span>
-</span></code></pre></td></tr></table></div></figure>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/03/17/rvm-ruby-version-manager/">RVM - Ruby Version Manager</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-03-17T23:48:00+07:00" pubdate data-updated="true">Mar 17<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/rvm.png" width="300" />
-</p>
-
-
-
-
-<p>
-  Ruby is a very popular programming language that has Ruby on Rails or RoR is a popular development framework that allows you to easily get your application up and running with minimal hassle.
-</p>
-
-
-
-
-<p>
-  Developing applications often times requires that you emulate different environments. Different versions of Ruby may be necessary for different projects. With conventional installations, this would impede your ability to be flexible.
-</p>
-
-
-
-
-<p>
-  Luckily, the Ruby Version Manager, known more widely as RVM, allows you to easily install multiple, contained versions of Ruby and easily switch between them.
-</p>
-
-
-
-
-<p><p>
-  <strong>Installing RVM</strong><br/>
-  Run a quick update to make sure that all of the packages we download to our VPS are up to date:<br/>
-  <code>sudo apt-get update</code><br/><br/>
-  If you do not have curl on your system, you can start by installing it:<br/>
-  <code>sudo apt-get install curl</code><br/><br/>
-  To install RVM:<br/>
-  <code>bash -s stable &lt; &lt;(curl -s <a href="https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer">https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer</a>)</code><br/><br/>
-  To inject RVM into your environment .bashrc add the bit of bash it mentions at the end of the installation:<br/>
-  <code>echo &lsquo;[[ -s &ldquo;$HOME/.rvm/scripts/rvm&rdquo; ]] &amp;&amp; source &ldquo;$HOME/.rvm/scripts/rvm&rdquo;&rsquo; >> .bashrc</code>
-</p></p>
-
-<p><p>
-  <strong>Installing Ruby</strong><br/>
-  Let’s go ahead and install Ruby MRI 1.9.3 (this is the default interpreter originally developed by Matz) first, and set that as our default interpreter. Afterwards, we’ll install Ruby 1.8.7, use RVM to easily switch between these two Rubies.<br/>
-  Intall ruby version 1.9.3:<br/>
-  <code>rvm install 1.9.3</code><br/><br/>
-  To verify it works:<br/>
-  <code>ruby -v</code><br/><br/>
-  To make ruby version 1.9.3 as default version:<br/>
-  <code>rvm &mdash;default 1.9.3</code><br/><br/>
-  Let’s install ruby version 1.8.7:<br/>
-  <code>rvm install 1.8.7</code><br/><br/>
-  To switch ruby version:<br/>
-  <code>rvm use 1.8.7</code> or <code>rvm 1.8.7</code>
-</p></p>
-
-<p><p>
-  <strong>Installing Rails</strong><br/>
-  To install the latest Rails:<br/>
-  <code>gem install rails</code>
-</p></p>
-
-<p><p>
-  <strong>Gemsets</strong><br/>
-  One common way to distribute code in Ruby is to use a format called gems. Gems can be installed to extend the capabilities of the core Ruby distribution, and there are often gems that are required to be installed to get certain programs to function correctly.<br/><br/>
-  In keeping with RVM&rsquo;s mission of providing contained Ruby environments, it is also possible to install gems that are only associated with a single Ruby installation. RVM calls this functionality gemsets.<br/><br/>
-  This means that you can have two different versions of the same gem, or you can make gems unaware of other gems on the system.<br/><br/>
-  To see the available gemsets for the current Ruby:<br/>
-  <code>rvm gemset list</code><br/><br/>
-  If you have more than one Ruby version installed, you can see all of the gemsets:<br/>
-  <code>rvm gemset list_all</code><br/><br/>
-  By default, you should have two gemsets configured:<br/>
-  &ndash; default: the gemset that is applied if no other gemset is specified.<br/>
-  &ndash; global: this gemset is inherited by every other gemset that is used. This set generally does not need to be selected because it will be included automatically. You should install shared gems here.
-</p></p>
-
-<p><p>
-  <strong>Creating Gemset for Rails Project</strong><br/>
-  1. Create a Rails project:<br/>
-  <code>rails new blog</code><br/><br/>
-  2. Get in the project:<br/>
-  <code>cd blog</code><br/><br/>
-  3. Create gemset for the project:<br/>
-  <code>rvm &mdash;rvmrc &mdash;create ruby_version@gemset_name</code><br/>
-  <code>rvm &mdash;rvmrc &mdash;create 1.9.3@blog</code><br/><br/>
-  4. Get out the project:<br/>
-  <code>cd ..</code><br/><br/>
-  5. Get in the project:<br/>
-  <code>cd blog</code><br/><br/>
-  6. To see the gemset that we have created and stand on:<br/>
-  <code>rvm gemset list</code><br/><br/>
-  So far so good whenever we cd into the project it will automatically switch to project&rsquo;s gemset.
-</p></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/19/">&larr; Older</a>
@@ -1894,6 +1773,14 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/01/21/saas-cloud-computing/">SaaS Cloud Computing</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/01/09/reactjs-controller-view-pattern/">ReactJS - Controller View Pattern</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2016/01/09/should-i-use-reactjs/">Should I Use ReactJS?</a>
@@ -1913,14 +1800,6 @@
     
       <li class="post">
         <a href="/blog/2015/11/21/reactjs-mixins/">ReactJS Mixins</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/21/reactjs-component-lifecycle-unmounting/">ReactJS Component Lifecycle Unmounting</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/21/reactjs-component-lifecycle-updating/">ReactJS Component Lifecycle Updating</a>
       </li>
     
   </ul>
@@ -1966,7 +1845,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/javascript/">Javascript [ 25 ]</a>
+        <a href="/blog/categories/javascript/">Javascript [ 26 ]</a>
       </li>
     
       <li>
@@ -1978,11 +1857,11 @@
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 27 ]</a>
+        <a href="/blog/categories/other/">Other [ 28 ]</a>
       </li>
     
       <li>
-        <a href="/blog/categories/reactjs/">Reactjs [ 18 ]</a>
+        <a href="/blog/categories/reactjs/">Reactjs [ 19 ]</a>
       </li>
     
   </ul>
