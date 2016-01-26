@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby on Rails | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby-on-rails/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2016-01-24T13:56:23+07:00</updated>
+  <updated>2016-01-26T15:58:25+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,386 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Rails Tagging]]></title>
+    <link href="http://geekhmer.github.io/blog/2016/01/26/rails-tagging/"/>
+    <updated>2016-01-26T15:03:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2016/01/26/rails-tagging</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="Rails Tagging" />
+</p>
+
+
+
+
+<p>
+  For instance, in a social network, a user might have tags that are called skills, interests, sports, and more. This article will show you how to implement tagging in your Rails application. Let’s run through this with me.
+</p>
+
+
+
+
+<p>
+  <strong>Installation</strong><br/>
+  Add gem <code>acts-as-taggable-on</code> to your Gemfile:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">acts</span><span class="o">-</span><span class="n">as</span><span class="o">-</span><span class="n">taggable</span><span class="o">-</span><span class="n">on</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  and run bundle:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  install migrations:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">generate</span> <span class="n">acts_as_taggable_on</span><span class="ss">:migration</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  This creates some tables and doesn't need to know anything specific about your models. The models and concerns for working with these tables (Tag, Tagging, etc).
+</p>
+
+
+
+
+<p>
+  <strong>Model Integration</strong>
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/models/post.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span>
+</span><span class='line'>  <span class="n">acts_as_taggable</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Now you can do, eg:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">post</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">create</span>
+</span><span class='line'><span class="n">post</span><span class="o">.</span><span class="n">tag_list</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">programming</span><span class="p">,</span> <span class="n">ruby</span><span class="p">,</span> <span class="n">rails</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'><span class="n">post</span><span class="o">.</span><span class="n">tag_list</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;=&gt; [&amp;lsquo;programming&amp;rsquo;, &amp;lsquo;ruby&amp;rsquo;, &amp;lsquo;rails&amp;rsquo;]&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <code>#tag_list=</code> takes a string and splits it up, using the resulting substrings to find_or_create Tags, and associate them with the taggable thing (eg, <code>Post</code>), through <code>Taggings</code>. You don't need to know this.
+</p>
+
+
+
+
+<p>
+  The important thing is that, with <code>#tag_list=</code> we can manage tags via a comma-separated-list in a text field in a form.
+</p>
+
+
+
+
+<p>
+  <strong>Controller Integration</strong>
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/controllers/posts_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostsController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@post = Post.create(post_params)</span>
+</span><span class='line'><span class="sr">redirect_to @post</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">def</span> <span class="nf">post_params</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;params.require(:post).permit(:title, :body, :tag_list)</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  This is assuming you're trying to tag an existing <code>Post</code> model with <code>title</code> and <code>body</code> fields, web-accessible through an existing <code>PostsController</code>, with <code>index</code>, <code>show</code>, <code>new</code>, etc. methods.
+</p>
+
+
+
+
+<p>
+  Substitute your own, the important machinery here is whitelisting <code>tag_list</code> from the <code>params</code>.
+</p>
+
+
+
+
+<p>
+  <strong>Form Integration</strong>
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/views/posts/_form.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="sx">%= form_for post do |f| %&gt;</span>
+</span><span class='line'><span class="sx">  &amp;lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">text_field</span> <span class="ss">:title</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &amp;lt;%= f.text_area :body %&gt;</span>
+</span><span class='line'>  <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="sx">%= f.text_field :tag_list %&gt;</span>
+</span><span class='line'><span class="sx">  &amp;lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">submit</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">&amp;lt;% end %&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Now you can create tags for stuff. How about displaying them? Couple options, I'll go through the most explicit (a <code>TagsController</code> with index and show actions), but they can be rolled up into other controllers/actions.
+</p>
+
+
+
+
+<p>
+  <strong>Controller</strong>
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">resources</span> <span class="ss">:posts</span>
+</span><span class='line'>  <span class="n">resources</span> <span class="ss">:tags</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:index</span><span class="p">,</span> <span class="ss">:show</span><span class="o">]</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/controllers/tags_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">TagsController</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@tags = ActsAsTaggableOn::Tag.all</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">def</span> <span class="nf">show</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@tag =  ActsAsTaggableOn::Tag.find(params[:id])</span>
+</span><span class='line'><span class="sr">@posts = Post.tagged_with(@tag.name)</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  It's unfortunate we have to do this slightly awkward workaround with <code>Post.tagged_with(@tag.name)</code> in <code>tags#show</code>. The <code>ActsAsTaggableOn::Tag</code> model does not have a built-in relationship with its taggable types (this is a necessary consequence of some polymorphism which we're not using here). We could add one for <code>Post</code>, but this way is easier to demonstrate.
+</p>
+
+
+
+
+<p>
+  <strong>Tags Views</strong>
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/views/acts_as_taggable_on/tags/_tag.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%=</span> <span class="n">link_to</span> <span class="n">tag</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">tag_path</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/views/tags/index.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;Tags&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%=</span> <span class="n">render</span> <span class="vi">@tags</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/views/tags/show.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;&lt;%= @tag.name %&gt;&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;&lt;%=</span> <span class="n">render</span> <span class="vi">@posts</span> <span class="sx">%&gt;&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Note the partial path is <code>acts_as_taggable_on/tags/tag</code>. This is so we can just say <code>render @tags</code> and let rails do its implicit magic. There are other ways to organize everything, but this is the simplest.
+</p>
+
+
+
+
+<p>
+  <strong>View Integration</strong>
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/views/posts/_post.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h2&gt;&lt;%= link_to post.title, post_path(post) %&gt;&lt;/</span><span class="n">h2</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;&lt;%=</span> <span class="n">render</span> <span class="n">post</span><span class="o">.</span><span class="n">tags</span> <span class="sx">%&gt;&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/views/posts/index.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;Posts&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%=</span> <span class="n">render</span> <span class="vi">@posts</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/views/posts/show.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;&lt;%= @post.title %&gt;&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;&lt;</span><span class="sx">%= @post.body %&gt;&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="sx">&lt;div&gt;&lt;%=</span> <span class="n">render</span> <span class="vi">@post</span><span class="o">.</span><span class="n">tags</span> <span class="sx">%&gt;&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  And that should be it. It'll look shitty, but I hope you can figure out how to elaborate on this once you have it working. If anything here is assuming familiarity with something you don't have, ask and I will gladly elaborate.
+</p>
+
+
+
+
+<p>
+  So far so good, That's it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Rails 5 ActionCable Architecture and Concepts]]></title>
@@ -868,89 +1248,6 @@
 
 <p>
   So far go good, That's it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Rails Server Command Line Options]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/07/11/rails-server-command-line-options/"/>
-    <updated>2015-07-11T22:19:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/07/11/rails-server-command-line-options</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="Rails Server Command Line Options" />
-</p>
-
-
-
-
-<p>
-  Syntax:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="o">[</span><span class="n">options</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Options:<br/>
-  -s, –config-script=path Uses the specified mongrel config script.<br/>
-  -p, –port=port Runs Rails on the specified port. Default: 3000<br/>
-  -b, –binding=ip Binds Rails to the specified ip. Default: 0.0.0.0<br/>
-  -e, –environment=name Specifies the environment to run this server under (test/development/production). Default: development
-</p>
-
-
-
-
-<p>
-  <strong>Listen on any Interface</strong><br/>
-  By default versions of Rails is localhost, this prevents users on your local network from accessing your network. You may not want to do this however. You may wish to share your development site with coworker so that they can review the site. Otherwise, you may wish to test the site on other devices such as a mobile device. Fortunately you can easily open the rails server up to all interfaces using the -b argument. Simple run the rails s command below:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">s</span> <span class="o">-</span><span class="n">b</span> <span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  <strong>Use a Different Port</strong><br/>
-  Sometimes you want to use a port other than 3000 for your Rails server. For instance, maybe you need to run multiple Rails servers. You can easily do this with the -p argument:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">s</span> <span class="o">-</span><span class="nb">p</span> <span class="mi">3001</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  This command line tells rails to start the server on port 3001 instead of 3000.
-</p>
-
-
-
-
-<p>
-  <strong>Run in a Different Environment</strong><br/>
-  You can start a rails server for another environment such as production or staging by using the -e argument along with the name of the environment you wish to start up in:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">s</span> <span class="o">-</span><span class="n">e</span> <span class="n">production</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  The code above starts the Rails server in the production environment. Very handy when you have custom environments or need to debug something.
-</p>
-
-
-
-
-<p>
-  So far so good, That's it!!! See ya!!! :)
 </p>
 
 ]]></content>

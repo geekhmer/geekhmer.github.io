@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2016-01-24T13:56:23+07:00</updated>
+  <updated>2016-01-26T15:58:25+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,359 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Rails Tagging]]></title>
+    <link href="http://geekhmer.github.io/blog/2016/01/26/rails-tagging/"/>
+    <updated>2016-01-26T15:03:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2016/01/26/rails-tagging</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="Rails Tagging" />
+</p>
+
+
+
+
+<p>
+  For instance, in a social network, a user might have tags that are called skills, interests, sports, and more. This article will show you how to implement tagging in your Rails application. Let’s run through this with me.
+</p>
+
+
+
+
+<p>
+  <strong>Installation</strong><br/>
+  Add gem <code>acts-as-taggable-on</code> to your Gemfile:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;acts-as-taggable-on&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  and run bundle:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  install migrations:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">generate</span> <span class="n">acts_as_taggable_on</span><span class="ss">:migration</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  This creates some tables and doesn&#8217;t need to know anything specific about your models. The models and concerns for working with these tables (Tag, Tagging, etc).
+</p>
+
+
+
+
+<p>
+  <strong>Model Integration</strong>
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/models/post.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span>
+</span><span class='line'>  <span class="n">acts_as_taggable</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now you can do, eg:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">post</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">create</span>
+</span><span class='line'><span class="n">post</span><span class="o">.</span><span class="n">tag_list</span> <span class="o">=</span> <span class="s2">&quot;programming, ruby, rails&quot;</span>
+</span><span class='line'><span class="n">post</span><span class="o">.</span><span class="n">tag_list</span>
+</span><span class='line'><span class="c1"># =&gt; [&#39;programming&#39;, &#39;ruby&#39;, &#39;rails&#39;]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <code>#tag_list=</code> takes a string and splits it up, using the resulting substrings to find_or_create Tags, and associate them with the taggable thing (eg, <code>Post</code>), through <code>Taggings</code>. You don&#8217;t need to know this.
+</p>
+
+
+
+
+<p>
+  The important thing is that, with <code>#tag_list=</code> we can manage tags via a comma-separated-list in a text field in a form.
+</p>
+
+
+
+
+<p>
+  <strong>Controller Integration</strong>
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/controllers/posts_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="vi">@post</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">post_params</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">redirect_to</span> <span class="vi">@post</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">post_params</span>
+</span><span class='line'>    <span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:post</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:title</span><span class="p">,</span> <span class="ss">:body</span><span class="p">,</span> <span class="ss">:tag_list</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  This is assuming you&#8217;re trying to tag an existing <code>Post</code> model with <code>title</code> and <code>body</code> fields, web-accessible through an existing <code>PostsController</code>, with <code>index</code>, <code>show</code>, <code>new</code>, etc. methods.
+</p>
+
+
+
+
+<p>
+  Substitute your own, the important machinery here is whitelisting <code>tag_list</code> from the <code>params</code>.
+</p>
+
+
+
+
+<p>
+  <strong>Form Integration</strong>
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/posts/_form.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= form_for post do |f| %&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">text_field</span> <span class="ss">:title</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%= f.text_area :body %&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="sx">%= f.text_field :tag_list %&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">submit</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">&lt;% end %&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now you can create tags for stuff. How about displaying them? Couple options, I&#8217;ll go through the most explicit (a <code>TagsController</code> with index and show actions), but they can be rolled up into other controllers/actions.
+</p>
+
+
+
+
+<p>
+  <strong>Controller</strong>
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">resources</span> <span class="ss">:posts</span>
+</span><span class='line'>  <span class="n">resources</span> <span class="ss">:tags</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:index</span><span class="p">,</span> <span class="ss">:show</span><span class="o">]</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>app/controllers/tags_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">TagsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>    <span class="vi">@tags</span> <span class="o">=</span> <span class="ss">ActsAsTaggableOn</span><span class="p">:</span><span class="ss">:Tag</span><span class="o">.</span><span class="n">all</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>    <span class="vi">@tag</span> <span class="o">=</span>  <span class="ss">ActsAsTaggableOn</span><span class="p">:</span><span class="ss">:Tag</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@posts</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">tagged_with</span><span class="p">(</span><span class="vi">@tag</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  It&#8217;s unfortunate we have to do this slightly awkward workaround with <code>Post.tagged_with(@tag.name)</code> in <code>tags#show</code>. The <code>ActsAsTaggableOn::Tag</code> model does not have a built-in relationship with its taggable types (this is a necessary consequence of some polymorphism which we&#8217;re not using here). We could add one for <code>Post</code>, but this way is easier to demonstrate.
+</p>
+
+
+
+
+<p>
+  <strong>Tags Views</strong>
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/acts_as_taggable_on/tags/_tag.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">link_to</span> <span class="n">tag</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">tag_path</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/tags/index.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Tags</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'><span class="sr">&lt;%= render @tags %&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/tags/show.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;&lt;</span><span class="sx">%= @tag.name %&gt;&lt;/h1&gt;</span>
+</span><span class='line'><span class="sx">&lt;div&gt;&lt;%=</span> <span class="n">render</span> <span class="vi">@posts</span> <span class="sx">%&gt;&lt;/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Note the partial path is <code>acts_as_taggable_on/tags/tag</code>. This is so we can just say <code>render @tags</code> and let rails do its implicit magic. There are other ways to organize everything, but this is the simplest.
+</p>
+
+
+
+
+<p>
+  <strong>View Integration</strong>
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/posts/_post.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h2</span><span class="o">&gt;&lt;</span><span class="sx">%= link_to post.title, post_path(post) %&gt;&lt;/h2&gt;</span>
+</span><span class='line'><span class="sx">&lt;div&gt;&lt;%=</span> <span class="n">render</span> <span class="n">post</span><span class="o">.</span><span class="n">tags</span> <span class="sx">%&gt;&lt;/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/posts/index.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Posts</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'><span class="sr">&lt;%= render @posts %&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/posts/show.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;&lt;</span><span class="sx">%= @post.title %&gt;&lt;/h1&gt;</span>
+</span><span class='line'><span class="sx">&lt;div&gt;&lt;%=</span> <span class="vi">@post</span><span class="o">.</span><span class="n">body</span> <span class="sx">%&gt;&lt;/div&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;&lt;%=</span> <span class="n">render</span> <span class="vi">@post</span><span class="o">.</span><span class="n">tags</span> <span class="sx">%&gt;&lt;/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And that should be it. It&#8217;ll look shitty, but I hope you can figure out how to elaborate on this once you have it working. If anything here is assuming familiarity with something you don&#8217;t have, ask and I will gladly elaborate.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Rails 5 ActionCable Architecture and Concepts]]></title>
@@ -3361,114 +3714,6 @@ React events:<br/>
 - Touch events - <code>onTouchCancel</code> <code>onTouchEnd</code> <code>onTouchMove</code> <code>onTouchStart</code><br/>
 - UI Events - <code>onScroll</code> <code>onWheel</code><br/>
 - Form Events - <code>onChange</code> <code>onInput</code> <code>onSubmit</code>
-</p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Why you should use ReactJS for your next project?]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/10/29/why-you-should-use-reactjs-for-your-next-project/"/>
-    <updated>2015-10-29T21:09:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/10/29/why-you-should-use-reactjs-for-your-next-project</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/reactjs.png" width="600" alt="Why you should use ReactJS for your next project?" />
-</p>
-
-
-
-
-<p>
-  <a href="https://facebook.github.io/react/" target="_blank">React</a>, developed by Facebook, is an open source library for building User Interfaces. As the front end world moves too fast. I am a big fan of AngularJS and a few months back I started trying React. The biggest reason for me to try React was to create apps that render on both client and server (with a little help from other libraries as well). In this article I am going to share the best reasons to use React in your next project:
-</p>
-
-
-
-
-<p>
-  <strong>1. Can Render on Both Client and Server</strong><br/>
-  Well, React uses a concept called Virtual DOM (discussed subsequently) that gives your UI a great performance boost. You can build the UI using React and render it on both server and client. This has a strong advantage over traditional SPAs (Single Page Apps). While SPAs are great for building rich AJAX based web apps. SEO is the biggest challenge. With React what you can do is take a hybrid approach and create apps. The initial request to your app should be a server side rendered version. The subsequent user interactions should use client side rendering. With this approach your app takes advantage of all the features of SPAs while still being search engine friendly. You don&#8217;t need the techniques to pre-render your pages anymore.
-</p>
-
-
-
-
-<p>
-  <strong>2. Component Oriented Development is Good</strong><br/>
-  React takes a component oriented approach. You can break your whole UI in terms of reusable components. As the components are well encapsulated, reusing and testing.
-</p>
-
-
-
-
-<p>
-  <strong>3. Separation of Concerns</strong><br/>
-  By expressing your UI in terms of well encapsulated and reusable components you achieve separation of concerns. A component shouldn&#8217;t try to do more than one thing. Rather it should do only one job and anytime you need to separate the concerns you build new components.
-</p>
-
-
-
-
-<p>
-  <strong>4. Simple and Declarative</strong><br/>
-  Your components represent how your app looks at any given time. Simply feed some data to your components and React takes care of refreshing the components when the underlying data changes.
-</p>
-
-
-
-
-<p>
-  <strong>5. Virtual DOM is Fast</strong><br/>
-  React creates a fake DOM for you. Most of the times you will be working with this virtual DOM as it&#8217;s way faster than manipulating the actual DOM. React keeps an in memory copy of the DOM and your components describe how the DOM looks at any given time. So, React is fast in computing the Diff and knows which parts to update. In short React decides what&#8217;s the fastest way to update the UI and this technique is definitely performant.
-</p>
-
-
-
-
-<p>
-  <strong>6. JSX is Cool and Simple</strong><br/>
-  JSX is known as JavaScript XML transform. You create your components with JSX which are then compiled into JavaScript. Don&#8217;t worry! React provides tools which continuously watch your source directory and re build whenever there is a code change. JSX, on the other hand, has 2 simple benefits such as:<br/>
-  - It&#8217;s easier to visualize the DOM with JSX syntax.<br/>
-  - Designers can be very comfortable with JSX.
-</p>
-
-
-
-
-<p>
-  <strong>7. Reactive Updates</strong><br/>
-  React&#8217;s philosophy is based on Reactive Updates. Traditionally what we do is watch the data and update our UI whenever the data changes. On the other hand React components have a render method which describes how the DOM should look like at any point. React caches the value obtained from the last call to render and compares it each time render is re-run. So, it knows exactly which part of your component needs to be updated and refreshes the UI accordingly.
-</p>
-
-
-
-
-<p>
-  <strong>8. Event Handling Done Right</strong><br/>
-  React takes care to bubble and capture events according to W3C spec. It uses a synthetic event system to ensure all the events work consistently across the browsers IE 8+. So, you should not be afraid of the inconsistent DOM APIs anymore.
-</p>
-
-
-
-
-<p>
-  <strong>9. React Addons</strong><br/>
-  React Addons offer additional utilities that can help you write better UIs. For example, you can use the Animation and Two way data binding Addons. You can also use the testing addon to test React components using test framework of your choice.
-</p>
-
-
-
-
-<p>
-  <strong>10. Facebook has Created Something Awesome</strong><br/>
-  React is being used in large websites such as Facebook, Instagram, The New York Times and many others. Clearly, React is doing a great job.
 </p>
 
 
