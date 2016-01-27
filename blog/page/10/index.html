@@ -80,6 +80,138 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/03/18/dependency-inversion-principle-in-ruby/">Dependency Inversion Principle in Ruby</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-03-18T23:54:00+07:00" pubdate data-updated="true">Mar 18<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/rights_and_wrongsof_ruby.jpg" width="400" alt="Dependency Inversion Principle in Ruby" />
+</p>
+
+
+
+
+<p>
+  Simply Dependency Inversion Principle states that: Abstractions should not depend upon details. Details should depend upon abstractions.
+</p>
+
+
+
+
+<p>
+  Let&#8217;s go back to the first example on the Open/Closed Principle and change it a bit:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Report</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">body</span>
+</span><span class='line'>    <span class="n">generate_reporty_stuff</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">print</span>
+</span><span class='line'>    <span class="no">JSONFormatter</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">JSONFormatter</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now there is a formatter class, but I&#8217;ve hardcoded it on the Report class, thus creating a dependency from the Report to the JSONFormatter. Since the Report is a more abstract (high-level) concept than the JSONFormatter, we&#8217;re effectively breaking the DIP.
+</p>
+
+
+
+
+<p>
+  We can solve it the exact same way with solved it on the Open/Closed Principle problem, with dependency injection:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Report</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">body</span>
+</span><span class='line'>    <span class="n">generate_reporty_stuff</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">print</span><span class="p">(</span><span class="ss">formatter</span><span class="p">:</span> <span class="no">JSONFormatter</span><span class="o">.</span><span class="n">new</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">formatter</span><span class="o">.</span><span class="n">format</span> <span class="n">body</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, this way the Report does not depend on the JSONFormatter and can use any type of formatter that has a method called format (this is known as duck typing). That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/03/18/interface-segregation-principle-in-ruby/">Interface Segregation Principle in Ruby</a></h1>
     
     
@@ -1607,829 +1739,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/03/03/versioning-with-papertrail-on-rails/">Versioning With PaperTrail on Rails</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-03-03T21:28:00+07:00" pubdate data-updated="true">Mar 3<span>rd</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/ruby_on_rails.png" width="400" alt="Versioning with PaperTrail on Rails" />
-</p>
-
-
-
-
-<p>
-  Imagine the situation, You open your website’s admin page to do some clean up, find some old data that hasn’t been viewed by anyone for ages, and delete it. Deletion succeeds and everything is okay, but after a second &#8220;No!!! That data contained VERY IMPORTANT INFORMATION that could possibly change the world!&#8221;, you realize. But, it’s gone and the world remains unchanged (well, there is still a chance for recovery if you have a backup of the Database).
-</p>
-
-
-
-
-<p>
-  Can we prevent this situation in our Rails application? Yes, for sure we can. Well, in this article, we are going to talk about how to implement a &#8220;History&#8221; page and an &#8220;undo&#8221; button (as well as &#8220;redo&#8221;) with the help of the <code>paper_trail</code> gem.
-</p>
-
-
-
-
-<p>
-  We are going to build a simple blog that allows to add, update, and destroy posts. And would be able to undo every action related to the posts (for example, undoing an unintentional delete). We will also provide a &#8220;History&#8221; page displaying a list of actions (and some other info) that users performed while working with posts.
-</p>
-
-
-
-
-<p>
-  <strong>Create Rails Project</strong><br/>
-  Run command below to create a new Rails application:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="kp">new</span> <span class="n">blog</span> <span class="o">-</span><span class="n">d</span> <span class="n">mysql</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Add Gems</strong><br/>
-  We will add a gems to our Gemfile. paper_trail, it will help us to create both the “History” page and an “undo” button:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Gemfile </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;paper_trail&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 3.0.1&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The blog app has one controller (apart from the ApplicationController), PostsController, that will be used to manage our posts. Initially, it has seven default methods: index, new, create, destroy, edit and update, along with a number of views related to them. I will not go into the details on how to create these methods and views, because they are really basic (you can create them using rails g scaffold Posts).
-</p>
-
-
-
-
-<p>
-  The blog contains a model: Post. The posts table have the following columns: id, title, body, created_at, updated_at.
-</p>
-
-
-
-
-<p>
-  And routes file will looks like:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>routes.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s1">&#39;posts#index&#39;</span>
-</span><span class='line'><span class="n">resources</span> <span class="ss">:posts</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  At this point, we are ready to setup paper_trail. First of all, create a special table to store the versions (it’s a cool feature of paper_trail – if we want to clear old versions later, we would need only to access one table).
-</p>
-
-
-
-
-<p>
-  Run command below to generate and migrate paper_trail:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="nb">exec</span> <span class="n">rails</span> <span class="n">generate</span> <span class="n">paper_trail</span><span class="ss">:install</span>
-</span><span class='line'><span class="n">bundle</span> <span class="nb">exec</span> <span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Create and apply the required migration. Add the following line to your Post model (app/models/post.rb):
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>post.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">has_paper_trail</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Well! Now, all changes to the posts table will be audited automatically. How cool is that?
-</p>
-
-
-
-
-<p>
-  You can also specify which changes should not be tracked. For example, if posts had a view_count column in and we did not want to track changes to it, the modification looks like in (app/models/post.rb):
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>post.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">has_paper_trail</span> <span class="ss">ignore</span><span class="p">:</span> <span class="o">[</span><span class="ss">:view_count</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Some fields can be skipped, they will neither be tracked nor included in the serialized version of the object (app/models/post.rb):
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>post.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">has_paper_trail</span> <span class="ss">skip</span><span class="p">:</span> <span class="o">[</span><span class="ss">:view_count</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Or can specified as well (app/models/post.rb):
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>post.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">has_paper_trail</span> <span class="ss">on</span><span class="p">:</span> <span class="o">[</span><span class="ss">:update</span><span class="p">,</span> <span class="ss">:create</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Or provide conditions on whether to track the event:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>post.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">has_paper_trail</span> <span class="k">if</span><span class="p">:</span> <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span> <span class="n">t</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="mi">10</span> <span class="p">},</span>
-</span><span class='line'>                <span class="k">unless</span><span class="p">:</span> <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span> <span class="n">t</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">blank?</span> <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Display the Log</strong><br/>
-  Now, you probably want to display the audited versions, It’s easy, just, add the following route:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>routes.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s1">&#39;posts#index&#39;</span>
-</span><span class='line'><span class="n">resources</span> <span class="ss">:posts</span>
-</span><span class='line'><span class="n">get</span> <span class="s1">&#39;/posts/history&#39;</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="s1">&#39;posts#history&#39;</span><span class="p">,</span> <span class="ss">as</span><span class="p">:</span> <span class="ss">:posts_history</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  To the history page for Posts. If your app has many models that are being audited, it’s a good idea to create a separate VersionsController and place all versions-related methods there. However, in our case, only the Post model is being audited, so let’s stick with one controller.
-</p>
-
-
-
-
-<p>
-  Add a history method to the controller (app/controllers/posts_controller.rb):
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>posts_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">history</span>
-</span><span class='line'>  <span class="vi">@versions</span> <span class="o">=</span> <span class="ss">PaperTrail</span><span class="p">:</span><span class="ss">:Version</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="s1">&#39;created_at DESC&#39;</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Note that we have to use PaperTrail::Version, not just Version. This line of code extracts all the recorded events from the versions table that we have created earlier and sorts them by the creation date. In a real app, paginating these events by using will_paginate or kaminari gem is advisable.
-</p>
-
-
-
-
-<p>
-  Rendering the view history (app/views/posts/history.html.erb):
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>history.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;container&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">History</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
-</span><span class='line'><span class="sr"> </span>
-</span><span class='line'><span class="sr">  &lt;ul&gt;</span>
-</span><span class='line'><span class="sr">    &lt;% @versions.each do |version| %&gt;</span>
-</span><span class='line'><span class="sr">      &lt;li&gt;</span>
-</span><span class='line'><span class="sr">        &lt;%= l(version.created_at, format: &quot;%-d.%m.%Y %H:%M:%S %Z&quot;) %&gt;&lt;br/</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="no">Event</span> <span class="ss">ID</span><span class="p">:</span> <span class="o">&lt;</span><span class="sx">%= version.id %&gt;&lt;br/&gt;</span>
-</span><span class='line'><span class="sx">        &lt;b&gt;Target:&lt;/b&gt; &lt;%=</span> <span class="n">version</span><span class="o">.</span><span class="n">item_type</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">        &lt;small&gt;</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span> <span class="o">&lt;</span><span class="sx">%= version.item_id %&gt;)&lt;/small&gt;; &lt;b&gt;action&lt;/b&gt; &lt;%=</span> <span class="n">version</span><span class="o">.</span><span class="n">event</span> <span class="sx">%&gt;;&lt;br/&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>          <span class="no">More</span> <span class="ss">info</span><span class="p">:</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;%=</span> <span class="n">version</span><span class="o">.</span><span class="n">object</span> <span class="sx">%&gt;&lt;/pre&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="sr">/div&gt;</span>
-</span><span class='line'><span class="sr">      &lt;/</span><span class="n">li</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="sx">% end %&gt;</span>
-</span><span class='line'><span class="sx">  &lt;/ul&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Here is the data being displayed:
-</p>
-
-
-<table>
-<thead>
-<tr>
-<th>Data </th>
-<th> Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>version.created_at </td>
-<td> When this event took place.</td>
-</tr>
-<tr>
-<td>version.id </td>
-<td> ID of this event.</td>
-</tr>
-<tr>
-<td>version.item_type </td>
-<td> Model name for the event. In our case, it’s Post.</td>
-</tr>
-<tr>
-<td>version.item_id </td>
-<td> ID of the resource (Post) that was changed.</td>
-</tr>
-<tr>
-<td>version.event </td>
-<td> The action applied to the resource (create, update, destroy).version.object, Full dump of the resource that was changed.</td>
-</tr>
-</tbody>
-</table>
-
-
-<p>
-  <br/>
-  There are some things that could be improved. For example, which fields were changed (especially for the update action)? Well, that is very easy to implement.
-</p>
-
-
-
-
-<p>
-  Run command below to create and apply migration:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">migration</span> <span class="n">add_object_changes_to_versions</span> <span class="n">object_changes</span><span class="ss">:text</span>
-</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  This can also be done when setting up paper_trail. You just need to provide an appropriate option to the generator below:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">generate</span> <span class="n">paper_trail</span><span class="ss">:install</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">changes</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  No further action is required, paper_trail will automatically diff the versions.
-</p>
-
-
-
-
-<p>
-  Now, we can add a new div with version.changeset block to our view (app/views/posts/history.html.erb):
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>history.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[.</span><span class="n">.</span><span class="o">.]</span>
-</span><span class='line'><span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="ss">Changeset</span><span class="p">:</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;%=</span> <span class="n">version</span><span class="o">.</span><span class="n">changeset</span> <span class="sx">%&gt;&lt;/pre&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
-</span><span class='line'><span class="sr">[...]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  It will display attribute values before and after the event (if an attribute remained unchanged it will not be displayed).
-</p>
-
-
-
-
-<p>
-  <strong>Track User-Specific Information</strong><br/>
-  Okay, now we know when of our precious blog post deletion. But, we don’t know who, High time to fix this issue.
-</p>
-
-
-
-
-<p>
-  Let’s track an IP address of the user responsible for the action. Of course, an IP address can be forged, but the main point here is to explain how to store metadata alongside with the event’s data. Go on and create a new migration below:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">migration</span> <span class="n">add_ip_to_versions</span> <span class="ss">ip</span><span class="p">:</span><span class="n">string</span>
-</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  paper_trail will not store anything in the ip column, by default, so we need to help it out a bit. Add this method to the ApplicationController (app/controllers/application_controller.rb):
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>application_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">info_for_paper_trail</span>
-</span><span class='line'>  <span class="p">{</span> <span class="ss">ip</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">remote_ip</span> <span class="p">}</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  paper_trail will use this method to fetch some additional info and store it as metadata. If you are using Rails 3 or protected_attributes with Rails 4, you will also need to create an initializer (initializers/paper_trail.rb):
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>paper_trail.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">PaperTrail</span>
-</span><span class='line'>  <span class="k">class</span> <span class="nc">Version</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>    <span class="n">attr_accessible</span> <span class="ss">:ip</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Metadata can also be provided in the model (app/models/post.rb) like this (presuming we have a timestamp column):
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>post.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">has_paper_trail</span> <span class="ss">meta</span><span class="p">:</span> <span class="p">{</span> <span class="ss">timestamp</span><span class="p">:</span> <span class="no">Time</span><span class="o">.</span><span class="n">now</span> <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The last thing to do is add a line into view (app/views/posts/history.html.erb):
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>history.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[.</span><span class="n">.</span><span class="o">.]</span>
-</span><span class='line'><span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="no">Remote</span> <span class="ss">address</span><span class="p">:</span><span class="o">&lt;</span><span class="sr">/b&gt; &lt;%= version.ip %&gt;&lt;br/</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">[.</span><span class="n">.</span><span class="o">.]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Undo an Action</strong><br/>
-  Let’s move on, allowing the user to undo their actions. Create undo method in posts controller (app/controllers/posts_controller.rb) that will undo the requested action:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>posts_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">undo</span>
-</span><span class='line'>  <span class="vi">@post_version</span> <span class="o">=</span> <span class="ss">PaperTrail</span><span class="p">:</span><span class="ss">:Version</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">begin</span>
-</span><span class='line'>    <span class="k">if</span> <span class="vi">@post_version</span><span class="o">.</span><span class="n">reify</span>
-</span><span class='line'>      <span class="vi">@post_version</span><span class="o">.</span><span class="n">reify</span><span class="o">.</span><span class="n">save</span>
-</span><span class='line'>    <span class="k">else</span>
-</span><span class='line'>      <span class="vi">@post_version</span><span class="o">.</span><span class="n">item</span><span class="o">.</span><span class="n">destroy</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>    <span class="n">flash</span><span class="o">[</span><span class="ss">:success</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;Undid that...&quot;</span>
-</span><span class='line'>  <span class="k">rescue</span>
-</span><span class='line'>    <span class="n">flash</span><span class="o">[</span><span class="ss">:alert</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;Failed undoing the action...&quot;</span>
-</span><span class='line'>  <span class="k">ensure</span>
-</span><span class='line'>    <span class="n">redirect_to</span> <span class="n">root_path</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The above code, find a version by id and then check if there are previous versions available for the resource using the reify method, this method will return nil if the resource was just created in the current version (obviously, if the resource was just created it does not have any previous versions.) Either rollback to the previous version using @post_version.reify.save or destroy the newly created resource using @post_version.item.destroy (the @post_version.item returns the actual resource).
-</p>
-
-
-
-
-<p>
-  And routes file will looks like:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>routes.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s1">&#39;posts#index&#39;</span>
-</span><span class='line'><span class="n">resources</span> <span class="ss">:posts</span>
-</span><span class='line'><span class="n">get</span> <span class="s1">&#39;/posts/history&#39;</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="s1">&#39;posts#history&#39;</span><span class="p">,</span> <span class="ss">as</span><span class="p">:</span> <span class="ss">:posts_history</span>
-</span><span class='line'><span class="n">post</span> <span class="s1">&#39;/posts/:id/undo&#39;</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="s1">&#39;posts#undo&#39;</span><span class="p">,</span> <span class="ss">as</span><span class="p">:</span> <span class="ss">:undo</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Then put this undo link into the flash message, so make sure to render it somewhere in your layout (app/views/layouts/application.html.erb):
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>application.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;container&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="sx">% flash.each </span><span class="k">do</span> <span class="o">|</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="o">|</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">    &lt;div class=&quot;alert alert-&lt;%= key %&gt;</span><span class="s2">&quot;&gt;</span>
-</span><span class='line'><span class="s2">      &lt;button type=&quot;</span><span class="n">button</span><span class="s2">&quot; class=&quot;</span><span class="n">close</span><span class="s2">&quot; data-dismiss=&quot;</span><span class="n">alert</span><span class="s2">&quot;&gt;&amp;times;&lt;/button&gt;</span>
-</span><span class='line'><span class="s2">      &lt;%= value.html_safe %&gt;</span>
-</span><span class='line'><span class="s2">    &lt;/div&gt;</span>
-</span><span class='line'><span class="s2">  &lt;% end %&gt;</span>
-</span><span class='line'><span class="s2">&lt;/div&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Then create a private method in the PostsController that generates an undo link:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>posts_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[.</span><span class="n">.</span><span class="o">.]</span>
-</span><span class='line'><span class="kp">private</span>
-</span><span class='line'><span class="k">def</span> <span class="nf">make_undo_link</span>
-</span><span class='line'><span class="err">  </span><span class="n">view_context</span><span class="o">.</span><span class="n">link_to</span> <span class="s1">&#39;Undo that plz!&#39;</span><span class="p">,</span> <span class="n">undo_path</span><span class="p">(</span><span class="vi">@post</span><span class="o">.</span><span class="n">versions</span><span class="o">.</span><span class="n">last</span><span class="p">),</span> <span class="nb">method</span><span class="p">:</span> <span class="ss">:post</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  We cannot use link_to inside the controller, so the reference to view_context points to the actual view. @post.versions fetches all the versions for the Post resource and @post.versions.last gets the latest one. This method can be used like this in PostsController (app/controllers/posts_controller.rb):
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>posts_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[.</span><span class="n">.</span><span class="o">.]</span>
-</span><span class='line'><span class="k">def</span> <span class="nf">update</span>
-</span><span class='line'>  <span class="vi">@post</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">if</span> <span class="vi">@post</span><span class="o">.</span><span class="n">update_attributes</span><span class="p">(</span><span class="n">post_params</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">flash</span><span class="o">[</span><span class="ss">:success</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;Post was updated! </span><span class="si">#{</span><span class="n">make_undo_link</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>    <span class="n">redirect_to</span> <span class="n">post_path</span><span class="p">(</span><span class="vi">@post</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">else</span>
-</span><span class='line'>    <span class="n">render</span> <span class="s1">&#39;edit&#39;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="o">[.</span><span class="n">.</span><span class="o">.]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Make sure to add it to the create and destroy methods as well.
-</p>
-
-
-
-
-<p>
-  Okay, I have undone an action… but now I want to redo it. Here, we should introduce a redo link that reverts the undo. There are only few modifications needed.
-</p>
-
-
-
-
-<p>
-  Then create another private method in PostsController (app/controllers/posts_controller.rb):
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>posts_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[.</span><span class="n">.</span><span class="o">.]</span>
-</span><span class='line'><span class="kp">private</span>
-</span><span class='line'><span class="k">def</span> <span class="nf">make_redo_link</span>
-</span><span class='line'>  <span class="n">params</span><span class="o">[</span><span class="ss">:redo</span><span class="o">]</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span> <span class="p">?</span> <span class="n">link</span> <span class="o">=</span> <span class="s2">&quot;Undo that plz!&quot;</span> <span class="p">:</span> <span class="n">link</span> <span class="o">=</span> <span class="s2">&quot;Redo that plz!&quot;</span>
-</span><span class='line'>  <span class="n">view_context</span><span class="o">.</span><span class="n">link_to</span> <span class="n">link</span><span class="p">,</span> <span class="n">undo_path</span><span class="p">(</span><span class="vi">@post_version</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="k">redo</span><span class="p">:</span> <span class="o">!</span><span class="n">params</span><span class="o">[</span><span class="ss">:redo</span><span class="o">]</span><span class="p">),</span> <span class="nb">method</span><span class="p">:</span> <span class="ss">:post</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="o">[.</span><span class="n">.</span><span class="o">.]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  This method is very similar to make_undo_link. The main difference is the params[:redo] which is true of false. Based on this parameter, change the text of the link – the URL actually remains unchanged. This is because redoing basically means reverting to the previous version, which is absolutely the same as the undo action.
-</p>
-
-
-
-
-<p>
-  Then alter the flash message inside the undo method in PostsController:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>posts_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[.</span><span class="n">.</span><span class="o">.]</span>
-</span><span class='line'><span class="k">def</span> <span class="nf">undo</span>
-</span><span class='line'><span class="o">[.</span><span class="n">.</span><span class="o">.]</span>
-</span><span class='line'>  <span class="n">flash</span><span class="o">[</span><span class="ss">:success</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;Undid that! </span><span class="si">#{</span><span class="n">make_redo_link</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'><span class="o">[.</span><span class="n">.</span><span class="o">.]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  That’s it, users can undo and redo their actions as many times and they want, every time being recorded by paper_trail.
-</p>
-
-
-
-
-<p>
-  The only one problem is that the versions table can become fat very quickly. This should probably be handled with some background process to remove old entries. The job would use something like:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">PaperTrail</span><span class="p">:</span><span class="ss">:Version</span><span class="o">.</span><span class="n">delete_all</span> <span class="o">[</span><span class="s2">&quot;created_at &lt; ?&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="o">.</span><span class="n">week</span><span class="o">.</span><span class="n">ago</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You also can limit the number of created versions per object by adding this line into an initializer:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">PaperTrail</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">version_limit</span> <span class="o">=</span> <span class="mi">3</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/11/">&larr; Older</a>
@@ -2452,6 +1761,10 @@
 </section><section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/01/27/how-to-make-session-data-available-to-models-in-ruby-on-rails/">How to Make Session Data Available to Models in Ruby on Rails?</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2016/01/26/rails-tagging/">Rails Tagging</a>
@@ -2477,10 +1790,6 @@
         <a href="/blog/2015/11/22/what-is-flux/">What Is Flux?</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2015/11/22/reactjs-composable-components/">ReactJS Composable Components</a>
-      </li>
-    
   </ul>
 </section>
 <section>
@@ -2500,7 +1809,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 97 ]</a>
+        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 98 ]</a>
       </li>
     
       <li>

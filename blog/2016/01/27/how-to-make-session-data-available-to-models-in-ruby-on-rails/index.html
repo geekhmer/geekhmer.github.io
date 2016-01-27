@@ -5,13 +5,13 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Rails 4 FriendlyId - GeeKhmer</title>
+  <title>How to Make Session Data Available to Models in Ruby on Rails? - GeeKhmer</title>
   <meta name="author" content="Bunlong Van">
   
   
   <meta name="description" content="The biggest website of computer programming, Ruby, Ruby on Rails, Erlang, Chicagoboss and Javascript in Southeast Asia.">
 
-  <meta name="keywords" content="Rails 4 FriendlyId">
+  <meta name="keywords" content="How to Make Session Data Available to Models in Ruby on Rails?">
 
   <!-- http://t.co/dKP3o1e -->
   <meta name="HandheldFriendly" content="True">
@@ -19,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://geekhmer.github.io/blog/2015/05/09/rails-4-friendlyid">
+  <link rel="canonical" href="http://geekhmer.github.io/blog/2016/01/27/how-to-make-session-data-available-to-models-in-ruby-on-rails">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="" rel="alternate" title="GeeKhmer" type="application/atom+xml">
@@ -77,7 +77,7 @@
   
   <header>
     
-      <h1 class="entry-title">Rails 4 FriendlyId</h1>
+      <h1 class="entry-title">How to Make Session Data Available to Models in Ruby on Rails?</h1>
     
     
       <p class="meta">
@@ -93,7 +93,7 @@
   
 
 
-<time datetime="2015-05-09T22:13:00+07:00" pubdate data-updated="true">May 9<span>th</span>, 2015</time>
+<time datetime="2016-01-27T11:11:00+07:00" pubdate data-updated="true">Jan 27<span>th</span>, 2016</time>
         
       </p>
     
@@ -101,42 +101,99 @@
 
 
 <div class="entry-content"><p>
-  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="Rails 4 FriendlyId" />
+  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="How to Make Session Data Available to Models in Ruby on Rails?" />
 </p>
 
 
 
 
 <p>
-  In this article we will go over using <a href="https://github.com/norman/friendly_id" target="_blank">FriendlyId</a> in Rails 4. It is important to note that the current version of FriendlyId (4.0) does not work with Rails 4. Therefore we will need to use FriendlyId 5.x, which is currently in release candidate status.
+  Ruby on Rails is implemented as the Model View Controller (MVC) pattern. This pattern separates the context of the Web Application (in the Controller and the View) from the core Model of the application. The Model contains the Domain objects which encapsulate business logic, data retrieval, etc. The View displays information to the user and allows them to provide input to the application. The Controller handles the interactions between the View and the Model.
 </p>
 
 
 
 
 <p>
-  First, let&#8217;s include the FriendlyId gem in our gemfile.
+  This separation is a very good design principle that generally helps prevent <a href="https://en.wikipedia.org/wiki/Spaghetti_code" target="_blank">spaghetti code</a>. Sometimes though the separation might break down.
 </p>
 
 
 
 
-<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+<p>
+  Rails provides the Active Record Callbacks which allows you to write code that will respond to the lifecycle events of the Model objects. For example you could log information every time a specific kind of Model object is saved. For example you could record some information every time an Account changed using the following:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>account.rb </span></figcaption>
  <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s2">&quot;friendly_id&quot;</span><span class="p">,</span> <span class="s2">&quot;~&gt; 5.0.1&quot;</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Account</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">after_update</span> <span class="ss">:log_audit_change</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">log_audit_change</span>
+</span><span class='line'>    <span class="no">Audit</span><span class="o">.</span><span class="n">audit_change</span><span class="p">(</span><span class="nb">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="n">new_balance</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 
 
 <p>
-  FriendlyId no longer overrides finder code by default. Because of this we will need to change the way our controller code works. FriendlyId now exposes it&#8217;s functionality via <code>.friendly</code>. For example, to find a post by it&#8217;s friendly id, we use something like <code>Post.friendly.find(params[:id])</code>. To get FriendlyId working, you need to modify your controllers to use this behavior. An example is shown below.
+  You might have noticed a limitation with the previous API though. You didn&#8217;t notice? The only information passed to the model is the Object that is being changed. What if you want more context than this? For example, what if you want to audit not only the values that changed them, but the user who made the change?
 </p>
 
 
 
 
-<figure class='code'><figcaption><span>app/controllers/posts_controller.rb </span></figcaption>
+<figure class='code'><figcaption><span>account.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Account</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">after_update</span> <span class="ss">:log_audit_change</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">log_audit_change</span>
+</span><span class='line'>    <span class="no">Audit</span><span class="o">.</span><span class="n">audit_change</span><span class="p">(</span><span class="n">current_user</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="n">new_balance</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  How do you get the <code>current_user</code> value? Well, you have to plan ahead a little bit. The User in this application is stored in the HTTP Session when the user is authenticated. The session isn&#8217;t directly available to the Model level so you have to figure out a way around this. One way to accomplish this is by using a named <a href="http://ruby-doc.org/core-2.3.0/Thread.html#M000484" target="_blank">Thread local variable</a>. Each HTTP request is served by its own thread. That means that a variable stored as thread local will be available for the entire processing of a request.
+</p>
+
+
+
+
+<p>
+  The UserInfo module encapsulates reading and writing the User object from/to the Thread local. This module can then be mixed in with other objects for easy access.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>user_info.rb </span></figcaption>
  <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -146,13 +203,13 @@
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
 <span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
-</span><span class='line'>    <span class="vi">@posts</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">all</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">UserInfo</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">current_user</span>
+</span><span class='line'>    <span class="no">Thread</span><span class="o">.</span><span class="n">current</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
-</span><span class='line'>    <span class="vi">@post</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">friendly</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">current_user</span><span class="o">=</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+</span><span class='line'>    <span class="no">Thread</span><span class="o">.</span><span class="n">current</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span> <span class="o">=</span> <span class="n">user</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
@@ -161,65 +218,13 @@
 
 
 <p>
-  If you have a large site making extensive use of FriendlyId, you can also restore the old finder override behavior. This isn&#8217;t recommended though. An example of how to do this is listed below.
+  A <code>before_filter</code> set in the ApplicationController will be called before any action is called in any controller. You can take advantage of this to copy a value out of the HTTP session and set it in the Thread local:
 </p>
 
 
 
 
-<figure class='code'><figcaption><span>app/models/post.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="kp">extend</span> <span class="no">FriendlyId</span>
-</span><span class='line'>  <span class="n">friendly_id</span> <span class="ss">:title</span><span class="p">,</span> <span class="ss">use</span><span class="p">:</span> <span class="o">[</span><span class="ss">:slugged</span><span class="p">,</span> <span class="ss">:finders</span><span class="o">]</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Once you&#8217;ve added this, finder override functionality should now be restored. For example, the code listed below will now work as before.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/controllers/posts_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
-</span><span class='line'>    <span class="vi">@posts</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">all</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
-</span><span class='line'>    <span class="vi">@post</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  FriendlyId 5 introduces a new slug candidates feature. This feature allows you to tell friendly id what to do in the case of duplicate slugs. See the code listed below for an example of how to utilize this functionality.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/models/post.rb </span></figcaption>
+<figure class='code'><figcaption><span>user_info.rb </span></figcaption>
  <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -231,15 +236,25 @@
 <span class='line-number'>9</span>
 <span class='line-number'>10</span>
 <span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="kp">extend</span> <span class="no">FriendlyId</span>
-</span><span class='line'>  <span class="n">friendly_id</span> <span class="ss">:slug_candidates</span><span class="p">,</span> <span class="ss">use</span><span class="p">:</span> <span class="o">[</span><span class="ss">:slugged</span><span class="p">,</span> <span class="ss">:finders</span><span class="o">]</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="ss">ActionController</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">before_filter</span> <span class="ss">:set_user</span>
 </span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">slug_candidates</span>
-</span><span class='line'>    <span class="o">[</span>
-</span><span class='line'>      <span class="ss">:title</span><span class="p">,</span>
-</span><span class='line'>      <span class="o">[</span><span class="ss">:title</span><span class="p">,</span> <span class="ss">:id</span><span class="o">]</span>
-</span><span class='line'>    <span class="o">]</span>
+</span><span class='line'>  <span class="kp">protected</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">authenticate</span>
+</span><span class='line'>    <span class="k">unless</span> <span class="n">session</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span>
+</span><span class='line'>      <span class="n">redirect_to</span> <span class="ss">:controller</span> <span class="o">=&gt;</span> <span class="s2">&quot;login&quot;</span>
+</span><span class='line'>      <span class="k">return</span> <span class="kp">false</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># Sets the current user into a named Thread location so that it can be accessed by models and observers</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">set_user</span>
+</span><span class='line'>    <span class="no">UserInfo</span><span class="o">.</span><span class="n">current_user</span> <span class="o">=</span> <span class="n">session</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
@@ -248,16 +263,47 @@
 
 
 <p>
-  The code listed above tells FriendlyId you want to use the slug_candidates method to make the slug unique. It will try the list beginning to last, so in the example above, it will try to generate the slug first using title, and then if a post by that title already exists, it will try again by appending the id.
+  At any point in a Model class that you need to have access to those values you can just mixin the helper module and then use its methods to access the data. In this final example we mixin the UserInfo module to our model and it will now have access to the <code>current_user</code> method:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>account.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Account</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">UserInfo</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">after_update</span> <span class="ss">:log_audit_change</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">log_audit_change</span>
+</span><span class='line'>    <span class="no">Audit</span><span class="o">.</span><span class="n">audit_change</span><span class="p">(</span><span class="n">current_user</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="n">new_balance</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  You generally shouldn&#8217;t need this kind of trick outside of a model. In most cases the Controller should pass all of the information needed by a Model object to it through its methods. That will allow the Model objects to interact and the Controller to do the orchestration needed. But in a few special cases, this trick might be handy.
 </p>
 
 
 
 
 <p>
-  Some other quick things to note when upgrading to FriendlyId 5:<br/>
-  - The default sequence separator has been changed from two dashes (&#8211;) to one dash (-). If you have a url scheme in place using the old way of doing things, you might want to find a workaround.<br/>
-  - FriendlyId no longer uses a numeric sequence to differentiate a conflicting slug. Instead it uses a UUID (example: 2bc08962-b3dd-4f29-b2e6-244710c86106). If you dislike this functionality, you can utilize the new slug candidates feature explained above.
+  So far so good, That&#8217;s it!!! See ya!!! :)
 </p>
 
 </div>
@@ -282,12 +328,12 @@
   
 
 
-<time datetime="2015-05-09T22:13:00+07:00" pubdate data-updated="true">May 9<span>th</span>, 2015</time>
+<time datetime="2016-01-27T11:11:00+07:00" pubdate data-updated="true">Jan 27<span>th</span>, 2016</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/ruby/'>Ruby</a>, <a class='category' href='/blog/categories/ruby-on-rails/'>Ruby on Rails</a>
+    <a class='category' href='/blog/categories/ruby-on-rails/'>Ruby on Rails</a>
   
 </span>
 
@@ -296,7 +342,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2015/05/09/rails-4-friendlyid/" data-via="" data-counturl="http://geekhmer.github.io/blog/2015/05/09/rails-4-friendlyid/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2016/01/27/how-to-make-session-data-available-to-models-in-ruby-on-rails/" data-via="" data-counturl="http://geekhmer.github.io/blog/2016/01/27/how-to-make-session-data-available-to-models-in-ruby-on-rails/" >Tweet</a>
   
   
   
@@ -307,10 +353,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2015/05/09/ruby-on-rails-get-a-users-gravatar/" title="Previous Post: Ruby on Rails Get a User's Gravatar">&laquo; Ruby on Rails Get a User's Gravatar</a>
+        <a class="basic-alignment left" href="/blog/2016/01/26/rails-tagging/" title="Previous Post: Rails Tagging">&laquo; Rails Tagging</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2015/05/11/enable-compression-for-nginx/" title="Next Post: Enable Compression for Nginx">Enable Compression for Nginx &raquo;</a>
       
     </p>
   </footer>
