@@ -9,7 +9,7 @@ layout: page
   <div class="team-content">
     <p>
       <strong>Bunlong VAN</strong><br/>
-      Software Craftsman, Full-Stack Software Engineer & Ruby/Rails Developer.<br/><br/>
+      Software as a Service (SaaS) Consultant, Software Craftsman, Full-Stack Software Engineer & Ruby/Rails Engineer.<br/><br/>
     </p>
   </div>
 </div>
