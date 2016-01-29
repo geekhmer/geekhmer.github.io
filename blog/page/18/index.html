@@ -80,6 +80,501 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2014/07/22/decorator-design-pattern/">Decorator Design Pattern</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-22T20:10:00+07:00" pubdate data-updated="true">Jul 22<span>nd</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  In the object-oriented world, simple applications usually require small classes with static behaviors. Adding, modifying, and sharing those behaviors can be achieved by mixing in modules or inheriting from other classes at compile time.
+</p>
+
+
+
+
+<p>
+  However, more complex applications might require a particular instance of a class to gain additional functionality at runtime. To modify the behavior of an object dynamically, we can utilize the decorator design pattern.
+</p>
+
+
+
+
+<p>
+  <strong>When to Decorate</strong><br/>
+  Decoration can be used to add behavior to any individual object without affecting the behavior of other objects of the same class. Essentially the existing object is being wrapped with additional functionality. 
+</p>
+
+
+
+
+<p>
+  <strong>Some practical problems that can be solved by decoration are</strong><br/>
+  - applying one or more UI elements to a specific UI widget at runtime.<br/>
+  - saving an ActiveRecord model in various ways based on conditionals in a Rails controller.<br/>
+  - adding additional information to data streams by pre/appending with additional stream data.
+</p>
+
+
+
+
+<p>
+  <strong>Implementations of Decorators in Ruby</strong><br/>
+  There are several ways to implement the decorator pattern in Ruby, but I cover my 4 favorite ways:<br/>
+  - Class + Method Missing decorator<br/>
+  - Module + Extend + Super decorator<br/>
+  - Plain Old Ruby Object decorator<br/>
+  - SimpleDelegator + Super + Getobj decorator
+</p>
+
+
+
+
+<p>
+  <strong>Class + Method Missing Decorator</strong><br/>
+  The benefits of this implementation are:<br/>
+  - can be wrapped infinitely using Ruby instantiation.<br/>
+  - delegates through all decorators.<br/>
+  - can use the same decorator more than once on the same component.<br/>
+  - transparently uses component&#8217;s original interface.
+</p>
+
+
+
+
+<p>
+  The drawbacks of this implementation are:<br/>
+  - uses method_missing.<br/>
+  - the class of the decorated object is the decorator.
+</p>
+
+
+
+
+<p>
+  Sample example
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>sample.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Decorator</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">decorated</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@decorated</span> <span class="o">=</span> <span class="n">decorated</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">method_missing</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="vi">@decorated</span><span class="o">.</span><span class="n">respond_to?</span><span class="p">(</span><span class="n">meth</span><span class="p">)</span>
+</span><span class='line'>      <span class="vi">@decorated</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="k">super</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">respond_to?</span><span class="p">(</span><span class="n">meth</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@decorated</span><span class="o">.</span><span class="n">respond_to?</span><span class="p">(</span><span class="n">meth</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Coffee</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="mi">2</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Milk</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Decorator</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="vi">@decorated</span><span class="o">.</span><span class="n">cost</span> <span class="o">+</span> <span class="mi">0</span><span class="o">.</span><span class="mi">4</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Whip</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Decorator</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="vi">@decorated</span><span class="o">.</span><span class="n">cost</span> <span class="o">+</span> <span class="mi">0</span><span class="o">.</span><span class="mi">2</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Sprinkles</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Decorator</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="vi">@decorated</span><span class="o">.</span><span class="n">cost</span> <span class="o">+</span> <span class="mi">0</span><span class="o">.</span><span class="mi">3</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Whip</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Coffee</span><span class="o">.</span><span class="n">new</span><span class="p">)</span><span class="o">.</span><span class="n">cost</span> <span class="c1">#=&gt; 2.2</span>
+</span><span class='line'><span class="no">Sprinkles</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Whip</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Milk</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Coffee</span><span class="o">.</span><span class="n">new</span><span class="p">)))</span><span class="o">.</span><span class="n">cost</span> <span class="c1">#=&gt; 2.9</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Factory class</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">CoffeeFactory</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">cappuccino</span>
+</span><span class='line'>    <span class="no">Sprinkles</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Cream</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Milk</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Coffee</span><span class="o">.</span><span class="n">new</span><span class="p">)))</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">CoffeeFactory</span><span class="o">.</span><span class="n">cappucino</span><span class="o">.</span><span class="n">kind_of?</span> <span class="no">Coffee</span> <span class="c1">#=&gt; true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Module + Extend + Super Decorator</strong><br/>
+  The benefits of this implementation are:<br/>
+  - it delegates through all decorators.<br/>
+  - has all of the original interface because it is the original object.
+</p>
+
+
+
+
+<p>
+  The drawbacks of this implementation are:<br/>
+  - can not use the same decorator more than once on the same object.<br/>
+  - difficult to tell which decorator added the functionality.
+</p>
+
+
+
+
+<p>
+  Sample example
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>sample.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Coffee</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="mi">2</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">module</span> <span class="nn">Milk</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="k">super</span> <span class="o">+</span> <span class="mi">0</span><span class="o">.</span><span class="mi">4</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">module</span> <span class="nn">Sugar</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="k">super</span> <span class="o">+</span> <span class="mi">0</span><span class="o">.</span><span class="mi">2</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">coffee</span> <span class="o">=</span> <span class="no">Coffee</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">coffee</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="no">Milk</span><span class="p">)</span>
+</span><span class='line'><span class="n">coffee</span><span class="o">.</span><span class="n">cost</span>   <span class="c1">#=&gt; 2.4</span>
+</span><span class='line'><span class="n">coffee</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="no">Sugar</span><span class="p">)</span>
+</span><span class='line'><span class="n">coffee</span><span class="o">.</span><span class="n">cost</span>   <span class="c1">#=&gt; 2.6</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Plain Old Ruby Object Decorator</strong><br/>
+  The benefits of this implementation are:<br/>
+  - can be wrapped infinitely using Ruby instantiation.<br/>
+  - delegates through all decorators.<br/>
+  - can use same decorator more than once on component.
+</p>
+
+
+
+
+<p>
+  The drawbacks of this implementation are:<br/>
+  - cannot transparently use component&#8217;s original interface.
+</p>
+
+
+
+
+<p>
+  Sample example
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>sample.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Coffee</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="mi">2</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">origin</span>
+</span><span class='line'>    <span class="s2">&quot;Cambodia&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Sugar</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@component</span> <span class="o">=</span> <span class="n">component</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="vi">@component</span><span class="o">.</span><span class="n">cost</span> <span class="o">+</span> <span class="mi">0</span><span class="o">.</span><span class="mi">2</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Milk</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@component</span> <span class="o">=</span> <span class="n">component</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="vi">@component</span><span class="o">.</span><span class="n">cost</span> <span class="o">+</span> <span class="mi">0</span><span class="o">.</span><span class="mi">4</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">coffee</span> <span class="o">=</span> <span class="no">Coffee</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="no">Sugar</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Milk</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">coffee</span><span class="p">))</span><span class="o">.</span><span class="n">cost</span>  <span class="c1">#=&gt; 2.6</span>
+</span><span class='line'><span class="no">Sugar</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Sugar</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">coffee</span><span class="p">))</span><span class="o">.</span><span class="n">cost</span> <span class="c1">#=&gt; 2.4</span>
+</span><span class='line'><span class="no">Sugar</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Milk</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">coffee</span><span class="p">))</span><span class="o">.</span><span class="n">class</span> <span class="c1">#=&gt; Sugar</span>
+</span><span class='line'><span class="no">Milk</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">coffee</span><span class="p">)</span><span class="o">.</span><span class="n">origin</span>           <span class="c1">#=&gt; NoMethodError</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>SimpleDelegator + Super + Getobj</strong><br/>
+  The benefits of this implementation are:<br/>
+  - can be wrapped infinitely using Ruby instantiation.<br/>
+  - delegates through all decorators.<br/>
+  - can use same decorator more than once on component.<br/>
+  - transparently uses component&#8217;s original interface.<br/>
+  - class if the component.
+</p>
+
+
+
+
+<p>
+  The drawbacks of this implementation are:<br/>
+  - it redefines class.
+</p>
+
+
+
+
+<p>
+  Sample example
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>sample.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Coffee</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="mi">2</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">origin</span>
+</span><span class='line'>    <span class="s1">&#39;Cambodia&#39;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;delegate&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Decorator</span> <span class="o">&lt;</span> <span class="no">SimpleDelegator</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">class</span>
+</span><span class='line'>    <span class="n">__getobj__</span><span class="o">.</span><span class="n">class</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Milk</span> <span class="o">&lt;</span> <span class="no">Decorator</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cost</span>
+</span><span class='line'>    <span class="k">super</span> <span class="o">+</span> <span class="mi">0</span><span class="o">.</span><span class="mi">4</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, Let decorate your way with Decorator Design Pattern. :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2014/07/21/deploy-ruby-on-rails-4-to-heroku-on-ubuntu/">Deploy Ruby on Rails 4 to Heroku on Ubuntu</a></h1>
     
     
@@ -1853,182 +2348,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/02/jsrender/">JSRender</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-02T17:08:00+07:00" pubdate data-updated="true">Jun 2<span>nd</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <strong>What is JsRender?</strong><br/>
-  Many development platforms use templates to reduce code and simplify maintenance, and HTML5 and JavaScript are no exception. JsRender is a JavaScript library that allows you to define a boilerplate structure once and reuse it to generate HTML dynamically. JsRender brings a new templating library to HTML5 development that has a codeless tag syntax and high performance, has no dependency on jQuery nor on the Document Object Model (DOM), supports creating custom functions and uses pure string-based rendering.
-</p>
-
-
-
-
-<p>
-  <strong>Why Templates?</strong><br/>
-  Using templates with JavaScript reduces and simplifies code. Without templates, adding a series of list items and other HTML elements for a set of data might require manipulating a browser’s DOM. This is where templating using a plug-in such as JsRender can be quite useful to do the heavy lifting.
-</p>
-
-
-
-
-<p>
-  <strong>Practice</strong>
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>demo.html </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;js/jquery.min.js&quot;</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;js/jsrender.js&quot;</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">link</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;css/bootstrap.min.css&quot;</span> <span class="nx">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="o">/&gt;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;book_template&quot;</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/x-jsrender&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">tr</span><span class="o">&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="nx">td</span><span class="o">&gt;</span><span class="p">{</span> <span class="p">{</span><span class="o">:</span><span class="err">#</span><span class="nx">index</span><span class="o">+</span><span class="mi">1</span><span class="p">}</span> <span class="p">}</span> <span class="o">&lt;</span><span class="err">/td&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="nx">td</span><span class="o">&gt;</span><span class="p">{</span> <span class="p">{</span><span class="o">&gt;</span><span class="nx">name</span><span class="p">}</span> <span class="p">}</span><span class="o">&lt;</span><span class="err">/td&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="nx">td</span><span class="o">&gt;</span><span class="p">{</span> <span class="p">{</span><span class="o">&gt;</span><span class="nx">releaseYear</span><span class="p">}</span> <span class="p">}</span><span class="o">&lt;</span><span class="err">/td&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="err">/tr&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>      <span class="kd">var</span> <span class="nx">books</span> <span class="o">=</span> <span class="p">[</span>
-</span><span class='line'>        <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="s2">&quot;Erlang&quot;</span><span class="p">,</span> <span class="nx">releaseYear</span><span class="o">:</span> <span class="s2">&quot;1986&quot;</span> <span class="p">},</span>
-</span><span class='line'>        <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="s2">&quot;Ruby&quot;</span><span class="p">,</span> <span class="nx">releaseYear</span><span class="o">:</span> <span class="s2">&quot;1998&quot;</span> <span class="p">},</span>
-</span><span class='line'>        <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="s2">&quot;Ruby on Rails&quot;</span><span class="p">,</span> <span class="nx">releaseYear</span><span class="o">:</span> <span class="s2">&quot;1999&quot;</span> <span class="p">},</span>
-</span><span class='line'>        <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="s2">&quot;Javascript&quot;</span><span class="p">,</span> <span class="nx">releaseYear</span><span class="o">:</span> <span class="s2">&quot;1976&quot;</span> <span class="p">}</span>
-</span><span class='line'>      <span class="p">];</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;#book_list&quot;</span><span class="p">).</span><span class="nx">html</span><span class="p">(</span>
-</span><span class='line'>        <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;#book_template&quot;</span><span class="p">).</span><span class="nx">render</span><span class="p">(</span><span class="nx">books</span><span class="p">)</span>
-</span><span class='line'>      <span class="p">);</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/head&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">div</span> <span class="kr">class</span><span class="o">=</span><span class="s2">&quot;container&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">section</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;fluidGridSystem&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="nx">div</span> <span class="kr">class</span><span class="o">=</span><span class="s2">&quot;page-header&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">h3</span><span class="o">&gt;</span><span class="nx">Render</span> <span class="nx">template</span> <span class="nx">against</span> <span class="nx">local</span> <span class="nx">data</span><span class="o">&lt;</span><span class="err">/h3&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="err">/div&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="nx">div</span> <span class="kr">class</span><span class="o">=</span><span class="s2">&quot;row-fluid show-grid&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">table</span> <span class="kr">class</span><span class="o">=</span><span class="s2">&quot;table table-bordered&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="nx">thead</span><span class="o">&gt;</span>
-</span><span class='line'>            <span class="o">&lt;</span><span class="nx">tr</span><span class="o">&gt;</span>
-</span><span class='line'>              <span class="o">&lt;</span><span class="nx">th</span><span class="o">&gt;</span><span class="nx">No</span><span class="o">&lt;</span><span class="err">/th&gt;</span>
-</span><span class='line'>              <span class="o">&lt;</span><span class="nx">th</span><span class="o">&gt;</span><span class="nx">Name</span><span class="o">&lt;</span><span class="err">/th&gt;</span>
-</span><span class='line'>              <span class="o">&lt;</span><span class="nx">th</span><span class="o">&gt;</span><span class="nx">Release</span> <span class="nx">Year</span><span class="o">&lt;</span><span class="err">/th&gt;</span>
-</span><span class='line'>            <span class="o">&lt;</span><span class="err">/tr&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="err">/thead&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="nx">tbody</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;book_list&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="err">/tbody&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="err">/table&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="err">/div&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="err">/section&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="err">/div&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/body&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/html&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You can download the <a href="https://github.com/Bunlong/jsrender" target="_blank">source code</a> and try it out.
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/19/">&larr; Older</a>
@@ -2053,6 +2372,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/01/29/how-to-make-project-success-on-github/">How to Make Project Success on GitHub?</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/01/27/how-to-make-session-data-available-to-models-in-ruby-on-rails/">How to Make Session Data Available to Models in Ruby on Rails?</a>
       </li>
     
@@ -2074,10 +2397,6 @@
     
       <li class="post">
         <a href="/blog/2015/11/24/reactjs-flux-in-practice/">ReactJS Flux in Practice</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/22/what-is-flux/">What Is Flux?</a>
       </li>
     
   </ul>
@@ -2135,7 +2454,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 28 ]</a>
+        <a href="/blog/categories/other/">Other [ 29 ]</a>
       </li>
     
       <li>
