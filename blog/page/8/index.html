@@ -80,6 +80,347 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/04/29/ruby-on-rails-getting-started-with-jbuilder/">Ruby on Rails Getting Started With JBuilder</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-29T20:20:00+07:00" pubdate data-updated="true">Apr 29<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/ruby_on_rails.png" width="400" alt="Ruby on Rails Getting Started with JBuilder" />
+</p>
+
+
+
+
+<p>
+  In the past, it could be really cumbersome to build proper JSON data feeds. Fortunately Ruby on Rails makes dealing with JSON much easier. Today we will learn how to use the JBuilder gem, which will allow us to easily build complex data feeds.
+</p>
+
+
+
+
+<p>
+  First, we need to include the gem in our gemfile. Recent versions of Ruby on Rails include this gem commented out towards the bottom of the file. In addition, Rails 4 already includes this gem so you don&#8217;t need to do anything. If it is in your gemfile and it is commented out, uncomment it, otherwise, add the gem using the line shown below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;jbuilder&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 1.2&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then run a bundle install:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Next, we will need a model and some sample data. In this sample project we will have 2 models. A product model, and a review model, which will be associated with products. Lets generate these 2 models now. Run the commands below to create the models and migrate the database:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Product</span> <span class="nb">name</span> <span class="ss">price</span><span class="p">:</span><span class="n">decimal</span><span class="p">{</span><span class="mi">12</span><span class="p">,</span><span class="mi">2</span><span class="p">}</span> <span class="ss">active</span><span class="p">:</span><span class="n">boolean</span>
+</span><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Review</span> <span class="ss">product</span><span class="p">:</span><span class="n">references</span> <span class="n">user</span> <span class="ss">rating</span><span class="p">:</span><span class="n">integer</span> <span class="ss">body</span><span class="p">:</span><span class="n">text</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Excellent, Now lets add some seed data. Copy and paste the following seed data into your seeds.rb file:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>db/seeds.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Product</span><span class="o">.</span><span class="n">delete_all</span>
+</span><span class='line'><span class="no">Review</span><span class="o">.</span><span class="n">delete_all</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Product</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="o">[</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;Nintendo Wii U Premium&quot;</span><span class="p">,</span> <span class="ss">price</span><span class="p">:</span> <span class="mi">250</span><span class="p">,</span> <span class="ss">active</span><span class="p">:</span> <span class="kp">true</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;XBox 360 250GB&quot;</span><span class="p">,</span> <span class="ss">price</span><span class="p">:</span> <span class="mi">250</span><span class="p">,</span> <span class="ss">active</span><span class="p">:</span> <span class="kp">true</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;Playstation 3 500 GB&quot;</span><span class="p">,</span> <span class="ss">price</span><span class="p">:</span> <span class="mi">239</span><span class="o">.</span><span class="mi">95</span><span class="p">,</span> <span class="ss">active</span><span class="p">:</span> <span class="kp">true</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;Nintendo Wii&quot;</span><span class="p">,</span> <span class="ss">price</span><span class="p">:</span> <span class="mi">99</span><span class="o">.</span><span class="mi">95</span><span class="p">,</span> <span class="ss">active</span><span class="p">:</span> <span class="kp">true</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;Nintendo 3DS&quot;</span><span class="p">,</span> <span class="ss">price</span><span class="p">:</span> <span class="mi">174</span><span class="o">.</span><span class="mi">95</span><span class="p">,</span> <span class="ss">active</span><span class="p">:</span> <span class="kp">true</span><span class="p">}</span>
+</span><span class='line'><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Review</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="o">[</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Bob&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;dated graphics.  Overpriced.  However, the games are awesome.&quot;</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Rich&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;MARIO!  &#39;nuff Said&quot;</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;James&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;Excellent value for the money.&quot;</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Alison&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;Love it!&quot;</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;James&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;Bigger hard drive then my XBox 360.  Weak user interface though.&quot;</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Kay&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;Extremely dated.  Don&#39;t buy.  Will be discontinued soon.&quot;</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Jed&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;Awesome handheld system, but a bit overpriced.&quot;</span><span class="p">}</span>
+</span><span class='line'><span class="o">]</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Next, run the seed command to populate your database:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">seed</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Well, we now have a database populated with products and reviews. Next we will need to set up the association between our products and our reviews. First, open up the Product model and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/models/product.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Product</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:reviews</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Great, now lets add the reverse association. Open up your Review model and verify that it looks like the code listed below. Rails should auto populate this, but double check just to be sure.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/models/reviews.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Review</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:product</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  With the database model created, our data populated, and our associations set up, now it&#8217;s time to create a controller. Run the command below to create products controller.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="n">products</span> <span class="n">index</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now, lets make a change to our routes.rb file so that our controller becomes a resourceful controller. Replace the line that says get &#8220;products/index&#8221; with the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># get &quot;products/index&quot;</span>
+</span><span class='line'><span class="n">resources</span> <span class="ss">:products</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:index</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  This sets up the products controller as a resourceful controller. Now, in order to create a json feed using jbuilder, we must create a jbuilder view. Create a new file in app/views/products called index.json.jbuilder and add the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/products/index.json.jbuilder </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">json</span><span class="o">.</span><span class="n">products</span> <span class="k">do</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Excellent. Now if you navigate to http://localhost:3000/products.json You will see an empty json data feed. Now, lets add some content to that data feed. Now, open up the products controller and modify it so that it looks like the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/controllers/products_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ProductsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>    <span class="vi">@products</span> <span class="o">=</span> <span class="no">Product</span><span class="o">.</span><span class="n">all</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Next, Open the jbuilder file again and modify it so that it looks like the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/products/index.json.jbuilder </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">json</span><span class="o">.</span><span class="n">products</span> <span class="vi">@products</span> <span class="k">do</span> <span class="o">|</span><span class="n">product</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">json</span><span class="o">.</span><span class="n">name</span> <span class="n">product</span><span class="o">.</span><span class="n">name</span>
+</span><span class='line'>  <span class="n">json</span><span class="o">.</span><span class="n">price</span> <span class="n">number_to_currency</span> <span class="n">product</span><span class="o">.</span><span class="n">price</span>
+</span><span class='line'>  <span class="n">json</span><span class="o">.</span><span class="n">active</span> <span class="n">product</span><span class="o">.</span><span class="n">active</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Excellent, now if we refresh the page we will see a listing of products in json format. Now lets add the reviews. Modify your code so that it looks like the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/products/index.json.jbuilder </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">json</span><span class="o">.</span><span class="n">products</span> <span class="vi">@products</span> <span class="k">do</span> <span class="o">|</span><span class="n">product</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">json</span><span class="o">.</span><span class="n">name</span> <span class="n">product</span><span class="o">.</span><span class="n">name</span>
+</span><span class='line'>  <span class="n">json</span><span class="o">.</span><span class="n">price</span> <span class="n">number_to_currency</span> <span class="n">product</span><span class="o">.</span><span class="n">price</span>
+</span><span class='line'>  <span class="n">json</span><span class="o">.</span><span class="n">active</span> <span class="n">product</span><span class="o">.</span><span class="n">active</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">json</span><span class="o">.</span><span class="n">reviews</span> <span class="n">product</span><span class="o">.</span><span class="n">reviews</span> <span class="k">do</span> <span class="o">|</span><span class="n">review</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">json</span><span class="o">.</span><span class="n">user</span> <span class="n">review</span><span class="o">.</span><span class="n">user</span>
+</span><span class='line'>    <span class="n">json</span><span class="o">.</span><span class="n">rating</span> <span class="n">review</span><span class="o">.</span><span class="n">rating</span>
+</span><span class='line'>    <span class="n">json</span><span class="o">.</span><span class="n">body</span> <span class="n">review</span><span class="o">.</span><span class="n">body</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Excellent! Now if we refresh the page we&#8217;ll see the review listing for each product. That&#8217;s it folks! That&#8217;s all there is to using the jbuilder gem.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/04/25/10-useful-ruby-on-rails-4-gems/">10 Useful Ruby on Rails 4 Gems</a></h1>
     
     
@@ -1760,183 +2101,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/04/16/what-new-with-foreign-keys-in-rails-4-dot-2/">What New With Foreign Keys in Rails 4.2?</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-04-16T15:43:00+07:00" pubdate data-updated="true">Apr 16<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/ruby_on_rails.png" width="400" alt="What New with Foreign Keys in Rails 4.2?" />
-</p>
-
-
-
-
-<p>
-  Previous versions of Rails did not have the ability to create foreign keys without resorting to executing SQL statements directly. This lead to messy, database dependent solutions that weren&#8217;t very nice. 
-</p>
-
-
-
-
-<p>
-  Luckily, Rails 4.2 rectifies this with new features to add and remove foreign keys. In this article we will discuss what foreign keys are, and how to add them to your database.
-</p>
-
-
-
-
-<p>
-  If you don&#8217;t know what a foreign key is, well, quite simply, a foreign key links one table to another&#8217;s primary key. For example, if I have an authors table and a books table, I could create a foreign key that points from books back to authors, linking the two tables together. Then, these two tables become linked. It means that I cannot add or update the record with invalid data for the author_id field in the books table.  I can also tell the database server what to do when I update or delete the record. For example, I can tell rails to automatically delete child records when the parent is deleted (delete an author from the authors table and all the author&#8217;s books are deleted). I could also tell Rails to set the author_id column to null or to simply not let me delete the author while child records exist.
-</p>
-
-
-
-
-<p>
-  <strong>Add Foreign Keys</strong><br/>
-  To add a foreign key to the books table:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">add_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:authors</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  We can also give the foreign key a custom name:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">add_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:authors</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="ss">:my_foreign_key</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  If we are using a non Rails friendly database, we can specify the column names we wish to use for the foreign key. For example, let&#8217;s say the primary key of the authors table is author_id and the key in the books table is auid. We could simply use the following code to create the foreign key:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">add_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:authors</span><span class="p">,</span> <span class="ss">column</span><span class="p">:</span> <span class="ss">:auid</span><span class="p">,</span> <span class="n">primary_key</span><span class="p">:</span> <span class="ss">:author_id</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  We can control the behavior of the foreign key as well. A list of the available behaviors are below. Independent behaviors can be set for both update as well as delete.<br/>
-  - :restrict (default) - Prevents changes from being made.<br/>
-  - :nullify - Sets the child columns to null.<br/>
-  - :cascade - Cascades down to the child records. For instance, deleting an author deletes the author&#8217;s books.
-</p>
-
-
-
-
-<p>
-  To specify behaviors, you simply use the <code>on_delete</code> or <code>on_update</code> parameters. For example, the following code would cascade deletes so that the books get deleted when the parent gets deleted.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">add_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:authors</span><span class="p">,</span> <span class="n">on_delete</span><span class="p">:</span> <span class="n">cascade</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Delete Foreign Keys</strong><br/>
-  It is just as easy to delete foreign keys:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">remove_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:authors</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You can optionally specify the name of the foreign key to delete:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">remove_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="ss">:my_foreign_key</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  If you have non Rails friendly column names, you can specify the column name that contains the foreign key you wish to remove:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">remove_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">column</span><span class="p">:</span> <span class="ss">:auid</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/9/">&larr; Older</a>
@@ -1961,6 +2125,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/02/04/i-should-write-bad-code-more-often/">I Should Write Bad Code More Often</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/02/04/5d-co-working-lab/">5D Co-working Lab</a>
       </li>
     
@@ -1982,10 +2150,6 @@
     
       <li class="post">
         <a href="/blog/2016/01/27/how-to-make-session-data-available-to-models-in-ruby-on-rails/">How to Make Session Data Available to Models in Ruby on Rails?</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/01/26/rails-tagging/">Rails Tagging</a>
       </li>
     
   </ul>
@@ -2043,7 +2207,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 29 ]</a>
+        <a href="/blog/categories/other/">Other [ 30 ]</a>
       </li>
     
       <li>
