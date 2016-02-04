@@ -80,6 +80,453 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/05/07/ruby-slash-ruby-on-rails-mistakes/">Ruby/Ruby on Rails Mistakes</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-05-07T21:16:00+07:00" pubdate data-updated="true">May 7<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="Ruby/Ruby on Rails Mistakes" />
+</p>
+
+
+
+
+<p>
+  Software Engineer make mistakes. Some of them are just annoying (for others to read) and some are really dangerous. Here is my selection of 10 mistakes done by Ruby / Ruby on Rails developers. These tips are easy to follow and can save you much time of later debugging.
+</p>
+
+
+
+
+<p>
+  <strong>Double Negative and Complex Conditionals</strong><br/>
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">if</span> <span class="o">!</span><span class="n">user</span><span class="o">.</span><span class="n">nil?</span>
+</span><span class='line'>  <span class="c1"># ...</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">unless</span> <span class="n">user</span><span class="o">.</span><span class="n">blank?</span>
+</span><span class='line'>  <span class="c1"># ...</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">unless</span> <span class="n">user</span><span class="o">.</span><span class="n">active?</span> <span class="o">||</span> <span class="n">address</span><span class="o">.</span><span class="n">confirmed?</span>
+</span><span class='line'>  <span class="c1"># ...</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Double negative is hard to read. Every time I encounter it, I spend a couple of seconds on parsing the condition. Use the API which Rails gives you  <code>user.present?</code> instead of <code>!user.blank?</code>.
+</p>
+
+
+
+
+<p>
+  I also rarely see any usage for unless, especially with complex conditionals connected by && and ||. How fast can you decide when unless <code>user.active? || address.confirmed?</code> will fire?
+</p>
+
+
+
+
+<p>
+  <strong>Using Save Instead of save! and Not Checking Return Value</strong><br/>
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;John&quot;</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">save</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  What is wrong with this piece of code? It will fail silently when user cannot be saved. There will be no single trace of this failure in your logs and you will spend time wondering: “why there are no users in the database”. If you expect that data is valid and model should be always saved successfully, then use bang versions – <code>save!</code>, <code>create!</code> and so on. Use save only when you handle the return value:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">if</span> <span class="n">user</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'>  <span class="c1"># ...</span>
+</span><span class='line'><span class="k">else</span>
+</span><span class='line'>  <span class="c1"># ...</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>self When It’s Not Needed</strong><br/>
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span>
+</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:first_name</span>
+</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:last_name</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">display_name</span>
+</span><span class='line'>    <span class="s2">&quot;</span><span class="si">#{</span><span class="nb">self</span><span class="o">.</span><span class="n">first_name</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="nb">self</span><span class="o">.</span><span class="n">last_name</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  In this case writing self.first_name is completely unnecessary, because <code>first_name</code> will do. This is of course just matter of style and has no other negative consequences than overly verbose code. Please mind that you need <code>self</code> in assignments: <code>self.first_name = "John"</code>.
+</p>
+
+
+
+
+<p>
+  <strong>N + 1 Queries</strong><br/>
+  This is a vast topic, but I will try to give the simplest example. You want to display a list of posts with names of authors. Post model <code>belongs_to :user</code>. If you just do <code>Post.limit(10)</code> and then call <code>post.user.name</code> in your views, you will make a separate database query for each user. That’s because Rails has no single chance to guess that you need users when you make the first query in the controller.
+</p>
+
+
+
+
+<p>
+  It’s easy to spot N + 1 queries problem just by looking at server’s logs:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Template</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">4</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;templates&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;templates&quot;</span>   <span class="no">ORDER</span> <span class="no">BY</span> <span class="s2">&quot;templates&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="n">desc</span> <span class="no">LIMIT</span> <span class="mi">30</span> <span class="no">OFFSET</span> <span class="mi">0</span>
+</span><span class='line'>  <span class="no">Collection</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">2</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;collections&quot;</span>  <span class="no">WHERE</span> <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">LIMIT</span> <span class="mi">1</span>  <span class="o">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="o">]]</span>
+</span><span class='line'>  <span class="no">Collection</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;collections&quot;</span>  <span class="no">WHERE</span> <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">LIMIT</span> <span class="mi">1</span>  <span class="o">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="mi">6</span><span class="o">]]</span>
+</span><span class='line'>  <span class="no">CACHE</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;collections&quot;</span>  <span class="no">WHERE</span> <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">LIMIT</span> <span class="mi">1</span>  <span class="o">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="mi">6</span><span class="o">]]</span>
+</span><span class='line'>  <span class="no">CACHE</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;collections&quot;</span>  <span class="no">WHERE</span> <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">LIMIT</span> <span class="mi">1</span>  <span class="o">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="mi">6</span><span class="o">]]</span>
+</span><span class='line'>  <span class="no">Collection</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;collections&quot;</span>  <span class="no">WHERE</span> <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">LIMIT</span> <span class="mi">1</span>  <span class="o">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="o">]]</span>
+</span><span class='line'>  <span class="no">CACHE</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;collections&quot;</span>  <span class="no">WHERE</span> <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">LIMIT</span> <span class="mi">1</span>  <span class="o">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="o">]]</span>
+</span><span class='line'>  <span class="no">Collection</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;collections&quot;</span>  <span class="no">WHERE</span> <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">LIMIT</span> <span class="mi">1</span>  <span class="o">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="o">]]</span>
+</span><span class='line'>  <span class="no">CACHE</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;collections&quot;</span>  <span class="no">WHERE</span> <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">LIMIT</span> <span class="mi">1</span>  <span class="o">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="o">]]</span>
+</span><span class='line'>  <span class="no">CACHE</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;collections&quot;</span>  <span class="no">WHERE</span> <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">LIMIT</span> <span class="mi">1</span>  <span class="o">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="o">]]</span>
+</span><span class='line'>  <span class="no">CACHE</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;collections&quot;</span>  <span class="no">WHERE</span> <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">LIMIT</span> <span class="mi">1</span>  <span class="o">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="o">]]</span>
+</span><span class='line'>  <span class="no">CACHE</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;collections&quot;</span>  <span class="no">WHERE</span> <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">LIMIT</span> <span class="mi">1</span>  <span class="o">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="o">]]</span>
+</span><span class='line'>  <span class="no">Collection</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;collections&quot;</span>  <span class="no">WHERE</span> <span class="s2">&quot;collections&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">LIMIT</span> <span class="mi">1</span>  <span class="o">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="o">]]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  You have to be explicit at telling what you need from the database. In the easy cases Rails includes method will do. You can read more about it in Rails guides - <a href="http://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations" target="_blank">Eager Loading</a>
+</p>
+
+
+
+
+<p>
+  <strong>Boolean Field with Three Possible Values</strong><br/>
+  Boolean is supposed to have two possible values – <code>true</code> and <code>false</code>, right? And how about <code>nil</code>? If you do not specify default value and null: false in your migrations, you end up with boolean field with three possible values – <code>true</code>, <code>false</code> and <code>nil</code>. This leads to nasty code like:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># post is new, not published, not rejected</span>
+</span><span class='line'><span class="k">if</span> <span class="n">post</span><span class="o">.</span><span class="n">published</span><span class="o">.</span><span class="n">nil?</span>
+</span><span class='line'>  <span class="c1"># ...</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># post is published</span>
+</span><span class='line'><span class="k">if</span> <span class="n">post</span><span class="o">.</span><span class="n">published</span>
+</span><span class='line'>  <span class="c1"># ...</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># post is new or rejected</span>
+</span><span class='line'><span class="k">unless</span> <span class="n">post</span><span class="o">.</span><span class="n">published</span>
+</span><span class='line'>  <span class="c1"># ...</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If you need three possible states – use string field with three <code>well-defined</code> values.
+</p>
+
+
+
+
+<p>
+  <strong>Orphaned Records After Destroy</strong><br/>
+  When you destroy a model and it is required by associated records, you should handle it. It’s easy to find such cases:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:user</span>
+</span><span class='line'>  <span class="n">validates_presence_of</span> <span class="ss">:user</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  User is required for post. Hence, we have to write:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:posts</span><span class="p">,</span> <span class="ss">dependent</span><span class="p">:</span> <span class="ss">:destroy</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Leaving puts</strong><br/>
+  Leaving <code>puts</code> in the code after some debugging session pollutes server logs and output of tests. Use <code>Rails.logger.debug</code> so it’s later possible to adjust the desired log level.
+</p>
+
+
+
+
+<p>
+  <strong>Not Using map</strong><br/>
+  I’ve seen such code many times:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">users</span> <span class="o">=</span> <span class="o">[]</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">posts</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">post</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">users</span> <span class="o">&lt;&lt;</span> <span class="n">post</span><span class="o">.</span><span class="n">user</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  This is exactly the case for using <code>map</code>, which is shorter and more idiomatic:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">users</span> <span class="o">=</span> <span class="n">posts</span><span class="o">.</span><span class="n">map</span> <span class="k">do</span> <span class="o">|</span><span class="n">post</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">post</span><span class="o">.</span><span class="n">user</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Not Using Hash#fetch</strong><br/>
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">name</span> <span class="o">=</span> <span class="n">params</span><span class="o">[</span><span class="ss">:user</span><span class="o">][</span><span class="ss">:name</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  What’s wrong with this code? It will throw <code>NoMethodError: undefined method `[]' for nil:NilClass</code> if there is no user key in the hash. If you expect the key to always be present, use <code>Hash#fetch</code>:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">name</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span><span class="o">[</span><span class="ss">:name</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  This will give you a meaningful <code>exception – KeyError: key not found: :user</code>.
+</p>
+
+
+
+
+<p>
+  <strong>Using Code from app/ in Migrations</strong><br/>
+  Let’s say you have the following model:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="no">ACTIVE</span> <span class="o">=</span> <span class="s2">&quot;after_registration&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  and you want to add points field to it. So you create a migration. But you would also like to handle existing users: 10 points for active and 0 for the rest. You add to your migration:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">status</span><span class="p">:</span> <span class="ss">User</span><span class="p">:</span><span class="ss">:ACTIVE</span><span class="p">)</span><span class="o">.</span><span class="n">update_all</span><span class="p">(</span><span class="ss">points</span><span class="p">:</span> <span class="mi">10</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  It works and you are happy. Time passes by and you decide to remove <code>User::ACTIVE</code> constant. Your migrations are now broken, you cannot run them from scratch, because <code>User::ACTIVE</code> is undefined.
+</p>
+
+
+
+
+<p>
+  Never use code from app/ directory in migrations. If you need to update existing data and do it in a few environments (development, staging, production) create a Rake task and delete it once it’s executed in every environment.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/05/07/fast-rails-api-with-rails-api-and-active-model-serializers/">Fast Rails API With Rails-api and Active_model_serializers</a></h1>
     
     
@@ -2930,210 +3377,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/04/20/ruby-on-rails-build-a-simple-rake-task/">Ruby on Rails Build a Simple Rake Task</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-04-20T10:46:00+07:00" pubdate data-updated="true">Apr 20<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/ruby_on_rails.png" width="400" alt="Ruby on Rails Build a Simple Rake Task" />
-</p>
-
-
-
-
-<p>
-  There are many tasks that need to be performed outside of your website that are related to your web application. An example would be cleaning up temporary files. You wouldn&#8217;t want to have this code running in a web page. Fortunately rails includes a mechanism for doing this. Rake tasks make it easy to automate various aspects of your application.
-</p>
-
-
-
-
-<p>
-  First, we need to create a couple models for our sample. In this sample we will have 2 models. Our first model, Product, will store product information. Our second model, Review, will be a review of the product. Run the commands below to generate these 2 models:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Product</span> <span class="nb">name</span> <span class="n">average_rating</span><span class="ss">:float</span> <span class="ss">price</span><span class="p">:</span><span class="n">decimal</span><span class="p">{</span><span class="mi">12</span><span class="p">,</span><span class="mi">2</span><span class="p">}</span> <span class="ss">active</span><span class="p">:</span><span class="n">boolean</span>
-</span><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Review</span> <span class="ss">product</span><span class="p">:</span><span class="n">references</span> <span class="n">user</span> <span class="ss">rating</span><span class="p">:</span><span class="n">integer</span> <span class="ss">body</span><span class="p">:</span><span class="n">text</span>
-</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Next, we need some seed data. Open up your seeds.rb file and add the following code:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>db/seeds.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Product</span><span class="o">.</span><span class="n">delete_all</span>
-</span><span class='line'><span class="no">Review</span><span class="o">.</span><span class="n">delete_all</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Product</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="o">[</span>
-</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;Die Hard - Blu-Ray&quot;</span><span class="p">,</span> <span class="ss">price</span><span class="p">:</span> <span class="mi">9</span><span class="o">.</span><span class="mi">95</span><span class="p">,</span> <span class="ss">active</span><span class="p">:</span> <span class="kp">true</span><span class="p">},</span>
-</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;Iron Man 3 - Blu-Ray&quot;</span><span class="p">,</span> <span class="ss">price</span><span class="p">:</span> <span class="mi">24</span><span class="o">.</span><span class="mi">95</span><span class="p">,</span> <span class="ss">active</span><span class="p">:</span> <span class="kp">true</span><span class="p">},</span>
-</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;Star Trek - Into Darkness - Blu-Ray&quot;</span><span class="p">,</span> <span class="ss">price</span><span class="p">:</span> <span class="mi">19</span><span class="o">.</span><span class="mi">95</span><span class="p">,</span> <span class="ss">active</span><span class="p">:</span> <span class="kp">true</span><span class="p">},</span>
-</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;The Little Mermaid - Blu-Ray&quot;</span><span class="p">,</span> <span class="ss">price</span><span class="p">:</span> <span class="mi">29</span><span class="o">.</span><span class="mi">95</span><span class="p">,</span> <span class="ss">active</span><span class="p">:</span> <span class="kp">true</span><span class="p">},</span>
-</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;This is the End - Blu-Ray&quot;</span><span class="p">,</span> <span class="ss">price</span><span class="p">:</span> <span class="mi">17</span><span class="o">.</span><span class="mi">95</span><span class="p">,</span> <span class="ss">active</span><span class="p">:</span> <span class="kp">true</span><span class="p">}</span>
-</span><span class='line'><span class="o">]</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Review</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="o">[</span>
-</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Dan&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;Epic Action Flick&quot;</span><span class="p">},</span>
-</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Will&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;The Stunts were AMAZING!&quot;</span><span class="p">},</span>
-</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;James&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;I didn&#39;t like it as much as the first one.&quot;</span><span class="p">},</span>
-</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Lisa&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;Epic!&quot;</span><span class="p">},</span>
-</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Linda&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;A classic revived!  Well worth watching again.&quot;</span><span class="p">},</span>
-</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Kathy&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;This movie is hilarious!&quot;</span><span class="p">},</span>
-</span><span class='line'>  <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="n">product_id</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Jim&quot;</span><span class="p">,</span> <span class="ss">rating</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="s2">&quot;Really cheesy.&quot;</span><span class="p">}</span>
-</span><span class='line'><span class="o">]</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Then run rake db:seed
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">seed</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now, lets open up the Product model so that we can add an association to reviews. Modify the Product model so that it looks like the code listed below:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/models/product.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Product</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:reviews</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Then create a file called calculate_averages.rake in the lib/tasks folder and add the following code:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>lib/tasks/calculate_averages.rake </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;rake&#39;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">task</span> <span class="ss">:calculate_averages</span> <span class="o">=&gt;</span> <span class="ss">:environment</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">products</span> <span class="o">=</span> <span class="no">Product</span><span class="o">.</span><span class="n">all</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">products</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">product</span><span class="o">|</span>
-</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;Calculating average rating for </span><span class="si">#{</span><span class="n">product</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">...&quot;</span>
-</span><span class='line'>    <span class="n">product</span><span class="o">.</span><span class="n">update_attribute</span><span class="p">(</span><span class="ss">:average_rating</span><span class="p">,</span> <span class="n">product</span><span class="o">.</span><span class="n">reviews</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="s2">&quot;rating&quot;</span><span class="p">))</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now, if we run our rake command we will see that the averages are updated in the database.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="n">calculate_averages</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/8/">&larr; Older</a>
@@ -3158,6 +3401,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/02/04/one-thing-cambodian-startups-need-to-learn-english/">One Thing Cambodian Startups Need to Learn English</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/02/01/rails-model-view-controller/">Rails Model View Controller</a>
       </li>
     
@@ -3179,10 +3426,6 @@
     
       <li class="post">
         <a href="/blog/2016/01/21/saas-cloud-computing/">SaaS Cloud Computing</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/01/09/should-i-use-reactjs/">Should I Use ReactJS?</a>
       </li>
     
   </ul>
@@ -3245,6 +3488,10 @@
     
       <li>
         <a href="/blog/categories/reactjs/">Reactjs [ 18 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/startup/">Startup [ 1 ]</a>
       </li>
     
   </ul>
