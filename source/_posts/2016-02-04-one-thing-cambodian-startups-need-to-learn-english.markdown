@@ -1,0 +1,64 @@
+---
+layout: post
+title: "One Thing Cambodian Startups Need to Learn English"
+date: 2016-02-04 11:22
+comments: true
+categories: [Startup]
+keywords: One Thing Cambodian Startups Need to Learn English
+---
+
+<p>
+  <img src="/images/about_us.jpg" width="500" alt="One Thing Cambodian Startups Need to Learn English" />
+</p>
+
+<p>
+  Being a startup in Cambodia is a particularly existential experience. You have to constantly evaluate what your place is in the society, consider whether or not your idea works, evaluate yourself as a leader, and fight for your own reason to exist. On top of that, you have to look at where you need to improve. I’m always meeting young startups who are asking me "What should I learn? Where should I go? What problems can I solve?"
+</p>
+
+{% blockquote %}
+English is really important.
+{% endblockquote %}
+
+<p>
+  <h3>
+    5 Reasons Why English is Vital to Your Startup
+  </h3>
+  The key with English for Cambodian startups is access. If you cannot understand, read, and converse with foreigners, you will not get the full benefit of the interaction. Here’s five nuanced examples of why English is so important for startups to win in the next ten years.
+</p>
+
+<p>
+  <strong>1. English at Events in Cambodia</strong><br/>
+   Although there was simultaneous audio translation with headphones, there is just no way that you can catch all the nuances and understand in the translation. Some of my colleagues at the event only understood 70 percent of what translator said because there weren’t enough headphones. Even with headphones, people could only understand so much. translator spoke so fast and with idioms that the professional translators could scarcely catch up to. Now 70 percent, you may think, sounds like they understood a lot. But that has exponential consequences. If you only understand 70 percent, and you go up to talk to the speaker after the event, and you ask him a question he already answered, he might think you weren’t listening. He might be unimpressed. But if you could understand 100 percent, you could take the conversation to the next level. That will impress the speaker, and impressing the speaker will bring enormous benefits in the long run. If you understand only 70 percent, what happened to that 30 percent? In that 30 percent could have been a piece of advice that would have deeply helped your startup.
+</p>
+
+<p>
+  In Phnom Penh, a large influx of foreign interest and foreigners come to Cambodia. Some are successful entrepreneurs, some are startups, some are just good possible links into global ecosystems. If your English sucks, how are you going to talk to them?
+</p>
+
+<p>
+  <strong>2. English at Events Outside Cambodia</strong><br/>
+  If you’re thinking about going global or getting your name out there, you’re bound to go to an event outside of Cambodia. At that time, if you’re a founder, and you can’t communicate with foreigners, you’ve wasted money on a plane ticket. At a recent event I went to outside of Cambodia, one of the Cambodian founders I was hanging out with couldn’t understand a simple question from a Singaporean investor. I had to help translate the question for him into Khmer and then back into English. What would happen if I wasn’t there? These situations are lost opportunities. Rubbing elbows with other people in English is a skill you cannot underestimate. It could lead you down the path to better networks, and possibly even investment. Bad english makes you look like an idiot. Don’t look like an idiot.
+</p>
+
+<p>
+  <strong>3. Getting Knowledge Online</strong><br/>
+  The plethora of information about technology and startups online is vast. For the techies, StackOverflow is the place to be. For people looking to understand the personal and intimate mechanics of certain tech companies and startups, Quora is the place to be. I haven’t even begun to mention the pulse of news that you can find on TechCrunch, PandoDaily, Tech In Asia, e27, Cnet, GigaOm, and more. All the best up-to-date information out there is in English. Also, all the best advice on technology and startups is laid out across personal and company blogs across the internet, in English. If you don’t know English, you might be building a project on top of technology that is outdated, or employing techniques and trends that just don’t work anymore. If you want to stay ahead of the game, English is the way.
+</p>
+
+<p>
+  <strong>4. Interacting with Foreigners Online</strong><br/>
+  And it’s not just knowledge and news that’s online. People are also online. If you can’t write an email that sounds like you are a professional, passionate, and eloquent person, why would anyone reply to you? This is also true on Twitter, Facebook, and any other platform that involves interacting with other people on a professional and casual level.
+</p>
+
+<p>
+  <strong>5. Pitching Your Product</strong><br/>
+  Probably the most important and last point in this mix is pitching your product. It is not easy to set up your startup or product in one minute. Brevity is a skill of great communicators. Tell me what your product is, in English, in 30 seconds. Now elaborate on it for the next hour, while I ask you penetrating questions about how the business works. Can you do it? For your sake, I hope so.
+</p>
+
+<p>
+  At the end of the day, if you’re playing to win – and you should be if you’re doing a startup – you should know English. It doesn’t matter if you are competing on a global or domestic level. Either way, you have to be top class. And top class people know English. Besides the benefits above, being bilingual gives you mental dexterity and diversity. People who know multiple languages are generally more open to new ideas and have more reflection on their own culture. These are essential advantages for a young startup in the battlefield that is Cambodia.
+</p>
+
+<p>
+  It is true that all the above applies for startups across the Asian startup ecosystem. But it is presently a huge obstacle that Cambodian startups need to pay special attention to, since many view Cambodia as a blackbox, a startup world that is hard to understand and wrap one’s head around. Especially if Cambodia wants to be known outside of Cambodia.
+</p>
