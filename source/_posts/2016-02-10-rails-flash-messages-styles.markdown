@@ -3,7 +3,7 @@ layout: post
 title: "Rails Flash Messages Styles"
 date: 2016-02-10 10:57
 comments: true
-categories: [Rails]
+categories: [Ruby on Rails]
 keywords: Rails Flash Messages Styles
 ---
 
