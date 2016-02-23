@@ -80,6 +80,247 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2016/01/27/how-to-make-session-data-available-to-models-in-ruby-on-rails/">How to Make Session Data Available to Models in Ruby on Rails?</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-01-27T11:11:00+07:00" pubdate data-updated="true">Jan 27<span>th</span>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="How to Make Session Data Available to Models in Ruby on Rails?" />
+</p>
+
+
+
+
+<p>
+  Ruby on Rails is implemented as the Model View Controller (MVC) pattern. This pattern separates the context of the Web Application (in the Controller and the View) from the core Model of the application. The Model contains the Domain objects which encapsulate business logic, data retrieval, etc. The View displays information to the user and allows them to provide input to the application. The Controller handles the interactions between the View and the Model.
+</p>
+
+
+
+
+<p>
+  This separation is a very good design principle that generally helps prevent <a href="https://en.wikipedia.org/wiki/Spaghetti_code" target="_blank">spaghetti code</a>. Sometimes though the separation might break down.
+</p>
+
+
+
+
+<p>
+  Rails provides the Active Record Callbacks which allows you to write code that will respond to the lifecycle events of the Model objects. For example you could log information every time a specific kind of Model object is saved. For example you could record some information every time an Account changed using the following:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>account.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Account</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">after_update</span> <span class="ss">:log_audit_change</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">log_audit_change</span>
+</span><span class='line'>    <span class="no">Audit</span><span class="o">.</span><span class="n">audit_change</span><span class="p">(</span><span class="nb">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="n">new_balance</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  You might have noticed a limitation with the previous API though. You didn&#8217;t notice? The only information passed to the model is the Object that is being changed. What if you want more context than this? For example, what if you want to audit not only the values that changed them, but the user who made the change?
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>account.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Account</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">after_update</span> <span class="ss">:log_audit_change</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">log_audit_change</span>
+</span><span class='line'>    <span class="no">Audit</span><span class="o">.</span><span class="n">audit_change</span><span class="p">(</span><span class="n">current_user</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="n">new_balance</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  How do you get the <code>current_user</code> value? Well, you have to plan ahead a little bit. The User in this application is stored in the HTTP Session when the user is authenticated. The session isn&#8217;t directly available to the Model level so you have to figure out a way around this. One way to accomplish this is by using a named <a href="http://ruby-doc.org/core-2.3.0/Thread.html#M000484" target="_blank">Thread local variable</a>. Each HTTP request is served by its own thread. That means that a variable stored as thread local will be available for the entire processing of a request.
+</p>
+
+
+
+
+<p>
+  The UserInfo module encapsulates reading and writing the User object from/to the Thread local. This module can then be mixed in with other objects for easy access.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>user_info.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">UserInfo</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">current_user</span>
+</span><span class='line'>    <span class="no">Thread</span><span class="o">.</span><span class="n">current</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">current_user</span><span class="o">=</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+</span><span class='line'>    <span class="no">Thread</span><span class="o">.</span><span class="n">current</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span> <span class="o">=</span> <span class="n">user</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  A <code>before_filter</code> set in the ApplicationController will be called before any action is called in any controller. You can take advantage of this to copy a value out of the HTTP session and set it in the Thread local:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>user_info.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="ss">ActionController</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">before_filter</span> <span class="ss">:set_user</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">protected</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">authenticate</span>
+</span><span class='line'>    <span class="k">unless</span> <span class="n">session</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span>
+</span><span class='line'>      <span class="n">redirect_to</span> <span class="ss">:controller</span> <span class="o">=&gt;</span> <span class="s2">&quot;login&quot;</span>
+</span><span class='line'>      <span class="k">return</span> <span class="kp">false</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># Sets the current user into a named Thread location so that it can be accessed by models and observers</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">set_user</span>
+</span><span class='line'>    <span class="no">UserInfo</span><span class="o">.</span><span class="n">current_user</span> <span class="o">=</span> <span class="n">session</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  At any point in a Model class that you need to have access to those values you can just mixin the helper module and then use its methods to access the data. In this final example we mixin the UserInfo module to our model and it will now have access to the <code>current_user</code> method:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>account.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Account</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">UserInfo</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">after_update</span> <span class="ss">:log_audit_change</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">log_audit_change</span>
+</span><span class='line'>    <span class="no">Audit</span><span class="o">.</span><span class="n">audit_change</span><span class="p">(</span><span class="n">current_user</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="n">new_balance</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  You generally shouldn&#8217;t need this kind of trick outside of a model. In most cases the Controller should pass all of the information needed by a Model object to it through its methods. That will allow the Model objects to interact and the Controller to do the orchestration needed. But in a few special cases, this trick might be handy.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2016/01/26/rails-tagging/">Rails Tagging</a></h1>
     
     
@@ -1969,155 +2210,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/11/21/reactjs-component-lifecycle-updating/">ReactJS Component Lifecycle Updating</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-11-21T11:36:00+07:00" pubdate data-updated="true">Nov 21<span>st</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/reactjs.png" width="600" alt="ReactJS Component Lifecycle Updating" />
-</p>
-
-
-
-
-<p>
-  ReactJS mounting have 4 methods:<br/>
-  - <code>componentWillReceiveProps(object nextProps)</code>: is invoked when a mounted component receives new props. This method should be used to compare <code>this.props</code> and nextProps to perform state transitions using <code>this.setState()</code>.<br/>
-  - <code>shouldComponentUpdate(object nextProps, object nextState): boolean</code>: is invoked when a component decides whether any changes warrant an update to the DOM. Implement this as an optimization to compare <code>this.props</code> with <code>nextProps</code> and <code>this.state</code> with <code>nextState</code> and return <code>false</code> if React should skip updating.<br/>
-  - <code>componentWillUpdate(object nextProps, object nextState)</code>: is invoked immediately before updating occurs. You cannot call <code>this.setState()</code> here.<br/>
-  - <code>componentDidUpdate(object prevProps, object prevState)</code>: is invoked immediately after updating occurs.
-</p>
-
-
-
-
-<p>
-  Example:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">meta</span> <span class="nx">charset</span><span class="o">=</span><span class="s2">&quot;UTF-8&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;&lt;</span><span class="err">/title&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;http://fb.me/react-0.12.2.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;http://fb.me/JSXTransformer-0.12.2.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/head&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/jsx&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">Button</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
-</span><span class='line'>      <span class="nx">getInitialState</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">return</span> <span class="p">{</span><span class="nx">increasing</span><span class="o">:</span> <span class="kc">false</span><span class="p">}</span>
-</span><span class='line'>      <span class="p">},</span>
-</span><span class='line'>      <span class="nx">handleUpdate</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">this</span><span class="p">.</span><span class="nx">setProps</span><span class="p">({</span><span class="nx">val</span><span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">val</span><span class="o">+</span><span class="mi">1</span><span class="p">});</span>
-</span><span class='line'>      <span class="p">},</span>
-</span><span class='line'>      <span class="nx">componentWillReceiveProps</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">nextProps</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span><span class="nx">increasing</span><span class="o">:</span> <span class="nx">nextProps</span><span class="p">.</span><span class="nx">val</span> <span class="o">&gt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">val</span><span class="p">});</span>
-</span><span class='line'>      <span class="p">},</span>
-</span><span class='line'>      <span class="nx">shouldComponentUpdate</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">nextProps</span><span class="p">,</span> <span class="nx">nextState</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">return</span> <span class="nx">nextProps</span><span class="p">.</span><span class="nx">val</span> <span class="o">%</span> <span class="mi">5</span> <span class="o">===</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'>      <span class="p">},</span>
-</span><span class='line'>      <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">increasing</span><span class="p">);</span>
-</span><span class='line'>        <span class="k">return</span><span class="p">(</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
-</span><span class='line'>            <span class="o">&lt;</span><span class="nx">button</span> <span class="nx">onClick</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">handleUpdate</span><span class="p">}</span><span class="o">&gt;</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">val</span><span class="p">}</span><span class="o">&lt;</span><span class="err">/button&gt;</span>
-</span><span class='line'>          <span class="o">&lt;</span><span class="err">/div&gt;</span>
-</span><span class='line'>        <span class="p">);</span>
-</span><span class='line'>      <span class="p">},</span>
-</span><span class='line'>      <span class="nx">componentDidUpdate</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">prevProps</span><span class="p">,</span> <span class="nx">prevState</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;prevProps&#39;</span><span class="p">,</span> <span class="nx">prevProps</span><span class="p">);</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nx">ReactDOM</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="o">&lt;</span><span class="nx">Button</span> <span class="nx">val</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">}</span> <span class="o">/&gt;</span><span class="p">,</span> <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">);</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/body&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/html&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far go good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -2140,6 +2232,10 @@
 </section><section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/02/23/dynamic-programming-with-ruby/">Dynamic Programming With Ruby</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2016/02/10/rails-flash-messages-styles/">Rails Flash Messages Styles</a>
@@ -2165,10 +2261,6 @@
         <a href="/blog/2016/02/04/emerald-hub/">Emerald HUB</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2016/02/04/one-thing-cambodian-startups-need-to-learn-english/">One Thing Cambodian Startups Need to Learn English</a>
-      </li>
-    
   </ul>
 </section>
 <section>
@@ -2180,7 +2272,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby/">Ruby [ 106 ]</a>
+        <a href="/blog/categories/ruby/">Ruby [ 107 ]</a>
       </li>
     
       <li>

@@ -5,13 +5,13 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>ruby websocket and real-time app tutorial - GeeKhmer</title>
+  <title>Dynamic Programming with Ruby - GeeKhmer</title>
   <meta name="author" content="Bunlong Van">
   
   
-  <meta name="description" content="ruby websocket and real-time app tutorial">
+  <meta name="description" content="The biggest website of computer programming, Ruby, Ruby on Rails, Erlang, Chicagoboss and Javascript in Southeast Asia.">
 
-  <meta name="keywords" content="websocket, ruby websocket, ruby websocket tutorial, ruby websocket real time app">
+  <meta name="keywords" content="Dynamic Programming with Ruby">
 
   <!-- http://t.co/dKP3o1e -->
   <meta name="HandheldFriendly" content="True">
@@ -19,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://geekhmer.github.io/blog/2014/02/04/ruby-websocket-and-real-time-app-tutorial">
+  <link rel="canonical" href="http://geekhmer.github.io/blog/2016/02/23/dynamic-programming-with-ruby">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="" rel="alternate" title="GeeKhmer" type="application/atom+xml">
@@ -77,7 +77,7 @@
   
   <header>
     
-      <h1 class="entry-title">Ruby Websocket and Real-time App Tutorial</h1>
+      <h1 class="entry-title">Dynamic Programming With Ruby</h1>
     
     
       <p class="meta">
@@ -93,7 +93,7 @@
   
 
 
-<time datetime="2014-02-04T21:12:00+07:00" pubdate data-updated="true">Feb 4<span>th</span>, 2014</time>
+<time datetime="2016-02-23T10:32:00+07:00" pubdate data-updated="true">Feb 23<span>rd</span>, 2016</time>
         
       </p>
     
@@ -101,25 +101,34 @@
 
 
 <div class="entry-content"><p>
-  In this post I would like to present a small tutorial, I hope it will serve as a good introduction to web-socket api.
+  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="Dynamic Programming with Ruby" />
 </p>
 
 
 
 
 <p>
-  <strong>Websocket Server</strong><br/>
-  In the part we focus on server part. In ruby we use eventmachine, em-websocket gem to install websocket server.<br/>
-  To install eventmachine run <code>gem install eventmachine</code><br/>
-  To install em-websocket run <code>gem install em-websocket</code><br/>
-  Make a file server.rb and implement codes below:
+  I had a task to analyse the value of a cookie set by a tool on the subdomain. The value of the cookie set looked something like this:
 </p>
 
 
 
 
-<figure class='code'><figcaption><span>server.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="s2">&quot;18337|20120404|True#Q0A|18342|21-30|20120404|18344#Q1|18349|NO PARTNER|20120404|18351#Q2|18352|EMPLOYED|20120404|18353#Q4|18432|STRUGGLING|18539|WANT|20120404|18541#Q3|18358|EMPLOYED|20120404|18359#&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  My task was to try to decipher the values of set inside the cookie and how they changed depending on the progress through the application that set the values. I was told the answers to questions sat next to the ID of the question. For example, the answer to the &#8220;age&#8221; question (21-30) was related to the question 18342 and would always appear as |18342|21-30|. I started out with some tests and ended up with a method like this:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
@@ -136,51 +145,36 @@
 <span class='line-number'>15</span>
 <span class='line-number'>16</span>
 <span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;eventmachine&#39;</span>
-</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;em-websocket&#39;</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Answers</span>
+</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:age</span><span class="p">,</span> <span class="ss">:employment_status</span><span class="p">,</span> <span class="ss">:has_partner</span>
 </span><span class='line'>
-</span><span class='line'><span class="no">EventMachine</span><span class="o">.</span><span class="n">run</span> <span class="p">{</span>
-</span><span class='line'>  <span class="ss">EventMachine</span><span class="p">:</span><span class="ss">:WebSocket</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="ss">:host</span> <span class="o">=&gt;</span> <span class="s2">&quot;0.0.0.0&quot;</span><span class="p">,</span> <span class="ss">:port</span> <span class="o">=&gt;</span> <span class="mi">8080</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">ws</span><span class="o">|</span>
-</span><span class='line'>    <span class="n">ws</span><span class="o">.</span><span class="n">onopen</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nb">puts</span> <span class="s2">&quot;WebSocket connection open&quot;</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">ws</span><span class="o">.</span><span class="n">onmessage</span> <span class="p">{</span> <span class="o">|</span><span class="n">msg</span><span class="o">|</span>
-</span><span class='line'>      <span class="nb">puts</span> <span class="n">msg</span>
-</span><span class='line'>      <span class="n">ws</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">ws</span><span class="o">.</span><span class="n">onclose</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nb">puts</span> <span class="s2">&quot;WebSocket connection closed&quot;</span>
-</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">cookie_contents</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">items</span> <span class="o">=</span> <span class="n">cookie_contents</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">items</span><span class="o">.</span><span class="n">each_index</span> <span class="k">do</span> <span class="o">|</span> <span class="n">i</span> <span class="o">|</span>
+</span><span class='line'>       <span class="n">current</span> <span class="o">=</span> <span class="n">items</span><span class="o">[</span><span class="n">i</span><span class="o">]</span>
+</span><span class='line'>       <span class="k">if</span> <span class="p">(</span><span class="n">current</span> <span class="o">==</span> <span class="s2">&quot;18342&quot;</span><span class="p">)</span>
+</span><span class='line'>         <span class="vi">@age</span> <span class="o">=</span> <span class="n">items</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">]</span>
+</span><span class='line'>       <span class="k">elsif</span> <span class="p">(</span><span class="n">current</span> <span class="o">==</span> <span class="s2">&quot;18352&quot;</span><span class="p">)</span>
+</span><span class='line'>         <span class="vi">@employment_status</span> <span class="o">=</span> <span class="n">items</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">]</span>
+</span><span class='line'>       <span class="k">elsif</span> <span class="p">(</span><span class="n">current</span> <span class="o">==</span> <span class="s2">&quot;18349&quot;</span><span class="p">)</span>
+</span><span class='line'>         <span class="vi">@current_partner</span> <span class="o">=</span> <span class="n">items</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">]</span>
+</span><span class='line'>       <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
 </span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 
 
 <p>
-  What the code does is creates a websocket-server which listens at localhost:8080. Callbacks have been provided for open and close events, so when a client creates a connection or a connection gets closed the associated callbacks print an appropriate message to the terminal. And callbacks have been provided for message event when a client send the message.<br/><br/>
-  To run websocket server run <code>ruby sever.rb</code>
+  Of course, I wanted to avoid the growing if-else statement so found a way that I could do it dynamically and focus just on the mapping from an ID to an attribute. The resulting code looked like this:
 </p>
 
 
 
 
-<p>
-  <strong>Websocket Client</strong><br/>
-  So far, so good. But the main purpose of a websocket server is to get the message from client and relay data to the client. How do we do that? Turns out that is pretty simple too.<br/>
-  Make a file index.html and implement codes below:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>index.html </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
@@ -199,58 +193,39 @@
 <span class='line-number'>17</span>
 <span class='line-number'>18</span>
 <span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;html&gt;</span>
-</span><span class='line'><span class="nt">&lt;head&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;title&gt;</span>Websocket GeeKhmer<span class="nt">&lt;/title&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">ws</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-</span><span class='line'>    <span class="kd">function</span> <span class="nx">init</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">ws</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">WebSocket</span><span class="p">(</span><span class="s2">&quot;ws://localhost:8080&quot;</span><span class="p">);</span>
-</span><span class='line'>      <span class="nx">ws</span><span class="p">.</span><span class="nx">onopen</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;Connection is opened&quot;</span><span class="p">);</span>
-</span><span class='line'>      <span class="p">}</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Answers</span>
+</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:age</span><span class="p">,</span> <span class="ss">:employment_status</span><span class="p">,</span> <span class="ss">:has_partner</span>
 </span><span class='line'>
-</span><span class='line'>      <span class="nx">ws</span><span class="p">.</span><span class="nx">onclose</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;Connection is closed&quot;</span><span class="p">);</span>
-</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="no">Mappings</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s2">&quot;18342&quot;</span> <span class="o">=&gt;</span> <span class="ss">:age</span><span class="o">=</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;18352&quot;</span> <span class="o">=&gt;</span> <span class="ss">:employment_status</span><span class="o">=</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;18349&quot;</span> <span class="o">=&gt;</span> <span class="ss">:has_partner</span><span class="o">=</span>
+</span><span class='line'>  <span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'>      <span class="nx">ws</span><span class="p">.</span><span class="nx">onmessage</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">msg</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s2">&quot;display&quot;</span><span class="p">).</span><span class="nx">innerHTML</span> <span class="o">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">data</span><span class="p">;</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">function</span> <span class="nx">send</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">ws</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s2">&quot;txt&quot;</span><span class="p">).</span><span class="nx">value</span><span class="p">);</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>  <span class="nt">&lt;/script&gt;</span>
-</span><span class='line'><span class="nt">&lt;/head&gt;</span>
-</span><span class='line'><span class="nt">&lt;body</span> <span class="na">onload=</span><span class="s">&quot;init();&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;h2&gt;</span>WebSocket GeeKhmer<span class="nt">&lt;/h2&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">id=</span><span class="s">&quot;txt&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;button&quot;</span> <span class="na">onclick=</span><span class="s">&quot;send();&quot;</span> <span class="na">value=</span><span class="s">&quot;Send&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;p</span> <span class="na">id=</span><span class="s">&quot;display&quot;</span><span class="nt">&gt;&lt;/p&gt;</span>
-</span><span class='line'><span class="nt">&lt;/body&gt;</span>
-</span><span class='line'><span class="nt">&lt;/html&gt;</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">cookie_contents</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">items</span> <span class="o">=</span> <span class="n">cookie_contents</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">items</span><span class="o">.</span><span class="n">each_index</span> <span class="k">do</span> <span class="o">|</span> <span class="n">i</span> <span class="o">|</span>
+</span><span class='line'>       <span class="n">current</span> <span class="o">=</span> <span class="n">items</span><span class="o">[</span><span class="n">i</span><span class="o">]</span>
+</span><span class='line'>       <span class="k">if</span> <span class="p">(</span><span class="no">Mappings</span><span class="o">.</span><span class="n">has_key?</span><span class="p">(</span><span class="n">current</span><span class="p">))</span>
+</span><span class='line'>          <span class="nb">self</span><span class="o">.</span><span class="n">public_send</span><span class="p">(</span><span class="no">Mappings</span><span class="o">[</span><span class="n">current</span><span class="o">]</span><span class="p">,</span> <span class="n">items</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>       <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 
 
 <p>
-  Feel free to provide your suggestions and to point out errors.
+  By the end of the analysis, I discovered that multiple IDs mapped to the same properties and all I had to do was add another entry into the map defining which ID mapped to what property on the object.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
 </p>
 
 </div>
@@ -275,12 +250,12 @@
   
 
 
-<time datetime="2014-02-04T21:12:00+07:00" pubdate data-updated="true">Feb 4<span>th</span>, 2014</time>
+<time datetime="2016-02-23T10:32:00+07:00" pubdate data-updated="true">Feb 23<span>rd</span>, 2016</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/ruby/'>Ruby</a>, <a class='category' href='/blog/categories/websocket/'>Websocket</a>
+    <a class='category' href='/blog/categories/ruby/'>Ruby</a>
   
 </span>
 
@@ -289,7 +264,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2014/02/04/ruby-websocket-and-real-time-app-tutorial/" data-via="" data-counturl="http://geekhmer.github.io/blog/2014/02/04/ruby-websocket-and-real-time-app-tutorial/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2016/02/23/dynamic-programming-with-ruby/" data-via="" data-counturl="http://geekhmer.github.io/blog/2016/02/23/dynamic-programming-with-ruby/" >Tweet</a>
   
   
   
@@ -300,10 +275,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/02/01/top-three-front-end-mvc-framework/" title="Previous Post: Top Three Front-End MVC Framework">&laquo; Top Three Front-End MVC Framework</a>
+        <a class="basic-alignment left" href="/blog/2016/02/10/rails-flash-messages-styles/" title="Previous Post: Rails Flash Messages Styles">&laquo; Rails Flash Messages Styles</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2014/03/17/rvm-ruby-version-manager/" title="Next Post: RVM - Ruby Version Manager">RVM - Ruby Version Manager &raquo;</a>
       
     </p>
   </footer>

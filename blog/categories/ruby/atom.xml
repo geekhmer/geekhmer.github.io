@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2016-02-15T17:09:13+07:00</updated>
+  <updated>2016-02-23T11:20:39+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,145 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Dynamic Programming with Ruby]]></title>
+    <link href="http://geekhmer.github.io/blog/2016/02/23/dynamic-programming-with-ruby/"/>
+    <updated>2016-02-23T10:32:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2016/02/23/dynamic-programming-with-ruby</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="Dynamic Programming with Ruby" />
+</p>
+
+
+
+
+<p>
+  I had a task to analyse the value of a cookie set by a tool on the subdomain. The value of the cookie set looked something like this:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="mi">18337</span><span class="o">|</span><span class="mi">20120404</span><span class="o">|</span><span class="no">True</span><span class="c1">#Q0A|18342|21-30|20120404|18344#Q1|18349|NO PARTNER|20120404|18351#Q2|18352|EMPLOYED|20120404|18353#Q4|18432|STRUGGLING|18539|WANT|20120404|18541#Q3|18358|EMPLOYED|20120404|18359#&amp;rdquo;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  My task was to try to decipher the values of set inside the cookie and how they changed depending on the progress through the application that set the values. I was told the answers to questions sat next to the ID of the question. For example, the answer to the "age" question (21-30) was related to the question 18342 and would always appear as |18342|21-30|. I started out with some tests and ended up with a method like this:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Answers</span>
+</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:age</span><span class="p">,</span> <span class="ss">:employment_status</span><span class="p">,</span> <span class="ss">:has_partner</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  def parse(cookie_contents)&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">items</span> <span class="o">=</span> <span class="n">cookie_contents</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">items</span><span class="o">.</span><span class="n">each_index</span> <span class="k">do</span> <span class="o">|</span> <span class="n">i</span> <span class="o">|</span>
+</span><span class='line'>   <span class="n">current</span> <span class="o">=</span> <span class="n">items</span><span class="o">[</span><span class="n">i</span><span class="o">]</span>
+</span><span class='line'>   <span class="k">if</span> <span class="p">(</span><span class="n">current</span> <span class="o">==</span> <span class="s2">&quot;18342&quot;</span><span class="p">)</span>
+</span><span class='line'>     <span class="vi">@age</span> <span class="o">=</span> <span class="n">items</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">]</span>
+</span><span class='line'>   <span class="k">elsif</span> <span class="p">(</span><span class="n">current</span> <span class="o">==</span> <span class="s2">&quot;18352&quot;</span><span class="p">)</span>
+</span><span class='line'>     <span class="vi">@employment_status</span> <span class="o">=</span> <span class="n">items</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">]</span>
+</span><span class='line'>   <span class="k">elsif</span> <span class="p">(</span><span class="n">current</span> <span class="o">==</span> <span class="s2">&quot;18349&quot;</span><span class="p">)</span>
+</span><span class='line'>     <span class="vi">@current_partner</span> <span class="o">=</span> <span class="n">items</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">]</span>
+</span><span class='line'>   <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Of course, I wanted to avoid the growing if-else statement so found a way that I could do it dynamically and focus just on the mapping from an ID to an attribute. The resulting code looked like this:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Answers</span>
+</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:age</span><span class="p">,</span> <span class="ss">:employment_status</span><span class="p">,</span> <span class="ss">:has_partner</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  Mappings = {&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="s2">&quot;18342&quot;</span> <span class="o">=&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="ss">:age</span><span class="o">=</span><span class="p">,</span>
+</span><span class='line'><span class="s2">&quot;18352&quot;</span> <span class="o">=&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="ss">:employment_status</span><span class="o">=</span><span class="p">,</span>
+</span><span class='line'><span class="s2">&quot;18349&quot;</span> <span class="o">=&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="ss">:has_partner</span><span class="o">=</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="p">}</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  def parse(cookie_contents)&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">items</span> <span class="o">=</span> <span class="n">cookie_contents</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">items</span><span class="o">.</span><span class="n">each_index</span> <span class="k">do</span> <span class="o">|</span> <span class="n">i</span> <span class="o">|</span>
+</span><span class='line'>   <span class="n">current</span> <span class="o">=</span> <span class="n">items</span><span class="o">[</span><span class="n">i</span><span class="o">]</span>
+</span><span class='line'>   <span class="k">if</span> <span class="p">(</span><span class="no">Mappings</span><span class="o">.</span><span class="n">has_key?</span><span class="p">(</span><span class="n">current</span><span class="p">))</span>
+</span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">public_send</span><span class="p">(</span><span class="no">Mappings</span><span class="o">[</span><span class="n">current</span><span class="o">]</span><span class="p">,</span> <span class="n">items</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>   <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  By the end of the analysis, I discovered that multiple IDs mapped to the same properties and all I had to do was add another entry into the map defining which ID mapped to what property on the object.
+</p>
+
+
+
+
+<p>
+  So far so good, That's it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Rails 5 ActionCable Architecture and Concepts]]></title>
@@ -743,181 +882,6 @@
 
 <p>
   So far so good, That's it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Social Network Sharing Buttons in Rails App]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/07/12/social-network-sharing-buttons-in-rails-app/"/>
-    <updated>2015-07-12T22:46:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/07/12/social-network-sharing-buttons-in-rails-app</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="Social Network Sharing Buttons in Rails App" />
-</p>
-
-
-
-
-<p>
-  There are many services that allow you to add social network buttons to your website. The problem with these services is that they are free because they harvest traffic statistics from your site, track your visitors, and in general are a big nuisance. They also have the disadvantage of being slow to load.
-</p>
-
-
-
-
-<p>
-  In this article we will show you how to add social sharing buttons to your website via a gem called Social Share Button. Unlike most services, Social Share Button has buttons that are hosted locally on your site and don't go through a third party service. As a result, they are quick to load and extremely customizable.
-</p>
-
-
-
-
-<p>
-  <strong>Setup Application</strong><br/>
-  First we need to add the social-share-button gem to our Gemfile. Open up your Gemfile and add in the line listed below:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Gemfile </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">social</span><span class="o">-</span><span class="n">share</span><span class="o">-</span><span class="n">button</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">~&gt;</span> <span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">6</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Next, we need to run a bundle install to install the gem:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Now we need to run the <code>rails generate social_share_button:install</code> command to install some additional configuration files that the Social Sharing Button gem uses to display the buttons on your site. This includes an initializer called social_share_button.rb in your initializers folder as well as some localization files:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">generate</span> <span class="n">social_share_button</span><span class="ss">:install</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Great, Next we need to do is create a simple Home controller in order to test the social sharing button functionality:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="n">homes</span> <span class="n">show</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Now let's modify our routes file a bit:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/routes.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">resources</span> <span class="ss">:homes</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:show</span><span class="o">]</span>
-</span><span class='line'>  <span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">homes</span><span class="c1">#show&amp;rdquo;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Great, now we need to add some javascript and CSS includes to make things work. Open up your application.js file and modify it so that it looks like the code listed below:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/assets/javascripts/application.js </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">jquery</span>
-</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">jquery_ujs</span>
-</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">turbolinks</span>
-</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">social</span><span class="o">-</span><span class="n">share</span><span class="o">-</span><span class="n">button</span>
-</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="n">require_tree</span> <span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Great, now for the application.css file. Open it up and modify it so that it looks like the code listed below:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/assets/stylesheets/application.css </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">/&lt;em&gt;</span>
-</span><span class='line'><span class="sr"> &lt;/em</span><span class="o">&gt;=</span> <span class="n">require_tree</span> <span class="o">.</span>
-</span><span class='line'> <span class="o">&lt;</span><span class="n">em</span><span class="o">&gt;=</span> <span class="nb">require</span> <span class="n">social</span><span class="o">-</span><span class="n">share</span><span class="o">-</span><span class="n">button</span>
-</span><span class='line'> <span class="o">&lt;</span><span class="sr">/em&gt;= require_self</span>
-</span><span class='line'><span class="sr"> */</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Excellent, now we can add the social sharing buttons to our site. Open up your homes/show view and modify it so that it looks like the code listed below:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/views/homes/show.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%=</span> <span class="n">social_share_button_tag</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">My</span> <span class="no">Site</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;)</span> <span class="o">%&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Great, now if we run rails server and visit http://localhost:3000, we will see the social sharing buttons. However, you'll notice that there is a problem. About 15 or so buttons are listed, but we only care about a couple. Luckily we can easily resolve this. Open up the social_share_button initializer and modify it so that it looks like the code listed below:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/initializers/social_share_button.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">SocialShareButton</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
-</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">allow_sites</span> <span class="o">=</span> <span class="sx">%w(twitter facebook google_plus delicious tumblr pinterest)</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  Now if you restart your rails server, you'll notice that the buttons have been limited to the sites listed above. Note that you can also specify a specific url if needed. Social Share Button detects the current URL by default, but there are times when you may want to customize this. You can do this like so:
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="sx">%= social_share_button_tag(&amp;ldquo;My Home Page&amp;rdquo;, :url =</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;http://mysite.com/sample&quot;</span><span class="o">&gt;</span><span class="ss">http</span><span class="p">:</span><span class="sr">//m</span><span class="n">ysite</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">sample</span><span class="o">&lt;</span><span class="sr">/a&gt;&amp;rdquo;) %&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  However, what if we want to customize the button look/feel? Luckily this is pretty easy. If you inspect the elements in chrome developer tools you'll notice that they each have a unique css class. We can override this CSS class with our own code. For example, to modify the facebook button to look different, we'd use something like the following CSS (placed into our application.css file):
-</p>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">social</span><span class="o">-</span><span class="n">share</span><span class="o">-</span><span class="n">button</span><span class="o">-</span><span class="n">facebook</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nb">display</span><span class="p">:</span> <span class="n">inline</span><span class="o">-</span><span class="n">block</span><span class="p">;</span>
-</span><span class='line'>  <span class="ss">width</span><span class="p">:</span> <span class="mi">16</span><span class="n">px</span><span class="p">;</span>
-</span><span class='line'>  <span class="ss">height</span><span class="p">:</span> <span class="mi">16</span><span class="n">px</span><span class="p">;</span>
-</span><span class='line'>  <span class="ss">background</span><span class="p">:</span> <span class="n">url</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">/</span><span class="n">social</span><span class="o">/</span><span class="n">facebook</span><span class="o">.</span><span class="n">png</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;)</span> <span class="n">no</span><span class="o">-</span><span class="n">repeat</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-  So far go good, That's it!!! See ya!!! :)
 </p>
 
 ]]></content>
