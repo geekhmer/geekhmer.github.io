@@ -5,13 +5,13 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Add Google Analytics to Ruby on Rails Application - GeeKhmer</title>
+  <title>Sessions Expiring - GeeKhmer</title>
   <meta name="author" content="Bunlong Van">
   
   
   <meta name="description" content="The biggest website of computer programming, Ruby, Ruby on Rails, Erlang, Chicagoboss and Javascript in Southeast Asia.">
 
-  <meta name="keywords" content="Add Google Analytics to Ruby on Rails Application">
+  <meta name="keywords" content="Sessions Expiring">
 
   <!-- http://t.co/dKP3o1e -->
   <meta name="HandheldFriendly" content="True">
@@ -19,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://geekhmer.github.io/blog/2015/04/19/add-google-analytics-to-ruby-on-rails-application">
+  <link rel="canonical" href="http://geekhmer.github.io/blog/2016/02/23/sessions-expiring">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="" rel="alternate" title="GeeKhmer" type="application/atom+xml">
@@ -77,7 +77,7 @@
   
   <header>
     
-      <h1 class="entry-title">Add Google Analytics to Ruby on Rails Application</h1>
+      <h1 class="entry-title">Sessions Expiring</h1>
     
     
       <p class="meta">
@@ -93,7 +93,7 @@
   
 
 
-<time datetime="2015-04-19T12:30:00+07:00" pubdate data-updated="true">Apr 19<span>th</span>, 2015</time>
+<time datetime="2016-02-23T14:54:00+07:00" pubdate data-updated="true">Feb 23<span>rd</span>, 2016</time>
         
       </p>
     
@@ -101,57 +101,29 @@
 
 
 <div class="entry-content"><p>
-  <img src="/images/ruby_on_rails.png" width="400" alt="Add Google Analytics to Ruby on Rails Application" />
+  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="Sessions Expiring" />
 </p>
 
 
 
 
 <p>
-  Google Analytics is used by the vast majority of the internet to monitor traffic. You can quickly and easily add Google Analytics to your Rails application, however there are a few things you should pay attention to. First, make sure that the Analytics code only loads up in a production environment. It&#8217;s best to do this by first creating a partial called google_analytics and placing the following code inside of it:
+  To improve user security, we may wish to expire the user&#8217;s session after they are inactive for a given amount of time. In order to do this, we simply set the <code>expire_after</code> parameter when setting up our session store. For example:
 </p>
 
 
 
 
-<figure class='code'><figcaption><span>app/views/layouts/_google_analytics.html.erb </span></figcaption>
+<figure class='code'><figcaption><span>config/initializers/session_store.rb </span></figcaption>
  <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">% if </span><span class="no">Rails</span><span class="o">.</span><span class="n">env</span> <span class="o">==</span> <span class="s2">&quot;production&quot;</span>  <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">  &lt;script type=&quot;text/javascript&quot;&gt;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">var</span> <span class="n">_gaq</span> <span class="o">=</span> <span class="n">_gaq</span> <span class="o">||</span> <span class="o">[]</span><span class="p">;</span>
-</span><span class='line'>    <span class="n">_gaq</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="o">[</span><span class="s1">&#39;_setAccount&#39;</span><span class="p">,</span> <span class="s1">&#39;UA-00000000-1&#39;</span><span class="o">]</span><span class="p">);</span>
-</span><span class='line'>    <span class="n">_gaq</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="o">[</span><span class="s1">&#39;_trackPageview&#39;</span><span class="o">]</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="p">(</span><span class="n">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>      <span class="n">var</span> <span class="n">ga</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">createElement</span><span class="p">(</span><span class="s1">&#39;script&#39;</span><span class="p">);</span> <span class="n">ga</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s1">&#39;text/javascript&#39;</span><span class="p">;</span> <span class="n">ga</span><span class="o">.</span><span class="n">async</span> <span class="o">=</span> <span class="kp">true</span><span class="p">;</span>
-</span><span class='line'>      <span class="n">ga</span><span class="o">.</span><span class="n">src</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;https:&#39;</span> <span class="o">==</span> <span class="n">document</span><span class="o">.</span><span class="n">location</span><span class="o">.</span><span class="n">protocol</span> <span class="p">?</span> <span class="s1">&#39;https://ssl&#39;</span> <span class="p">:</span> <span class="s1">&#39;http://www&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.google-analytics.com/ga.js&#39;</span><span class="p">;</span>
-</span><span class='line'>      <span class="n">var</span> <span class="n">s</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;script&#39;</span><span class="p">)</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="p">;</span> <span class="n">s</span><span class="o">.</span><span class="n">parentNode</span><span class="o">.</span><span class="n">insertBefore</span><span class="p">(</span><span class="n">ga</span><span class="p">,</span> <span class="n">s</span><span class="p">);</span>
-</span><span class='line'>    <span class="p">})();</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">&lt;</span><span class="sr">/script&gt;</span>
-</span><span class='line'><span class="sr">&lt;% end %&gt;</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">session_store</span> <span class="ss">:cookie_store</span><span class="p">,</span> <span class="ss">key</span><span class="p">:</span> <span class="s1">&#39;_example_session&#39;</span><span class="p">,</span> <span class="n">expire_after</span><span class="p">:</span> <span class="mi">15</span><span class="o">.</span><span class="n">minutes</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 
 
 <p>
-  This code will tell Rails to only include the Analytics code in a production environment.
+  The line above would expire the session after 15 minutes of inactivity. This means that the user&#8217;s session variables would get wiped once time reaches 15 minutes since the user last accessed the Rails application. If the user refreshes the page, the timer gets refreshed.
 </p>
 
 
@@ -183,12 +155,12 @@
   
 
 
-<time datetime="2015-04-19T12:30:00+07:00" pubdate data-updated="true">Apr 19<span>th</span>, 2015</time>
+<time datetime="2016-02-23T14:54:00+07:00" pubdate data-updated="true">Feb 23<span>rd</span>, 2016</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/ruby/'>Ruby</a>, <a class='category' href='/blog/categories/ruby-on-rails/'>Ruby on Rails</a>
+    <a class='category' href='/blog/categories/ruby-on-rails/'>Ruby on Rails</a>
   
 </span>
 
@@ -197,7 +169,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2015/04/19/add-google-analytics-to-ruby-on-rails-application/" data-via="" data-counturl="http://geekhmer.github.io/blog/2015/04/19/add-google-analytics-to-ruby-on-rails-application/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2016/02/23/sessions-expiring/" data-via="" data-counturl="http://geekhmer.github.io/blog/2016/02/23/sessions-expiring/" >Tweet</a>
   
   
   
@@ -208,10 +180,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2015/04/19/ruby-on-rails-generate-options/" title="Previous Post: Ruby on Rails Generate Options">&laquo; Ruby on Rails Generate Options</a>
+        <a class="basic-alignment left" href="/blog/2016/02/23/dynamic-programming-with-ruby/" title="Previous Post: Dynamic Programming with Ruby">&laquo; Dynamic Programming with Ruby</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2015/04/20/ruby-on-rails-build-a-simple-rake-task/" title="Next Post: Ruby on Rails Build a Simple Rake Task">Ruby on Rails Build a Simple Rake Task &raquo;</a>
       
     </p>
   </footer>
