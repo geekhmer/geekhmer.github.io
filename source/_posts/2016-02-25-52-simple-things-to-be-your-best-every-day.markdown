@@ -231,3 +231,6 @@ keywords: 52 Simple Things to Be Your Best Every Day
   <strong>52. Lead from within:</strong> everything you need for a successful life is within you now.
 </p>
  
+<p>
+  So far so good, That's it!!! See ya!!! :)
+</p>
