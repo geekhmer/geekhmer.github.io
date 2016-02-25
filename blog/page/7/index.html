@@ -80,6 +80,238 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/05/16/ip-geolocation-in-ruby-on-rails-application/">IP Geolocation in Ruby on Rails Application</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-05-16T23:47:00+07:00" pubdate data-updated="true">May 16<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="IP Geolocation in Ruby on Rails Application" />
+</p>
+
+
+
+
+<p>
+  Sometimes it can be useful to find a user&#8217;s physical location in our Rails application. For instance, maybe we want to send a special Happy Holidays to users of a particular country. IP address geolocation lets us do exactly that. With IP address geolocation you can get a pretty good idea of where the customer is accessing your site from as long as they aren&#8217;t using a proxy server or some other means of obscuring their IP address. In this article we will show you how to utilize the Maxmind GeoIP database to look up the location of just about any IP address. Let&#8217;s get started.
+</p>
+
+
+
+
+<p>
+  <strong>Setup Rails Application</strong><br/>
+  To utilize the IP address geolocation functionality, we first need to add the geoip gem to our gemfile. Open up your gemfile and add in the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;geoip&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 1.4.0&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Great, now let&#8217;s run a bundle install to install the gem.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now we need to download the GeoIP database for use with the geoip gem. A free one <a href="http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz" target="_blank"> can be downloaded at this link</a>, or you can use the paid version if you have a subscription. Once downloaded, extract the compressed archive and place the .dat folder contained within in the root directory of your Rails app.
+</p>
+
+
+
+
+<p>
+  Great, now let&#8217;s create a controller so that we can play around with the GeoIP functionality. Run the commands below to create a controller called GeoIpRequest:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="n">geo_ip_request</span> <span class="kp">new</span> <span class="n">create</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Next, open up your routes file and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">resource</span> <span class="ss">:geo_ip_request</span><span class="p">,</span> <span class="ss">controller</span><span class="p">:</span> <span class="ss">:geo_ip_request</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;geo_ip_request#new&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Great, now open up your GeoIpRequest controller and modify it so that it looks like the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/controllers/geo_ip_request_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">GeoIpRequestController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">new</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="nb">require</span> <span class="s1">&#39;geoip&#39;</span>
+</span><span class='line'>    <span class="vi">@info</span> <span class="o">=</span> <span class="no">GeoIP</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Rails</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;GeoLiteCity.dat&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">city</span><span class="p">(</span><span class="n">ip_request_params</span><span class="o">[</span><span class="ss">:host</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">ip_request_params</span>
+</span><span class='line'>    <span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:request</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:host</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  In the code above, we tell the geoip gem to load our database file and do a search for the host parameter.
+</p>
+
+
+
+
+<p>
+  Now let&#8217;s create our views. Open up the new view for the GeoIpRequest controller and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/geo_ip_request/new.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">GeoIP</span> <span class="no">Example</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'><span class="sr">&lt;p&gt;Get the country for any ip address or hostname by typing it below and pressing the lookup button.&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">%= form_for :request, url: geo_ip_request_index_path do |f| %&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">text_field</span> <span class="ss">:host</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%= f.submit &quot;Lookup&quot; %&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% end </span><span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Great, now finally let&#8217;s do the create view. Open up the create view for the GeoIpRequest controller and modify it so that it looks like the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/geo_ip_request/create.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">IP</span> <span class="no">Address</span> <span class="no">Info</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'><span class="sr">&lt;b&gt;IP:&amp;nbsp;&amp;nbsp;&lt;/</span><span class="n">b</span><span class="o">&gt;&lt;</span><span class="sx">%= @info.request %&gt;&lt;br /&gt;</span>
+</span><span class='line'><span class="sx">&lt;b&gt;Country:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;%=</span> <span class="vi">@info</span><span class="o">.</span><span class="n">country_name</span> <span class="sx">%&gt;&lt;br /&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="ss">City</span><span class="p">:</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/b&gt;&lt;%= @info.city_name %&gt;&lt;br /</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="ss">Region</span><span class="p">:</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">nbsp</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/b&gt;&lt;%= @info.real_region_name %&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Excellent, now if you fire up your rails development server and and navigate to http://localhost:3000 you will see a form requesting your ip address or hostname. Entering any ip address or host name will show the country, city, and region that ip is from.
+</p>
+
+
+
+
+<p>
+  So far so good, that&#8217;s it!!! that&#8217;s all there is to it!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/05/14/code-concerns-in-rails-4-models/">Code Concerns in Rails 4 Models</a></h1>
     
     
@@ -2490,504 +2722,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/05/07/fast-rails-api-with-rails-api-and-active-model-serializers/">Fast Rails API With Rails-api and Active_model_serializers</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-05-07T13:50:00+07:00" pubdate data-updated="true">May 7<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="Fast Rails API with Rails-api and Active_model_serializers" />
-</p>
-
-
-
-
-<p>
-  Dealing with JSON in Rails is pretty easy and straight forward. The support is built into the framework, request data is automatically available in params hash. Then we just have to say <code>render :json</code> and we are done.
-</p>
-
-
-
-
-<p>
-  If JSON is one of the formats which we use. For instance, we can render both JSON and HTML in the same controller action. Or we may create an action intended for AJAX call which changes some model and returns JSON with status field.
-</p>
-
-
-
-
-<p>
-  On the other hand, we may use Ruby on Rails for building JSON API – app with the assumption that JSON is the only format we support. In such a case we know that the app won’t render HTML. There is no View layer (or you can say that JSON is your View layer). We probably won’t need cookies support and the code specific to handling browser requests.
-</p>
-
-
-
-
-<h3>
-  Rails-API
-</h3>
-
-
-
-
-<p>
-  Ruby on Rails has modular structure – you can opt out of the things which you don’t want to use. But if we are talking about API only Rails app already did it for us and published in the gem called <a href="https://github.com/rails-api/rails-api/blob/master/README.md" target="_blank">rails-api</a>.
-</p>
-
-
-
-
-<p>
-  What I care is &#8220;Don’t require things which you won’t use&#8221;. There might be bugs hiding there or security vulnerabilities connected with it. And of course there are other reasons:
-</p>
-
-
-
-
-<p>
-  <strong>More Lightweight Application</strong><br/>
-  I generated two fresh applications – one using <code>rails-api new</code> and the second using <code>rails new</code>. The environment was consistent – Ruby 2.1.0, Rails 4.0.2. Then I started the server with rails s and measured RAM memory taken by server process. The results are following:
-</p>
-
-
-
-
-<p>
-  This is 15% less. Obviously when you start adding new gems the relative difference will be smaller.
-</p>
-
-
-
-
-<p>
-  <strong>Faster Application</strong><br/>
-  The same benchmarking environment as above. I created controller action which loads 100 User records from the database and renders them as JSON. I placed exactly the same code in rails-api application and regular rails application. Then I measured the server response time for a bunch of requests and took the avarage value. It looks like:
-</p>
-
-
-
-
-<p>
-  This is 12% faster.
-</p>
-
-
-
-
-<p>
-  <strong>Useful Generator</strong><br/>
-  The controller scaffold which comes with rails-api is really cool. It disables new and edit actions (they don’t make sense because we do not display forms) and provides sensible default code inside other actions.
-</p>
-
-
-
-
-<p>
-  <strong>Easy Installation and No Maintenance Costs</strong><br/>
-  Last but not least, rails-api is super easy to install and learn. All you have to do to bootstrap new app is:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="n">install</span> <span class="n">rails</span><span class="o">-</span><span class="n">api</span>
-</span><span class='line'><span class="n">rails</span><span class="o">-</span><span class="n">api</span> <span class="kp">new</span> <span class="n">my_app</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  It’s worth to spend 10 minutes of your time for learning it. <a href="https://github.com/rails-api/rails-api/blob/master/README.md" target="_blank">Check out the docs</a>.
-</p>
-
-
-
-
-<h3>
-  Active Model Serializers
-</h3>
-
-
-
-
-<p>
-  If you want to build JSON API it’s good to have control over the generated JSON. And here we need the second gem is <a href="https://github.com/rails-api/active_model_serializers" target="_blank">active_model_serializers</a>.
-</p>
-
-
-
-
-<p>
-  Let’s look at a sample serializer:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/serializers/user_serializer.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">UserSerializer</span> <span class="o">&lt;</span> <span class="ss">ActiveModel</span><span class="p">:</span><span class="ss">:Serializer</span>
-</span><span class='line'>  <span class="n">attributes</span> <span class="ss">:id</span><span class="p">,</span> <span class="ss">:first_name</span><span class="p">,</span> <span class="ss">:last_name</span><span class="p">,</span> <span class="ss">:email</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">has_one</span> <span class="ss">:address</span>
-</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:packages</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  As you can see UserSerializer is used to serialize User model. Using attributes we define what should be included in the generated JSON. You may think that this is repeating yourself (the fields are already defined in database schema), but in my opinion you rarely render all the fields, more often you want to hide some internals.
-</p>
-
-
-
-
-<p>
-  As you can see we embed associated records using familiar syntax: has_one and has_many. Serializing Address and Package will be handled using AddressSerializer and PackageSerializer, respectively.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/serializers/user_serializer.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">UserSerializer</span> <span class="o">&lt;</span> <span class="ss">ActiveModel</span><span class="p">:</span><span class="ss">:Serializer</span>
-</span><span class='line'>  <span class="o">[.</span><span class="n">.</span><span class="o">.]</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">attributes</span> <span class="ss">:full_name</span><span class="p">,</span> <span class="ss">:email_address</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">full_name</span>
-</span><span class='line'>    <span class="s2">&quot;</span><span class="si">#{</span><span class="n">object</span><span class="o">.</span><span class="n">first_name</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">object</span><span class="o">.</span><span class="n">last_name</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">email_address</span>
-</span><span class='line'>    <span class="n">object</span><span class="o">.</span><span class="n">email</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">[.</span><span class="n">.</span><span class="o">.]</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Serializers are just classes which inherit from ActiveModel::Serializer. You can define regular methods and the model being serialized is accessed by object method.
-</p>
-
-
-
-
-<p>
-  How does the code inside UsersController look like?
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/controllers/users_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[.</span><span class="n">.</span><span class="o">.]</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
-</span><span class='line'>    <span class="vi">@users</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">:address</span><span class="p">,</span> <span class="ss">:packages</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="vi">@users</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">[.</span><span class="n">.</span><span class="o">.]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Pretty simple, You just say: “I want JSON” and you have JSON rendered with proper serializer.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="s2">&quot;users&quot;</span><span class="p">:</span>
-</span><span class='line'>    <span class="o">[</span>
-</span><span class='line'>      <span class="p">{</span>
-</span><span class='line'>        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-</span><span class='line'>        <span class="s2">&quot;first_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Some String&quot;</span><span class="p">,</span>
-</span><span class='line'>        <span class="s2">&quot;last_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Another String&quot;</span><span class="p">,</span>
-</span><span class='line'>        <span class="o">[.</span><span class="n">.</span><span class="o">.]</span>
-</span><span class='line'>        <span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="s2">&quot;street&quot;</span><span class="p">:</span> <span class="s2">&quot;Yet another string&quot;</span> <span class="p">},</span>
-</span><span class='line'>        <span class="s2">&quot;packages&quot;</span><span class="p">:</span> <span class="o">[</span>
-</span><span class='line'>          <span class="p">{</span> <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;delivered&quot;</span> <span class="p">},</span>
-</span><span class='line'>          <span class="p">{</span> <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;lost&quot;</span> <span class="p">}</span>
-</span><span class='line'>        <span class="o">]</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>    <span class="o">]</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>More about Associations</strong><br/>
-  Let’s imagine following use case, we want to get information about a package given its id. And we want it to contain information about the owner (user).
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>package_serializer.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PackageSerializer</span> <span class="o">&lt;</span> <span class="ss">ActiveModel</span><span class="p">:</span><span class="ss">:Serializer</span>
-</span><span class='line'>  <span class="n">attributes</span> <span class="ss">:id</span><span class="p">,</span> <span class="ss">:status</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">has_one</span> <span class="ss">:user</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  What’s different here from model code? Package <code>belongs_to</code> user, but here it says <code>has_one</code> user. From the point of view of serializers <code>belongs_to</code> is exactly the same as <code>has_one</code>, hence we have only has_one and has_many.
-</p>
-
-
-
-
-<p>
-  Now let’s go back to <code>UsersController#index</code> after our changes. We hit the action again and what do we get this time?
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Failure</span><span class="o">/</span><span class="ss">Error</span><span class="p">:</span> <span class="no">Unable</span> <span class="n">to</span> <span class="n">find</span> <span class="n">matching</span> <span class="n">line</span> <span class="n">from</span> <span class="n">backtrace</span>
-</span><span class='line'>  <span class="ss">SystemStackError</span><span class="p">:</span>
-</span><span class='line'>    <span class="n">stack</span> <span class="n">level</span> <span class="n">too</span> <span class="n">deep</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  That’s an infinite loop: user contains package, package contains user, user contains package&#8230; How can we solve this?
-</p>
-
-
-
-
-<p>
-  <strong>Solution 1</strong>
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>user_serializer.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">UserSerializer</span> <span class="o">&lt;</span> <span class="ss">ActiveModel</span><span class="p">:</span><span class="ss">:Serializer</span>
-</span><span class='line'>  <span class="o">[.</span><span class="n">.</span><span class="o">.]</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:packages</span><span class="p">,</span> <span class="ss">:embed</span> <span class="o">=&gt;</span> <span class="ss">:ids</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">[.</span><span class="n">.</span><span class="o">.]</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="s2">&quot;users&quot;</span><span class="p">:</span>
-</span><span class='line'>    <span class="o">[</span>
-</span><span class='line'>      <span class="p">{</span>
-</span><span class='line'>        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-</span><span class='line'>        <span class="o">[.</span><span class="n">.</span><span class="o">.]</span>
-</span><span class='line'>        <span class="s2">&quot;package_ids&quot;</span><span class="p">:</span> <span class="o">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="o">]</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>    <span class="o">]</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  We can use <code>:embed</code> option and include only ids of the packages. This has a drawback: if a client of our API wants not only id of the package, but also its status then he will have to make a separate request for each package. Certainly this is a situation which we want to avoid.
-</p>
-
-
-
-
-<p>
-  <strong>Solution 2</strong>
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>user_serializer.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">UserSerializer</span> <span class="o">&lt;</span> <span class="ss">ActiveModel</span><span class="p">:</span><span class="ss">:Serializer</span>
-</span><span class='line'>  <span class="o">[.</span><span class="n">.</span><span class="o">.]</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:packages</span><span class="p">,</span> <span class="ss">:serializer</span> <span class="o">=&gt;</span> <span class="no">ShortPackageSerializer</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">[.</span><span class="n">.</span><span class="o">.]</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span>short_package_serializer.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ShortPackageSerializer</span> <span class="o">&lt;</span> <span class="ss">ActiveModel</span><span class="p">:</span><span class="ss">:Serializer</span>
-</span><span class='line'>  <span class="n">attributes</span> <span class="ss">:id</span><span class="p">,</span> <span class="ss">:status</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  We use <code>:serializer</code> option to specify different serializer than that inferred from naming conventions. We create <code>ShortPackageSerializer</code>, which doesn’t contain user embeded. What’s more you can put <code>ShortPackageSerializer</code> and <code>PackageSerializer</code> in the inheritance hierarchy so you DRY.
-</p>
-
-
-
-
-<p>
-  In my opinion this solution is pretty clean. We have separate class for each representation and we are able to share some pieces of code by using inheritance. Of course, this may become too complex if the inheritance hierarchy grows very big. However if we limit ourselves to 2-3 serializers per model the code should stay clear and maintainable.
-</p>
-
-
-
-
-<p>
-  Use rails-api if you are building API-only application. It’s easy to learn and maintenance won’t hit you later, because you can opt out without any problems.
-</p>
-
-
-
-
-<p>
-  Use active_model_serializers for better control over the generated JSON.
-</p>
-
-
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/8/">&larr; Older</a>
@@ -3012,6 +2746,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/02/25/52-simple-things-to-be-your-best-every-day/">52 Simple Things to Be Your Best Every Day</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/02/23/sessions-expiring/">Sessions Expiring</a>
       </li>
     
@@ -3033,10 +2771,6 @@
     
       <li class="post">
         <a href="/blog/2016/02/04/i-should-write-bad-code-more-often/">I Should Write Bad Code More Often</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/02/04/5d-co-working-lab/">5D Co-working Lab</a>
       </li>
     
   </ul>
@@ -3094,7 +2828,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 32 ]</a>
+        <a href="/blog/categories/other/">Other [ 33 ]</a>
       </li>
     
       <li>
