@@ -8,7 +8,7 @@ keywords: 52 Simple Things to Be Your Best Every Day
 ---
 
 <p>
-  <img src="/images/52_simple _things.jpg" width="500" alt="52 Simple Things to Be Your Best Every Day" />
+  <img src="/images/52_simple _things.png" width="500" alt="52 Simple Things to Be Your Best Every Day" />
 </p>
 
 <p>
