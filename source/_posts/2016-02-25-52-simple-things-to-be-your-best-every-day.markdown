@@ -176,10 +176,6 @@ keywords: 52 Simple Things to Be Your Best Every Day
 </p>
 
 <p>
-  <strong>39. Be an active listener:</strong> make sure you listen at least as much as you speak.
-</p>
-
-<p>
   <strong>40. Honor your commitments:</strong> when you make a promise, keep it.
 </p>
 
