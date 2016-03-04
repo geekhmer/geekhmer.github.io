@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2016-03-04T10:53:14+07:00</updated>
+  <updated>2016-03-04T17:38:23+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,251 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Executing Background Tasks with Scheduler in Rails]]></title>
+    <link href="http://geekhmer.github.io/blog/2016/03/04/executing-background-tasks-with-scheduler-in-rails/"/>
+    <updated>2016-03-04T16:42:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2016/03/04/executing-background-tasks-with-scheduler-in-rails</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="Executing Background Tasks with Scheduler in Rails" />
+</p>
+
+
+
+
+<p>
+  <a href="https://rubygems.org/gems/rufus-scheduler/versions/3.2.0" target="_blank">rufus-scheduler</a> is a handy gem that allows you to perform background jobs. In this article we will show you how to use rufus-scheduler in your Rails applications. Let&#8217;s get started:
+</p>
+
+
+
+
+<h3>Setup</h3>
+
+
+
+
+<p>
+  In order to use rufus-scheduler, we must first add the rufus-scheduler gem to our Gemfile. To do this, open up your Gemfile and add in the line listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;rufus-scheduler&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Run a bundle install to install the gem:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Great, we need to create an initializer that will contain the jobs we wish to schedule. Create a new initializer called scheduler.rb in the <code>config/initializers</code> directory and add in the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/initializers/scheduler.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;rufus-scheduler&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">scheduler</span> <span class="o">=</span> <span class="ss">Rufus</span><span class="p">:</span><span class="ss">:Scheduler</span><span class="o">::</span><span class="n">singleton</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># jobs go below here.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now we are ready to schedule jobs.
+</p>
+
+
+
+
+<h3>Scheduling the Jobs</h3>
+
+
+
+
+<p>
+  rufus-scheduler provides a simple syntax for scheduling jobs. You can schedule both one time jobs and recurring jobs. One time jobs can be either scheduled at a specific time, or you can tell rufus to wait a specific amount of time before running the job (a delayed job). For recurring jobs and delayed jobs, you can either use a simple plain English (30m = 30 minutes, etc.) format or you can use the cron format for scheduling jobs. For this article we&#8217;ll focus on the English format:
+</p>
+
+
+
+
+<p>
+  <strong>Recurring the Jobs</strong><br/>
+  Scheduling recurring jobs is easy. Simply use the following format in your scheduler.rb file:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/initializers/scheduler.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">scheduler</span><span class="o">.</span><span class="n">every</span> <span class="s1">&#39;5s&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># do stuff</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The code above would perform your background task every 5 seconds. The list below will give you an idea of what time units are supported:
+</p>
+
+
+
+
+<p>
+  <strong>s</strong> Example: 5s - seconds, specifies the number of seconds you wish to wait.<br/>
+  <strong>m</strong> Example: 5m - the number of minutes you wish to wait.<br/>
+  <strong>h</strong> Example: 5h - the number of hours you wish to wait.<br/>
+  <strong>d</strong> Example: 5d - the number of days you wish to wait.<br/>
+  <strong>w</strong> Example: 5w - the number of weeks you wish to wait.<br/>
+  <strong>M</strong> Example: 5M - the number of months you wish to wait.<br/>
+  <strong>y</strong> Example: 1y - the number of years you wish to wait.
+</p>
+
+
+
+
+<p>
+  For example, the following code would tell rufus you wish to schedule a job for every 11 and a half hours:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/initializers/scheduler.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">scheduler</span><span class="o">.</span><span class="n">every</span> <span class="s1">&#39;11h30m&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># do stuff</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Scheduling a delayed job is easy. The syntax is similar to the recurring syntax listed above, but we use the <code>.in</code> method instead of <code>.every</code>. For example, the following code would run a task 4 hours after the server starts:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/initializers/scheduler.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">scheduler</span><span class="o">.</span><span class="n">in</span> <span class="s1">&#39;4h&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># do stuff</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Scheduling the Jobs for Specific Dates/Times</strong><br/>
+  You can also schedule a job for a specific date and time. To do this we use the at method. For example, the following code would run at 12:01am on December 1st, 2017:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/initializers/scheduler.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">scheduler</span><span class="o">.</span><span class="n">at</span> <span class="s1">&#39;2017/12/01 00:01:00&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># do stuff</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<h3>Important Caveats</h3>
+
+
+
+
+<p>
+  1. Because rufus-scheduler runs in process, the scheduler will reset if your Rails server gets restarted. This means that the timer for your jobs will get reset, so don&#8217;t count on any monthly or yearly jobs getting called. If you need to persist jobs across server resets, use a job backend. We will show you how to do this in another article.<br/>
+  2. Rufus does not work with Active Job.<br/>
+  3. Some additional setup is needed for production environments (see below).
+</p>
+
+
+
+
+<h3>Production Setup</h3>
+
+
+
+
+<p>
+  Production servers require a bit of additional setup. On most production web servers, idle Ruby processes are killed. In order for rufus to work, you&#8217;ll need to stop this from happening. For Passenger/Nginx you can copy the following code below to your <code>nginx.conf</code> config file for your website after the line that says <code>passenger_enabled on;</code>.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>nginx.conf </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">passenger_spawn_method</span> <span class="n">direct</span><span class="p">;</span>
+</span><span class='line'><span class="n">passenger_min_instances</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'><span class="n">passenger_pool_idle_time</span> <span class="mi">0</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  rufus-scheduler is a simple, easy to use scheduler that provides great functionality. It can be used for stuff like sending emails, cleaning up temp files, and much more.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[4 Startups Mark Zuckerberg Created Before Facebook]]></title>
@@ -2571,122 +2816,6 @@
 
 <p>
   So far go good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[What is Flux?]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/11/22/what-is-flux/"/>
-    <updated>2015-11-22T16:27:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/11/22/what-is-flux</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/react_flux.jpg" width="600" alt="What is Flux?" />
-</p>
-
-
-
-
-<p>
-  Flux is an architecture that Facebook uses internally when working with React. It is not a framework or a library. It is a new kind of architecture that complements React and the concept of Unidirectional Data Flow (Central to the Flux Pattern).
-</p>
-
-
-
-
-<p>
-  Facebook provide a Dispatcher javascript library. The dispatcher is a kind of global pub/sub handler that broadcasts payloads to registered callbacks.
-</p>
-
-
-
-
-<p>
-  Flux architecture will use this Dispatcher javascript library, along with NodeJS’s EventEmitter module in order to set up an event system that helps manage an applications state.
-</p>
-
-
-
-
-<p>
-  <strong>Flux have 4 layers:</strong><br/>
-  - <code>Actions</code> - Helper methods that facilitate passing data to the Dispatcher.<br/>
-  - <code>Dispatcher</code> - Receives actions and broadcasts payloads to registered callbacks.<br/>
-  - <code>Stores</code> - Containers for application state & logic that have callbacks registered to the dispatcher.<br/>
-  - <code>Controller Views</code> - React Components that grab the state from Stores and pass it down via props to child components.
-</p>
-
-
-
-
-<p>
-  <strong>Structure and Data Flow </strong><br/>
-  Data in a Flux application flows in a single direction:<br/>
-</p>
-
-
-
-
-<p>
-  <img src="http://geekhmer.github.io/images/flux_diagram_1.png" width="600" alt="What is Flux?" />
-</p>
-
-
-
-
-<p>
-  The dispatcher, stores and views are independent nodes with distinct inputs and outputs. The actions are simple objects containing the new data and an identifying type property.
-</p>
-
-
-
-
-<p>
-  The views may cause a new action to be propagated through the system in response to user interactions:
-</p>
-
-
-
-
-<p>
-  <img src="http://geekhmer.github.io/images/flux_diagram_2.png" width="600" alt="What is Flux?" />
-</p>
-
-
-
-
-<p>
-  All data flows through the dispatcher as a central hub. Actions are provided to the dispatcher in an action creator method, and most often originate from user interactions with the views. The dispatcher then invokes the callbacks that the stores have registered with it, dispatching actions to all stores. Within their registered callbacks, stores respond to whichever actions are relevant to the state they maintain. The stores then emit a change event to alert the controller-views that a change to the data layer has occurred. Controller-views listen for these events and retrieve data from the stores in an event handler. The controller-views call their own <code>setState()</code> method, causing a re-rendering of themselves and all of their descendants in the component tree.
-</p>
-
-
-
-
-<p>
-  <img src="http://geekhmer.github.io/images/flux_diagram_3.png" width="600" alt="What is Flux?" />
-</p>
-
-
-
-
-<p>
-  <strong>Summary</strong><br/>
-  Flux is a pattern for unidirectional data flows Actions encapsulate events Dispatcher is a central hub that holds callbacks Stores hold app state Many implementations
-</p>
-
-
-
-
-<p>
-  So far after reading this article, I hope that if you didn’t get Facebook’s Flux Architecture before, that now you can say you do. 
-</p>
-
-
-
-
-<p>
-  If you want to use the Flux architecture. but you don&#8217;t know how to use it and which library you should use, please stay turned for the next article. See you!!! :)
 </p>
 
 ]]></content>
