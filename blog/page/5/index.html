@@ -79,6 +79,83 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/09/02/open-sourcing-a-gem/">Open Sourcing a Gem</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-09-02T20:24:00+07:00" pubdate data-updated="true">Sep 2<span>nd</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/rubygems_logo.png" alt="Open Sourcing a Gem" />
+</p>
+
+
+
+
+<p>
+  <strong>Considerations when Open Sourcing</strong><br/>
+  When open sourcing a gem (or any project, this post can be generalized to not just focus on gems), there are a number of things to consider. The first check is to ensure that the use case is general enough that it is likely to be helpful to other parties. Though the project might never gain many external users, it is a good sanity check before taking on the work to open source the project. Following this there are a number of things to think out, with the purpose of determining a track of work that needs to be taken (if any) before the gem can be open sourced.
+</p>
+
+
+
+
+<p>
+  <strong>Generalize the implementation</strong><br/>
+  - Remove coupled business logic and application specific code.<br/>
+  - Ensure no keys/account information were stored in the repo (even in past commits). Typically not considered a good practice, but it is something to be aware of when releasing the source of a project publicly.
+</p>
+
+
+
+
+<p>
+  <strong>Set bounds on the responsibilities</strong><br/>
+  - What is the purpose of this gem and what needs is it fulfilling?<br/>
+  - Take a step back from how you currently use the library. What other potential use cases might others use it for? Is it worth generalizing the implementation to aid these other use cases?<br/>
+  - Set bounds on the responsibilities that the gem will take care of.<br/>
+  - What will the gem provide and what is left up to the user? In the case of Signalman, we allow users to customize the URL of the Signalman admin page, but it is up to the user to provide additional authentication besides obscurity. Signalman is a gem designed to aid with A/B testing, not authentication.<br/>
+  - Try to stick to the gem&#8217;s core competencies. Do not add features at a whim to quell user requests. This can cause a gem to grow out of control and become hard to manage or even discern its original purpose/intent.
+</p>
+
+
+
+
+<p>
+  <strong>Consider strategies to manage repository ownership</strong><br/>
+  - Like it or not, becoming a maintainer is a big responsibility. If you are open sourcing a project with a team, this will greatly ease the burden, but you must still consider processes to manage external pull requests and issues that arise.<br/>
+  - Giving the user power and encouraging pull requests and a community that supports each other&#8217;s issues can also relieve the burden of being a project maintainer. You can help this process by adding documentation for contributing and making it easy for other parties to contribute to the project. This also means providing help to newer developers; you never know who might become a leading contributor in the future.
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/07/25/web-notifications-api/">Web Notifications API</a></h1>
     
     
@@ -2698,447 +2775,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/06/25/mark-methods-private-when-you-dont-test-them/">Mark Methods Private When You Don’t Test Them</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-06-25T20:58:00+07:00" pubdate data-updated="true">Jun 25<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="Mark Methods Private When You Don’t Test Them" />
-</p>
-
-
-
-
-<p>
-  In Ruby and many other languages, you write private methods to implement internal logic you don’t want to expose. You want the freedom to rename, repurpose or even delete them without worrying about impacting anything else. The <code>private</code> keyword signals other developers: Don’t rely on this; don’t call it; it might change. This is especially important when writing framework or library code that many other developers will use.
-</p>
-
-
-
-
-<p>
-  But which methods should you make private? Sometimes this is obvious; sometimes it isn&#8217;t. A good rule of thumb to use is: If you’re not testing a method, it should be private.
-</p>
-
-
-
-
-<p>
-  But wait a minute! Aren&#8217;t we supposed to test everything? Isn&#8217;t 100% code coverage the every Ruby developer seeks? Let me clarify. You should mark methods private when you test them indirectly by calling the other, public methods in the same class. Use the <code>private</code> keyword to help organize your code, to remind yourself what you still need to test, and what you don&#8217;t.
-</p>
-
-
-
-
-<p>
-  <strong>Three Paintings</strong><br/>
-  A simple example will make this clear. Suppose I have a class that describes a painting:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Painting</span> <span class="o">=</span> <span class="no">Struct</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span> <span class="ss">:year</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now I can create a list of three paintings in a Minitest::Spec file like this:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">let</span><span class="p">(</span><span class="ss">:one</span><span class="p">)</span> <span class="p">{</span> <span class="no">Painting</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;Spanish Couple In Front Of Inn&quot;</span><span class="p">,</span> <span class="mi">1900</span><span class="p">)</span> <span class="p">}</span>
-</span><span class='line'><span class="n">let</span><span class="p">(</span><span class="ss">:two</span><span class="p">)</span> <span class="p">{</span> <span class="no">Painting</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;Guernica&quot;</span><span class="p">,</span> <span class="mi">1937</span><span class="p">)</span> <span class="p">}</span>
-</span><span class='line'><span class="n">let</span><span class="p">(</span><span class="ss">:three</span><span class="p">)</span> <span class="p">{</span> <span class="no">Painting</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;Petite Fleurs&quot;</span><span class="p">,</span> <span class="mi">1958</span><span class="p">)</span> <span class="p">}</span>
-</span><span class='line'><span class="n">let</span><span class="p">(</span><span class="ss">:paintings</span><span class="p">)</span> <span class="p">{</span> <span class="o">[</span><span class="n">one</span><span class="p">,</span> <span class="n">two</span><span class="p">,</span> <span class="n">three</span><span class="o">]</span> <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Suppose my first requirement is to return the first painting from the list. Simple enough:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">list</span><span class="o">.</span><span class="n">first</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="s2">&quot;should return the first element&quot;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">first</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">must_equal</span> <span class="n">one</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  I just call Array#first and I’m done. Returning the rest of the list is slightly more interesting:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">rest</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">_</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span> <span class="o">=</span> <span class="n">list</span>
-</span><span class='line'>  <span class="n">rest</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="s2">&quot;returns the rest of the elements&quot;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">rest</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">must_equal</span> <span class="o">[</span><span class="n">two</span><span class="p">,</span> <span class="n">three</span><span class="o">]</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Rest always returns an array even if the input list was empty or had only one element. So far, so good. I’ve written two methods and two tests:
-</p>
-
-
-
-
-<p>
-  <img src="/images/two_tests.png" width="400" alt="Mark Methods Private When You Don’t Test Them" />
-</p>
-
-
-
-
-<p>
-  <strong>A New Requirement</strong><br/>
-  Now suppose my business requirement changes slightly and I instead need to return the first painting sorted alphabetically by name. Once again, it’s not hard to do:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">list</span><span class="o">.</span><span class="n">sort</span> <span class="k">do</span> <span class="o">|</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">|</span>
-</span><span class='line'>    <span class="n">p1</span><span class="o">.</span><span class="n">name</span> <span class="o">&lt;=&gt;</span> <span class="n">p2</span><span class="o">.</span><span class="n">name</span>
-</span><span class='line'>  <span class="k">end</span><span class="o">.</span><span class="n">first</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="s2">&quot;should return the first element&quot;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">first</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">must_equal</span> <span class="s2">&quot;Guernica&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  And I need rest to use the same sort order, so I repeat the call to sort:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">rest</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">_</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span> <span class="o">=</span> <span class="n">list</span><span class="o">.</span><span class="n">sort</span> <span class="k">do</span> <span class="o">|</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">|</span>
-</span><span class='line'>    <span class="n">p1</span><span class="o">.</span><span class="n">name</span> <span class="o">&lt;=&gt;</span> <span class="n">p2</span><span class="o">.</span><span class="n">name</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>  <span class="n">rest</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="s2">&quot;returns the rest of the elements&quot;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">rest</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:name</span><span class="p">)</span><span class="o">.</span><span class="n">must_equal</span> <span class="o">[</span>
-</span><span class='line'>    <span class="s2">&quot;Petite Fleurs&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;Spanish Couple In Front Of Inn&quot;</span>
-</span><span class='line'>  <span class="o">]</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  I’ve implemented new behavior, but still have two methods and two tests:
-</p>
-
-
-
-
-<p>
-  <img src="/images/two_tests.png" width="400" alt="Mark Methods Private When You Don’t Test Them" />
-</p>
-
-
-
-
-<p>
-  <strong>Extracting a Method</strong><br/>
-  Because both of my methods are covered by tests, I’m free to refactor them. I decide to extract a new method, sorted_by_name:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">sorted_by_name</span><span class="p">(</span><span class="n">list</span><span class="p">)</span><span class="o">.</span><span class="n">first</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">def</span> <span class="nf">rest</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">_</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span> <span class="o">=</span> <span class="n">sorted_by_name</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">rest</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">def</span> <span class="nf">sorted_by_name</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">list</span><span class="o">.</span><span class="n">sort</span> <span class="k">do</span> <span class="o">|</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">|</span>
-</span><span class='line'>    <span class="n">p1</span><span class="o">.</span><span class="n">name</span> <span class="o">&lt;=&gt;</span> <span class="n">p2</span><span class="o">.</span><span class="n">name</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="s2">&quot;returns the element with the first name&quot;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">first</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">must_equal</span> <span class="s2">&quot;Guernica&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">it</span> <span class="s2">&quot;returns the rest after the first name&quot;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">rest</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:name</span><span class="p">)</span><span class="o">.</span><span class="n">must_equal</span> <span class="o">[</span>
-</span><span class='line'>    <span class="s2">&quot;Petite Fleurs&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;Spanish Couple In Front Of Inn&quot;</span>
-</span><span class='line'>  <span class="o">]</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Here I’ve simply moved the call to sort into a utility method called sorted_by_name. Now first and rest both call sorted_by_name, making the code a bit clearer and DRY-er. But now I have three methods and only two tests:
-</p>
-
-
-
-
-<p>
-  <img src="/images/two_tests_three_methods.png" width="400" alt="Mark Methods Private When You Don’t Test Them" />
-</p>
-
-
-
-
-<p>
-  <strong>Mark Methods Private When You Don’t Test Them</strong><br/>
-  Notice I didn’t bother writing a test for sorted_by_name. I know it works because my other tests still pass. The existing tests are sufficient; I am testing sorted_by_name indirectly. Because I extracted sorted_by_name from first and rest, because I refactored my code without adding any new behavior, no new test were required.
-</p>
-
-
-
-
-<p>
-  In this scenario, take the time to mark the new, untested method as private:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">sorted_by_name</span><span class="p">(</span><span class="n">list</span><span class="p">)</span><span class="o">.</span><span class="n">first</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">def</span> <span class="nf">rest</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">_</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span> <span class="o">=</span> <span class="n">sorted_by_name</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">rest</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="kp">private</span>
-</span><span class='line'><span class="k">def</span> <span class="nf">sorted_by_name</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">list</span><span class="o">.</span><span class="n">sort</span> <span class="k">do</span> <span class="o">|</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">|</span>
-</span><span class='line'>    <span class="n">p1</span><span class="o">.</span><span class="n">name</span> <span class="o">&lt;=&gt;</span> <span class="n">p2</span><span class="o">.</span><span class="n">name</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="s2">&quot;returns the element with the first name&quot;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">first</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">must_equal</span> <span class="s2">&quot;Guernica&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">it</span> <span class="s2">&quot;returns the rest after the first name&quot;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">rest</span><span class="p">(</span><span class="n">paintings</span><span class="p">)</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:name</span><span class="p">)</span><span class="o">.</span><span class="n">must_equal</span> <span class="o">[</span>
-</span><span class='line'>    <span class="s2">&quot;Petite Fleurs&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;Spanish Couple In Front Of Inn&quot;</span>
-</span><span class='line'>  <span class="o">]</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The private keyword here reminds me I’ve already tested sorted_by_name, that I don’t need to write new tests for it. Now private is helping me organize my code; it’s helping me remember which methods I don’t need to test… and which methods are missing important tests.
-</p>
-
-
-
-
-<p>
-  <img src="/images/two_tests_three_methods_private.png" width="400" alt="Mark Methods Private When You Don’t Test Them" />
-</p>
-
-
-
-
-<p>
-  f my tests don’t need to know about sorted_by_name, then certainly other developers don’t. It should be private. Marking it private reminds me that it is being tested indirectly, that I didn’t just forget to write a test for it. Marking it private tells other developers about what I’ve learned from my own test suite.
-</p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/6/">&larr; Older</a>
@@ -3163,6 +2799,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/03/21/continuous-learning/">Continuous Learning</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/03/14/the-learn-to-code-movement/">The Learn to Code Movement</a>
       </li>
     
@@ -3184,10 +2824,6 @@
     
       <li class="post">
         <a href="/blog/2016/02/23/sessions-expiring/">Sessions Expiring</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/02/23/dynamic-programming-with-ruby/">Dynamic Programming With Ruby</a>
       </li>
     
   </ul>
@@ -3245,7 +2881,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 35 ]</a>
+        <a href="/blog/categories/other/">Other [ 36 ]</a>
       </li>
     
       <li>
