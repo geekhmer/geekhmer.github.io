@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2016-04-06T14:28:14+07:00</updated>
+  <updated>2016-05-05T15:30:33+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,231 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Send Notifications from Rails Backend to iOS and Android]]></title>
+    <link href="http://geekhmer.github.io/blog/2016/05/03/send-notifications-from-rails-backend-to-ios-and-android/"/>
+    <updated>2016-05-03T12:29:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2016/05/03/send-notifications-from-rails-backend-to-ios-and-android</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/gcm-app.png" width="600" alt="Send Notifications from Rails Backend to iOS and Android" />
+</p>
+
+
+
+
+<p>
+  Written for a project. I developed the backend for a social network app - My own startup business, will release soon.
+</p>
+
+
+
+
+<p>
+  One of the most common uses for a backend connected to a mobile application is to use it to send push notifications to users. Once you&#8217;ve wrapped your head around it, it&#8217;s pretty straightforward, but it&#8217;s also a common source of confusion for developers new to the topic. This frequent confusion is also the reason I&#8217;ve decided to cover it for my introductory technical story for my own startup business app, where I&#8217;m a CEO.
+</p>
+
+
+
+
+<p>
+  Before I continue, you should know that there are plug-n-play services that will provide you with a notification-sending backend, if you&#8217;re willing to pay for it (Parse, mobDB, Pushwoosh, Urban Airship, etc.), but since that&#8217;s not the way of the warrior, let&#8217;s see how you do it from scratch (and for free).
+</p>
+
+
+
+
+<blockquote><p>&#8220;If you wish to make an apple pie from scratch, you must first invent the universe.&#8221; - Carl Sagan</p></blockquote>
+
+
+
+
+<p>
+  There are several components in my own startup business app that play various roles in the notification sending feature:<br/>
+  1. API endpoint for getting tokens from mobile devices.<br/>
+  2. <a href="https://github.com/resque/resque" target="_blank">Resque</a> worker which remains connected to Apple/Google notification servers and feeds off a queue of notifications in Redis.<br/>
+  3. The code that does the actual sending and feedback processing in the worker.
+</p>
+
+
+
+
+<p>
+  Before anything else, you need to ask the user if they&#8217;d like to receive push notifications (<a href="https://developer.apple.com/notifications/" target="_blank">iOS notifications</a>, <a href="http://developer.android.com/guide/topics/ui/notifiers/notifications.html" target="_blank">Google Cloud Messaging</a>) and if they say yes, get their device token and send it from the mobile device to the backend server. We store these tokens in a simple <a href="http://api.rubyonrails.org/classes/ActiveRecord/Base.html" target="_blank">ActiveRecord</a> model called Device:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># ====================</span>
+</span><span class='line'><span class="c1"># Schema Information</span>
+</span><span class='line'><span class="c1"># Table name: devices</span>
+</span><span class='line'><span class="c1">#  id         :integer          not null, primary key</span>
+</span><span class='line'><span class="c1">#  user_id    :integer</span>
+</span><span class='line'><span class="c1">#  token      :string(255)</span>
+</span><span class='line'><span class="c1">#  enabled    :boolean          default(TRUE)</span>
+</span><span class='line'><span class="c1">#  created_at :datetime         not null</span>
+</span><span class='line'><span class="c1">#  updated_at :datetime         not null</span>
+</span><span class='line'><span class="c1">#  platform   :string(255)</span>
+</span><span class='line'><span class="c1"># ====================</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Device</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">attr_accessible</span> <span class="ss">:enabled</span><span class="p">,</span> <span class="ss">:token</span><span class="p">,</span> <span class="ss">:user</span><span class="p">,</span> <span class="ss">:platform</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:user</span>
+</span><span class='line'>  <span class="n">validates_uniqueness_of</span> <span class="ss">:token</span><span class="p">,</span> <span class="ss">scope</span><span class="p">:</span> <span class="ss">:user_id</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Instances of Device get created when the mobile app calls an API endpoint, which looks something like this (we&#8217;re using <a href="https://github.com/ruby-grape/grape" target="_blank">grape</a> gem for our API needs):
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">resource</span> <span class="ss">:devices</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">post</span> <span class="k">do</span>
+</span><span class='line'>    <span class="vi">@device</span> <span class="o">=</span> <span class="no">Device</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="ss">user</span><span class="p">:</span> <span class="n">current_user</span><span class="p">,</span> <span class="ss">token</span><span class="p">:</span> <span class="n">params</span><span class="o">[</span><span class="ss">:token</span><span class="o">]</span><span class="p">,</span> <span class="ss">platform</span><span class="p">:</span> <span class="n">params</span><span class="o">[</span><span class="ss">:platform</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">present</span> <span class="vi">@device</span><span class="p">,</span> <span class="ss">with</span><span class="p">:</span> <span class="ss">WellWithMe</span><span class="p">:</span><span class="ss">:Entities</span><span class="o">::</span><span class="no">Device</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  With our mobile app user having a stored device token, we&#8217;re now ready to queue notifications for her, which we do through a simple Redis list backed Notification model, which ensures data validity among other things. If a user has multiple devices, the Notification model also ensures they get sent to all of them. Queuing notifications is then as easy as:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">notification</span> <span class="o">=</span> <span class="no">Notification</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">activity</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> just started the challenge!&quot;</span><span class="p">,</span> <span class="s1">&#39;status_change&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  In an essence, the Notification model is a Redis list, which serves as the queue for a background worker (NotificationSender):
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">NotificationSender</span>
+</span><span class='line'>  <span class="vi">@queue</span> <span class="o">=</span> <span class="ss">:notifications</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">perform</span>
+</span><span class='line'>    <span class="vi">@list</span> <span class="o">=</span> <span class="ss">Redis</span><span class="p">:</span><span class="ss">:List</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Notification</span><span class="o">.</span><span class="n">key_name</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">while</span> <span class="n">notification</span> <span class="o">=</span> <span class="vi">@list</span><span class="o">.</span><span class="n">pop</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">notification_json</span> <span class="o">=</span> <span class="no">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">notification</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">if</span> <span class="n">notification_json</span><span class="o">[</span><span class="s1">&#39;platform&#39;</span><span class="o">]</span> <span class="o">==</span> <span class="s1">&#39;iOS&#39;</span>
+</span><span class='line'>        <span class="n">note</span> <span class="o">=</span> <span class="ss">Grocer</span><span class="p">:</span><span class="ss">:Notification</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+</span><span class='line'>          <span class="n">device_token</span><span class="p">:</span> <span class="n">notification_json</span><span class="o">[</span><span class="s1">&#39;token&#39;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>          <span class="ss">alert</span><span class="p">:</span> <span class="n">notification_json</span><span class="o">[</span><span class="s1">&#39;message&#39;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>          <span class="ss">sound</span><span class="p">:</span> <span class="s1">&#39;default&#39;</span><span class="p">,</span>
+</span><span class='line'>          <span class="ss">badge</span><span class="p">:</span> <span class="mi">0</span>
+</span><span class='line'>        <span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="no">PUSHER</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">note</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">elsif</span> <span class="n">notification_json</span><span class="o">[</span><span class="s1">&#39;platform&#39;</span><span class="o">]</span> <span class="o">==</span> <span class="s1">&#39;Android&#39;</span>
+</span><span class='line'>        <span class="n">gcm</span> <span class="o">=</span> <span class="no">GCM</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;gcm_key&#39;</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">registration_id</span> <span class="o">=</span> <span class="o">[</span><span class="n">notification_json</span><span class="o">[</span><span class="s1">&#39;token&#39;</span><span class="o">]]</span>
+</span><span class='line'>        <span class="n">options</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>          <span class="s1">&#39;data&#39;</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s1">&#39;message&#39;</span> <span class="o">=&gt;</span> <span class="n">notification_json</span><span class="o">[</span><span class="s1">&#39;message&#39;</span><span class="o">]</span>
+</span><span class='line'>          <span class="p">},</span>
+</span><span class='line'>            <span class="s1">&#39;collapse_key&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;updated_state&#39;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">send_notification</span><span class="p">(</span><span class="n">registration_id</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Having NotificationSender be a queued job constantly running on a worker as opposed to a synchronous connection has the advantage of not trying to establish a connection to Apple&#8217;s notification servers for every notification, which is something Apple actively discourages: <a href="https://developer.apple.com/news/?id=03212012a" target="_blank">Apple&#8217;s note about notification servers connections</a>.
+</p>
+
+
+
+
+<p>
+  Thus NotificationSender is a Resque job, which is run every minute and just gobbles up the Redis list of notifications, and sends them according to the platform. We&#8217;re using the awesome <a href="https://github.com/grocer/grocer" target="_blank">grocer</a> gem for iOS and the <a href="https://github.com/spacialdb/gcm" target="_blank">GCM</a> gem for Android. Both are working perfectly and the documentation is very good. The only caveat is that you should watch out for certificates magic in iOS, as you need to have your Apple certificates on the server as well, and you need to export them in a certain way (including the private key) - just follow instructions for the grocer gem to the letter, and you&#8217;ll be fine.
+</p>
+
+
+
+
+<p>
+  With this, you should have a working and easily extendible system for sending important notifications about in-app events to your users. Notifications can drastically increase user retention, just don&#8217;t abuse them or they&#8217;ll have an opposite effect.
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Git Command Line]]></title>
@@ -2540,220 +2765,6 @@
 
 <p>
   So far so good, Accelerate engaging a community of volunteer software developers by making them feel welcome, giving them clear tasks, and establishing tangible ways for them to be completed. Most importantly, thank contributors when they help you. Your project will flourish because of it. See ya!!!
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[How to Make Session Data Available to Models in Ruby on Rails?]]></title>
-    <link href="http://geekhmer.github.io/blog/2016/01/27/how-to-make-session-data-available-to-models-in-ruby-on-rails/"/>
-    <updated>2016-01-27T11:11:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2016/01/27/how-to-make-session-data-available-to-models-in-ruby-on-rails</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="How to Make Session Data Available to Models in Ruby on Rails?" />
-</p>
-
-
-
-
-<p>
-  Ruby on Rails is implemented as the Model View Controller (MVC) pattern. This pattern separates the context of the Web Application (in the Controller and the View) from the core Model of the application. The Model contains the Domain objects which encapsulate business logic, data retrieval, etc. The View displays information to the user and allows them to provide input to the application. The Controller handles the interactions between the View and the Model.
-</p>
-
-
-
-
-<p>
-  This separation is a very good design principle that generally helps prevent <a href="https://en.wikipedia.org/wiki/Spaghetti_code" target="_blank">spaghetti code</a>. Sometimes though the separation might break down.
-</p>
-
-
-
-
-<p>
-  Rails provides the Active Record Callbacks which allows you to write code that will respond to the lifecycle events of the Model objects. For example you could log information every time a specific kind of Model object is saved. For example you could record some information every time an Account changed using the following:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>account.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Account</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">after_update</span> <span class="ss">:log_audit_change</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kp">private</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">log_audit_change</span>
-</span><span class='line'>    <span class="no">Audit</span><span class="o">.</span><span class="n">audit_change</span><span class="p">(</span><span class="nb">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="n">new_balance</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You might have noticed a limitation with the previous API though. You didn&#8217;t notice? The only information passed to the model is the Object that is being changed. What if you want more context than this? For example, what if you want to audit not only the values that changed them, but the user who made the change?
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>account.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Account</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">after_update</span> <span class="ss">:log_audit_change</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kp">private</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">log_audit_change</span>
-</span><span class='line'>    <span class="no">Audit</span><span class="o">.</span><span class="n">audit_change</span><span class="p">(</span><span class="n">current_user</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="n">new_balance</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  How do you get the <code>current_user</code> value? Well, you have to plan ahead a little bit. The User in this application is stored in the HTTP Session when the user is authenticated. The session isn&#8217;t directly available to the Model level so you have to figure out a way around this. One way to accomplish this is by using a named <a href="http://ruby-doc.org/core-2.3.0/Thread.html#M000484" target="_blank">Thread local variable</a>. Each HTTP request is served by its own thread. That means that a variable stored as thread local will be available for the entire processing of a request.
-</p>
-
-
-
-
-<p>
-  The UserInfo module encapsulates reading and writing the User object from/to the Thread local. This module can then be mixed in with other objects for easy access.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>user_info.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">UserInfo</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">current_user</span>
-</span><span class='line'>    <span class="no">Thread</span><span class="o">.</span><span class="n">current</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">current_user</span><span class="o">=</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
-</span><span class='line'>    <span class="no">Thread</span><span class="o">.</span><span class="n">current</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span> <span class="o">=</span> <span class="n">user</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  A <code>before_filter</code> set in the ApplicationController will be called before any action is called in any controller. You can take advantage of this to copy a value out of the HTTP session and set it in the Thread local:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>user_info.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="ss">ActionController</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">before_filter</span> <span class="ss">:set_user</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kp">protected</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">authenticate</span>
-</span><span class='line'>    <span class="k">unless</span> <span class="n">session</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span>
-</span><span class='line'>      <span class="n">redirect_to</span> <span class="ss">:controller</span> <span class="o">=&gt;</span> <span class="s2">&quot;login&quot;</span>
-</span><span class='line'>      <span class="k">return</span> <span class="kp">false</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1"># Sets the current user into a named Thread location so that it can be accessed by models and observers</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">set_user</span>
-</span><span class='line'>    <span class="no">UserInfo</span><span class="o">.</span><span class="n">current_user</span> <span class="o">=</span> <span class="n">session</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  At any point in a Model class that you need to have access to those values you can just mixin the helper module and then use its methods to access the data. In this final example we mixin the UserInfo module to our model and it will now have access to the <code>current_user</code> method:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>account.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Account</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="kp">include</span> <span class="no">UserInfo</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">after_update</span> <span class="ss">:log_audit_change</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kp">private</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">log_audit_change</span>
-</span><span class='line'>    <span class="no">Audit</span><span class="o">.</span><span class="n">audit_change</span><span class="p">(</span><span class="n">current_user</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="n">new_balance</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You generally shouldn&#8217;t need this kind of trick outside of a model. In most cases the Controller should pass all of the information needed by a Model object to it through its methods. That will allow the Model objects to interact and the Controller to do the orchestration needed. But in a few special cases, this trick might be handy.
-</p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
 </p>
 
 ]]></content>

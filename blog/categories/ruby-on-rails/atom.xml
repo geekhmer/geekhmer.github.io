@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby on Rails | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby-on-rails/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2016-04-06T14:29:32+07:00</updated>
+  <updated>2016-05-05T15:31:30+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,175 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Send Notifications from Rails Backend to iOS and Android]]></title>
+    <link href="http://geekhmer.github.io/blog/2016/05/03/send-notifications-from-rails-backend-to-ios-and-android/"/>
+    <updated>2016-05-03T12:29:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2016/05/03/send-notifications-from-rails-backend-to-ios-and-android</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/gcm-app.png" width="600" alt="Send Notifications from Rails Backend to iOS and Android" />
+</p>
+
+
+
+
+<p>
+  Written for a project. I developed the backend for a social network app - My own startup business, will release soon.
+</p>
+
+
+
+
+<p>
+  One of the most common uses for a backend connected to a mobile application is to use it to send push notifications to users. Once you've wrapped your head around it, it's pretty straightforward, but it's also a common source of confusion for developers new to the topic. This frequent confusion is also the reason I've decided to cover it for my introductory technical story for my own startup business app, where I'm a CEO.
+</p>
+
+
+
+
+<p>
+  Before I continue, you should know that there are plug-n-play services that will provide you with a notification-sending backend, if you're willing to pay for it (Parse, mobDB, Pushwoosh, Urban Airship, etc.), but since that's not the way of the warrior, let's see how you do it from scratch (and for free).
+</p>
+
+
+<p>{% blockquote %}
+&ldquo;If you wish to make an apple pie from scratch, you must first invent the universe.&rdquo; &ndash; Carl Sagan
+{% endblockquote %}</p>
+
+<p>
+  There are several components in my own startup business app that play various roles in the notification sending feature:<br/>
+  1. API endpoint for getting tokens from mobile devices.<br/>
+  2. <a href="https://github.com/resque/resque" target="_blank">Resque</a> worker which remains connected to Apple/Google notification servers and feeds off a queue of notifications in Redis.<br/>
+  3. The code that does the actual sending and feedback processing in the worker.
+</p>
+
+
+
+
+<p>
+  Before anything else, you need to ask the user if they'd like to receive push notifications (<a href="https://developer.apple.com/notifications/" target="_blank">iOS notifications</a>, <a href="http://developer.android.com/guide/topics/ui/notifiers/notifications.html" target="_blank">Google Cloud Messaging</a>) and if they say yes, get their device token and send it from the mobile device to the backend server. We store these tokens in a simple <a href="http://api.rubyonrails.org/classes/ActiveRecord/Base.html" target="_blank">ActiveRecord</a> model called Device:
+</p>
+
+
+<p>{% codeblock lang:ruby %}</p>
+
+<h1>====================</h1>
+
+<h1>Schema Information</h1>
+
+<h1>Table name: devices</h1>
+
+<h1>id         :integer          not null, primary key</h1>
+
+<h1>user_id    :integer</h1>
+
+<h1>token      :string(255)</h1>
+
+<h1>enabled    :boolean          default(TRUE)</h1>
+
+<h1>created_at :datetime         not null</h1>
+
+<h1>updated_at :datetime         not null</h1>
+
+<h1>platform   :string(255)</h1>
+
+<h1>====================</h1>
+
+<p>class Device &lt; ActiveRecord::Base<br/>
+  attr_accessible :enabled, :token, :user, :platform
+  belongs_to :user
+  validates_uniqueness_of :token, scope: :user_id
+end
+{% endcodeblock %}</p>
+
+<p>
+  Instances of Device get created when the mobile app calls an API endpoint, which looks something like this (we're using <a href="https://github.com/ruby-grape/grape" target="_blank">grape</a> gem for our API needs):
+</p>
+
+
+<p>{% codeblock lang:ruby %}
+resource :devices do<br/>
+  post do</p>
+
+<pre><code>@device = Device.create(user: current_user, token: params[:token], platform: params[:platform])
+present @device, with: WellWithMe::Entities::Device
+</code></pre>
+
+<p>  end
+end<br/>
+{% endcodeblock %}</p>
+
+<p>
+  With our mobile app user having a stored device token, we're now ready to queue notifications for her, which we do through a simple Redis list backed Notification model, which ensures data validity among other things. If a user has multiple devices, the Notification model also ensures they get sent to all of them. Queuing notifications is then as easy as:
+</p>
+
+
+<p>{% codeblock lang:ruby %}
+notification = Notification.new(user, &ldquo;#{activity.user.name} just started the challenge!&rdquo;, &lsquo;status_change&rsquo;)
+{% endcodeblock %}</p>
+
+<p>
+  In an essence, the Notification model is a Redis list, which serves as the queue for a background worker (NotificationSender):
+</p>
+
+
+<p>{% codeblock lang:ruby %}
+class NotificationSender
+  @queue = :notifications</p>
+
+<p>  def self.perform</p>
+
+<pre><code>@list = Redis::List.new(Notification.key_name)
+while notification = @list.pop do
+  notification_json = JSON.parse(notification)
+  if notification_json['platform'] == 'iOS'
+    note = Grocer::Notification.new(
+      device_token: notification_json['token'],
+      alert: notification_json['message'],
+      sound: 'default',
+      badge: 0
+    )
+
+    PUSHER.push(note)
+  elsif notification_json['platform'] == 'Android'
+    gcm = GCM.new(ENV['gcm_key'])
+    registration_id = [notification_json['token']]
+    options = {
+      'data' =&gt; {
+        'message' =&gt; notification_json['message']
+      },
+        'collapse_key' =&gt; 'updated_state'
+    }
+    response = gcm.send_notification(registration_id, options)
+  end
+end
+</code></pre>
+
+<p>  end
+end
+{% endcodeblock %}</p>
+
+<p>
+  Having NotificationSender be a queued job constantly running on a worker as opposed to a synchronous connection has the advantage of not trying to establish a connection to Apple's notification servers for every notification, which is something Apple actively discourages: <a href="https://developer.apple.com/news/?id=03212012a" target="_blank">Apple's note about notification servers connections</a>.
+</p>
+
+
+
+
+<p>
+  Thus NotificationSender is a Resque job, which is run every minute and just gobbles up the Redis list of notifications, and sends them according to the platform. We're using the awesome <a href="https://github.com/grocer/grocer" target="_blank">grocer</a> gem for iOS and the <a href="https://github.com/spacialdb/gcm" target="_blank">GCM</a> gem for Android. Both are working perfectly and the documentation is very good. The only caveat is that you should watch out for certificates magic in iOS, as you need to have your Apple certificates on the server as well, and you need to export them in a certain way (including the private key) - just follow instructions for the grocer gem to the letter, and you'll be fine.
+</p>
+
+
+
+
+<p>
+  With this, you should have a working and easily extendible system for sending important notifications about in-app events to your users. Notifications can drastically increase user retention, just don't abuse them or they'll have an opposite effect.
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Executing Background Tasks with Scheduler in Rails]]></title>
@@ -384,165 +553,6 @@ flash[:alert] = &ldquo;Alerting you to the monkey on your car!&rdquo;
 
 <p>
   Many MVC discussions ignore the role of the web server. However, it’s important to mention how the controller magically gets created and passed user information. The web server is the invisible gateway, shuttling data back and forth: users never interact with the controller directly.
-</p>
-
-
-
-
-<p>
-  So far so good, That's it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[How to Make Session Data Available to Models in Ruby on Rails?]]></title>
-    <link href="http://geekhmer.github.io/blog/2016/01/27/how-to-make-session-data-available-to-models-in-ruby-on-rails/"/>
-    <updated>2016-01-27T11:11:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2016/01/27/how-to-make-session-data-available-to-models-in-ruby-on-rails</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="How to Make Session Data Available to Models in Ruby on Rails?" />
-</p>
-
-
-
-
-<p>
-  Ruby on Rails is implemented as the Model View Controller (MVC) pattern. This pattern separates the context of the Web Application (in the Controller and the View) from the core Model of the application. The Model contains the Domain objects which encapsulate business logic, data retrieval, etc. The View displays information to the user and allows them to provide input to the application. The Controller handles the interactions between the View and the Model.
-</p>
-
-
-
-
-<p>
-  This separation is a very good design principle that generally helps prevent <a href="https://en.wikipedia.org/wiki/Spaghetti_code" target="_blank">spaghetti code</a>. Sometimes though the separation might break down.
-</p>
-
-
-
-
-<p>
-  Rails provides the Active Record Callbacks which allows you to write code that will respond to the lifecycle events of the Model objects. For example you could log information every time a specific kind of Model object is saved. For example you could record some information every time an Account changed using the following:
-</p>
-
-
-<p>{% codeblock account.rb lang:ruby %}
-class Account &lt; ActiveRecord::Base
-  after_update :log_audit_change</p>
-
-<p>  private
-  def log_audit_change</p>
-
-<pre><code>Audit.audit_change(self.id, self.new_balance)
-</code></pre>
-
-<p>  end
-end
-{% endcodeblock %}</p>
-
-<p>
-  You might have noticed a limitation with the previous API though. You didn't notice? The only information passed to the model is the Object that is being changed. What if you want more context than this? For example, what if you want to audit not only the values that changed them, but the user who made the change?
-</p>
-
-
-<p>{% codeblock account.rb lang:ruby %}
-class Account &lt; ActiveRecord::Base
-  after_update :log_audit_change</p>
-
-<p>  private
-  def log_audit_change</p>
-
-<pre><code>Audit.audit_change(current_user, self.id, self.new_balance)
-</code></pre>
-
-<p>  end
-end
-{% endcodeblock %}</p>
-
-<p>
-  How do you get the <code>current_user</code> value? Well, you have to plan ahead a little bit. The User in this application is stored in the HTTP Session when the user is authenticated. The session isn't directly available to the Model level so you have to figure out a way around this. One way to accomplish this is by using a named <a href="http://ruby-doc.org/core-2.3.0/Thread.html#M000484" target="_blank">Thread local variable</a>. Each HTTP request is served by its own thread. That means that a variable stored as thread local will be available for the entire processing of a request.
-</p>
-
-
-
-
-<p>
-  The UserInfo module encapsulates reading and writing the User object from/to the Thread local. This module can then be mixed in with other objects for easy access.
-</p>
-
-
-<p>{% codeblock user_info.rb lang:ruby %}
-module UserInfo
-  def current_user</p>
-
-<pre><code>Thread.current[:user]
-</code></pre>
-
-<p>  end</p>
-
-<p>  def self.current_user=(user)</p>
-
-<pre><code>Thread.current[:user] = user
-</code></pre>
-
-<p>  end
-end
-{% endcodeblock %}</p>
-
-<p>
-  A <code>before_filter</code> set in the ApplicationController will be called before any action is called in any controller. You can take advantage of this to copy a value out of the HTTP session and set it in the Thread local:
-</p>
-
-
-<p>{% codeblock user_info.rb lang:ruby %}
-class ApplicationController &lt; ActionController::Base
-  before_filter :set_user</p>
-
-<p>  protected
-  def authenticate</p>
-
-<pre><code>unless session[:user]
-  redirect_to :controller =&gt; "login"
-  return false
-end
-</code></pre>
-
-<p>  end</p>
-
-<p>  # Sets the current user into a named Thread location so that it can be accessed by models and observers
-  def set_user</p>
-
-<pre><code>UserInfo.current_user = session[:user]
-</code></pre>
-
-<p>  end
-end
-{% endcodeblock %}</p>
-
-<p>
-  At any point in a Model class that you need to have access to those values you can just mixin the helper module and then use its methods to access the data. In this final example we mixin the UserInfo module to our model and it will now have access to the <code>current_user</code> method:
-</p>
-
-
-<p>{% codeblock account.rb lang:ruby %}
-class Account &lt; ActiveRecord::Base
-  include UserInfo</p>
-
-<p>  after_update :log_audit_change</p>
-
-<p>  private
-  def log_audit_change</p>
-
-<pre><code>Audit.audit_change(current_user, self.id, self.new_balance)
-</code></pre>
-
-<p>  end
-end
-{% endcodeblock %}</p>
-
-<p>
-  You generally shouldn't need this kind of trick outside of a model. In most cases the Controller should pass all of the information needed by a Model object to it through its methods. That will allow the Model objects to interact and the Controller to do the orchestration needed. But in a few special cases, this trick might be handy.
 </p>
 
 
