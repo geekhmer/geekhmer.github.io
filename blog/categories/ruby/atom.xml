@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2016-05-05T15:31:30+07:00</updated>
+  <updated>2016-07-13T16:38:26+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,330 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Setup and Deploy Ruby On Rails on Ubuntu 16.04 or Latest]]></title>
+    <link href="http://geekhmer.github.io/blog/2016/07/13/setup-and-deploy-ruby-on-rails-on-ubuntu-16-dot-04-or-latest/"/>
+    <updated>2016-07-13T15:00:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2016/07/13/setup-and-deploy-ruby-on-rails-on-ubuntu-16-dot-04-or-latest</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/rails_nginx_ubuntu.jpg" width="600" alt="Setup and Deploy Ruby On Rails on Ubuntu 16.04 or Latest" />
+</p>
+
+
+
+
+<p>
+  Since we setup Ubuntu for our development environment, we also want to use it in production. This keeps your application running consistently between development and production. 
+</p>
+
+
+
+
+<h3>Install Ruby</h3>
+
+
+
+
+<p>
+  The first step is to install some dependencies for Ruby:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
+</span><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">git</span><span class="o">-</span><span class="n">core</span> <span class="n">curl</span> <span class="n">zlib1g</span><span class="o">-</span><span class="n">dev</span> <span class="n">build</span><span class="o">-</span><span class="n">essential</span> <span class="n">libssl</span><span class="o">-</span><span class="n">dev</span> <span class="n">libreadline</span><span class="o">-</span><span class="n">dev</span> <span class="n">libyaml</span><span class="o">-</span><span class="n">dev</span> <span class="n">libsqlite3</span><span class="o">-</span><span class="n">dev</span> <span class="n">sqlite3</span> <span class="n">libxml2</span><span class="o">-</span><span class="n">dev</span> <span class="n">libxslt1</span><span class="o">-</span><span class="n">dev</span> <span class="n">libcurl4</span><span class="o">-</span><span class="n">openssl</span><span class="o">-</span><span class="n">dev</span> <span class="n">python</span><span class="o">-</span><span class="n">software</span><span class="o">-</span><span class="n">properties</span> <span class="n">libffi</span><span class="o">-</span><span class="n">dev</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Next we're going to be installing Ruby using rvm:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">libgdbm</span><span class="o">-</span><span class="n">dev</span> <span class="n">libncurses5</span><span class="o">-</span><span class="n">dev</span> <span class="n">automake</span> <span class="n">libtool</span> <span class="n">bison</span> <span class="n">libffi</span><span class="o">-</span><span class="n">dev</span>
+</span><span class='line'><span class="n">gpg</span> <span class="o">&amp;</span><span class="n">mdash</span><span class="p">;</span><span class="n">keyserver</span> <span class="ss">hkp</span><span class="p">:</span><span class="sr">//</span><span class="n">keys</span><span class="o">.</span><span class="n">gnupg</span><span class="o">.</span><span class="n">net</span> <span class="o">&amp;</span><span class="n">mdash</span><span class="p">;</span><span class="n">recv</span><span class="o">-</span><span class="n">keys</span> <span class="mi">409</span><span class="no">B6B1796C275462A1703113804BB82D39DC0E3</span>
+</span><span class='line'><span class="n">curl</span> <span class="o">-</span><span class="n">sSL</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;https://get.rvm.io&quot;</span><span class="o">&gt;</span><span class="ss">https</span><span class="p">:</span><span class="sr">//</span><span class="n">get</span><span class="o">.</span><span class="n">rvm</span><span class="o">.</span><span class="n">io</span><span class="o">&lt;</span><span class="sr">/a&gt; | bash -s stable</span>
+</span><span class='line'><span class="sr">source ~/</span><span class="o">.</span><span class="n">rvm</span><span class="o">/</span><span class="n">scripts</span><span class="o">/</span><span class="n">rvm</span>
+</span><span class='line'><span class="n">rvm</span> <span class="n">install</span> <span class="mi">2</span><span class="o">.</span><span class="mi">3</span><span class="o">.</span><span class="mi">1</span>
+</span><span class='line'><span class="n">rvm</span> <span class="n">use</span> <span class="mi">2</span><span class="o">.</span><span class="mi">3</span><span class="o">.</span><span class="mi">1</span> <span class="o">&amp;</span><span class="n">mdash</span><span class="p">;</span><span class="n">default</span>
+</span><span class='line'><span class="n">ruby</span> <span class="o">-</span><span class="n">v</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  The last step is to install Bundler
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="n">install</span> <span class="n">bundler</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3>Install Nginx</h3>
+
+
+
+
+<p>
+  Phusion is the company that develops Passenger and they recently put out an official Ubuntu package that ships with Nginx and Passenger pre-installed.
+</p>
+
+
+
+
+<p>
+  We'll be using that to setup our production server because it's very easy to setup:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">key</span> <span class="n">adv</span> <span class="o">&amp;</span><span class="n">mdash</span><span class="p">;</span><span class="n">keyserver</span> <span class="ss">hkp</span><span class="p">:</span><span class="sr">//</span><span class="n">keyserver</span><span class="o">.</span><span class="n">ubuntu</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="mi">80</span> <span class="o">&amp;</span><span class="n">mdash</span><span class="p">;</span><span class="n">recv</span><span class="o">-</span><span class="n">keys</span> <span class="mi">561</span><span class="no">F9B9CAC40B2F7</span>
+</span><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">apt</span><span class="o">-</span><span class="n">transport</span><span class="o">-</span><span class="n">https</span> <span class="n">ca</span><span class="o">-</span><span class="n">certificates</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;Add Passenger APT repository&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">sudo</span> <span class="n">sh</span> <span class="o">-</span><span class="n">c</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">echo</span> <span class="n">deb</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;https://oss-binaries.phusionpassenger.com/apt/passenger&quot;</span><span class="o">&gt;</span><span class="ss">https</span><span class="p">:</span><span class="sr">//oss</span><span class="o">-</span><span class="n">binaries</span><span class="o">.</span><span class="n">phusionpassenger</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">passenger</span><span class="o">&lt;</span><span class="sr">/a&gt; xenial main &gt; /e</span><span class="n">tc</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">sources</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">passenger</span><span class="o">.</span><span class="n">list</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;Install Passenger &amp;amp; Nginx&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">nginx</span><span class="o">-</span><span class="n">extras</span> <span class="n">passenger</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>So now we have Nginx and passenger installed. We can manage the Nginx webserver by using the service command:</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">service</span> <span class="n">nginx</span> <span class="n">start</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+The service command also provides some other methods such as <code>restart</code> and <code>stop</code> that allow you to easily restart and stop your webserver.
+</p>
+
+
+
+
+<p>Next, we need to update the Nginx configuration to point Passenger to the version of Ruby that we're using. You'll want to open up <code>/etc/nginx/nginx.conf</code> in your favorite editor. I like to use vim, so I'd run this command:</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">vim</span> <span class="sr">/etc/n</span><span class="n">ginx</span><span class="o">/</span><span class="n">nginx</span><span class="o">.</span><span class="n">conf</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Find the following lines, and uncomment them:</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;#&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Phusion</span> <span class="no">Passenger</span> <span class="n">config</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;#&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Uncomment</span> <span class="n">it</span> <span class="k">if</span> <span class="n">you</span> <span class="n">installed</span> <span class="n">passenger</span> <span class="ow">or</span> <span class="n">passenger</span><span class="o">-</span><span class="n">enterprise</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;#&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="kp">include</span> <span class="sr">/etc/n</span><span class="n">ginx</span><span class="o">/</span><span class="n">passenger</span><span class="o">.</span><span class="n">conf</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Once you've configured <code>/etc/nginx/nginx.conf</code> , you can run <code>sudo service nginx restart</code> to restart Nginx with the new Passenger configuration.</p>
+
+
+
+
+<h3>Install MySQL and PostgreSQL</h3>
+
+
+
+
+<p>Setting up your production database is pretty easy. Make sure to keep in mind that you should use a different password for your production databases.</p>
+
+
+
+
+<p>Depending on what database you want to use, follow the steps related to the database:</p>
+
+
+
+
+<p>
+  <strong>Install MySQL</strong><br/>
+  All you need to do in order to install MySQL is to run the following command:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">mysql</span><span class="o">-</span><span class="n">server</span> <span class="n">mysql</span><span class="o">-</span><span class="n">client</span> <span class="n">libmysqlclient</span><span class="o">-</span><span class="n">dev</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>You can use the root user and password set during installation for your database or you can add a new user to MySQL.</p>
+
+
+
+
+<p>
+  <strong>Install PostgreSQL</strong><br/>
+  We can install PostgreSQL like so:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">postgresql</span> <span class="n">postgresql</span><span class="o">-</span><span class="n">contrib</span> <span class="n">libpq</span><span class="o">-</span><span class="n">dev</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Next we need to setup the postgres user:</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">su</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span> <span class="n">postgres</span>
+</span><span class='line'><span class="n">createuser</span> <span class="o">&amp;</span><span class="n">mdash</span><span class="p">;</span><span class="n">pwprompt</span>
+</span><span class='line'><span class="nb">exit</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>The password you type in here will be the one to put in your <code>my_app/current/config/database.yml</code> later when you deploy your app for the first time.</p>
+
+
+
+
+<h3>Adding The Nginx Host</h3>
+
+
+
+
+<p>In order to get Nginx to respond with the Rails app, we need to modify it's sites-enabled.</p>
+
+
+
+
+<p>Open up <code>/etc/nginx/sites-enabled/default</code> in your text editor and we will replace the file's contents with the following:</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">server</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">listen</span> <span class="mi">80</span> <span class="n">default_server</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">listen</span> <span class="o">[::]</span><span class="p">:</span><span class="mi">80</span> <span class="n">default_server</span> <span class="n">ipv6only</span><span class="o">=</span><span class="n">on</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  server_name mydomain.com;</span>
+</span><span class='line'><span class="sr">  passenger_enabled on;</span>
+</span><span class='line'><span class="sr">  rails_env    production;</span>
+</span><span class='line'><span class="sr">  root         /</span><span class="n">home</span><span class="o">/</span><span class="n">deploy</span><span class="o">/</span><span class="n">myapp</span><span class="o">/</span><span class="kp">public</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  # redirect server error pages to the static page /</span><span class="mi">50</span><span class="n">x</span><span class="o">.</span><span class="n">html</span>
+</span><span class='line'>  <span class="n">error_page</span>   <span class="mi">500</span> <span class="mi">502</span> <span class="mi">503</span> <span class="mi">504</span>  <span class="o">/</span><span class="mi">50</span><span class="n">x</span><span class="o">.</span><span class="n">html</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">location</span> <span class="o">=</span> <span class="sr">/50x.html {&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">root</span>   <span class="n">html</span><span class="p">;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>This is our Nginx configuration for a server listening on port 80. You need to change the server_name values to match the domain you want to use and in root replace "myapp" with the name of your application.</p>
+
+
+
+
+<h3>Connect The Database</h3>
+
+
+
+
+<p>
+  The file <code>config/database.yml</code> needs to be updated for the production database server username, password, and host. You can set host to "localhost" and you will have to create a database on the server with the same name by using command:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">create</span> <span class="no">RAILS_ENV</span><span class="o">=</span><span class="n">production</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span> <span class="no">RAILS_ENV</span><span class="o">=</span><span class="n">production</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Then run command below to minify or compress JavaScript and CSS assets:</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">assets</span><span class="p">:</span><span class="n">precompile</span> <span class="no">RAILS_ENV</span><span class="o">=</span><span class="n">production</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3>Setup Secret Key Base</h3>
+
+
+
+
+<p>Go to your rails app directory and run command below to generate secret key base:</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="n">secret</span> <span class="no">RAILS_ENV</span><span class="o">=</span><span class="n">production</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Go to <code>/yourapp/config/secrets.yml</code> and set production secret_key_base. Then reload Nginx using command line: <code>sudo service nginx reload</code>
+</p>
+
+
+
+
+<p>
+  So far so good, That's it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Dynamic Programming with Ruby]]></title>
@@ -30,70 +354,113 @@
 </p>
 
 
-<p>{% codeblock lang:ruby %}
-&ldquo;18337|20120404|True#Q0A|18342|21-30|20120404|18344#Q1|18349|NO PARTNER|20120404|18351#Q2|18352|EMPLOYED|20120404|18353#Q4|18432|STRUGGLING|18539|WANT|20120404|18541#Q3|18358|EMPLOYED|20120404|18359#&rdquo;
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="mi">18337</span><span class="o">|</span><span class="mi">20120404</span><span class="o">|</span><span class="no">True</span><span class="c1">#Q0A|18342|21-30|20120404|18344#Q1|18349|NO PARTNER|20120404|18351#Q2|18352|EMPLOYED|20120404|18353#Q4|18432|STRUGGLING|18539|WANT|20120404|18541#Q3|18358|EMPLOYED|20120404|18359#&amp;rdquo;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   My task was to try to decipher the values of set inside the cookie and how they changed depending on the progress through the application that set the values. I was told the answers to questions sat next to the ID of the question. For example, the answer to the "age" question (21-30) was related to the question 18342 and would always appear as |18342|21-30|. I started out with some tests and ended up with a method like this:
 </p>
 
 
-<p>{% codeblock lang:ruby %}
-class Answers
-  attr_accessor :age, :employment_status, :has_partner</p>
-
-<p>  def parse(cookie_contents)</p>
-
-<pre><code>items = cookie_contents.split("|")
-items.each_index do | i |
-   current = items[i]
-   if (current == "18342")
-     @age = items[i+1]
-   elsif (current == "18352")
-     @employment_status = items[i+1]
-   elsif (current == "18349")
-     @current_partner = items[i+1]
-   end
-end
-</code></pre>
-
-<p>  end
-end
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Answers</span>
+</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:age</span><span class="p">,</span> <span class="ss">:employment_status</span><span class="p">,</span> <span class="ss">:has_partner</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  def parse(cookie_contents)&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">items</span> <span class="o">=</span> <span class="n">cookie_contents</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">items</span><span class="o">.</span><span class="n">each_index</span> <span class="k">do</span> <span class="o">|</span> <span class="n">i</span> <span class="o">|</span>
+</span><span class='line'>   <span class="n">current</span> <span class="o">=</span> <span class="n">items</span><span class="o">[</span><span class="n">i</span><span class="o">]</span>
+</span><span class='line'>   <span class="k">if</span> <span class="p">(</span><span class="n">current</span> <span class="o">==</span> <span class="s2">&quot;18342&quot;</span><span class="p">)</span>
+</span><span class='line'>     <span class="vi">@age</span> <span class="o">=</span> <span class="n">items</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">]</span>
+</span><span class='line'>   <span class="k">elsif</span> <span class="p">(</span><span class="n">current</span> <span class="o">==</span> <span class="s2">&quot;18352&quot;</span><span class="p">)</span>
+</span><span class='line'>     <span class="vi">@employment_status</span> <span class="o">=</span> <span class="n">items</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">]</span>
+</span><span class='line'>   <span class="k">elsif</span> <span class="p">(</span><span class="n">current</span> <span class="o">==</span> <span class="s2">&quot;18349&quot;</span><span class="p">)</span>
+</span><span class='line'>     <span class="vi">@current_partner</span> <span class="o">=</span> <span class="n">items</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">]</span>
+</span><span class='line'>   <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   Of course, I wanted to avoid the growing if-else statement so found a way that I could do it dynamically and focus just on the mapping from an ID to an attribute. The resulting code looked like this:
 </p>
 
 
-<p>{% codeblock lang:ruby %}
-class Answers
-  attr_accessor :age, :employment_status, :has_partner</p>
-
-<p>  Mappings = {</p>
-
-<pre><code>"18342" =&gt; :age=,
-"18352" =&gt; :employment_status=,
-"18349" =&gt; :has_partner=
-</code></pre>
-
-<p>  }</p>
-
-<p>  def parse(cookie_contents)</p>
-
-<pre><code>items = cookie_contents.split("|")
-items.each_index do | i |
-   current = items[i]
-   if (Mappings.has_key?(current))
-      self.public_send(Mappings[current], items[i+1])
-   end
-end
-</code></pre>
-
-<p>  end
-end
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Answers</span>
+</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:age</span><span class="p">,</span> <span class="ss">:employment_status</span><span class="p">,</span> <span class="ss">:has_partner</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  Mappings = {&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="s2">&quot;18342&quot;</span> <span class="o">=&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="ss">:age</span><span class="o">=</span><span class="p">,</span>
+</span><span class='line'><span class="s2">&quot;18352&quot;</span> <span class="o">=&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="ss">:employment_status</span><span class="o">=</span><span class="p">,</span>
+</span><span class='line'><span class="s2">&quot;18349&quot;</span> <span class="o">=&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="ss">:has_partner</span><span class="o">=</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="p">}</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  def parse(cookie_contents)&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">items</span> <span class="o">=</span> <span class="n">cookie_contents</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">items</span><span class="o">.</span><span class="n">each_index</span> <span class="k">do</span> <span class="o">|</span> <span class="n">i</span> <span class="o">|</span>
+</span><span class='line'>   <span class="n">current</span> <span class="o">=</span> <span class="n">items</span><span class="o">[</span><span class="n">i</span><span class="o">]</span>
+</span><span class='line'>   <span class="k">if</span> <span class="p">(</span><span class="no">Mappings</span><span class="o">.</span><span class="n">has_key?</span><span class="p">(</span><span class="n">current</span><span class="p">))</span>
+</span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">public_send</span><span class="p">(</span><span class="no">Mappings</span><span class="o">[</span><span class="n">current</span><span class="o">]</span><span class="p">,</span> <span class="n">items</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>   <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>
   By the end of the analysis, I discovered that multiple IDs mapped to the same properties and all I had to do was add another entry into the map defining which ID mapped to what property on the object.
@@ -430,287 +797,6 @@ end
   <strong>Consider strategies to manage repository ownership</strong><br/>
   - Like it or not, becoming a maintainer is a big responsibility. If you are open sourcing a project with a team, this will greatly ease the burden, but you must still consider processes to manage external pull requests and issues that arise.<br/>
   - Giving the user power and encouraging pull requests and a community that supports each other's issues can also relieve the burden of being a project maintainer. You can help this process by adding documentation for contributing and making it easy for other parties to contribute to the project. This also means providing help to newer developers; you never know who might become a leading contributor in the future.
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Using reCAPTCHA in Ruby on Rails Application]]></title>
-    <link href="http://geekhmer.github.io/blog/2015/07/14/using-recaptcha-in-ruby-on-rails-application/"/>
-    <updated>2015-07-14T23:44:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2015/07/14/using-recaptcha-in-ruby-on-rails-application</id>
-    <content type="html"><![CDATA[<p>
-  For a site with lots of user generated content, fighting spammers can be a never ending battle. Luckily, we can use a service called reCAPTCHA to help keep spammers off our site. reCAPTCHA works by displaying an image on screen and asking the user to type what they see in the image. This works because, the spammer's spambots are unable to read the image and unable to proceed with filling out the form. reCAPTCHA is just one of a number of tools we can use to prevent spammers from abusing our websites.
-</p>
-
-
-
-
-<p>
-  <strong>Setup Account</strong><br/>
-  First, we need to create a reCAPTCHA account. Visit the <a href="http://www.google.com/recaptcha/intro/index.html" target="_blank">reCAPTCHA</a> website and click the button that says 'Get reCAPTCHA'.
-</p>
-
-
-
-
-<p>
-  <img src="http://geekhmer.github.io/images/reCAPTCHA_1.png" width="600" alt="Using reCAPTCHA in Ruby on Rails Application" />
-</p>
-
-
-
-
-<p>
-  On the next screen enter your label, domain, owners and check the box that says 'Get alerts about this site' then click the 'Register' button.
-</p>
-
-
-
-
-<p>
-  <img src="http://geekhmer.github.io/images/reCAPTCHA_2.png" width="600" alt="Using reCAPTCHA in Ruby on Rails Application" />
-</p>
-
-
-
-
-<p>
-  Make sure you copy the public key and private key and save it somewhere, you will need this information when adding reCAPTCHA to your Rails application.
-</p>
-
-
-
-
-<p>
-  <strong>Setup Rails Application</strong><br/>
-  Now we have an account, it's time to set up our Ruby on Rails application. The first thing we will need to do is include the recaptcha gem in our Gemfile. Add the following lines to your gemfile. Note that the bcrypt-ruby gem is used for our example user signup form. You don't have to include this in your application if you aren't using it for user authentication.
-</p>
-
-
-<p>{% codeblock Gemfile lang:ruby %}
-gem &lsquo;recaptcha&rsquo;, &lsquo;~> 0.3.5&rsquo;
-gem &lsquo;bcrypt-ruby&rsquo;, &lsquo;~> 3.1.2&rsquo;
-{% endcodeblock %}</p>
-
-<p>
-  Next run a bundle install to install the gem:
-</p>
-
-
-<p>{% codeblock lang:ruby %}
-bundle install
-{% endcodeblock %}</p>
-
-<p>
-  Next create an initializer for recaptcha that will contain the public and private keys we mentioned earlier. Create a new initializer called recaptcha.rb and add the code listed below, make sure to modify it to contain your public and private keys.
-</p>
-
-
-<p>{% codeblock config/initializers.rb lang:ruby %}
-Recaptcha.configure do |config|
-  config.public_key  = &lsquo;Replace with your public key&rsquo;
-  config.private_key = &lsquo;Replace with your private key&rsquo;
-end
-{% endcodeblock %}</p>
-
-<p>
-  Next create a model called User that we will use to test the reCAPTCHA functionality. Run the following commands to create the user model:
-</p>
-
-
-<p>{% codeblock lang:ruby %}
-rails g model user name email password_digest
-rake db:migrate
-{% endcodeblock %}</p>
-
-<p>
-  Next, open your User model and modify it:
-</p>
-
-
-<p>{% codeblock app/models/user.rb lang:ruby %}
-class User &lt; ActiveRecord::Base
-  has_secure_password
-  validates_presence_of :password, on: :create
-  validates :email, uniqueness: true, presence: true
-end
-{% endcodeblock %}</p>
-
-<p>
-  Next create a couple controllers that will handle our user input. The first controller, Home, will provide a simple landing page that contains a sign up link. The second controller, Users, will process the actual user signup request. Run the commands below to create the controllers.
-</p>
-
-
-<p>{% codeblock lang:ruby %}
-rails g controller Home show
-rails g controller Users new create
-{% endcodeblock %}</p>
-
-<p>
-  Now edit our routes file to set up a few routes for the controllers we just created. Modify the routes file so that it looks like the code listed below, being sure not to overwrite your application name on the first line:
-</p>
-
-
-<p>{% codeblock config/routes.rb lang:ruby %}
-ReCAPTCHAExample::Application.routes.draw do
-  resource :home, only: [:show], controller: :home
-  resource :users, only: [:new, :create]
-  root to: &ldquo;home#show&rdquo;
-end
-{% endcodeblock %}</p>
-
-<p>
-  Next open up your home/show view and modify it so that it looks like the code listed below:
-</p>
-
-
-<p>{% codeblock app/views/home/show.html.erb lang:ruby %}</p>
-
-<h3>Welcome!</h3>
-
-
-<p>
-Click the link below to sign up for an account.
-</p>
-
-
-<p>&lt;%= link_to &ldquo;Sign Up!&rdquo;, new_users_path %>
-{% endcodeblock %}</p>
-
-<p>
-  Next open up the users/new view and modify it so that it looks like the code listed below:
-</p>
-
-
-<p>{% codeblock app/views/users/new.html.erb lang:ruby %}</p>
-
-<h3>New User Sign Up</h3>
-
-
-<p>&lt;% if !@user.errors.empty? %>
-  <ul></p>
-
-<pre><code>&lt;% @user.errors.full_messages.each do |message| %&gt;
-  &lt;li&gt;&lt;%= message %&gt;&lt;/li&gt;
-&lt;% end %&gt;
-</code></pre>
-
-<p>  </ul>
-&lt;% end %>
-&lt;%= form_for User.new do |f| %>
-  <div></p>
-
-<pre><code>&lt;%= f.label :name %&gt;
-&lt;%= f.text_field :name %&gt;
-</code></pre>
-
-<p>  </div>
-  <div></p>
-
-<pre><code>&lt;%= f.label :email %&gt;
-&lt;%= f.text_field :email %&gt;
-</code></pre>
-
-<p>  </div>
-  <div></p>
-
-<pre><code>&lt;%= f.label :password %&gt;
-&lt;%= f.password_field :password %&gt;
-</code></pre>
-
-<p>  </div>
-  <div></p>
-
-<pre><code>&lt;%= f.label :password_confirmation %&gt;
-&lt;%= f.password_field :password_confirmation %&gt;
-</code></pre>
-
-<p>  </div>
-  <div></p>
-
-<pre><code>&lt;%= recaptcha_tags %&gt;
-</code></pre>
-
-<p>  </div>
-  <div></p>
-
-<pre><code>&lt;%= f.submit "Sign Up" %&gt;
-</code></pre>
-
-<p>  </div>
-&lt;% end %>
-{% endcodeblock %}</p>
-
-<p>
-  Most of the code is self explanatory, however, you'll notice the recaptcha_tags method being called. This method is responsible for rendering the reCAPTCHA.
-</p>
-
-
-
-
-<p>
-  Next open up our users controller and add some code to handle the request. Modify your users controller so that it looks like the code listed below.
-</p>
-
-
-<p>{% codeblock app/controllers/users_controller.rb lang:ruby %}
-class UsersController &lt; ApplicationController
-  def new</p>
-
-<pre><code>@user = User.new
-</code></pre>
-
-<p>  end</p>
-
-<p>  def create</p>
-
-<pre><code>captcha_message = "The data you entered for the CAPTCHA wasn't correct.  Please try again"
-@user = User.new(user_params)
-if !verify_recaptcha(model: @user, message: captcha_message) || !@user.save
-  render "new"
-end
-</code></pre>
-
-<p>  end</p>
-
-<p>  private
-  def user_params</p>
-
-<pre><code>params.require(:user).permit(:name, :email, :password, :password_confirmation)
-</code></pre>
-
-<p>  end
-end
-{% endcodeblock %}</p>
-
-<p>
-  Almost done! Now lets open up our users/create view and add the following code.
-</p>
-
-
-<p>{% codeblock app/views/users/create.html.erb lang:ruby %}</p>
-
-<h3>Thank You!</h3>
-
-
-<p>
-Thanks for signing up!
-</p>
-
-
-<p>{% endcodeblock %}</p>
-
-<p>
-  Now if you start a rails server and navigate to http://localhost:3000 we will see a sign up link. if you click on the sign up link you will be presented with a sign up form, complete with a captcha to fill out. You'll notice that filling out the captcha wrongly results in a validation error message, and filling out the correct information allows the user signup to proceed.
-</p>
-
-
-
-
-<p>
-  So far so good, That's it!!! See ya!!! :)
 </p>
 
 ]]></content>
