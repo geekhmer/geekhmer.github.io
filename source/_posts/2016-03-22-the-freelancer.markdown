@@ -11,7 +11,6 @@ keywords: The Freelancer
   <img src="/images/the_freelancer.jpg" width="600" alt="The Freelancer" />
 </p>
 
-
 <p>
   Freelancer is a self-employed person who pursues a profession without a long-term commitment to any particular employer. Your curiosity in this opportunity was probably sparked by posts marked "Freelance" or "Work from anywhere" on the myriad of job boards around the Web. Freelancing is equal parts freedom and responsibility. While you have the freedom to choose when you work, where you work and what you work on, you are also responsible for everything: deadlines, finding work, the quality of your work, communication and so much more.
 </p>
