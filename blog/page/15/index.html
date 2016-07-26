@@ -79,6 +79,342 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/02/12/ruby-on-rails-with-endless-scrolling/">Ruby on Rails With Endless Scrolling</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-12T23:20:00+07:00" pubdate data-updated="true">Feb 12<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/ruby_on_rails.png" width="400" alt="Ruby on Rails with Endless Scrolling" />
+</p>
+
+
+
+
+<p>
+  Endless scrolling allows a website to let users avoid having to click page links or pagination in order to load additional pages of content. It is used by a number of sites such as Pinterest in order to enhanced the user experience. This article will show you how to implement endless scrolling in your Rails application. Let’s run through this with me.
+</p>
+
+
+
+
+<p>
+  <strong>Create Rails Project</strong><br/>
+  To create a Rails project; open up your terminal and type commands below:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="kp">new</span> <span class="n">endless_scrolling</span> <span class="o">-</span><span class="n">d</span> <span class="n">mysql</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Setting up</strong><br/>
+  Ruby on Rails endless scrolling uses the will_paginate gem to manage paging. This has a couple of advantages.
+</p>
+
+
+
+
+<p>
+  First, if your endless scrolling code doesn&#8217;t work properly or is disabled, the pagination links themselves will still be present and allow the user to page.
+</p>
+
+
+
+
+<p>
+  Second, the will_paginate gem provides us with the pagination functionality itself so that we do not need to reinvent the wheel.
+</p>
+
+
+
+
+<p>
+  To get started, add the will_paginate gem to your <code>Gemfile</code> file.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;will_paginate&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 3.0.7&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then run a <code>bundle install</code> to install the gem:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  we will create a simple Post model with the fields title, and body. In addition, we will create a simple Posts controller with an index method. Run the commands below to create these items:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Post</span> <span class="n">title</span> <span class="ss">body</span><span class="p">:</span><span class="n">text</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="no">Posts</span> <span class="n">index</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then open up your routes (<code>config/routes.rb</code>) file and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;posts#index&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then we need some seed data to play with. Open up your seeds.rb file and add in the code listed below. This code will create 100 posts for us to play with:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>seeds.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span>
+</span><span class='line'>  <span class="no">Post</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="ss">title</span><span class="p">:</span> <span class="s2">&quot;Lipsum Post </span><span class="si">#{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="sx">%{</span>
+</span><span class='line'><span class="sx">    Lorem ipsum dolor sit amet, consectetur adipiscing elit. In feugiat purus dapibus fermentum sagittis. Fusce in tempus felis. Phasellus a erat ut lorem lacinia bibendum. Vivamus viverra facilisis neque, in scelerisque urna pharetra vel. Donec a est mauris. Integer eget metus quis eros egestas elementum. Integer bibendum risus hendrerit dapibus tempor. Fusce placerat in orci vitae tincidunt.</span>
+</span><span class='line'><span class="sx">  }</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then run rake db:seed to create the seed data:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">seed</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then open up your Posts controller (<code>app/controllers/posts_controller.rb</code>) and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>    <span class="vi">@posts</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">paginate</span><span class="p">(</span><span class="ss">:page</span> <span class="o">=&gt;</span> <span class="n">params</span><span class="o">[</span><span class="ss">:page</span><span class="o">]</span><span class="p">,</span> <span class="ss">:per_page</span> <span class="o">=&gt;</span> <span class="mi">20</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now modify the index view for your Posts controller so that it looks like the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>posts_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>    <span class="vi">@posts</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">paginate</span><span class="p">(</span><span class="ss">:page</span> <span class="o">=&gt;</span> <span class="n">params</span><span class="o">[</span><span class="ss">:page</span><span class="o">]</span><span class="p">,</span> <span class="ss">:per_page</span> <span class="o">=&gt;</span> <span class="mi">20</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then modify the index (<code>app/views/posts/index.html.erb</code>) view for your Posts controller so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>index.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;posts&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Posts</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'><span class="sr">  &lt;%= render @posts %&gt;</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;%=</span> <span class="n">will_paginate</span> <span class="vi">@posts</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then let&#8217;s create the post partial. Create a file called _post.html.erb (<code>app/views/posts/_post.html.erb</code>) for your Posts controller and add in the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>_post.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;post&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">h2</span><span class="o">&gt;&lt;</span><span class="sx">%= post.title %&gt;&lt;/h2&gt;</span>
+</span><span class='line'><span class="sx">  &lt;p&gt;&lt;%=</span> <span class="n">post</span><span class="o">.</span><span class="n">body</span> <span class="sx">%&gt;&lt;/p&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If you were to start a rails server at this point, you&#8217;d see a typical paginated list of posts. Now it&#8217;s time to add in the javascript that will make endless scrolling work. Open up your application.js (<code>app/assets/javascripts/application.js</code>) file and add in the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>application.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span><span class="p">(</span><span class="n">document</span><span class="p">)</span><span class="o">.</span><span class="n">ready</span><span class="p">(</span><span class="n">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="err">$</span><span class="p">(</span><span class="s1">&#39;.pagination&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">length</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="err">$</span><span class="p">(</span><span class="n">window</span><span class="p">)</span><span class="o">.</span><span class="n">scroll</span><span class="p">(</span><span class="n">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">var</span> <span class="n">url</span> <span class="o">=</span> <span class="err">$</span><span class="p">(</span><span class="s1">&#39;.pagination .next_page&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">attr</span><span class="p">(</span><span class="s1">&#39;href&#39;</span><span class="p">);</span>
+</span><span class='line'>      <span class="k">if</span> <span class="p">(</span><span class="n">url</span> <span class="o">&amp;&amp;</span> <span class="err">$</span><span class="p">(</span><span class="n">window</span><span class="p">)</span><span class="o">.</span><span class="n">scrollTop</span><span class="p">()</span> <span class="o">&gt;</span> <span class="err">$</span><span class="p">(</span><span class="n">document</span><span class="p">)</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">-</span> <span class="err">$</span><span class="p">(</span><span class="n">window</span><span class="p">)</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">-</span> <span class="mi">50</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="err">$</span><span class="p">(</span><span class="s1">&#39;.pagination&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">&quot;Please Wait...&quot;</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">return</span> <span class="vg">$.</span><span class="n">getScript</span><span class="p">(</span><span class="n">url</span><span class="p">);</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>    <span class="k">return</span> <span class="err">$</span><span class="p">(</span><span class="n">window</span><span class="p">)</span><span class="o">.</span><span class="n">scroll</span><span class="p">();</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then create a file called index.js.erb (<code>app/views/posts/index.js.erb</code>) for your Posts controller and add in the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>index.js.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span><span class="p">(</span><span class="s1">&#39;#posts&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&lt;%= escape_javascript render(@posts) %&gt;&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="err">$</span><span class="p">(</span><span class="s1">&#39;.pagination&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replaceWith</span><span class="p">(</span><span class="s1">&#39;&lt;%= escape_javascript will_paginate(@posts) %&gt;&#39;</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The code works by watching the window&#8217;s scroll event. When the user scrolls past the specified threshold, more posts are loaded using AJAX. That&#8217;s it, thank you!. See ya! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/02/11/ruby-on-rails-generate-random-data/">Ruby on Rails Generate Random Data</a></h1>
     
     
@@ -2952,679 +3288,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/22/erlang-list-and-list-module/">Erlang List &amp; List Module</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-22T23:01:00+07:00" pubdate data-updated="true">Jan 22<span>nd</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/logo_erlang.png" alt="Erlang Control Flow Statement" />
-</p>
-
-
-
-
-<p>
-  List is the the most important data type in Erlang, as in every functional programming language. In this article, I will present the Erlang’s lists module and its most important functions.
-</p>
-
-
-
-
-<p>
-  <h3>Syntax</h3>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="no">Element1</span><span class="p">,</span> <span class="no">Element2</span><span class="p">,</span> <span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="n">,</span> <span class="no">ElementN</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  N is called the length of the list. So, [] is the empty list.
-</p>
-
-
-
-
-<p>
-  <h3>Decomposing & Pattern Matching</h3>
-</p>
-
-
-
-
-<p>
-  An empty list pattern matches with [].
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="no">Empty</span> <span class="o">=</span> <span class="o">[].</span>
-</span><span class='line'><span class="o">[]</span>
-</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="no">Empty</span> <span class="o">==</span> <span class="o">[].</span>
-</span><span class='line'><span class="kp">true</span>
-</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="no">Empty</span> <span class="o">=</span> <span class="o">[].</span>
-</span><span class='line'><span class="o">[]</span>
-</span><span class='line'><span class="mi">4</span><span class="o">&gt;</span> <span class="no">NotEmpty</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="o">].</span>
-</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="o">]</span>
-</span><span class='line'><span class="mi">5</span><span class="o">&gt;</span> <span class="no">Empty</span> <span class="o">==</span> <span class="no">NotEmpty</span><span class="o">.</span>
-</span><span class='line'><span class="kp">false</span>
-</span><span class='line'><span class="mi">6</span><span class="o">&gt;</span> <span class="no">Empty</span> <span class="o">=</span> <span class="no">NotEmpty</span><span class="o">.</span>
-</span><span class='line'><span class="o">**</span> <span class="n">exception</span> <span class="ss">error</span><span class="p">:</span> <span class="n">no</span> <span class="n">match</span> <span class="n">of</span> <span class="n">right</span> <span class="n">hand</span> <span class="n">side</span> <span class="n">value</span> <span class="o">[</span><span class="mi">1</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  A non-empty list pattern matches with [Head | Tail].
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="o">[</span><span class="no">Head</span> <span class="o">|</span> <span class="no">Tail</span><span class="o">]</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="o">].</span>
-</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="o">]</span>
-</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="no">Head</span><span class="o">.</span>
-</span><span class='line'><span class="mi">1</span>
-</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="no">Tail</span><span class="o">.</span>
-</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="o">]</span>
-</span><span class='line'><span class="mi">4</span><span class="o">&gt;</span> <span class="o">[</span><span class="no">Head1</span> <span class="o">|</span> <span class="no">Tail1</span><span class="o">]</span> <span class="o">=</span> <span class="no">Tail</span><span class="o">.</span>
-</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="o">]</span>
-</span><span class='line'><span class="mi">5</span><span class="o">&gt;</span> <span class="no">Head1</span><span class="o">.</span>
-</span><span class='line'><span class="mi">2</span>
-</span><span class='line'><span class="mi">6</span><span class="o">&gt;</span> <span class="no">Tail1</span><span class="o">.</span>
-</span><span class='line'><span class="o">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="o">]</span>
-</span><span class='line'><span class="mi">7</span><span class="o">&gt;</span> <span class="o">[</span><span class="no">Head2</span> <span class="o">|</span> <span class="no">Tail2</span><span class="o">]</span> <span class="o">=</span> <span class="o">[].</span>
-</span><span class='line'><span class="o">**</span> <span class="n">exception</span> <span class="ss">error</span><span class="p">:</span> <span class="n">no</span> <span class="n">match</span> <span class="n">of</span> <span class="n">right</span> <span class="n">hand</span> <span class="n">side</span> <span class="n">value</span> <span class="o">[]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Normal Representation</strong><br/>
-  The format [Element1, Element2, &#8230;, ElementN] is a shorthand of [Element1 | [Element2 | &#8230; | [ElementN | []] &#8230; ] representation.<br/>
-  Example: the list [1, 2, 3] is a shorthand of [1 | [2 | 3 | []]], that is the normal representation of a list.
-</p>
-
-
-
-
-<p>
-  Decomposing:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="o">[</span><span class="n">A</span> <span class="o">|</span> <span class="o">[</span><span class="n">B</span> <span class="o">|[</span><span class="n">C</span> <span class="o">|</span> <span class="n">D</span><span class="o">]]]</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span>
-</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
-</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="n">A</span><span class="o">.</span>
-</span><span class='line'><span class="mi">1</span>
-</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="n">B</span><span class="o">.</span>
-</span><span class='line'><span class="mi">2</span>
-</span><span class='line'><span class="mi">4</span><span class="o">&gt;</span> <span class="n">C</span><span class="o">.</span>
-</span><span class='line'><span class="mi">3</span>
-</span><span class='line'><span class="mi">5</span><span class="o">&gt;</span> <span class="n">D</span><span class="o">.</span>
-</span><span class='line'><span class="o">[]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Composing:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="no">List</span> <span class="o">=</span> <span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">].</span>
-</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
-</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="no">List1</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span> <span class="o">|</span> <span class="no">List</span><span class="o">].</span>
-</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
-</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="no">List2</span> <span class="o">=</span> <span class="o">[-</span><span class="mi">1</span> <span class="o">|</span> <span class="o">[</span><span class="mi">0</span> <span class="o">|</span> <span class="no">List1</span><span class="o">]].</span>
-</span><span class='line'><span class="o">[-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
-</span><span class='line'><span class="mi">4</span><span class="o">&gt;</span> <span class="no">List3</span> <span class="o">=</span> <span class="o">[[-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="o">]</span> <span class="o">|</span> <span class="no">List2</span><span class="o">].</span>
-</span><span class='line'><span class="o">[[-</span><span class="mi">3</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="o">]</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span> <span class="o">%</span> <span class="n">the</span> <span class="n">head</span> <span class="n">is</span> <span class="n">just</span> <span class="mi">1</span> <span class="n">element</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Of course, since it is more readable and easier to write, the shorthand representation is usually used: 
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="o">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="o">]</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span>
-</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
-</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="o">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="o">]</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span> <span class="o">%</span> <span class="n">does</span> <span class="ow">not</span> <span class="n">match</span> <span class="n">cause</span>
-</span><span class='line'><span class="sx">% the </span><span class="n">left</span><span class="o">-</span><span class="n">hand</span> <span class="n">side</span> <span class="n">matches</span> <span class="n">a</span> <span class="mi">4</span><span class="o">-</span><span class="n">elements</span> <span class="n">list</span>
-</span><span class='line'><span class="o">**</span> <span class="n">exception</span> <span class="ss">error</span><span class="p">:</span> <span class="n">no</span> <span class="n">match</span> <span class="n">of</span> <span class="n">right</span> <span class="n">hand</span> <span class="n">side</span> <span class="n">value</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
-</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="o">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span> <span class="o">|</span> <span class="n">D</span><span class="o">]</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span>
-</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
-</span><span class='line'><span class="mi">4</span><span class="o">&gt;</span> <span class="n">D</span><span class="o">.</span>
-</span><span class='line'><span class="o">[]</span>
-</span><span class='line'><span class="mi">5</span><span class="o">&gt;</span> <span class="o">[-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span> <span class="o">|</span> <span class="o">[-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span> <span class="o">|</span> <span class="o">[</span><span class="mi">1</span> <span class="o">|</span> <span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]]]].</span>
-</span><span class='line'><span class="o">[-</span><span class="mi">3</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>List Parsing</strong><br/>
-  The pattern matching you saw before can be used in a function in order to parse the list:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">parse</span><span class="p">(</span><span class="o">[]</span><span class="p">)</span> <span class="o">-&gt;</span>
-</span><span class='line'>  <span class="n">parsed</span><span class="o">.</span>
-</span><span class='line'><span class="n">parse</span><span class="p">(</span><span class="o">[</span><span class="no">Head</span> <span class="o">|</span> <span class="no">Tail</span><span class="o">]</span><span class="p">)</span> <span class="o">-&gt;</span>
-</span><span class='line'>  <span class="n">parse</span><span class="p">(</span><span class="no">Tail</span><span class="p">)</span><span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Concatenation</strong><br/>
-  Two lists can be concatenated using ++:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="no">L1</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">]</span><span class="p">,</span> <span class="no">L2</span> <span class="o">=</span> <span class="o">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="o">].</span>
-</span><span class='line'><span class="o">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="o">]</span>
-</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="no">L1</span> <span class="o">++</span> <span class="no">L2</span><span class="o">.</span>
-</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="o">]</span>
-</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="no">L1</span> <span class="o">++</span> <span class="no">L2</span> <span class="o">++</span> <span class="no">L1</span><span class="o">.</span>
-</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="o">]</span>
-</span><span class='line'><span class="mi">4</span><span class="o">&gt;</span> <span class="no">Mirror</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="no">List</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="no">List</span> <span class="o">++</span> <span class="ss">lists</span><span class="p">:</span><span class="n">reverse</span><span class="p">(</span><span class="no">List</span><span class="p">)</span> <span class="k">end</span><span class="o">.</span>
-</span><span class='line'><span class="c1">#Fun&lt;erl_eval .6.13229925&gt;</span>
-</span><span class='line'><span class="mi">5</span><span class="o">&gt;</span> <span class="no">Mirror</span><span class="p">(</span><span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="p">{</span><span class="n">c</span><span class="p">}</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="o">[</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,{</span><span class="n">c</span><span class="p">},{</span><span class="n">c</span><span class="p">},</span><span class="n">b</span><span class="p">,</span><span class="n">a</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Difference</strong><br/>
-  You can take the difference of two lists (the left-hand side one without the element of the right-hand side) using the &#8211; operator:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span> <span class="o">--</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span>
-</span><span class='line'><span class="o">[]</span>
-</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span> <span class="o">--</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span>
-</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="o">]</span>
-</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span> <span class="o">--</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span>
-</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="o">]</span>
-</span><span class='line'><span class="mi">4</span><span class="o">&gt;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span> <span class="o">--</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span>
-</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="o">]</span>
-</span><span class='line'><span class="mi">5</span><span class="o">&gt;</span> <span class="o">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span> <span class="o">--</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span>
-</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
-</span><span class='line'><span class="mi">6</span><span class="o">&gt;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span> <span class="o">--</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="o">].</span>
-</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
-</span><span class='line'><span class="mi">7</span><span class="o">&gt;</span> <span class="no">Delete</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="no">List</span><span class="p">,</span> <span class="no">Element</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="no">List</span> <span class="o">--</span> <span class="o">[</span><span class="no">Element</span><span class="o">]</span> <span class="k">end</span><span class="o">.</span>
-</span><span class='line'><span class="c1">#Fun&lt;erl_eval .12.113037538&gt;</span>
-</span><span class='line'><span class="mi">8</span><span class="o">&gt;</span> <span class="no">Delete</span><span class="p">(</span><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="o">]</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <h3>Module Lists</h3>
-</p>
-
-
-
-
-<p>
-  The lists module defines some commonly used list processing functions. This module is extremely useful, so it is a good idea to “remember” what functions it provides.
-</p>
-
-
-
-
-<p>
-  <strong>all/2</strong><br/>
-  Called as all(Pred, List). Returns true if Pred(Element) returns true for all lists’ elements.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="n">L</span> <span class="o">=</span> <span class="o">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="o">]</span><span class="p">,</span>
-</span><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="n">F</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">X</span> <span class="n">rem</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">end</span><span class="p">,</span>
-</span><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">all</span><span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="n">L</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="kp">true</span>
-</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="n">f</span><span class="p">()</span><span class="o">.</span>
-</span><span class='line'><span class="n">ok</span>
-</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="n">L</span> <span class="o">=</span> <span class="o">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="o">]</span><span class="p">,</span>
-</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="n">F</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">X</span> <span class="n">rem</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">end</span><span class="p">,</span>
-</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">all</span><span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="n">L</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="kp">false</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>append/1|2</strong><br/>
-  Concatenates the lists to one.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">append</span><span class="p">(</span><span class="o">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">]</span><span class="p">,</span> <span class="o">[</span><span class="mi">3</span><span class="o">]</span><span class="p">,</span> <span class="o">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="o">]]</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="o">]</span>
-</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">append</span><span class="p">(</span><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">]</span><span class="p">,</span> <span class="o">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Notice that the operator ++ and the function append/2 are the same.
-</p>
-
-
-
-
-<p>
-  <strong>delete/2</strong><br/>
-  Deletes an element from the list (first occurrence, if any).
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">delete</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">[</span><span class="n">d</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">d</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="o">[</span><span class="n">d</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">d</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>concat/1</strong><br/>
-  Accepts a list of items (atom, integer, float, string) and returns the concatenation of their textual representation as a list.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">concat</span><span class="p">(</span><span class="o">[</span><span class="s2">&quot;ab&quot;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="s2">&quot;ab.1&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>filter/2</strong><br/>
-  Called as filter(Pred, List). Returns a list containing only the elements that return true for the Pred.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="no">Gt10</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">X</span> <span class="o">&gt;</span> <span class="mi">10</span> <span class="k">end</span><span class="p">,</span> <span class="ss">lists</span><span class="p">:</span><span class="n">filter</span><span class="p">(</span><span class="no">Gt10</span><span class="p">,</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">44</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">66</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="o">[</span><span class="mi">22</span><span class="p">,</span><span class="mi">44</span><span class="p">,</span><span class="mi">66</span><span class="o">]</span>
-</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="n">L</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="mi">3</span><span class="o">.</span><span class="mi">0</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="p">{</span><span class="mi">4</span><span class="p">}</span><span class="o">].</span>
-</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="mi">3</span><span class="o">.</span><span class="mi">0</span><span class="p">,</span><span class="n">d</span><span class="p">,{</span><span class="mi">4</span><span class="p">}</span><span class="o">]</span>
-</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">filter</span><span class="p">(</span><span class="n">fun</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">is_number</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="k">end</span><span class="p">,</span> <span class="n">L</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">.</span><span class="mi">0</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>flatten/1</strong><br/>
-  Returns a flattened (no element is a list) version of the input list.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">flatten</span><span class="p">(</span><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">[</span><span class="mi">2</span><span class="o">]</span><span class="p">,</span> <span class="o">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="o">[</span><span class="mi">5</span><span class="p">,</span> <span class="o">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="o">]]]</span><span class="p">,</span> <span class="o">[[[[</span><span class="mi">8</span><span class="o">]]]]]</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>key*** functions</strong><br/>
-  There are several functions which their name starts with the word &#8220;key&#8221;. They are all used to process lists of tuples.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="no">Kl</span> <span class="o">=</span> <span class="o">[</span><span class="p">{</span><span class="n">a</span><span class="p">,</span> <span class="n">k1</span><span class="p">,</span> <span class="n">a</span><span class="p">},</span> <span class="p">{</span><span class="n">b</span><span class="p">,</span> <span class="n">k2</span><span class="p">,</span> <span class="n">b</span><span class="p">},</span> <span class="p">{</span><span class="n">c</span><span class="p">,</span> <span class="n">k3</span><span class="p">,</span> <span class="n">c</span><span class="p">},</span> <span class="p">{</span><span class="n">e</span><span class="p">,</span> <span class="n">k5</span><span class="p">,</span> <span class="n">e</span><span class="p">}</span><span class="o">].</span>
-</span><span class='line'><span class="o">[</span><span class="p">{</span><span class="n">a</span><span class="p">,</span><span class="n">k1</span><span class="p">,</span><span class="n">a</span><span class="p">},{</span><span class="n">b</span><span class="p">,</span><span class="n">k2</span><span class="p">,</span><span class="n">b</span><span class="p">},{</span><span class="n">c</span><span class="p">,</span><span class="n">k3</span><span class="p">,</span><span class="n">c</span><span class="p">},{</span><span class="n">e</span><span class="p">,</span><span class="n">k5</span><span class="p">,</span><span class="n">e</span><span class="p">}</span><span class="o">]</span>
-</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">keydelete</span><span class="p">(</span><span class="n">k3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="no">Kl</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="o">[</span><span class="p">{</span><span class="n">a</span><span class="p">,</span><span class="n">k1</span><span class="p">,</span><span class="n">a</span><span class="p">},{</span><span class="n">b</span><span class="p">,</span><span class="n">k2</span><span class="p">,</span><span class="n">b</span><span class="p">},{</span><span class="n">e</span><span class="p">,</span><span class="n">k5</span><span class="p">,</span><span class="n">e</span><span class="p">}</span><span class="o">]</span>
-</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">keysearch</span><span class="p">(</span><span class="n">k3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="no">Kl</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="p">{</span><span class="n">value</span><span class="p">,{</span><span class="n">c</span><span class="p">,</span><span class="n">k3</span><span class="p">,</span><span class="n">c</span><span class="p">}}</span>
-</span><span class='line'><span class="mi">4</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">keysearch</span><span class="p">(</span><span class="n">k4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="no">Kl</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="kp">false</span>
-</span><span class='line'><span class="mi">5</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">keyreplace</span><span class="p">(</span><span class="n">k3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="no">Kl</span><span class="p">,</span> <span class="p">{</span><span class="kp">new</span><span class="p">,</span> <span class="n">tuple</span><span class="p">})</span><span class="o">.</span>
-</span><span class='line'><span class="o">[</span><span class="p">{</span><span class="n">a</span><span class="p">,</span><span class="n">k1</span><span class="p">,</span><span class="n">a</span><span class="p">},{</span><span class="n">b</span><span class="p">,</span><span class="n">k2</span><span class="p">,</span><span class="n">b</span><span class="p">},{</span><span class="kp">new</span><span class="p">,</span><span class="n">tuple</span><span class="p">},{</span><span class="n">e</span><span class="p">,</span><span class="n">k5</span><span class="p">,</span><span class="n">e</span><span class="p">}</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>last/1</strong><br/>
-  Returns the last element of the list.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">last</span><span class="p">(</span><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="mi">3</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>map/2</strong><br/>
-  Called as map(Fun, List). Applies function Fun to every item of the list and returns the resulting list.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">map</span><span class="p">(</span><span class="n">fun</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">I</span> <span class="k">end</span><span class="p">,</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>partition/2</strong><br/>
-  Partitions a list to two according to if the elements satisfy or not a given predicate.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">map</span><span class="p">(</span><span class="n">fun</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">I</span> <span class="k">end</span><span class="p">,</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>reverse/1|2</strong><br/>
-  Returns the reverse of a list.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">reverse</span><span class="p">(</span><span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="o">[</span><span class="n">d</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">a</span><span class="o">]</span>
-</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">reverse</span><span class="p">(</span><span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="o">]</span><span class="p">,</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="o">[</span><span class="n">d</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>sort/1|2</strong><br/>
-  Sorts a list to increasing order or according to a given function.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="n">L</span> <span class="o">=</span> <span class="o">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="o">].</span>
-</span><span class='line'><span class="o">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">4</span><span class="o">]</span>
-</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">sort</span><span class="p">(</span><span class="n">L</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="o">]</span>
-</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="no">Gt</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">J</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">I</span> <span class="o">&gt;</span> <span class="n">J</span> <span class="k">end</span><span class="o">.</span>
-</span><span class='line'><span class="c1">#Fun&lt;erl_eval .12.113037538&gt;</span>
-</span><span class='line'><span class="mi">4</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">sort</span><span class="p">(</span><span class="no">Gt</span><span class="p">,</span> <span class="n">L</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="o">[</span><span class="mi">5</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>sum/1</strong><br/>
-  Returns the sum of the elements of a list containing numbers.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">sum</span><span class="p">(</span><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">.</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="mi">6</span><span class="o">.</span><span class="mi">2</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>u*** functions</strong><br/>
-  There are several function which their name starts with &#8220;u&#8221; and the results they return contain no duplicates.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">usort</span><span class="p">(</span><span class="o">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
-</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/16/">&larr; Older</a>
@@ -3647,6 +3310,10 @@
 </section><section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/07/25/facebook-fan-page-auto-like-revised/">Facebook Fan Page Auto Like - Revised</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2016/07/22/application-steps-for-applying-to-study-masters-in-computer-science-at-maharishi-university-of-management-usa/">Application Steps for Applying to Study Masters in Computer Science at MAHARISHI UNIVERSITY of MANAGEMENT USA</a>
@@ -3672,10 +3339,6 @@
         <a href="/blog/2016/03/22/the-freelancer/">The Freelancer</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2016/03/21/continuous-learning/">Continuous Learning</a>
-      </li>
-    
   </ul>
 </section>
 <section>
@@ -3683,7 +3346,7 @@
   <ul id="recent_posts">
     
       <li>
-        <a href="/blog/categories/facebook/">Facebook [ 4 ]</a>
+        <a href="/blog/categories/facebook/">Facebook [ 5 ]</a>
       </li>
     
       <li>
