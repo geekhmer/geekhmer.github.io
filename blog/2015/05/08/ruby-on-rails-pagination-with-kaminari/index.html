@@ -1,0 +1,751 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Ruby on Rails Pagination with Kaminari - GeeKhmer</title>
+  <meta name="author" content="Bunlong Van">
+  
+  
+  <meta name="description" content="The biggest website of computer programming, Ruby, Ruby on Rails, Erlang, Chicagoboss and Javascript in Southeast Asia.">
+
+  <meta name="keywords" content="Ruby on Rails Pagination with Kaminari">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://geekhmer.github.io/blog/2015/05/08/ruby-on-rails-pagination-with-kaminari">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="" rel="alternate" title="GeeKhmer" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+<link href="/stylesheets/jquery.fancybox.css" media="screen, projection" rel="stylesheet" type="text/css">
+<script src="/javascripts/libs/jquery.fancybox.pack.js"></script>
+<script src="/javascripts/init_fancybox.js"></script>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1>
+    <!-- <a href="/">GeeKhmer</a> -->
+    <div class="logo" />
+  </h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation">
+  <form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:geekhmer.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+  </form>
+
+<ul class="subscription" data-subscription="rss">
+  
+  
+</ul>
+<ul class="main-navigation">
+  <li><a href="/">Home</a></li>
+  <li><a href="/blog/archives">Articles</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/team">Team</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Ruby on Rails Pagination With Kaminari</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-05-08T14:53:00+07:00" pubdate data-updated="true">May 8<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>
+  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="Ruby on Rails Pagination with Kaminari" />
+</p>
+
+
+
+
+<p>
+  The <a href="https://github.com/mislav/will_paginate" target="_blank">will_paginate</a> gem has long since been the most popular gem used when it comes to pagination. However it is not the only gem out there. <a href="https://github.com/amatsuda/kaminari" target="_blank">Kaminari</a> is another very popular pagination gem. In this article we will show you how to use it in your application.
+</p>
+
+
+
+
+<p>
+  <strong>Setup Rails Application</strong><br/>
+  To begin using the kaminari gem, we must first add it to our Gemfile. Open up your Gemfile and add in the line listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;kaminari&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now run a bundle install to install the gem.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Next, create a model called Post. The post model in this example will represent a blog post. Run the commands below to create the post model:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Post</span> <span class="n">title</span> <span class="ss">body</span><span class="p">:</span><span class="n">string</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We need some seed data. Open your <code>db/seeds.rb</code> file and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>db/seeds.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span>
+</span><span class='line'>  <span class="no">Post</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="ss">title</span><span class="p">:</span> <span class="s2">&quot;Lipsum Post </span><span class="si">#{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="ss">body</span><span class="p">:</span> <span class="sx">%{</span>
+</span><span class='line'><span class="sx">      Nullam hendrerit iaculis sodales. Curabitur varius nibh arcu, id molestie nibh fermentum vitae. Cras quis semper dui. Cras porttitor urna sit amet risus vehicula tempor. Maecenas quis tempor ligula. Donec et nibh eu leo volutpat placerat. Fusce vulputate elit in nisi pretium, vel fermentum mi fermentum. Mauris scelerisque, lectus non luctus ultricies, urna eros tincidunt risus, at varius sapien diam id erat.</span>
+</span><span class='line'><span class="sx">  }</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now run a rake db:seed to add the seed data:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">seed</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We need to add a controller called Posts that we will use to render the posts. Run the command below to create this controller now:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="no">Posts</span> <span class="n">index</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Let&#8217;s modify our routes file to set a site root. Open up your config/routes.rb file and modify it so that it looks like the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;posts#index&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Open up your Posts controller and modify it so that it looks like the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/controllers/posts_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>    <span class="vi">@posts</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">page</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:page</span><span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">per</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  As you can see, the first bit of our pagination code is here. The <code>page</code> method tells kaminari what page we are on. The <code>per</code> method tells kaminari how many items we wish to have per page.
+</p>
+
+
+
+
+<p>
+  Let&#8217;s open up the <code>index</code> view for our <code>Posts</code> controller and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/posts/index.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Posts</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'><span class="sr">&lt;hr /</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% @posts.each </span><span class="k">do</span> <span class="o">|</span><span class="n">post</span><span class="o">|</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;h2&gt;</span><span class="o">&lt;</span><span class="sx">%= post.title %&gt;&lt;/h2&gt;</span>
+</span><span class='line'><span class="sx">  &lt;p&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%=</span> <span class="n">post</span><span class="o">.</span><span class="n">body</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;/p&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% end %&gt;</span>
+</span><span class='line'><span class="sx">&lt;hr /&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">%= paginate @posts %&gt;</span>
+</span><span class='line'><span class="sx">&lt;%=</span> <span class="n">page_entries_info</span> <span class="vi">@posts</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The <code>paginate</code> helper is the line actually responsible for rendering the pagination links. The <code>page_entries_info</code> helper displays a line similar to Displaying posts 1 - 10 of 100 in total. This can be extremely helpful in letting the user know how many items there are in the list.
+</p>
+
+
+
+
+<p>
+  <strong>Global Configuration</strong><br/>
+  You can also specify global defaults for Kaminari. First, run the following command to generate an initializer file for Kaminari:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="ss">kaminari</span><span class="p">:</span><span class="n">config</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If you open up the <code>config/initializers/kaminari_config.rb</code> file you&#8217;ll see something similar to the following:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/initializers/kaminari_config.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Kaminari</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+</span><span class='line'>  <span class="c1"># config.default_per_page = 25</span>
+</span><span class='line'>  <span class="c1"># config.max_per_page = nil</span>
+</span><span class='line'>  <span class="c1"># config.window = 4</span>
+</span><span class='line'>  <span class="c1"># config.outer_window = 0</span>
+</span><span class='line'>  <span class="c1"># config.left = 0</span>
+</span><span class='line'>  <span class="c1"># config.right = 0</span>
+</span><span class='line'>  <span class="c1"># config.page_method_name = :page</span>
+</span><span class='line'>  <span class="c1"># config.param_name = :page</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  A description of these options can be found below:
+</p>
+
+
+<table>
+<thead>
+<tr>
+<th>Config </th>
+<th> Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>config.default_per_page </td>
+<td> Specifies the default amount of items to display per page.</td>
+</tr>
+<tr>
+<td>config.max_per_page </td>
+<td> The maximum amount of items to display per page.</td>
+</tr>
+<tr>
+<td>config.window </td>
+<td> Specifies the inner window size. The inner window is the number of items in the middle of the pagination block. e.g. « First ‹ Prev &hellip; 1 2 3 4 &hellip; Next › Last », in the previous example, 1 2 3 4 would be considered the inner window.</td>
+</tr>
+<tr>
+<td>config.outer_window </td>
+<td> Specifies how many items to display in the outer window. For example: 1 2 3 4 &hellip; 8 9 10 11, numbers visible on the outside are the outer window.</td>
+</tr>
+<tr>
+<td>config.left </td>
+<td> Specifies how many items should be displayed in the left outer window.</td>
+</tr>
+<tr>
+<td>config.right </td>
+<td> Specifies how many items should be displayed in the right outer window.</td>
+</tr>
+<tr>
+<td>config.page_method_name </td>
+<td> Changes the page method name from page to whatever you want. Can be used to avoid conflict with other gems that use page.</td>
+</tr>
+<tr>
+<td>config.param_name </td>
+<td> The default parameter to use when looking for the page number.</td>
+</tr>
+</tbody>
+</table>
+
+
+<br/>
+
+
+
+
+<p>
+  <strong>I18N</strong><br/>
+  Kaminari can be configured via I18N. The default I18N configuration file looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">en</span><span class="p">:</span>
+</span><span class='line'>  <span class="ss">views</span><span class="p">:</span>
+</span><span class='line'>    <span class="ss">pagination</span><span class="p">:</span>
+</span><span class='line'>      <span class="ss">first</span><span class="p">:</span> <span class="s2">&quot;&amp;laquo; First&quot;</span>
+</span><span class='line'>      <span class="ss">last</span><span class="p">:</span> <span class="s2">&quot;Last &amp;raquo;&quot;</span>
+</span><span class='line'>      <span class="ss">previous</span><span class="p">:</span> <span class="s2">&quot;&amp;lsaquo; Prev&quot;</span>
+</span><span class='line'>      <span class="k">next</span><span class="p">:</span> <span class="s2">&quot;Next &amp;rsaquo;&quot;</span>
+</span><span class='line'>      <span class="ss">truncate</span><span class="p">:</span> <span class="s2">&quot;&amp;hellip;&quot;</span>
+</span><span class='line'>  <span class="ss">helpers</span><span class="p">:</span>
+</span><span class='line'>    <span class="n">page_entries_info</span><span class="p">:</span>
+</span><span class='line'>      <span class="n">one_page</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">display_entries</span><span class="p">:</span>
+</span><span class='line'>          <span class="ss">zero</span><span class="p">:</span> <span class="s2">&quot;No %{entry_name} found&quot;</span>
+</span><span class='line'>          <span class="ss">one</span><span class="p">:</span> <span class="s2">&quot;Displaying &lt;b&gt;1&lt;/b&gt; %{entry_name}&quot;</span>
+</span><span class='line'>          <span class="ss">other</span><span class="p">:</span> <span class="s2">&quot;Displaying &lt;b&gt;all %{count}&lt;/b&gt; %{entry_name}&quot;</span>
+</span><span class='line'>      <span class="n">more_pages</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">display_entries</span><span class="p">:</span> <span class="s2">&quot;Displaying %{entry_name} &lt;b&gt;%{first}&amp;nbsp;-&amp;nbsp;%{last}&lt;/b&gt; of &lt;b&gt;%{total}&lt;/b&gt; in total&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  To override it, simply modify your locale files under <code>config/locales</code>.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Bunlong Van</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-05-08T14:53:00+07:00" pubdate data-updated="true">May 8<span>th</span>, 2015</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ruby/'>Ruby</a>, <a class='category' href='/blog/categories/ruby-on-rails/'>Ruby on Rails</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2015/05/08/ruby-on-rails-pagination-with-kaminari/" data-via="" data-counturl="http://geekhmer.github.io/blog/2015/05/08/ruby-on-rails-pagination-with-kaminari/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/05/07/ruby-slash-ruby-on-rails-mistakes/" title="Previous Post: Ruby/Ruby on Rails Mistakes">&laquo; Ruby/Ruby on Rails Mistakes</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2015/05/09/put-ruby-on-rails-on-a-slim/" title="Next Post: Put Ruby on Rails on a Slim">Put Ruby on Rails on a Slim &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Like To News Article</h1>
+  <ul>
+    <li>
+      <div class="fb-page" data-href="https://www.facebook.com/geekhmer" data-small-header="false" data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true" data-show-posts="false"><div class="fb-xfbml-parse-ignore"><blockquote cite="https://www.facebook.com/geekhmer"><a href="https://www.facebook.com/geekhmer">GeeKhmer</a></blockquote></div></div>
+    </li>
+  </ul>
+</section><section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/08/28/gulp-moving-files/">Gulp – Moving Files</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/28/gulp-hello-world/">Gulp – Hello World</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/28/gulp-installation/">Gulp – Installation</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/09/what-is-gulp/">What Is Gulp?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/07/25/facebook-fan-page-auto-like-revised/">Facebook Fan Page Auto Like - Revised</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/07/22/application-steps-for-applying-to-study-masters-in-computer-science-at-maharishi-university-of-management-usa/">Application Steps for Applying to Study Masters in Computer Science at MAHARISHI UNIVERSITY of MANAGEMENT USA</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/07/22/the-requirements-to-applying-to-study-masters-in-computer-science-at-maharishi-university-of-management-usa/">The Requirements to Applying to Study Masters in Computer Science at MAHARISHI UNIVERSITY of MANAGEMENT USA</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Category</h1>
+  <ul id="recent_posts">
+    
+      <li>
+        <a href="/blog/categories/facebook/">Facebook [ 5 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby/">Ruby [ 108 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/heroku/">Heroku [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 104 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/testing/">Testing [ 5 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/layout/">Layout [ 3 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby-metaprogramming/">Ruby metaprogramming [ 4 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/websocket/">Websocket [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/front-end-mvc-framework/">Front-end mvc framework [ 1 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/javascript/">Javascript [ 25 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/erlang/">Erlang [ 20 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/design-pattern/">Design pattern [ 1 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/other/">Other [ 40 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/reactjs/">Reactjs [ 18 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/startup/">Startup [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/cambodia-hacker-place/">Cambodia hacker place [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/gulp/">Gulp [ 4 ]</a>
+      </li>
+    
+  </ul>
+</section><section>
+  <h1>Notes</h1>
+  <ul id="recent_posts">
+    <li>
+      <a href="http://vimcommands.github.io/" target="_blank">Vim Commands</a>
+    </li>
+    <li>
+      <a href="http://ruby-hacking-style-guide.github.io/" target="_blank">Ruby Hacking Style Guide</a>
+    </li>
+  </ul>
+</section><section>
+  <h1>References</h1>
+  <ul id="recent_posts">
+    <li>
+      <a href="http://www.erlang.org/" target="_blank">
+        <img src="/images/logo_erlang.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://www.chicagoboss.org/" target="_blank">
+        <img src="/images/logo_chicagoboss.svg" />
+      </a>
+    </li>
+    <li>
+      <a href="https://www.ruby-lang.org/en/" target="_blank">
+        <img src="/images/logo_ruby.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://guides.rubyonrails.org" target="_blank">
+        <img src="/images/logo_rails_guides.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://railscasts.com" target="_blank">
+        <img src="/images/logo_rails_casts.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://github.com" target="_blank">
+        <img src="/images/logo_github.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://www.linode.com" target="_blank">
+        <img src="/images/logo_linode.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://newrelic.com" target="_blank">
+        <img src="/images/logo_newrelic.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://developers.facebook.com/" target="_blank">
+        <img src="/images/logo_facebook.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://facebook.github.io/react/" target="_blank">
+        <img src="/images/logo_react.png" />
+      </a>
+    </li>
+  </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 GeeKhmer in Phnom Penh, Cambodia.
+</p>
+
+</footer>
+  
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=1451301955117043&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,936 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Ruby on Rails | GeeKhmer]]></title>
+  <link href="http://geekhmer.github.io/blog/categories/ruby-on-rails/atom.xml" rel="self"/>
+  <link href="http://geekhmer.github.io/"/>
+  <updated>2016-08-28T20:22:45+07:00</updated>
+  <id>http://geekhmer.github.io/</id>
+  <author>
+    <name><![CDATA[Bunlong Van]]></name>
+    <email><![CDATA[bunlong.van@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Setup and Deploy Ruby On Rails on Ubuntu 16.04 or Latest]]></title>
+    <link href="http://geekhmer.github.io/blog/2016/07/13/setup-and-deploy-ruby-on-rails-on-ubuntu-16-dot-04-or-latest/"/>
+    <updated>2016-07-13T15:00:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2016/07/13/setup-and-deploy-ruby-on-rails-on-ubuntu-16-dot-04-or-latest</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/rails_nginx_ubuntu.jpg" width="600" alt="Setup and Deploy Ruby On Rails on Ubuntu 16.04 or Latest" />
+</p>
+
+
+
+
+<p>
+  Since we setup Ubuntu for our development environment, we also want to use it in production. This keeps your application running consistently between development and production. 
+</p>
+
+
+
+
+<h3>Install Ruby</h3>
+
+
+
+
+<p>
+  The first step is to install some dependencies for Ruby:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
+</span><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">git</span><span class="o">-</span><span class="n">core</span> <span class="n">curl</span> <span class="n">zlib1g</span><span class="o">-</span><span class="n">dev</span> <span class="n">build</span><span class="o">-</span><span class="n">essential</span> <span class="n">libssl</span><span class="o">-</span><span class="n">dev</span> <span class="n">libreadline</span><span class="o">-</span><span class="n">dev</span> <span class="n">libyaml</span><span class="o">-</span><span class="n">dev</span> <span class="n">libsqlite3</span><span class="o">-</span><span class="n">dev</span> <span class="n">sqlite3</span> <span class="n">libxml2</span><span class="o">-</span><span class="n">dev</span> <span class="n">libxslt1</span><span class="o">-</span><span class="n">dev</span> <span class="n">libcurl4</span><span class="o">-</span><span class="n">openssl</span><span class="o">-</span><span class="n">dev</span> <span class="n">python</span><span class="o">-</span><span class="n">software</span><span class="o">-</span><span class="n">properties</span> <span class="n">libffi</span><span class="o">-</span><span class="n">dev</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Next we're going to be installing Ruby using rvm:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">libgdbm</span><span class="o">-</span><span class="n">dev</span> <span class="n">libncurses5</span><span class="o">-</span><span class="n">dev</span> <span class="n">automake</span> <span class="n">libtool</span> <span class="n">bison</span> <span class="n">libffi</span><span class="o">-</span><span class="n">dev</span>
+</span><span class='line'><span class="n">gpg</span> <span class="o">&amp;</span><span class="n">mdash</span><span class="p">;</span><span class="n">keyserver</span> <span class="ss">hkp</span><span class="p">:</span><span class="sr">//</span><span class="n">keys</span><span class="o">.</span><span class="n">gnupg</span><span class="o">.</span><span class="n">net</span> <span class="o">&amp;</span><span class="n">mdash</span><span class="p">;</span><span class="n">recv</span><span class="o">-</span><span class="n">keys</span> <span class="mi">409</span><span class="no">B6B1796C275462A1703113804BB82D39DC0E3</span>
+</span><span class='line'><span class="n">curl</span> <span class="o">-</span><span class="n">sSL</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;https://get.rvm.io&quot;</span><span class="o">&gt;</span><span class="ss">https</span><span class="p">:</span><span class="sr">//</span><span class="n">get</span><span class="o">.</span><span class="n">rvm</span><span class="o">.</span><span class="n">io</span><span class="o">&lt;</span><span class="sr">/a&gt; | bash -s stable</span>
+</span><span class='line'><span class="sr">source ~/</span><span class="o">.</span><span class="n">rvm</span><span class="o">/</span><span class="n">scripts</span><span class="o">/</span><span class="n">rvm</span>
+</span><span class='line'><span class="n">rvm</span> <span class="n">install</span> <span class="mi">2</span><span class="o">.</span><span class="mi">3</span><span class="o">.</span><span class="mi">1</span>
+</span><span class='line'><span class="n">rvm</span> <span class="n">use</span> <span class="mi">2</span><span class="o">.</span><span class="mi">3</span><span class="o">.</span><span class="mi">1</span> <span class="o">&amp;</span><span class="n">mdash</span><span class="p">;</span><span class="n">default</span>
+</span><span class='line'><span class="n">ruby</span> <span class="o">-</span><span class="n">v</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  The last step is to install Bundler
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="n">install</span> <span class="n">bundler</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3>Install Nginx</h3>
+
+
+
+
+<p>
+  Phusion is the company that develops Passenger and they recently put out an official Ubuntu package that ships with Nginx and Passenger pre-installed.
+</p>
+
+
+
+
+<p>
+  We'll be using that to setup our production server because it's very easy to setup:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">key</span> <span class="n">adv</span> <span class="o">&amp;</span><span class="n">mdash</span><span class="p">;</span><span class="n">keyserver</span> <span class="ss">hkp</span><span class="p">:</span><span class="sr">//</span><span class="n">keyserver</span><span class="o">.</span><span class="n">ubuntu</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="mi">80</span> <span class="o">&amp;</span><span class="n">mdash</span><span class="p">;</span><span class="n">recv</span><span class="o">-</span><span class="n">keys</span> <span class="mi">561</span><span class="no">F9B9CAC40B2F7</span>
+</span><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">apt</span><span class="o">-</span><span class="n">transport</span><span class="o">-</span><span class="n">https</span> <span class="n">ca</span><span class="o">-</span><span class="n">certificates</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;Add Passenger APT repository&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">sudo</span> <span class="n">sh</span> <span class="o">-</span><span class="n">c</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">echo</span> <span class="n">deb</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;https://oss-binaries.phusionpassenger.com/apt/passenger&quot;</span><span class="o">&gt;</span><span class="ss">https</span><span class="p">:</span><span class="sr">//oss</span><span class="o">-</span><span class="n">binaries</span><span class="o">.</span><span class="n">phusionpassenger</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">passenger</span><span class="o">&lt;</span><span class="sr">/a&gt; xenial main &gt; /e</span><span class="n">tc</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">sources</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">passenger</span><span class="o">.</span><span class="n">list</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;Install Passenger &amp;amp; Nginx&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">nginx</span><span class="o">-</span><span class="n">extras</span> <span class="n">passenger</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>So now we have Nginx and passenger installed. We can manage the Nginx webserver by using the service command:</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">service</span> <span class="n">nginx</span> <span class="n">start</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+The service command also provides some other methods such as <code>restart</code> and <code>stop</code> that allow you to easily restart and stop your webserver.
+</p>
+
+
+
+
+<p>Next, we need to update the Nginx configuration to point Passenger to the version of Ruby that we're using. You'll want to open up <code>/etc/nginx/nginx.conf</code> in your favorite editor. I like to use vim, so I'd run this command:</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">vim</span> <span class="sr">/etc/n</span><span class="n">ginx</span><span class="o">/</span><span class="n">nginx</span><span class="o">.</span><span class="n">conf</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Find the following lines, and uncomment them:</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;#&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Phusion</span> <span class="no">Passenger</span> <span class="n">config</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;#&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Uncomment</span> <span class="n">it</span> <span class="k">if</span> <span class="n">you</span> <span class="n">installed</span> <span class="n">passenger</span> <span class="ow">or</span> <span class="n">passenger</span><span class="o">-</span><span class="n">enterprise</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;#&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="kp">include</span> <span class="sr">/etc/n</span><span class="n">ginx</span><span class="o">/</span><span class="n">passenger</span><span class="o">.</span><span class="n">conf</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Once you've configured <code>/etc/nginx/nginx.conf</code> , you can run <code>sudo service nginx restart</code> to restart Nginx with the new Passenger configuration.</p>
+
+
+
+
+<h3>Install MySQL and PostgreSQL</h3>
+
+
+
+
+<p>Setting up your production database is pretty easy. Make sure to keep in mind that you should use a different password for your production databases.</p>
+
+
+
+
+<p>Depending on what database you want to use, follow the steps related to the database:</p>
+
+
+
+
+<p>
+  <strong>Install MySQL</strong><br/>
+  All you need to do in order to install MySQL is to run the following command:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">mysql</span><span class="o">-</span><span class="n">server</span> <span class="n">mysql</span><span class="o">-</span><span class="n">client</span> <span class="n">libmysqlclient</span><span class="o">-</span><span class="n">dev</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>You can use the root user and password set during installation for your database or you can add a new user to MySQL.</p>
+
+
+
+
+<p>
+  <strong>Install PostgreSQL</strong><br/>
+  We can install PostgreSQL like so:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">postgresql</span> <span class="n">postgresql</span><span class="o">-</span><span class="n">contrib</span> <span class="n">libpq</span><span class="o">-</span><span class="n">dev</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Next we need to setup the postgres user:</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">su</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span> <span class="n">postgres</span>
+</span><span class='line'><span class="n">createuser</span> <span class="o">&amp;</span><span class="n">mdash</span><span class="p">;</span><span class="n">pwprompt</span>
+</span><span class='line'><span class="nb">exit</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>The password you type in here will be the one to put in your <code>my_app/current/config/database.yml</code> later when you deploy your app for the first time.</p>
+
+
+
+
+<h3>Adding The Nginx Host</h3>
+
+
+
+
+<p>In order to get Nginx to respond with the Rails app, we need to modify it's sites-enabled.</p>
+
+
+
+
+<p>Open up <code>/etc/nginx/sites-enabled/default</code> in your text editor and we will replace the file's contents with the following:</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">server</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">listen</span> <span class="mi">80</span> <span class="n">default_server</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">listen</span> <span class="o">[::]</span><span class="p">:</span><span class="mi">80</span> <span class="n">default_server</span> <span class="n">ipv6only</span><span class="o">=</span><span class="n">on</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  server_name mydomain.com;</span>
+</span><span class='line'><span class="sr">  passenger_enabled on;</span>
+</span><span class='line'><span class="sr">  rails_env    production;</span>
+</span><span class='line'><span class="sr">  root         /</span><span class="n">home</span><span class="o">/</span><span class="n">deploy</span><span class="o">/</span><span class="n">myapp</span><span class="o">/</span><span class="kp">public</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  # redirect server error pages to the static page /</span><span class="mi">50</span><span class="n">x</span><span class="o">.</span><span class="n">html</span>
+</span><span class='line'>  <span class="n">error_page</span>   <span class="mi">500</span> <span class="mi">502</span> <span class="mi">503</span> <span class="mi">504</span>  <span class="o">/</span><span class="mi">50</span><span class="n">x</span><span class="o">.</span><span class="n">html</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">location</span> <span class="o">=</span> <span class="sr">/50x.html {&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">root</span>   <span class="n">html</span><span class="p">;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>This is our Nginx configuration for a server listening on port 80. You need to change the server_name values to match the domain you want to use and in root replace "myapp" with the name of your application.</p>
+
+
+
+
+<h3>Connect The Database</h3>
+
+
+
+
+<p>
+  The file <code>config/database.yml</code> needs to be updated for the production database server username, password, and host. You can set host to "localhost" and you will have to create a database on the server with the same name by using command:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">create</span> <span class="no">RAILS_ENV</span><span class="o">=</span><span class="n">production</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span> <span class="no">RAILS_ENV</span><span class="o">=</span><span class="n">production</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Then run command below to minify or compress JavaScript and CSS assets:</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">assets</span><span class="p">:</span><span class="n">precompile</span> <span class="no">RAILS_ENV</span><span class="o">=</span><span class="n">production</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3>Setup Secret Key Base</h3>
+
+
+
+
+<p>Go to your rails app directory and run command below to generate secret key base:</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="n">secret</span> <span class="no">RAILS_ENV</span><span class="o">=</span><span class="n">production</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Go to <code>/yourapp/config/secrets.yml</code> and set production secret_key_base. Then reload Nginx using command line: <code>sudo service nginx reload</code>
+</p>
+
+
+
+
+<p>
+  So far so good, That's it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Send Notifications from Rails Backend to iOS and Android]]></title>
+    <link href="http://geekhmer.github.io/blog/2016/05/03/send-notifications-from-rails-backend-to-ios-and-android/"/>
+    <updated>2016-05-03T12:29:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2016/05/03/send-notifications-from-rails-backend-to-ios-and-android</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/gcm-app.png" width="600" alt="Send Notifications from Rails Backend to iOS and Android" />
+</p>
+
+
+
+
+<p>
+  Written for a project. I developed the backend for a social network app - My own startup business, will release soon.
+</p>
+
+
+
+
+<p>
+  One of the most common uses for a backend connected to a mobile application is to use it to send push notifications to users. Once you've wrapped your head around it, it's pretty straightforward, but it's also a common source of confusion for developers new to the topic. This frequent confusion is also the reason I've decided to cover it for my introductory technical story for my own startup business app, where I'm a CEO.
+</p>
+
+
+
+
+<p>
+  Before I continue, you should know that there are plug-n-play services that will provide you with a notification-sending backend, if you're willing to pay for it (Parse, mobDB, Pushwoosh, Urban Airship, etc.), but since that's not the way of the warrior, let's see how you do it from scratch (and for free).
+</p>
+
+
+<p><blockquote><p>&ldquo;If you wish to make an apple pie from scratch, you must first invent the universe.&rdquo; &ndash; Carl Sagan</p></blockquote></p>
+
+<p>
+  There are several components in my own startup business app that play various roles in the notification sending feature:<br/>
+  1. API endpoint for getting tokens from mobile devices.<br/>
+  2. <a href="https://github.com/resque/resque" target="_blank">Resque</a> worker which remains connected to Apple/Google notification servers and feeds off a queue of notifications in Redis.<br/>
+  3. The code that does the actual sending and feedback processing in the worker.
+</p>
+
+
+
+
+<p>
+  Before anything else, you need to ask the user if they'd like to receive push notifications (<a href="https://developer.apple.com/notifications/" target="_blank">iOS notifications</a>, <a href="http://developer.android.com/guide/topics/ui/notifiers/notifications.html" target="_blank">Google Cloud Messaging</a>) and if they say yes, get their device token and send it from the mobile device to the backend server. We store these tokens in a simple <a href="http://api.rubyonrails.org/classes/ActiveRecord/Base.html" target="_blank">ActiveRecord</a> model called Device:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;====================&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Schema</span> <span class="no">Information</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;Table name: devices&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="nb">id</span>         <span class="ss">:integer</span>          <span class="ow">not</span> <span class="n">null</span><span class="p">,</span> <span class="n">primary</span> <span class="n">key</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;user_id    :integer&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="n">token</span>      <span class="ss">:string</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;enabled    :boolean          default(TRUE)&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="n">created_at</span> <span class="ss">:datetime</span>         <span class="ow">not</span> <span class="n">null</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;updated_at :datetime         not null&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="n">platform</span>   <span class="ss">:string</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;====================&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="k">class</span> <span class="nc">Device</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">&lt;</span><span class="n">br</span><span class="o">/&gt;</span>
+</span><span class='line'>  <span class="n">attr_accessible</span> <span class="ss">:enabled</span><span class="p">,</span> <span class="ss">:token</span><span class="p">,</span> <span class="ss">:user</span><span class="p">,</span> <span class="ss">:platform</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:user</span>
+</span><span class='line'>  <span class="n">validates_uniqueness_of</span> <span class="ss">:token</span><span class="p">,</span> <span class="ss">scope</span><span class="p">:</span> <span class="ss">:user_id</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Instances of Device get created when the mobile app calls an API endpoint, which looks something like this (we're using <a href="https://github.com/ruby-grape/grape" target="_blank">grape</a> gem for our API needs):
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">resource</span> <span class="ss">:devices</span> <span class="k">do</span><span class="o">&lt;</span><span class="n">br</span><span class="o">/&gt;</span>
+</span><span class='line'>  <span class="n">post</span> <span class="k">do</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@device = Device.create(user: current_user, token: params[:token], platform: params[:platform])</span>
+</span><span class='line'><span class="sr">present @device, with: WellWithMe::Entities::Device</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end&lt;br/</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  With our mobile app user having a stored device token, we're now ready to queue notifications for her, which we do through a simple Redis list backed Notification model, which ensures data validity among other things. If a user has multiple devices, the Notification model also ensures they get sent to all of them. Queuing notifications is then as easy as:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">notification</span> <span class="o">=</span> <span class="no">Notification</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="c1">#{activity.user.name} just started the challenge!&amp;rdquo;, &amp;lsquo;status_change&amp;rsquo;)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  In an essence, the Notification model is a Redis list, which serves as the queue for a background worker (NotificationSender):
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">NotificationSender</span>
+</span><span class='line'>  <span class="vi">@queue</span> <span class="o">=</span> <span class="ss">:notifications</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  def self.perform&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="vi">@list</span> <span class="o">=</span> <span class="ss">Redis</span><span class="p">:</span><span class="ss">:List</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Notification</span><span class="o">.</span><span class="n">key_name</span><span class="p">)</span>
+</span><span class='line'><span class="k">while</span> <span class="n">notification</span> <span class="o">=</span> <span class="vi">@list</span><span class="o">.</span><span class="n">pop</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">notification_json</span> <span class="o">=</span> <span class="no">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">notification</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">if</span> <span class="n">notification_json</span><span class="o">[</span><span class="s1">&#39;platform&#39;</span><span class="o">]</span> <span class="o">==</span> <span class="s1">&#39;iOS&#39;</span>
+</span><span class='line'>    <span class="n">note</span> <span class="o">=</span> <span class="ss">Grocer</span><span class="p">:</span><span class="ss">:Notification</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+</span><span class='line'>      <span class="n">device_token</span><span class="p">:</span> <span class="n">notification_json</span><span class="o">[</span><span class="s1">&#39;token&#39;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">alert</span><span class="p">:</span> <span class="n">notification_json</span><span class="o">[</span><span class="s1">&#39;message&#39;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">sound</span><span class="p">:</span> <span class="s1">&#39;default&#39;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">badge</span><span class="p">:</span> <span class="mi">0</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="no">PUSHER</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">note</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">elsif</span> <span class="n">notification_json</span><span class="o">[</span><span class="s1">&#39;platform&#39;</span><span class="o">]</span> <span class="o">==</span> <span class="s1">&#39;Android&#39;</span>
+</span><span class='line'>    <span class="n">gcm</span> <span class="o">=</span> <span class="no">GCM</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;gcm_key&#39;</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">registration_id</span> <span class="o">=</span> <span class="o">[</span><span class="n">notification_json</span><span class="o">[</span><span class="s1">&#39;token&#39;</span><span class="o">]]</span>
+</span><span class='line'>    <span class="n">options</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>      <span class="s1">&#39;data&#39;</span> <span class="o">=&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s1">&#39;message&#39;</span> <span class="o">=&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="n">notification_json</span><span class="o">[</span><span class="s1">&#39;message&#39;</span><span class="o">]</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>        <span class="s1">&#39;collapse_key&#39;</span> <span class="o">=&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="s1">&#39;updated_state&#39;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">send_notification</span><span class="p">(</span><span class="n">registration_id</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Having NotificationSender be a queued job constantly running on a worker as opposed to a synchronous connection has the advantage of not trying to establish a connection to Apple's notification servers for every notification, which is something Apple actively discourages: <a href="https://developer.apple.com/news/?id=03212012a" target="_blank">Apple's note about notification servers connections</a>.
+</p>
+
+
+
+
+<p>
+  Thus NotificationSender is a Resque job, which is run every minute and just gobbles up the Redis list of notifications, and sends them according to the platform. We're using the awesome <a href="https://github.com/grocer/grocer" target="_blank">grocer</a> gem for iOS and the <a href="https://github.com/spacialdb/gcm" target="_blank">GCM</a> gem for Android. Both are working perfectly and the documentation is very good. The only caveat is that you should watch out for certificates magic in iOS, as you need to have your Apple certificates on the server as well, and you need to export them in a certain way (including the private key) - just follow instructions for the grocer gem to the letter, and you'll be fine.
+</p>
+
+
+
+
+<p>
+  With this, you should have a working and easily extendible system for sending important notifications about in-app events to your users. Notifications can drastically increase user retention, just don't abuse them or they'll have an opposite effect.
+</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Executing Background Tasks with Scheduler in Rails]]></title>
+    <link href="http://geekhmer.github.io/blog/2016/03/04/executing-background-tasks-with-scheduler-in-rails/"/>
+    <updated>2016-03-04T16:42:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2016/03/04/executing-background-tasks-with-scheduler-in-rails</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="Executing Background Tasks with Scheduler in Rails" />
+</p>
+
+
+
+
+<p>
+  <a href="https://rubygems.org/gems/rufus-scheduler/versions/3.2.0" target="_blank">rufus-scheduler</a> is a handy gem that allows you to perform background jobs. In this article we will show you how to use rufus-scheduler in your Rails applications. Let's get started:
+</p>
+
+
+
+
+<h3>Setup</h3>
+
+
+
+
+<p>
+  In order to use rufus-scheduler, we must first add the rufus-scheduler gem to our Gemfile. To do this, open up your Gemfile and add in the line listed below:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">rufus</span><span class="o">-</span><span class="n">scheduler</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Run a bundle install to install the gem:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Great, we need to create an initializer that will contain the jobs we wish to schedule. Create a new initializer called scheduler.rb in the <code>config/initializers</code> directory and add in the code listed below:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/initializers/scheduler.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">rufus</span><span class="o">-</span><span class="n">scheduler</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;scheduler = Rufus::Scheduler::singleton&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="n">jobs</span> <span class="n">go</span> <span class="n">below</span> <span class="n">here</span><span class="o">.</span><span class="n">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Now we are ready to schedule jobs.
+</p>
+
+
+
+
+<h3>Scheduling the Jobs</h3>
+
+
+
+
+<p>
+  rufus-scheduler provides a simple syntax for scheduling jobs. You can schedule both one time jobs and recurring jobs. One time jobs can be either scheduled at a specific time, or you can tell rufus to wait a specific amount of time before running the job (a delayed job). For recurring jobs and delayed jobs, you can either use a simple plain English (30m = 30 minutes, etc.) format or you can use the cron format for scheduling jobs. For this article we'll focus on the English format:
+</p>
+
+
+
+
+<p>
+  <strong>Recurring the Jobs</strong><br/>
+  Scheduling recurring jobs is easy. Simply use the following format in your scheduler.rb file:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/initializers/scheduler.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">scheduler</span><span class="o">.</span><span class="n">every</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="mi">5</span><span class="n">s</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># do stuff</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  The code above would perform your background task every 5 seconds. The list below will give you an idea of what time units are supported:
+</p>
+
+
+
+
+<p>
+  <strong>s</strong> Example: 5s - seconds, specifies the number of seconds you wish to wait.<br/>
+  <strong>m</strong> Example: 5m - the number of minutes you wish to wait.<br/>
+  <strong>h</strong> Example: 5h - the number of hours you wish to wait.<br/>
+  <strong>d</strong> Example: 5d - the number of days you wish to wait.<br/>
+  <strong>w</strong> Example: 5w - the number of weeks you wish to wait.<br/>
+  <strong>M</strong> Example: 5M - the number of months you wish to wait.<br/>
+  <strong>y</strong> Example: 1y - the number of years you wish to wait.
+</p>
+
+
+
+
+<p>
+  For example, the following code would tell rufus you wish to schedule a job for every 11 and a half hours:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/initializers/scheduler.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">scheduler</span><span class="o">.</span><span class="n">every</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="mi">11</span><span class="n">h30m</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># do stuff</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Scheduling a delayed job is easy. The syntax is similar to the recurring syntax listed above, but we use the <code>.in</code> method instead of <code>.every</code>. For example, the following code would run a task 4 hours after the server starts:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/initializers/scheduler.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">scheduler</span><span class="o">.</span><span class="n">in</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="mi">4</span><span class="n">h</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># do stuff</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  <strong>Scheduling the Jobs for Specific Dates/Times</strong><br/>
+  You can also schedule a job for a specific date and time. To do this we use the at method. For example, the following code would run at 12:01am on December 1st, 2017:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/initializers/scheduler.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">scheduler</span><span class="o">.</span><span class="n">at</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="mi">2017</span><span class="o">/</span><span class="mi">12</span><span class="o">/</span><span class="mo">01</span> <span class="mo">00</span><span class="p">:</span><span class="mo">01</span><span class="p">:</span><span class="mo">00</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># do stuff</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3>Important Caveats</h3>
+
+
+
+
+<p>
+  1. Because rufus-scheduler runs in process, the scheduler will reset if your Rails server gets restarted. This means that the timer for your jobs will get reset, so don't count on any monthly or yearly jobs getting called. If you need to persist jobs across server resets, use a job backend. We will show you how to do this in another article.<br/>
+  2. Rufus does not work with Active Job.<br/>
+  3. Some additional setup is needed for production environments (see below).
+</p>
+
+
+
+
+<h3>Production Setup</h3>
+
+
+
+
+<p>
+  Production servers require a bit of additional setup. On most production web servers, idle Ruby processes are killed. In order for rufus to work, you'll need to stop this from happening. For Passenger/Nginx you can copy the following code below to your <code>nginx.conf</code> config file for your website after the line that says <code>passenger_enabled on;</code>.
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>nginx.conf </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">passenger_spawn_method</span> <span class="n">direct</span><span class="p">;</span>
+</span><span class='line'><span class="n">passenger_min_instances</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'><span class="n">passenger_pool_idle_time</span> <span class="mi">0</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  rufus-scheduler is a simple, easy to use scheduler that provides great functionality. It can be used for stuff like sending emails, cleaning up temp files, and much more.
+</p>
+
+
+
+
+<p>
+  So far so good, That's it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Sessions Expiring]]></title>
+    <link href="http://geekhmer.github.io/blog/2016/02/23/sessions-expiring/"/>
+    <updated>2016-02-23T14:54:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2016/02/23/sessions-expiring</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="Sessions Expiring" />
+</p>
+
+
+
+
+<p>
+  To improve user security, we may wish to expire the user's session after they are inactive for a given amount of time. In order to do this, we simply set the <code>expire_after</code> parameter when setting up our session store. For example:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>config/initializers/session_store.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">session_store</span> <span class="ss">:cookie_store</span><span class="p">,</span> <span class="ss">key</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">_example_session</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="n">expire_after</span><span class="p">:</span> <span class="mi">15</span><span class="o">.</span><span class="n">minutes</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  The line above would expire the session after 15 minutes of inactivity. This means that the user's session variables would get wiped once time reaches 15 minutes since the user last accessed the Rails application. If the user refreshes the page, the timer gets refreshed.
+</p>
+
+
+
+
+<p>
+  So far so good, That's it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Rails Flash Messages Styles]]></title>
+    <link href="http://geekhmer.github.io/blog/2016/02/10/rails-flash-messages-styles/"/>
+    <updated>2016-02-10T10:57:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2016/02/10/rails-flash-messages-styles</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="Rails Flash Messages Styles" />
+</p>
+
+
+
+
+<p>
+  If you're using Ruby on Rails with Twitter Bootstrap or other css framworks, then you may want to display flash messages with the alert styles. Here is a quick and easy way of doing so.
+</p>
+
+
+
+
+<p>
+  You just need to quickly extend <code>application_helper.rb</code> with the following:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>application_helper.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ApplicationHelper</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">bootstrap_class_for</span><span class="p">(</span><span class="n">flash_type</span><span class="p">)</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;case flash_type</span>
+</span><span class='line'><span class="sr">  when &quot;success&quot;</span>
+</span><span class='line'><span class="sr">    &quot;alert-success&quot;</span>
+</span><span class='line'><span class="sr">  when &quot;error&quot;</span>
+</span><span class='line'><span class="sr">    &quot;alert-danger&quot;</span>
+</span><span class='line'><span class="sr">  when &quot;alert&quot;</span>
+</span><span class='line'><span class="sr">    &quot;alert-warning&quot;</span>
+</span><span class='line'><span class="sr">  when &quot;notice&quot;</span>
+</span><span class='line'><span class="sr">    &quot;alert-info&quot;</span>
+</span><span class='line'><span class="sr">  else</span>
+</span><span class='line'><span class="sr">    flash_type.to_s</span>
+</span><span class='line'><span class="sr">  end</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  Now when you call a flash message, you can use the following in your view:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">%</span> <span class="n">flash</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">type</span><span class="p">,</span> <span class="n">message</span><span class="o">|</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;div class=&quot;alert &lt;%= bootstrap_class_for(type) %&gt;</span> <span class="n">alert</span><span class="o">-</span><span class="n">dismissible</span><span class="s2">&quot; role=&amp;ldquo;alert&amp;rdquo;&gt;&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;pre&gt;&lt;code&gt;&amp;lt;button type=&quot;</span><span class="n">button</span><span class="s2">&quot; class=&quot;</span><span class="n">close</span><span class="s2">&quot; data-dismiss=&quot;</span><span class="n">alert</span><span class="s2">&quot; aria-label=&quot;</span><span class="no">Close</span><span class="s2">&quot;&amp;gt;&amp;lt;span aria-hidden=&quot;</span><span class="kp">true</span><span class="s2">&quot;&amp;gt;&amp;amp;times;&amp;lt;/span&amp;gt;&amp;lt;/button&amp;gt;</span>
+</span><span class='line'><span class="s2">&amp;lt;%= message %&amp;gt;</span>
+</span><span class='line'><span class="s2">&lt;/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;  &lt;/div&gt;</span>
+</span><span class='line'><span class="s2">&amp;lt;% end %&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  And just use:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">flash</span><span class="o">[</span><span class="ss">:success</span><span class="o">]</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Credit</span> <span class="n">card</span> <span class="n">type</span> <span class="n">saved</span> <span class="n">successfully!</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  As success message:
+</p>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">flash</span><span class="o">[</span><span class="ss">:alert</span><span class="o">]</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Alerting</span> <span class="n">you</span> <span class="n">to</span> <span class="n">the</span> <span class="n">monkey</span> <span class="n">on</span> <span class="n">your</span> <span class="n">car!</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+  So far so good, That's it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
+  
+</feed>

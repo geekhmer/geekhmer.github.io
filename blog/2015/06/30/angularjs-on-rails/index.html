@@ -1,0 +1,1168 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>AngularJS on Rails - GeeKhmer</title>
+  <meta name="author" content="Bunlong Van">
+  
+  
+  <meta name="description" content="The biggest website of computer programming, Ruby, Ruby on Rails, Erlang, Chicagoboss and Javascript in Southeast Asia.">
+
+  <meta name="keywords" content="AngularJS on Rails, AngularJS, Getting Start with AngularJS and Rails">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://geekhmer.github.io/blog/2015/06/30/angularjs-on-rails">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="" rel="alternate" title="GeeKhmer" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+<link href="/stylesheets/jquery.fancybox.css" media="screen, projection" rel="stylesheet" type="text/css">
+<script src="/javascripts/libs/jquery.fancybox.pack.js"></script>
+<script src="/javascripts/init_fancybox.js"></script>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1>
+    <!-- <a href="/">GeeKhmer</a> -->
+    <div class="logo" />
+  </h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation">
+  <form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:geekhmer.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+  </form>
+
+<ul class="subscription" data-subscription="rss">
+  
+  
+</ul>
+<ul class="main-navigation">
+  <li><a href="/">Home</a></li>
+  <li><a href="/blog/archives">Articles</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/team">Team</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">AngularJS on Rails</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-06-30T23:43:00+07:00" pubdate data-updated="true">Jun 30<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>
+  <img src="/images/angularjs_on_rails.png" width="400" alt="AngularJS on Rails" />
+</p>
+
+
+
+
+<p>
+  AngularJS is an extremely popular JavaScript library that enables you to quickly and easily create rich web applications. In this article we will show you how to integrate AngularJS with your Rails app. We will also build a simple AngularJS application called VisitorsCenter. The VisitorsCenter application allows the user to track visitors that are coming and going from a building such as an office building. 
+</p>
+
+
+
+
+<p>
+  <strong>Setup Rails Application</strong><br/>
+  Before we begin, we will need to add a couple gems to our Gemfile. The <code>angularJs-rails</code> gem provides integration with the AngularJS library and our Rails application. The bootstrap-sass gem merely adds bootstrap support so we can focus on the code rather than the style of the app. Add these gems to your gemfile now as listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;angularjs-rails&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 1.2.25&#39;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;bootstrap-sass&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 3.2.0.2&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now run a bundle install to install the gems:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Next, we need to create a model called <code>Visitor</code>. The <code>Visitor</code> model will represent a visitor that visits. Run the command below to create the visitor model now:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Visitor</span> <span class="n">first_name</span><span class="ss">:string</span> <span class="n">last_name</span><span class="ss">:string</span> <span class="ss">reason</span><span class="p">:</span><span class="n">string</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Great, now we need to create a <code>Visitors</code> controller that will give us a way to interact with our model. The <code>Visitors</code> controller will have 3 different actions in this example application. The first action, <code>index</code> will return either the visitors page or a json list of visitors depending on how it is accessed. The second action, <code>create</code> will be responsible for creating the visitor. The final action, <code>destroy</code> will destroy the visitor. Run the command below to create this controller now:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="no">Visitors</span> <span class="n">index</span> <span class="n">create</span> <span class="n">destroy</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now let&#8217;s modify our routes file to set up the proper paths and add a site root. Open up your routes file and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">resources</span> <span class="ss">:visitors</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:index</span><span class="p">,</span> <span class="ss">:create</span><span class="p">,</span> <span class="ss">:destroy</span><span class="o">]</span><span class="p">,</span> <span class="ss">defaults</span><span class="p">:</span> <span class="p">{</span><span class="nb">format</span><span class="p">:</span> <span class="ss">:json</span><span class="p">}</span>
+</span><span class='line'>  <span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;visitors#index&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The code fragment that says <code>defaults: {format: :json}</code> tells Rails that we wish to return json by default for our actions. We do this because most of the interaction in our application will be via JSON.
+</p>
+
+
+
+
+<p>
+  By default, AngularJS knows nothing of the cross site request forgery (CSRF) protections in our applications. We need a way to tell AngularJS how to interact with our application while obeying the CSRF protections that we have in place. Luckily we have a way to do this. Open up your <code>ApplicationController</code> and add in the code listed below.
+</p>
+
+
+
+
+<p>
+  If you are using Rails 4.2 and up, use the code below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>application_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="ss">ActionController</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">protect_from_forgery</span> <span class="ss">with</span><span class="p">:</span> <span class="ss">:exception</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">after_action</span> <span class="ss">:set_csrf_cookie_for_ng</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">set_csrf_cookie_for_ng</span>
+</span><span class='line'>    <span class="n">cookies</span><span class="o">[</span><span class="s1">&#39;XSRF-TOKEN&#39;</span><span class="o">]</span> <span class="o">=</span> <span class="n">form_authenticity_token</span> <span class="k">if</span> <span class="n">protect_against_forgery?</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">protected</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">verified_request?</span>
+</span><span class='line'>    <span class="k">super</span> <span class="o">||</span> <span class="n">valid_authenticity_token?</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">[</span><span class="s1">&#39;X-XSRF-TOKEN&#39;</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If you are still using Rails 4.1, use the code below instead:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>application_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="ss">ActionController</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">protect_from_forgery</span> <span class="ss">with</span><span class="p">:</span> <span class="ss">:exception</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">after_action</span> <span class="ss">:set_csrf_cookie_for_ng</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">set_csrf_cookie_for_ng</span>
+</span><span class='line'>    <span class="n">cookies</span><span class="o">[</span><span class="s1">&#39;XSRF-TOKEN&#39;</span><span class="o">]</span> <span class="o">=</span> <span class="n">form_authenticity_token</span> <span class="k">if</span> <span class="n">protect_against_forgery?</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">protected</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">verified_request?</span>
+</span><span class='line'>    <span class="k">super</span> <span class="o">||</span> <span class="n">form_authenticity_token</span> <span class="o">==</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">[</span><span class="s1">&#39;X-XSRF-TOKEN&#39;</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The code listed above will create a cookie called <code>XSRF-TOKEN</code> that will contain our <code>form_authenticity_token</code>. Any time a request is made, AngularJS will present that token in the HTTP headers for the request.
+</p>
+
+
+
+
+<p>
+  Now let&#8217;s modify our <code>VisitorsController</code> to allow for access to the <code>Visitor</code> model. Open up your <code>VisitorsController</code> and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>visitors_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">VisitorsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="n">respond_to</span> <span class="ss">:json</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>    <span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+</span><span class='line'>      <span class="nb">format</span><span class="o">.</span><span class="n">json</span> <span class="p">{</span> <span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="no">Visitor</span><span class="o">.</span><span class="n">all</span> <span class="p">}</span>
+</span><span class='line'>      <span class="nb">format</span><span class="o">.</span><span class="n">html</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="n">respond_with</span> <span class="no">Visitor</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">visitor_params</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">destroy</span>
+</span><span class='line'>    <span class="n">respond_with</span> <span class="no">Visitor</span><span class="o">.</span><span class="n">destroy</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">visitor_params</span>
+</span><span class='line'>    <span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:visitor</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:first_name</span><span class="p">,</span> <span class="ss">:last_name</span><span class="p">,</span> <span class="ss">:reason</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The code above is typical Rails code, with the exception being that we return JSON as a result. Since our application will be communicating primarily via AJAX we have no need for HTML other than the index action, which will return either html or json depending on the request type.
+</p>
+
+
+
+
+<p>
+  Next we need to add support for both AngularJS and Bootstrap to our application.js file. Open up your application.js file and modify it so that it looks like the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>application.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">jquery</span>
+</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">jquery_ujs</span>
+</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">turbolinks</span>
+</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">angular</span>
+</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">angular</span><span class="o">-</span><span class="n">resource</span>
+</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">bootstrap</span><span class="o">-</span><span class="n">sprockets</span>
+</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="n">require_tree</span> <span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  In the code above we add support for AngularJS as well as Bootstrap. We also add support for a library called <code>angular-resource</code> which allows us to easily talk to our Rails application.
+</p>
+
+
+
+
+<p>
+  Now let&#8217;s add a bit of CSS for bootstrap. Create a new file called <code>bootstrap_config</code>.scss and add in the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>bootstrap_config.scss </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@import</span> <span class="s2">&quot;bootstrap-sprockets&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="vi">@import</span> <span class="s2">&quot;bootstrap&quot;</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The next thing we need to do is create our AngularJS application. AngularJS applications typically consists of JavaScript code that glues together various bits of HTML. To get started doing this, the first thing we must do is rename our <code>visitors.js.coffee</code> file to <code>visitors.js</code> and modify it so that it looks like the code listed below. You can also rewrite this in CoffeeScript, but I use JavaScript for those that haven&#8217;t yet learned CoffeeScript.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>visitors.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">var</span> <span class="n">visitorCenter</span> <span class="o">=</span> <span class="n">angular</span><span class="o">.</span><span class="n">module</span><span class="p">(</span><span class="s1">&#39;VisitorCenter&#39;</span><span class="p">,</span> <span class="o">[</span><span class="s1">&#39;ngResource&#39;</span><span class="o">]</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">visitorCenter</span><span class="o">.</span><span class="n">factory</span><span class="p">(</span><span class="s2">&quot;Visitor&quot;</span><span class="p">,</span> <span class="n">function</span><span class="p">(</span><span class="vg">$resource</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="vg">$resource</span><span class="p">(</span><span class="s2">&quot;visitors/:id&quot;</span><span class="p">,</span> <span class="p">{</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;@id&#39;</span> <span class="p">},</span> <span class="p">{</span>
+</span><span class='line'>    <span class="ss">index</span><span class="p">:</span>   <span class="p">{</span> <span class="nb">method</span><span class="p">:</span> <span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="ss">isArray</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">responseType</span><span class="p">:</span> <span class="s1">&#39;json&#39;</span> <span class="p">},</span>
+</span><span class='line'>    <span class="ss">update</span><span class="p">:</span>  <span class="p">{</span> <span class="nb">method</span><span class="p">:</span> <span class="s1">&#39;PUT&#39;</span><span class="p">,</span> <span class="ss">responseType</span><span class="p">:</span> <span class="s1">&#39;json&#39;</span> <span class="p">}</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">})</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">visitorCenter</span><span class="o">.</span><span class="n">controller</span><span class="p">(</span><span class="s2">&quot;visitorsController&quot;</span><span class="p">,</span> <span class="n">function</span><span class="p">(</span><span class="vg">$scope</span><span class="p">,</span> <span class="no">Visitor</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="vg">$scope</span><span class="o">.</span><span class="n">visitors</span> <span class="o">=</span> <span class="no">Visitor</span><span class="o">.</span><span class="n">index</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="vg">$scope</span><span class="o">.</span><span class="n">addVisitor</span> <span class="o">=</span> <span class="n">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">visitor</span> <span class="o">=</span> <span class="no">Visitor</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="vg">$scope</span><span class="o">.</span><span class="n">newVisitor</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="vg">$scope</span><span class="o">.</span><span class="n">visitors</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">visitor</span><span class="p">)</span>
+</span><span class='line'>    <span class="vg">$scope</span><span class="o">.</span><span class="n">newVisitor</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="vg">$scope</span><span class="o">.</span><span class="n">deleteVisitor</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">visitor</span> <span class="o">=</span> <span class="vg">$scope</span><span class="o">.</span><span class="n">visitors</span><span class="o">[</span><span class="n">index</span><span class="o">]</span>
+</span><span class='line'>    <span class="no">Visitor</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">visitor</span><span class="p">)</span>
+</span><span class='line'>    <span class="vg">$scope</span><span class="o">.</span><span class="n">visitors</span><span class="o">.</span><span class="n">splice</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">})</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  There is a lot going on here, so i&#8217;m going to break it down into pieces. The first line:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">var</span> <span class="n">visitorCenter</span> <span class="o">=</span> <span class="n">angular</span><span class="o">.</span><span class="n">module</span><span class="p">(</span><span class="s1">&#39;VisitorCenter&#39;</span><span class="p">,</span> <span class="o">[</span><span class="s1">&#39;ngResource&#39;</span><span class="o">]</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  defines an AngularJS module. AngularJS modules can be thought of as individual components in your application. You&#8217;ll notice we include <code>ngResource</code> as an argument. <code>ngResource</code> provides easy access to RESTful resources such as our Rails application.
+</p>
+
+
+
+
+<p>
+  The next set of lines:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">visitorCenter</span><span class="o">.</span><span class="n">factory</span><span class="p">(</span><span class="s2">&quot;Visitor&quot;</span><span class="p">,</span> <span class="n">function</span><span class="p">(</span><span class="vg">$resource</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="vg">$resource</span><span class="p">(</span><span class="s2">&quot;visitors/:id&quot;</span><span class="p">,</span> <span class="p">{</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;@id&#39;</span> <span class="p">},</span> <span class="p">{</span>
+</span><span class='line'>    <span class="ss">index</span><span class="p">:</span>   <span class="p">{</span> <span class="nb">method</span><span class="p">:</span> <span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="ss">isArray</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">responseType</span><span class="p">:</span> <span class="s1">&#39;json&#39;</span> <span class="p">},</span>
+</span><span class='line'>    <span class="ss">update</span><span class="p">:</span>  <span class="p">{</span> <span class="nb">method</span><span class="p">:</span> <span class="s1">&#39;PUT&#39;</span><span class="p">,</span> <span class="ss">responseType</span><span class="p">:</span> <span class="s1">&#39;json&#39;</span> <span class="p">}</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">})</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  defines a service, in this case, it ties in the <code>ngResource</code> service mentioned earlier and tells AngularJS how to talk to our application.
+</p>
+
+
+
+
+<p>
+  The next set of lines:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">visitorCenter</span><span class="o">.</span><span class="n">controller</span><span class="p">(</span><span class="s2">&quot;visitorsController&quot;</span><span class="p">,</span> <span class="n">function</span><span class="p">(</span><span class="vg">$scope</span><span class="p">,</span> <span class="no">Visitor</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="vg">$scope</span><span class="o">.</span><span class="n">visitors</span> <span class="o">=</span> <span class="no">Visitor</span><span class="o">.</span><span class="n">index</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="vg">$scope</span><span class="o">.</span><span class="n">addVisitor</span> <span class="o">=</span> <span class="n">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">visitor</span> <span class="o">=</span> <span class="no">Visitor</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="vg">$scope</span><span class="o">.</span><span class="n">newVisitor</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="vg">$scope</span><span class="o">.</span><span class="n">visitors</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">visitor</span><span class="p">)</span>
+</span><span class='line'>    <span class="vg">$scope</span><span class="o">.</span><span class="n">newVisitor</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="vg">$scope</span><span class="o">.</span><span class="n">deleteVisitor</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">visitor</span> <span class="o">=</span> <span class="vg">$scope</span><span class="o">.</span><span class="n">visitors</span><span class="o">[</span><span class="n">index</span><span class="o">]</span>
+</span><span class='line'>    <span class="no">Visitor</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">visitor</span><span class="p">)</span>
+</span><span class='line'>    <span class="vg">$scope</span><span class="o">.</span><span class="n">visitors</span><span class="o">.</span><span class="n">splice</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">})</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  define a controller. Controllers tell AngularJS how to interact with our application similar to how Rails controllers are used to tell Rails how our views interact with our models.
+</p>
+
+
+
+
+<p>
+  ow that we&#8217;ve written the JavaScript application, we need to create our view to tie everything together. Open up the index view for your <code>Visitors</code> controller and modify it so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;div class="container" ng-app="VisitorCenter"&gt;
+</span><span class='line'>  &lt;h1&gt;Visitors&lt;/h1&gt;
+</span><span class='line'>
+</span><span class='line'>  &lt;div ng-controller="visitorsController"&gt;
+</span><span class='line'>    &lt;div class="well"&gt;
+</span><span class='line'>      &lt;h3&gt;Add a new Visitor&lt;/h3&gt;
+</span><span class='line'>      &lt;form ng-submit="addVisitor()"&gt;
+</span><span class='line'>        &lt;div class="row"&gt;
+</span><span class='line'>          &lt;div class="col-xs-6"&gt;
+</span><span class='line'>            &lt;input type="text" ng-model="newVisitor.first_name" class="form-control" placeholder="First Name" /&gt;
+</span><span class='line'>          &lt;/div&gt;
+</span><span class='line'>          &lt;div class="col-xs-6"&gt;
+</span><span class='line'>            &lt;input type="text" ng-model="newVisitor.last_name" class="form-control" placeholder="Last Name" /&gt;
+</span><span class='line'>          &lt;/div&gt;
+</span><span class='line'>        &lt;/div&gt;
+</span><span class='line'>        &lt;div class="row"&gt;
+</span><span class='line'>          &lt;div class="col-xs-12"&gt;
+</span><span class='line'>            &lt;br /&gt;
+</span><span class='line'>            &lt;input type="text" ng-model="newVisitor.reason" class="form-control" placeholder="Reason for Visit" /&gt;
+</span><span class='line'>          &lt;/div&gt;
+</span><span class='line'>        &lt;/div&gt;
+</span><span class='line'>        &lt;div class="row"&gt;
+</span><span class='line'>          &lt;div class="col-xs-12 text-center"&gt;
+</span><span class='line'>            &lt;br /&gt;
+</span><span class='line'>            &lt;input type="Submit" value="Add Visitor" class="btn btn-primary" /&gt;
+</span><span class='line'>          &lt;/div&gt;
+</span><span class='line'>        &lt;/div&gt;
+</span><span class='line'>      &lt;/form&gt;
+</span><span class='line'>    &lt;/div&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;h3&gt;Currently Visiting&lt;/h3&gt;
+</span><span class='line'>    &lt;hr /&gt;
+</span><span class='line'>    &lt;table class="table table-bordered table-striped"&gt;
+</span><span class='line'>      &lt;thead&gt;
+</span><span class='line'>        &lt;tr&gt;
+</span><span class='line'>          &lt;th&gt;First Name&lt;/th&gt;
+</span><span class='line'>          &lt;th&gt;Last Name&lt;/th&gt;
+</span><span class='line'>          &lt;th&gt;Reason for Visit&lt;/th&gt;
+</span><span class='line'>          &lt;th&gt;&nbsp;&lt;/th&gt;
+</span><span class='line'>        &lt;/tr&gt;
+</span><span class='line'>      &lt;/thead&gt;
+</span><span class='line'>      &lt;tbody&gt;
+</span><span class='line'>        &lt;tr ng-show="!visitors.length"&gt;
+</span><span class='line'>          &lt;td colspan="4"&gt;No visitors in the building.&lt;/td&gt;
+</span><span class='line'>        &lt;/tr&gt;
+</span><span class='line'>        &lt;tr ng-repeat="visitor in visitors"&gt;
+</span><span class='line'>          &lt;td&gt;{{ visitor.first_name }}&lt;/td&gt;
+</span><span class='line'>          &lt;td&gt;{{ visitor.last_name }}&lt;/td&gt;
+</span><span class='line'>          &lt;td&gt;{{ visitor.reason }}&lt;/td&gt;
+</span><span class='line'>          &lt;td&gt;&lt;a class="btn btn-danger" ng-click="deleteVisitor($index)"&gt;Remove&lt;/a&gt;&lt;/td&gt;
+</span><span class='line'>        &lt;/tr&gt;
+</span><span class='line'>      &lt;/tbody&gt;
+</span><span class='line'>    &lt;/table&gt;
+</span><span class='line'>  &lt;/div&gt;
+</span><span class='line'>&lt;/div&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Let&#8217;s break this down a bit:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;container&quot;</span> <span class="n">ng</span><span class="o">-</span><span class="n">app</span><span class="o">=</span><span class="s2">&quot;VisitorCenter&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The outer div on the first line has an attribute called <code>ng-app</code>. The <code>ng-app</code> attribute tells AngularJS that this is part of our AngularJS application. In this case we specify the name of our AngularJS module, <code>VisitorCenter</code>.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">ng</span><span class="o">-</span><span class="n">controller</span><span class="o">=</span><span class="s2">&quot;visitorsController&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The next inner div contains an attribute called <code>ng-controller</code>. This attribute tells AngularJS that we wish to use our visitorsController as the controller for this portion of the application.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">form</span> <span class="n">ng</span><span class="o">-</span><span class="n">submit</span><span class="o">=</span><span class="s2">&quot;addVisitor()&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;row&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>      <span class="o">&lt;</span><span class="n">input</span> <span class="n">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span> <span class="n">ng</span><span class="o">-</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;newVisitor.first_name&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;form-control&quot;</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">&quot;First Name&quot;</span> <span class="sr">/&gt;</span>
+</span><span class='line'><span class="sr">    &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>      <span class="o">&lt;</span><span class="n">input</span> <span class="n">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span> <span class="n">ng</span><span class="o">-</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;newVisitor.last_name&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;form-control&quot;</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">&quot;Last Name&quot;</span> <span class="sr">/&gt;</span>
+</span><span class='line'><span class="sr">    &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span><span class='line'><span class="sr">  &lt;div class=&quot;row&quot;&gt;</span>
+</span><span class='line'><span class="sr">    &lt;div class=&quot;col-xs-12&quot;&gt;</span>
+</span><span class='line'><span class="sr">      &lt;br /</span><span class="o">&gt;</span>
+</span><span class='line'>      <span class="o">&lt;</span><span class="n">input</span> <span class="n">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span> <span class="n">ng</span><span class="o">-</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;newVisitor.reason&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;form-control&quot;</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">&quot;Reason for Visit&quot;</span> <span class="sr">/&gt;</span>
+</span><span class='line'><span class="sr">    &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span><span class='line'><span class="sr">  &lt;div class=&quot;row&quot;&gt;</span>
+</span><span class='line'><span class="sr">    &lt;div class=&quot;col-xs-12 text-center&quot;&gt;</span>
+</span><span class='line'><span class="sr">      &lt;br /</span><span class="o">&gt;</span>
+</span><span class='line'>      <span class="o">&lt;</span><span class="n">input</span> <span class="n">type</span><span class="o">=</span><span class="s2">&quot;Submit&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;Add Visitor&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;btn btn-primary&quot;</span> <span class="sr">/&gt;</span>
+</span><span class='line'><span class="sr">    &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">form</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The <code>ng-submit</code> attribute on our form tells AngularJS that we wish to use the addVisitor() method on our controller to process the form request. Each of the input elements contain an <code>ng-model</code> attribute. This attribute maps the input elements to our model.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">tr</span> <span class="n">ng</span><span class="o">-</span><span class="n">show</span><span class="o">=</span><span class="s2">&quot;!visitors.length&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">td</span> <span class="n">colspan</span><span class="o">=</span><span class="s2">&quot;4&quot;</span><span class="o">&gt;</span><span class="no">No</span> <span class="n">visitors</span> <span class="k">in</span> <span class="n">the</span> <span class="n">building</span><span class="o">.</span><span class="n">&lt;</span><span class="sr">/td&gt;</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">tr</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The <code>ng-show</code> attribute on the first row tells AngularJS that we only want to show the row if the condition mentioned is matched. In this case we only want to show the first row if there are no visitors.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">tr</span> <span class="n">ng</span><span class="o">-</span><span class="n">repeat</span><span class="o">=</span><span class="s2">&quot;visitor in visitors&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/tr&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The <code>ng-repeat</code> attribute is a loop. This particular loop tells AngularJS that we want to loop through each visitor.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">td</span><span class="o">&gt;</span><span class="p">{{</span> <span class="n">visitor</span><span class="o">.</span><span class="n">first_name</span> <span class="p">}}</span><span class="o">&lt;</span><span class="sr">/td&gt;</span>
+</span><span class='line'><span class="sr">&lt;td&gt;{{ visitor.last_name }}&lt;/</span><span class="n">td</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">td</span><span class="o">&gt;</span><span class="p">{{</span> <span class="n">visitor</span><span class="o">.</span><span class="n">reason</span> <span class="p">}}</span><span class="o">&lt;</span><span class="sr">/td&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Text contained within <code>{{ .... }}</code> are AngularJS expressions. In this case we are telling AngularJS to render the fields mentioned in each expression.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">td</span><span class="o">&gt;&lt;</span><span class="n">a</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;btn btn-danger&quot;</span> <span class="n">ng</span><span class="o">-</span><span class="n">click</span><span class="o">=</span><span class="s2">&quot;deleteVisitor($index)&quot;</span><span class="o">&gt;</span><span class="no">Remove</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="n">td</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The <code>ng-click</code> button tells AngularJS to run the specified controller function when the html tag in question is clicked. In this case we run the code to delete the specified user.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! for this introduction to AngularJS and Rails. See ya!!! :)
+</p>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Bunlong Van</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-06-30T23:43:00+07:00" pubdate data-updated="true">Jun 30<span>th</span>, 2015</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/javascript/'>Javascript</a>, <a class='category' href='/blog/categories/ruby-on-rails/'>Ruby on Rails</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2015/06/30/angularjs-on-rails/" data-via="" data-counturl="http://geekhmer.github.io/blog/2015/06/30/angularjs-on-rails/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/06/25/mark-methods-private-when-you-dont-test-them/" title="Previous Post: Mark Methods Private When You Don’t Test Them">&laquo; Mark Methods Private When You Don’t Test Them</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2015/07/04/10-reasons-you-should-design-and-code/" title="Next Post: 10 Reasons You Should Design and Code">10 Reasons You Should Design and Code &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Like To News Article</h1>
+  <ul>
+    <li>
+      <div class="fb-page" data-href="https://www.facebook.com/geekhmer" data-small-header="false" data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true" data-show-posts="false"><div class="fb-xfbml-parse-ignore"><blockquote cite="https://www.facebook.com/geekhmer"><a href="https://www.facebook.com/geekhmer">GeeKhmer</a></blockquote></div></div>
+    </li>
+  </ul>
+</section><section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/08/28/gulp-moving-files/">Gulp – Moving Files</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/28/gulp-hello-world/">Gulp – Hello World</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/28/gulp-installation/">Gulp – Installation</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/09/what-is-gulp/">What Is Gulp?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/07/25/facebook-fan-page-auto-like-revised/">Facebook Fan Page Auto Like - Revised</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/07/22/application-steps-for-applying-to-study-masters-in-computer-science-at-maharishi-university-of-management-usa/">Application Steps for Applying to Study Masters in Computer Science at MAHARISHI UNIVERSITY of MANAGEMENT USA</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/07/22/the-requirements-to-applying-to-study-masters-in-computer-science-at-maharishi-university-of-management-usa/">The Requirements to Applying to Study Masters in Computer Science at MAHARISHI UNIVERSITY of MANAGEMENT USA</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Category</h1>
+  <ul id="recent_posts">
+    
+      <li>
+        <a href="/blog/categories/facebook/">Facebook [ 5 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby/">Ruby [ 108 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/heroku/">Heroku [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 104 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/testing/">Testing [ 5 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/layout/">Layout [ 3 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby-metaprogramming/">Ruby metaprogramming [ 4 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/websocket/">Websocket [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/front-end-mvc-framework/">Front-end mvc framework [ 1 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/javascript/">Javascript [ 25 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/erlang/">Erlang [ 20 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/design-pattern/">Design pattern [ 1 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/other/">Other [ 40 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/reactjs/">Reactjs [ 18 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/startup/">Startup [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/cambodia-hacker-place/">Cambodia hacker place [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/gulp/">Gulp [ 4 ]</a>
+      </li>
+    
+  </ul>
+</section><section>
+  <h1>Notes</h1>
+  <ul id="recent_posts">
+    <li>
+      <a href="http://vimcommands.github.io/" target="_blank">Vim Commands</a>
+    </li>
+    <li>
+      <a href="http://ruby-hacking-style-guide.github.io/" target="_blank">Ruby Hacking Style Guide</a>
+    </li>
+  </ul>
+</section><section>
+  <h1>References</h1>
+  <ul id="recent_posts">
+    <li>
+      <a href="http://www.erlang.org/" target="_blank">
+        <img src="/images/logo_erlang.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://www.chicagoboss.org/" target="_blank">
+        <img src="/images/logo_chicagoboss.svg" />
+      </a>
+    </li>
+    <li>
+      <a href="https://www.ruby-lang.org/en/" target="_blank">
+        <img src="/images/logo_ruby.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://guides.rubyonrails.org" target="_blank">
+        <img src="/images/logo_rails_guides.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://railscasts.com" target="_blank">
+        <img src="/images/logo_rails_casts.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://github.com" target="_blank">
+        <img src="/images/logo_github.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://www.linode.com" target="_blank">
+        <img src="/images/logo_linode.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://newrelic.com" target="_blank">
+        <img src="/images/logo_newrelic.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://developers.facebook.com/" target="_blank">
+        <img src="/images/logo_facebook.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://facebook.github.io/react/" target="_blank">
+        <img src="/images/logo_react.png" />
+      </a>
+    </li>
+  </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 GeeKhmer in Phnom Penh, Cambodia.
+</p>
+
+</footer>
+  
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=1451301955117043&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

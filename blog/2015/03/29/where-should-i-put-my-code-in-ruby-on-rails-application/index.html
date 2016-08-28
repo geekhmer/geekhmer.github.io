@@ -1,0 +1,562 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Where Should I Put My Code in Ruby on Rails Application? - GeeKhmer</title>
+  <meta name="author" content="Bunlong Van">
+  
+  
+  <meta name="description" content="The biggest website of computer programming, Ruby, Ruby on Rails, Erlang, Chicagoboss and Javascript in Southeast Asia.">
+
+  <meta name="keywords" content="Where Should I Put My Code in Ruby on Rails Application?">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://geekhmer.github.io/blog/2015/03/29/where-should-i-put-my-code-in-ruby-on-rails-application">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="" rel="alternate" title="GeeKhmer" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+<link href="/stylesheets/jquery.fancybox.css" media="screen, projection" rel="stylesheet" type="text/css">
+<script src="/javascripts/libs/jquery.fancybox.pack.js"></script>
+<script src="/javascripts/init_fancybox.js"></script>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1>
+    <!-- <a href="/">GeeKhmer</a> -->
+    <div class="logo" />
+  </h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation">
+  <form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:geekhmer.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+  </form>
+
+<ul class="subscription" data-subscription="rss">
+  
+  
+</ul>
+<ul class="main-navigation">
+  <li><a href="/">Home</a></li>
+  <li><a href="/blog/archives">Articles</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/team">Team</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Where Should I Put My Code in Ruby on Rails Application?</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-03-29T09:44:00+07:00" pubdate data-updated="true">Mar 29<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>
+  <img src="/images/ruby_on_rails.png" width="400" alt="Ruby on Rails Nested Form Fields" />
+</p>
+
+
+
+
+<p>
+  Sometimes you’re sure that’s not the right place for that piece of code, but where does it go? &#8220;Refactor&#8221; is only a good answer if you know how to fix it.
+</p>
+
+
+
+
+<p>
+  In a Rails application, and what kind of code goes where?
+</p>
+
+
+
+
+<p>
+  <strong>Models</strong><br/>
+  For code about your database or domain objects, the model is your first step in Rails. Models are powerful, easy to test, reusable across applications and more like non-Rails code than most of Rails — familiar, even if you don’t know Rails yet.<br/>
+</p>
+
+
+
+
+<p>
+  If there’s a good way to put the code in your model, that’s usually a safe bet and a good idea.
+</p>
+
+
+
+
+<p>
+  Write tests too, of course!
+</p>
+
+
+
+
+<p>
+  <strong>Controllers</strong><br/>
+  It’s easy to put lots of code in your controllers, but it’s almost always a mistake. Business logic for your app should get out of the controller and into the model as quickly as possible. Logic about how things are shown to the user should go into the view. In general, the controller should be a tiny, thin glue layer putting together your other components.
+</p>
+
+
+
+
+<p>
+  <strong>Views</strong><br/>
+  Having lots of logic in your views is a huge anti-pattern. Don’t do it. It’s hard to test, it’s hard to find, it’s hard to write sandwiched in between the HTML… Just don’t.
+</p>
+
+
+
+
+<p>
+  Instead, your views should contain HTML, variables that turn into HTML, and calls to helper methods that generate HTML — or whatever your final output format is. There should be no logic in there to test. No conditionals, no loops, no non-display methods. If you add an output format, there should be no code to repeat because all the interesting data transforms already happened, and no other output format cares about your HTML-only helpers. Right?
+</p>
+
+
+
+
+<p>
+  <strong>Helpers</strong><br/>
+  Rails &#8220;helpers&#8221; are very specifically view helpers. They’re automatically included in views, but not in controllers or models. That’s on purpose.
+</p>
+
+
+
+
+<p>
+  Code in the application helper is included in all the views in your application. Code in other helpers is included in the corresponding view. If you find yourself writing big loops, method calls or other logic in the view but it’s clearly display logic, move it into a method in the helper.
+</p>
+
+
+
+
+<p>
+  <strong>Lib Directory</strong><br/>
+  Every Rails app starts with a /lib directory, but not much explanation of it.
+</p>
+
+
+
+
+<p>
+  Remember that helpers are specifically view helpers? What if you wanted a controller helper? Or a model helper? Sometimes you can use a parent controller or parent model, but that’s not always the best choice.
+</p>
+
+
+
+
+<p>
+  If you want to write a helper module for non-view logic, the /lib directory is usually the best place to put it. For example, logging code or some kinds of error handling may be a cross-cutting concern like that.
+</p>
+
+
+
+
+<p>
+  Also, if you’re putting everything in the ApplicationController or ApplicationHelper, those can get big. Consider factoring some of that code out into helpers, or into /lib.
+</p>
+
+
+
+
+<p>
+  Stuff in /lib isn’t always automagically included for you like controllers and models. So you may need to explicitly require the file, not just use the name of the class. (<a href="http://geekhmer.github.io/blog/2014/04/24/autoload-all-files-in-lib-directory-ruby-on-rails/">Autoload All Files in Lib Directory Ruby on Rails</a>)
+</p>
+
+
+
+
+<p>
+  <strong>Gems</strong><br/>
+  Sometimes you have reusable pieces in your application. A controller or model might be needed by multiple different Rails apps. A particular piece of logic for logging or display might be useful to a lot of different folks. You might even find a different way of doing things that most Rails apps would benefit from.
+</p>
+
+
+
+
+<p>
+  These are all cases where you want to create a new gem and have your applications use it instead of sharing a directory of code.
+</p>
+
+
+
+
+<p>
+  These days it’s really easy to create a new gem, so don’t be intimidated. If you haven’t worked through the first free chapter of Rebuilding Rails, this may be a good time to do it — it’ll show you how to quickly, easily create and use a new gem.
+</p>
+
+
+
+
+<p>
+  <strong>Assets</strong><br/>
+  In a few cases, you’re not even writing Ruby code. Instead, it may be Sass, Scss, JavaScript or CoffeeScript. In this case, it generally belongs under app/assets.
+</p>
+
+
+
+
+<p>
+  <strong>Concerns and Exceptions</strong><br/>
+  Rails has a very specific, very unusual setup. I think it’s a good idea for small apps, but only use Rails until it hurts. If your application gets too big or complicated, the Rails code organization may hurt more than it helps you.
+</p>
+
+
+
+
+<p>
+  There are several &#8220;grow out of Rails&#8221; approaches to apply alternate architectures to the framework. From Hexagonal Rails to Objects on Rails to the more general Clean Ruby DCI approach. I won’t tell you which to use, but I’ll tell you that you’re better off starting with plain, simple Rails and growing out of it.
+</p>
+
+
+
+
+<p>
+  Most Rails apps, and even more Rails controllers, don’t need to get all that big. They often don’t need to change much. Why go complicated when simple is working great?
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Bunlong Van</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-03-29T09:44:00+07:00" pubdate data-updated="true">Mar 29<span>th</span>, 2015</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ruby-on-rails/'>Ruby on Rails</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2015/03/29/where-should-i-put-my-code-in-ruby-on-rails-application/" data-via="" data-counturl="http://geekhmer.github.io/blog/2015/03/29/where-should-i-put-my-code-in-ruby-on-rails-application/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/03/23/ruby-on-rails-nested-form-fields/" title="Previous Post: Ruby on Rails Nested Form Fields">&laquo; Ruby on Rails Nested Form Fields</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2015/03/31/rails-5-timestamps-will-be-changed/" title="Next Post: Rails 5 timestamps will be changed">Rails 5 timestamps will be changed &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Like To News Article</h1>
+  <ul>
+    <li>
+      <div class="fb-page" data-href="https://www.facebook.com/geekhmer" data-small-header="false" data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true" data-show-posts="false"><div class="fb-xfbml-parse-ignore"><blockquote cite="https://www.facebook.com/geekhmer"><a href="https://www.facebook.com/geekhmer">GeeKhmer</a></blockquote></div></div>
+    </li>
+  </ul>
+</section><section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/08/28/gulp-moving-files/">Gulp – Moving Files</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/28/gulp-hello-world/">Gulp – Hello World</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/28/gulp-installation/">Gulp – Installation</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/09/what-is-gulp/">What Is Gulp?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/07/25/facebook-fan-page-auto-like-revised/">Facebook Fan Page Auto Like - Revised</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/07/22/application-steps-for-applying-to-study-masters-in-computer-science-at-maharishi-university-of-management-usa/">Application Steps for Applying to Study Masters in Computer Science at MAHARISHI UNIVERSITY of MANAGEMENT USA</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/07/22/the-requirements-to-applying-to-study-masters-in-computer-science-at-maharishi-university-of-management-usa/">The Requirements to Applying to Study Masters in Computer Science at MAHARISHI UNIVERSITY of MANAGEMENT USA</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Category</h1>
+  <ul id="recent_posts">
+    
+      <li>
+        <a href="/blog/categories/facebook/">Facebook [ 5 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby/">Ruby [ 108 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/heroku/">Heroku [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 104 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/testing/">Testing [ 5 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/layout/">Layout [ 3 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby-metaprogramming/">Ruby metaprogramming [ 4 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/websocket/">Websocket [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/front-end-mvc-framework/">Front-end mvc framework [ 1 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/javascript/">Javascript [ 25 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/erlang/">Erlang [ 20 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/design-pattern/">Design pattern [ 1 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/other/">Other [ 40 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/reactjs/">Reactjs [ 18 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/startup/">Startup [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/cambodia-hacker-place/">Cambodia hacker place [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/gulp/">Gulp [ 4 ]</a>
+      </li>
+    
+  </ul>
+</section><section>
+  <h1>Notes</h1>
+  <ul id="recent_posts">
+    <li>
+      <a href="http://vimcommands.github.io/" target="_blank">Vim Commands</a>
+    </li>
+    <li>
+      <a href="http://ruby-hacking-style-guide.github.io/" target="_blank">Ruby Hacking Style Guide</a>
+    </li>
+  </ul>
+</section><section>
+  <h1>References</h1>
+  <ul id="recent_posts">
+    <li>
+      <a href="http://www.erlang.org/" target="_blank">
+        <img src="/images/logo_erlang.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://www.chicagoboss.org/" target="_blank">
+        <img src="/images/logo_chicagoboss.svg" />
+      </a>
+    </li>
+    <li>
+      <a href="https://www.ruby-lang.org/en/" target="_blank">
+        <img src="/images/logo_ruby.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://guides.rubyonrails.org" target="_blank">
+        <img src="/images/logo_rails_guides.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://railscasts.com" target="_blank">
+        <img src="/images/logo_rails_casts.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://github.com" target="_blank">
+        <img src="/images/logo_github.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://www.linode.com" target="_blank">
+        <img src="/images/logo_linode.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://newrelic.com" target="_blank">
+        <img src="/images/logo_newrelic.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://developers.facebook.com/" target="_blank">
+        <img src="/images/logo_facebook.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://facebook.github.io/react/" target="_blank">
+        <img src="/images/logo_react.png" />
+      </a>
+    </li>
+  </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 GeeKhmer in Phnom Penh, Cambodia.
+</p>
+
+</footer>
+  
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=1451301955117043&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

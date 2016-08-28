@@ -1,0 +1,851 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Liquid on Rails - GeeKhmer</title>
+  <meta name="author" content="Bunlong Van">
+  
+  
+  <meta name="description" content="The biggest website of computer programming, Ruby, Ruby on Rails, Erlang, Chicagoboss and Javascript in Southeast Asia.">
+
+  <meta name="keywords" content="Liquid on Rails, Liquid Templating Engine on Rails, Ruby on Rails Liquid Templating Engine, Rails Liquid Templating Engine">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://geekhmer.github.io/blog/2015/02/21/liquid-on-rails">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="" rel="alternate" title="GeeKhmer" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+<link href="/stylesheets/jquery.fancybox.css" media="screen, projection" rel="stylesheet" type="text/css">
+<script src="/javascripts/libs/jquery.fancybox.pack.js"></script>
+<script src="/javascripts/init_fancybox.js"></script>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1>
+    <!-- <a href="/">GeeKhmer</a> -->
+    <div class="logo" />
+  </h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation">
+  <form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:geekhmer.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+  </form>
+
+<ul class="subscription" data-subscription="rss">
+  
+  
+</ul>
+<ul class="main-navigation">
+  <li><a href="/">Home</a></li>
+  <li><a href="/blog/archives">Articles</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/team">Team</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Liquid on Rails</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-21T22:59:00+07:00" pubdate data-updated="true">Feb 21<span>st</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>
+  <img src="/images/move_to_rails.png" alt="Liquid on Rails" />
+</p>
+
+
+
+
+<p>
+  Now you have a basic grasp on the Liquid template engine itself, let&#8217;s learn how to utilize it in our Ruby on Rails application. First you need to add the gem to the Gemfile. Add the following line to the Gemfile:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;liquid&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 2.6.1&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then run <code>bundle install</code> to install the Liquid gem:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then create a model called Page. The Page model will be used to represent a page owned by a specific user. Run the commands below to create this model:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Page</span> <span class="ss">user</span><span class="p">:</span><span class="n">string</span> <span class="ss">template</span><span class="p">:</span><span class="n">text</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then open up your seeds (<code>db/seeds.rb</code>) file and modify it so that it looks somethings like below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>seeds </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Page</span><span class="o">.</span><span class="n">delete_all</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Page</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;JingLong&quot;</span><span class="p">,</span> <span class="ss">template</span><span class="p">:</span> <span class="sx">%{</span>
+</span><span class='line'><span class="sx">  Hello {{ user }}, here is your shopping list.</span>
+</span><span class='line'><span class="sx">  &lt;ul&gt;</span>
+</span><span class='line'><span class="sx">    {% for item in list %}</span>
+</span><span class='line'><span class="sx">      &lt;li&gt;{{ item.name }}&lt;/li&gt;</span>
+</span><span class='line'><span class="sx">    {% endfor %}</span>
+</span><span class='line'><span class="sx">  &lt;/ul&gt;</span>
+</span><span class='line'><span class="sx">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Page</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Bunlong&quot;</span><span class="p">,</span> <span class="ss">template</span><span class="p">:</span> <span class="sx">%{</span>
+</span><span class='line'><span class="sx">  What is up my man? Here is your shopping list.</span>
+</span><span class='line'><span class="sx">  &lt;ul&gt;</span>
+</span><span class='line'><span class="sx">    {% for item in list %}</span>
+</span><span class='line'><span class="sx">      &lt;li&gt;{{ item.name }}&lt;/li&gt;</span>
+</span><span class='line'><span class="sx">    {% endfor %}</span>
+</span><span class='line'><span class="sx">  &lt;/ul&gt;</span>
+</span><span class='line'><span class="sx">}</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Page</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="s2">&quot;Rubyist&quot;</span><span class="p">,</span> <span class="ss">template</span><span class="p">:</span> <span class="sx">%{</span>
+</span><span class='line'><span class="sx">  HTTP 200:  Shopping List Found</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">  Items in your list:</span>
+</span><span class='line'><span class="sx">  &lt;ul&gt;</span>
+</span><span class='line'><span class="sx">    {% for item in list %}</span>
+</span><span class='line'><span class="sx">      &lt;li&gt;{{ item.name }}&lt;/li&gt;</span>
+</span><span class='line'><span class="sx">    {% endfor %}</span>
+</span><span class='line'><span class="sx">  &lt;/ul&gt;</span>
+</span><span class='line'><span class="sx">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then run <code>rake db:seed</code> command to seed the database with your sample data:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">seed</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then create a homes controller that will allow you to play with liquid. Run the command below to create the homes controller:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="no">Homes</span> <span class="n">show</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then create a pages controller. This controller will be used to display a user&#8217;s page. Run the commands below to create the pages controller:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="no">Pages</span> <span class="n">show</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then modify your routes (<code>config/routes.rb</code>) file so that it looks somethings like below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;homes#show&quot;</span>
+</span><span class='line'><span class="n">resource</span> <span class="ss">:home</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:show</span><span class="o">]</span>
+</span><span class='line'><span class="n">resources</span> <span class="ss">:pages</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:show</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then modify your homes controller (<code>app/controllers/homes_controller.rb</code>) to pull down a list of all the user&#8217;s pages. Open up your homes controller and modify it so that it looks somethings like below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>homes_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">HomesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>    <span class="vi">@pages</span> <span class="o">=</span> <span class="no">Page</span><span class="o">.</span><span class="n">all</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then modify your pages controller (<code>app/controllers/pages_controller.rb</code>) to pull down the correct page for the specified user. Open up your pages controller and modify it so that it looks somethings like below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>pages_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PagesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>    <span class="vi">@page</span> <span class="o">=</span> <span class="no">Page</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then create a few helper (<code>app/helpers/pages_helper.rb</code>) methods for use with this example. Open up your pages helper and modify it so that it looks somethings like below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>pages_helper.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">PagesHelper</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">shopping_list</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span><span class="s2">&quot;user&quot;</span> <span class="o">=&gt;</span> <span class="n">user</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span> <span class="o">=&gt;</span> <span class="n">shopping_list_items</span><span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">shopping_list_items</span>
+</span><span class='line'>    <span class="o">[</span>
+</span><span class='line'>      <span class="p">{</span> <span class="s2">&quot;name&quot;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Apple&#39;</span><span class="p">,</span> <span class="s2">&quot;quantity_needed&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;2&quot;</span><span class="p">},</span>
+</span><span class='line'>      <span class="p">{</span> <span class="s2">&quot;name&quot;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Stoberry&#39;</span><span class="p">,</span> <span class="s2">&quot;quantity_needed&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;1&quot;</span><span class="p">},</span>
+</span><span class='line'>      <span class="p">{</span> <span class="s2">&quot;name&quot;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Cherry&#39;</span><span class="p">,</span> <span class="s2">&quot;quantity_needed&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;3&quot;</span><span class="p">},</span>
+</span><span class='line'>    <span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The codes above gives you some sample data to play around with.
+</p>
+
+
+
+
+<p>
+  Then modify your pages show view (<code>pp/views/pages/show.html.erb</code>) to look somethings like below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>show.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;&lt;</span><span class="sx">%= @page.user %&gt;&#39;s Personal Page&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">&lt;% template =</span> <span class="ss">Liquid</span><span class="p">:</span><span class="ss">:Template</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="vi">@page</span><span class="o">.</span><span class="n">template</span><span class="p">)</span> <span class="sx">%&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">&lt;%= template.render(shopping_list(@page.user)).html_safe %&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The codes above tells Rails to render your template using the Liquid Template Engine. 
+</p>
+
+
+
+
+<p>
+  Finally, open up the show view for your home controller (<code>app/views/homes/show.html.erb</code>) and add in the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>show.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">User</span> <span class="no">Pages</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'><span class="sr">&lt;ul&gt;</span>
+</span><span class='line'><span class="sr">  &lt;% @pages.each do |page| %&gt;</span>
+</span><span class='line'><span class="sr">    &lt;li&gt;&lt;%= link_to &quot;</span><span class="si">#{</span><span class="n">page</span><span class="o">.</span><span class="n">user</span><span class="si">}</span><span class="sr">&#39;s page&quot;, page_path(page) %&gt;&lt;/</span><span class="n">li</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="sx">% end %&gt;</span>
+</span><span class='line'><span class="sx">&lt;/ul&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If you fire up a rails server and visit your development site, you&#8217;ll notice that you can browse each user&#8217;s pages and get a customized version of each one. 
+</p>
+
+
+
+
+<p>
+  However, what if you want to use the Liquid templating engine as a replacement for erb itself? take it easy, first, create a new file in the lib folder called liquid_view.rb (<code>lib/liquid_view.rb</code>) and add in the codes listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>liquid_view.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">LiquidView</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">call</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+</span><span class='line'>    <span class="s2">&quot;LiquidView.new(self).render(</span><span class="si">#{</span><span class="n">template</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">inspect</span><span class="si">}</span><span class="s2">, local_assigns)&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">view</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@view</span> <span class="o">=</span> <span class="n">view</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">local_assigns</span> <span class="o">=</span> <span class="p">{})</span>
+</span><span class='line'>    <span class="vi">@view</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">headers</span><span class="o">[</span><span class="s2">&quot;Content-Type&quot;</span><span class="o">]</span> <span class="o">||=</span> <span class="s1">&#39;text/html; charset=utf-8&#39;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">assigns</span> <span class="o">=</span> <span class="vi">@view</span><span class="o">.</span><span class="n">assigns</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="vi">@view</span><span class="o">.</span><span class="n">content_for?</span><span class="p">(</span><span class="ss">:layout</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">assigns</span><span class="o">[</span><span class="s2">&quot;content_for_layout&quot;</span><span class="o">]</span> <span class="o">=</span> <span class="vi">@view</span><span class="o">.</span><span class="n">content_for</span><span class="p">(</span><span class="ss">:layout</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>    <span class="n">assigns</span><span class="o">.</span><span class="n">merge!</span><span class="p">(</span><span class="n">local_assigns</span><span class="o">.</span><span class="n">stringify_keys</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">controller</span> <span class="o">=</span> <span class="vi">@view</span><span class="o">.</span><span class="n">controller</span>
+</span><span class='line'>    <span class="n">filters</span> <span class="o">=</span> <span class="k">if</span> <span class="n">controller</span><span class="o">.</span><span class="n">respond_to?</span><span class="p">(</span><span class="ss">:liquid_filters</span><span class="p">,</span> <span class="kp">true</span><span class="p">)</span>
+</span><span class='line'>                <span class="n">controller</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="ss">:liquid_filters</span><span class="p">)</span>
+</span><span class='line'>              <span class="k">elsif</span> <span class="n">controller</span><span class="o">.</span><span class="n">respond_to?</span><span class="p">(</span><span class="ss">:master_helper_module</span><span class="p">)</span>
+</span><span class='line'>                <span class="o">[</span><span class="n">controller</span><span class="o">.</span><span class="n">master_helper_module</span><span class="o">]</span>
+</span><span class='line'>              <span class="k">else</span>
+</span><span class='line'>                <span class="o">[</span><span class="n">controller</span><span class="o">.</span><span class="n">_helpers</span><span class="o">]</span>
+</span><span class='line'>              <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">liquid</span> <span class="o">=</span> <span class="ss">Liquid</span><span class="p">:</span><span class="ss">:Template</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">liquid</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">assigns</span><span class="p">,</span> <span class="ss">:filters</span> <span class="o">=&gt;</span> <span class="n">filters</span><span class="p">,</span> <span class="ss">:registers</span> <span class="o">=&gt;</span> <span class="p">{</span><span class="ss">:action_view</span> <span class="o">=&gt;</span> <span class="vi">@view</span><span class="p">,</span> <span class="ss">:controller</span> <span class="o">=&gt;</span> <span class="vi">@view</span><span class="o">.</span><span class="n">controller</span><span class="p">})</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">compilable?</span>
+</span><span class='line'>    <span class="kp">false</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Create an initializer called liquid_template_handler (<code>config/initializers/liquid_template_handler.rb</code>) and add the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>liquid_template_handler.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;liquid_view&#39;</span>
+</span><span class='line'><span class="ss">ActionView</span><span class="p">:</span><span class="ss">:Template</span><span class="o">.</span><span class="n">register_template_handler</span> <span class="ss">:liquid</span><span class="p">,</span> <span class="no">LiquidView</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Let restarting your Rails server you will be able to create actual views with the .liquid extension that uses the liquid templating engine.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it! See ya! :)
+</p>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Bunlong Van</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-21T22:59:00+07:00" pubdate data-updated="true">Feb 21<span>st</span>, 2015</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ruby/'>Ruby</a>, <a class='category' href='/blog/categories/ruby-on-rails/'>Ruby on Rails</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2015/02/21/liquid-on-rails/" data-via="" data-counturl="http://geekhmer.github.io/blog/2015/02/21/liquid-on-rails/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/02/21/liquid-template-engine/" title="Previous Post: Liquid Template Engine">&laquo; Liquid Template Engine</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2015/02/22/customize-the-ruby-on-rails-application-generator/" title="Next Post: Customize the Ruby on Rails Application Generator">Customize the Ruby on Rails Application Generator &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Like To News Article</h1>
+  <ul>
+    <li>
+      <div class="fb-page" data-href="https://www.facebook.com/geekhmer" data-small-header="false" data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true" data-show-posts="false"><div class="fb-xfbml-parse-ignore"><blockquote cite="https://www.facebook.com/geekhmer"><a href="https://www.facebook.com/geekhmer">GeeKhmer</a></blockquote></div></div>
+    </li>
+  </ul>
+</section><section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/08/28/gulp-moving-files/">Gulp – Moving Files</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/28/gulp-hello-world/">Gulp – Hello World</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/28/gulp-installation/">Gulp – Installation</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/09/what-is-gulp/">What Is Gulp?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/07/25/facebook-fan-page-auto-like-revised/">Facebook Fan Page Auto Like - Revised</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/07/22/application-steps-for-applying-to-study-masters-in-computer-science-at-maharishi-university-of-management-usa/">Application Steps for Applying to Study Masters in Computer Science at MAHARISHI UNIVERSITY of MANAGEMENT USA</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/07/22/the-requirements-to-applying-to-study-masters-in-computer-science-at-maharishi-university-of-management-usa/">The Requirements to Applying to Study Masters in Computer Science at MAHARISHI UNIVERSITY of MANAGEMENT USA</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Category</h1>
+  <ul id="recent_posts">
+    
+      <li>
+        <a href="/blog/categories/facebook/">Facebook [ 5 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby/">Ruby [ 108 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/heroku/">Heroku [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 104 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/testing/">Testing [ 5 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/layout/">Layout [ 3 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby-metaprogramming/">Ruby metaprogramming [ 4 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/websocket/">Websocket [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/front-end-mvc-framework/">Front-end mvc framework [ 1 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/javascript/">Javascript [ 25 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/erlang/">Erlang [ 20 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/design-pattern/">Design pattern [ 1 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/other/">Other [ 40 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/reactjs/">Reactjs [ 18 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/startup/">Startup [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/cambodia-hacker-place/">Cambodia hacker place [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/gulp/">Gulp [ 4 ]</a>
+      </li>
+    
+  </ul>
+</section><section>
+  <h1>Notes</h1>
+  <ul id="recent_posts">
+    <li>
+      <a href="http://vimcommands.github.io/" target="_blank">Vim Commands</a>
+    </li>
+    <li>
+      <a href="http://ruby-hacking-style-guide.github.io/" target="_blank">Ruby Hacking Style Guide</a>
+    </li>
+  </ul>
+</section><section>
+  <h1>References</h1>
+  <ul id="recent_posts">
+    <li>
+      <a href="http://www.erlang.org/" target="_blank">
+        <img src="/images/logo_erlang.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://www.chicagoboss.org/" target="_blank">
+        <img src="/images/logo_chicagoboss.svg" />
+      </a>
+    </li>
+    <li>
+      <a href="https://www.ruby-lang.org/en/" target="_blank">
+        <img src="/images/logo_ruby.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://guides.rubyonrails.org" target="_blank">
+        <img src="/images/logo_rails_guides.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://railscasts.com" target="_blank">
+        <img src="/images/logo_rails_casts.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://github.com" target="_blank">
+        <img src="/images/logo_github.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://www.linode.com" target="_blank">
+        <img src="/images/logo_linode.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://newrelic.com" target="_blank">
+        <img src="/images/logo_newrelic.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://developers.facebook.com/" target="_blank">
+        <img src="/images/logo_facebook.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://facebook.github.io/react/" target="_blank">
+        <img src="/images/logo_react.png" />
+      </a>
+    </li>
+  </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 GeeKhmer in Phnom Penh, Cambodia.
+</p>
+
+</footer>
+  
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=1451301955117043&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
