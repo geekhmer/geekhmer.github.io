@@ -79,6 +79,201 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/05/09/rails-4-friendlyid/">Rails 4 FriendlyId</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-05-09T22:13:00+07:00" pubdate data-updated="true">May 9<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="Rails 4 FriendlyId" />
+</p>
+
+
+
+
+<p>
+  In this article we will go over using <a href="https://github.com/norman/friendly_id" target="_blank">FriendlyId</a> in Rails 4. It is important to note that the current version of FriendlyId (4.0) does not work with Rails 4. Therefore we will need to use FriendlyId 5.x, which is currently in release candidate status.
+</p>
+
+
+
+
+<p>
+  First, let&#8217;s include the FriendlyId gem in our gemfile.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s2">&quot;friendly_id&quot;</span><span class="p">,</span> <span class="s2">&quot;~&gt; 5.0.1&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  FriendlyId no longer overrides finder code by default. Because of this we will need to change the way our controller code works. FriendlyId now exposes it&#8217;s functionality via <code>.friendly</code>. For example, to find a post by it&#8217;s friendly id, we use something like <code>Post.friendly.find(params[:id])</code>. To get FriendlyId working, you need to modify your controllers to use this behavior. An example is shown below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/controllers/posts_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>    <span class="vi">@posts</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">all</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>    <span class="vi">@post</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">friendly</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If you have a large site making extensive use of FriendlyId, you can also restore the old finder override behavior. This isn&#8217;t recommended though. An example of how to do this is listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/models/post.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="kp">extend</span> <span class="no">FriendlyId</span>
+</span><span class='line'>  <span class="n">friendly_id</span> <span class="ss">:title</span><span class="p">,</span> <span class="ss">use</span><span class="p">:</span> <span class="o">[</span><span class="ss">:slugged</span><span class="p">,</span> <span class="ss">:finders</span><span class="o">]</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Once you&#8217;ve added this, finder override functionality should now be restored. For example, the code listed below will now work as before.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/controllers/posts_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>    <span class="vi">@posts</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">all</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>    <span class="vi">@post</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  FriendlyId 5 introduces a new slug candidates feature. This feature allows you to tell friendly id what to do in the case of duplicate slugs. See the code listed below for an example of how to utilize this functionality.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/models/post.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="kp">extend</span> <span class="no">FriendlyId</span>
+</span><span class='line'>  <span class="n">friendly_id</span> <span class="ss">:slug_candidates</span><span class="p">,</span> <span class="ss">use</span><span class="p">:</span> <span class="o">[</span><span class="ss">:slugged</span><span class="p">,</span> <span class="ss">:finders</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">slug_candidates</span>
+</span><span class='line'>    <span class="o">[</span>
+</span><span class='line'>      <span class="ss">:title</span><span class="p">,</span>
+</span><span class='line'>      <span class="o">[</span><span class="ss">:title</span><span class="p">,</span> <span class="ss">:id</span><span class="o">]</span>
+</span><span class='line'>    <span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The code listed above tells FriendlyId you want to use the slug_candidates method to make the slug unique. It will try the list beginning to last, so in the example above, it will try to generate the slug first using title, and then if a post by that title already exists, it will try again by appending the id.
+</p>
+
+
+
+
+<p>
+  Some other quick things to note when upgrading to FriendlyId 5:<br/>
+  - The default sequence separator has been changed from two dashes (&#8211;) to one dash (-). If you have a url scheme in place using the old way of doing things, you might want to find a workaround.<br/>
+  - FriendlyId no longer uses a numeric sequence to differentiate a conflicting slug. Instead it uses a UUID (example: 2bc08962-b3dd-4f29-b2e6-244710c86106). If you dislike this functionality, you can utilize the new slug candidates feature explained above.
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/05/09/ruby-on-rails-get-a-users-gravatar/">Ruby on Rails Get a User&#8217;s Gravatar</a></h1>
     
     
@@ -3543,170 +3738,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/05/02/automatically-updating-timeago-text-with-rails-livestamp-gem/">Automatically-updating Timeago Text With Rails-livestamp Gem</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-05-02T08:29:00+07:00" pubdate data-updated="true">May 2<span>nd</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/rubygems_logo.png" width="200" alt="Automatically-updating Timeago Text with rails-livestamp Gem" />
-</p>
-
-
-
-
-<p>
-  <a href="https://github.com/Bunlong/rails-livestamp" target="_blank">rails-livestamp</a> is a simple jQuery plugin that makes it easy to provides automatically updating text to your timestamped HTML elements.
-</p>
-
-
-
-
-<p>
-  <strong>Installation</strong><br/>
-  Add this line to your application&#8217;s Gemfile:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Gemfile </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;rails-livestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 1.1.3&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  And then execute:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Or install it yourself as:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="n">install</span> <span class="n">rails</span><span class="o">-</span><span class="n">livestamp</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  To use rails-livestamp add this require statement to your application.js file:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>application.js </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">rails</span><span class="o">-</span><span class="n">livestamp</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Usage</strong><br/>
-  No extra JavaScript required! Just use a <span> with the data-livestamp attribute set to the desired Unix timestamp (in seconds), like this:
-</p>
-
-
-
-
-<p>
-  If you use ERB:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">You</span> <span class="n">discovered</span> <span class="n">rails</span><span class="o">-</span><span class="n">livestamp</span> <span class="o">&lt;</span><span class="n">span</span> <span class="n">data</span><span class="o">-</span><span class="n">livestamp</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">#{</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span><span class="o">.</span><span class="n">to_i</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">&gt;&lt;</span><span class="sr">/span&gt;.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  If you use HAML:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">You</span> <span class="n">discovered</span> <span class="n">rails</span><span class="o">-</span><span class="n">livestamp</span>
-</span><span class='line'><span class="o">%</span><span class="n">span</span><span class="p">{</span><span class="s2">&quot;data-livestamp&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span><span class="o">.</span><span class="n">to_i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span><span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  And you will see something like this:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">You</span> <span class="n">discovered</span> <span class="n">rails</span><span class="o">-</span><span class="n">livestamp</span> <span class="n">a</span> <span class="n">minutes</span> <span class="n">ago</span><span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Wait half a minute - the livestamp will update automatically.
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/10/">&larr; Older</a>
@@ -3731,6 +3762,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/08/28/gulp-hello-world/">Gulp – Hello World</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/08/28/gulp-installation/">Gulp – Installation</a>
       </li>
     
@@ -3752,10 +3787,6 @@
     
       <li class="post">
         <a href="/blog/2016/07/13/setup-and-deploy-ruby-on-rails-on-ubuntu-16-dot-04-or-latest/">Setup and Deploy Ruby on Rails on Ubuntu 16.04 or Latest</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/05/03/send-notifications-from-rails-backend-to-ios-and-android/">Send Notifications From Rails Backend to iOS and Android</a>
       </li>
     
   </ul>
@@ -3829,7 +3860,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/gulp/">Gulp [ 2 ]</a>
+        <a href="/blog/categories/gulp/">Gulp [ 3 ]</a>
       </li>
     
   </ul>
