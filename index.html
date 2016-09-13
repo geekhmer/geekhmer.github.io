@@ -79,6 +79,295 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2016/09/13/gulp-concat-combining-multiple-files-into-one/">Gulp – Concat: Combining Multiple Files Into One</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-09-13T09:35:00+07:00" pubdate data-updated="true">Sep 13<span>th</span>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/gulp.jpg" width="600" alt="Gulp, Gulp – Concat: Combining multiple files into one" />
+</p>
+
+
+
+
+<p>
+  Printing Hello and moving files is rather boring. Let’s do something productive.
+</p>
+
+
+
+
+<p>
+  When we create websites, we are always trying to deliver the best experience possible.
+  This includes having our webpages displaying fast. Back in the day, this meant having
+  all our styles in one css file.
+</p>
+
+
+
+
+<p>
+  While this made our webpages load faster, it made maintaining the css file a night-mare!
+</p>
+
+
+
+
+<p>
+  These days we can use multiple css files for better organization and then concat (meaning merge or combine) the files together into one large file.
+</p>
+
+
+
+
+<p>
+  We left our project looking like:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">/build</span>
+</span><span class='line'><span class="sr">  /s</span><span class="n">tyles</span>
+</span><span class='line'>    <span class="n">some_styles</span><span class="o">.</span><span class="n">css</span>
+</span><span class='line'>    <span class="n">more_styles</span><span class="o">.</span><span class="n">css</span>
+</span><span class='line'><span class="sr">/node_modules</span>
+</span><span class='line'><span class="sr">/</span><span class="n">contents</span>
+</span><span class='line'>  <span class="sr">/styles</span>
+</span><span class='line'><span class="sr">    some_styles.css</span>
+</span><span class='line'><span class="sr">    more_styles.css</span>
+</span><span class='line'><span class="sr">gulpfile.js</span>
+</span><span class='line'><span class="sr">package.json</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Right now, we have two separate css files in our build/styles folder. We are going to use a gulp plugin to concat all our css files in the styles folder.
+</p>
+
+
+
+
+<p>
+  Gulp contains some basic tasks, but the power of gulp is the customization you can bring into your build process by using plugins.
+</p>
+
+
+
+
+<p>
+  For a list of all the gulp plugins available, go to <a href="http://gulpjs.com/plugins/" target="_blank">http://gulpjs.com/plugins/</a>
+</p>
+
+
+
+
+<p>
+  To concat the files together, we will need to install one of these plugins.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">npm</span> <span class="n">install</span> <span class="n">gulp</span><span class="o">-</span><span class="n">concat</span> <span class="o">--</span><span class="n">save</span><span class="o">-</span><span class="n">dev</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We can then update our default gulp task to concat the files.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>gulpfile.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">var</span> <span class="n">gulp</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s1">&#39;gulp&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="n">var</span> <span class="n">concat</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s1">&#39;gulp-concat&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">gulp</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="o">[]</span><span class="p">,</span> <span class="n">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Concating and moving all the css files in styles folder&quot;</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">gulp</span><span class="o">.</span><span class="n">src</span><span class="p">(</span><span class="s2">&quot;contents/styles/**.css&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">concat</span><span class="p">(</span><span class="s1">&#39;main.css&#39;</span><span class="p">))</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">gulp</span><span class="o">.</span><span class="n">dest</span><span class="p">(</span><span class="s1">&#39;build/styles&#39;</span><span class="p">));</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Couple of things have changed, can you spot them? First, we had to reference the gulp plugin with:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">var</span> <span class="n">concat</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s1">&#39;gulp-concat&#39;</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We chose to label this <code>concat</code>. Obviously we could call it anything we want, but concat communicates what the plugin does to those reading our build script.
+</p>
+
+
+
+
+<p>
+  Second, we added another step to our task. In between the <code>src</code> and the <code>pipe(gulp.dest...)</code> steps, we added <code>pipe(concat(...))</code>.
+</p>
+
+
+
+
+<p>
+  Gulp works by streaming files from one process to another. This allows us to create complex build tasks out of small, simple steps. Composition == winning.
+</p>
+
+
+
+
+<p>
+  Now run our gulp task:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">gulp</span>
+</span><span class='line'><span class="no">Using</span> <span class="n">gulpfile</span> <span class="o">~</span><span class="sr">/YOUR_DIRECTORY/</span><span class="n">gulpfile</span><span class="o">.</span><span class="n">js</span>
+</span><span class='line'><span class="no">Starting</span> <span class="s1">&#39;default&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="no">Moving</span> <span class="n">all</span> <span class="n">the</span> <span class="n">css</span> <span class="n">files</span> <span class="k">in</span> <span class="n">styles</span> <span class="n">folder</span>
+</span><span class='line'><span class="no">Finished</span> <span class="s1">&#39;default&#39;</span> <span class="n">after</span> <span class="mi">6</span><span class="o">.</span><span class="mi">09</span> <span class="n">ms</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Our task will read all the css files in the <code>styles</code> folder, combine them into one <code>main.css</code> file, and then place that file in the <code>build/styles</code> folder.
+</p>
+
+
+
+
+<p>
+  Our project should now look like:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">/build</span>
+</span><span class='line'><span class="sr">  /s</span><span class="n">tyles</span>
+</span><span class='line'>    <span class="n">main</span><span class="o">.</span><span class="n">css</span>
+</span><span class='line'>    <span class="n">more_styles</span><span class="o">.</span><span class="n">css</span>
+</span><span class='line'>    <span class="n">some_styles</span><span class="o">.</span><span class="n">css</span>
+</span><span class='line'><span class="sr">/node_modules</span>
+</span><span class='line'><span class="sr">/s</span><span class="n">tyles</span>
+</span><span class='line'>  <span class="n">more_styles</span><span class="o">.</span><span class="n">css</span>
+</span><span class='line'>  <span class="n">some_styles</span><span class="o">.</span><span class="n">css</span>
+</span><span class='line'><span class="n">gulpfile</span><span class="o">.</span><span class="n">js</span>
+</span><span class='line'><span class="n">package</span><span class="o">.</span><span class="n">json</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Notice the more_styles.css and some_styles.css files are still in our build folder. :(
+</p>
+
+
+
+
+<p>
+  We don’t want those chumps there anymore. In the next chapter we will learn how to
+  get rid of those files.
+</p>
+
+
+
+
+<p>
+  So far so good, That’s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2016/08/28/gulp-moving-files/">Gulp – Moving Files</a></h1>
     
     
@@ -1682,652 +1971,6 @@ The service command also provides some other methods such as <code>restart</code
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/03/25/git-command-line/">Git Command Line</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-03-25T15:01:00+07:00" pubdate data-updated="true">Mar 25<span>th</span>, 2016</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/logo_git.png" alt="Git Command Line" />
-</p>
-
-
-
-
-<p>
-  <a href="http://geekhmer.github.io/blog/2015/02/09/install-git-on-linux-slash-ubuntu/" target="_blank">How to install GIT on Linux/Ubuntu</a> &#8211; Today, Source Version Control has gained popularity in the management of source code. Therefore, the software engineer needs to know how to use and manipulate GIT. The following common GIT command line will help you manipulate GIT:
-</p>
-
-
-
-
-<p>
-  <strong>Set up Git Configuration</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">config</span> <span class="o">--</span><span class="n">global</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span> <span class="s2">&quot;your_email@domain_name.com&quot;</span> <span class="sr">/* Setup email is used to commit */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">config</span> <span class="o">--</span><span class="n">global</span> <span class="n">user</span><span class="o">.</span><span class="n">name</span> <span class="s2">&quot;your user name&quot;</span> <span class="sr">/* Setup username is used to commit */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">config</span> <span class="o">--</span><span class="n">global</span> <span class="n">core</span><span class="o">.</span><span class="n">editor</span> <span class="s2">&quot;vi&quot;</span> <span class="sr">/* Choose editor used by GIT */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">config</span> <span class="o">--</span><span class="n">global</span> <span class="n">color</span><span class="o">.</span><span class="n">ui</span> <span class="kp">true</span> <span class="sr">/* Setup color ui for command line */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">config</span> <span class="o">--</span><span class="n">list</span> <span class="sr">/* See Git configuration */</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>To Initialise a Local Repository</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">init</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Add a File to the Repository</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">init</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Commit the Change to Git</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">commit</span> <span class="o">-</span><span class="n">m</span> <span class="s2">&quot;message&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>See the Commits</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">log</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Basic Commands</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">status</span>  <span class="sr">/*  The command &#39;git status&#39; tells which files are not added or committed from Working to Staging to Repository */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">commit</span> <span class="o">-</span><span class="n">m</span> <span class="s2">&quot;message&quot;</span> <span class="sr">/*  Commits and changes to all files that are in Staging into Repo  */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">diff</span> <span class="sr">/*  Show changes between Working and Local Repo, no file supplied shows all files  */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">diff</span> <span class="o">--</span><span class="n">staged</span> <span class="sr">/*  Shows changes between Staged and Local Repo  */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">rm</span> <span class="n">file</span><span class="o">.</span><span class="n">txt</span> <span class="sr">/*  Will remove file from working then git commit -m &quot;&quot; to also remove from Repo */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">rm</span> <span class="o">--</span><span class="n">cached</span> <span class="n">file</span><span class="o">.</span><span class="n">txt</span> <span class="sr">/* Leaves copy of file in Working but removes from Staging and Repo */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">mv</span> <span class="sr">/* Rename or move files - then git commit -m &quot;&quot; to move to Repo */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">commit</span> <span class="o">-</span><span class="n">am</span> <span class="s2">&quot;text goes here&quot;</span> <span class="sr">/* Adds all files straight to Repo from Staging if they have changes - meaning they skip git add */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">checkout</span> <span class="o">--</span> <span class="n">file</span><span class="o">.</span><span class="n">txt</span> <span class="sr">/* Restore Repo file to Working Directory using current branch  */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">reset</span> <span class="o">--</span><span class="n">soft</span> <span class="no">HEAD</span><span class="o">^</span> <span class="sr">/* Restore repo file to staging */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">reset</span> <span class="no">HEAD</span> <span class="n">file</span><span class="o">.</span><span class="n">txt</span> <span class="sr">/*  Move a Stage file out of Stage back to Working */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">commit</span> <span class="o">--</span><span class="n">amend</span> <span class="o">-</span><span class="n">m</span> <span class="s2">&quot;message&quot;</span> <span class="n">file</span><span class="o">.</span><span class="n">txt</span> <span class="sr">/* Change last commit to Repo (only last one can change) */</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Resetting & Reverting</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">/* Reverting --soft --mixed --hard will go back to previous commits* /</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">log</span> <span class="sr">/* Gets the sha1s so you can see the coomits where you want revert  back to */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">reset</span> <span class="o">--</span><span class="n">soft</span> <span class="n">sha</span> <span class="sr">/* Changes Repo but not Staging or Working */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">reset</span> <span class="o">--</span><span class="n">mixed</span> <span class="n">sha</span> <span class="sr">/* Changes Repo and Staging but not Working */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">reset</span> <span class="o">--</span><span class="n">hard</span> <span class="n">sha</span> <span class="sr">/* Changes all 3 Tiers */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">clean</span> <span class="o">-</span><span class="n">f</span> <span class="sr">/* Remove untracked files from Working  */</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Ignore File</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">gitignore</span> <span class="sr">/* Ignores files to track in Working /</span> <span class="n">track</span> <span class="n">the</span> <span class="o">.</span><span class="n">gitignore</span> <span class="n">file</span> <span class="o">*/</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Global</span> <span class="no">Ignore</span> <span class="sr">/* Create in home folder  */</span>
-</span><span class='line'><span class="o">.</span><span class="n">gitignore_global</span>
-</span><span class='line'><span class="o">.</span><span class="n">DS_Store</span>
-</span><span class='line'><span class="o">.</span><span class="n">Trashes</span>
-</span><span class='line'><span class="o">.</span><span class="n">Spotlight_V100</span>
-</span><span class='line'><span class="sr">/* Add in  */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">config</span> <span class="o">--</span><span class="n">global</span> <span class="n">core</span><span class="o">.</span><span class="n">excludesfile</span> <span class="o">~</span><span class="sr">/.gitignore_global /</span><span class="o">*</span> <span class="no">Add</span> <span class="n">to</span> <span class="n">gitconfig</span> <span class="o">*/</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Stop Tracking Changes</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">rm</span> <span class="o">--</span><span class="n">cached</span> <span class="n">file</span><span class="o">.</span><span class="n">txt</span> <span class="sr">/* Leaves copy in Repo and Working */</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Commit Log</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">ls</span><span class="o">-</span><span class="n">tree</span> <span class="no">HEAD</span>
-</span><span class='line'><span class="n">git</span> <span class="n">ls</span><span class="o">-</span><span class="n">tree</span> <span class="n">master</span>
-</span><span class='line'><span class="n">git</span> <span class="n">log</span> <span class="o">--</span><span class="n">oneline</span>
-</span><span class='line'><span class="n">git</span> <span class="n">log</span> <span class="o">--</span><span class="n">author</span><span class="o">=</span><span class="s2">&quot;Bunlong&quot;</span>
-</span><span class='line'><span class="n">git</span> <span class="n">log</span> <span class="o">--</span><span class="n">grep</span><span class="o">=</span><span class="s2">&quot;temp&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Show Commit</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">show</span> <span class="n">dc094cb</span> <span class="sr">/*  show SHA1 */</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Commands on Branch</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">branch</span> <span class="sr">/* Show local branches * is the one we are on */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">branch</span> <span class="o">-</span><span class="n">r</span> <span class="sr">/* Shows remote branches */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">branch</span> <span class="o">-</span><span class="n">a</span> <span class="sr">/* Shows local and remote */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">branch</span> <span class="n">newbranch</span> <span class="sr">/* Creates a new branch */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">checkout</span> <span class="n">newbranch</span> <span class="sr">/* Switch to new branch */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">checkout</span> <span class="o">-</span><span class="n">b</span> <span class="n">oldbranch</span> <span class="sr">/* Creates and switches to new branch  */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">push</span> <span class="n">origin</span> <span class="n">newbranch</span> <span class="sr">/* Push new branch to remote */</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">/* Diff in Branches */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">diff</span> <span class="n">master</span><span class="o">.</span><span class="n">.otherbranch</span> <span class="sr">/* Shows diff */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">diff</span> <span class="o">--</span><span class="n">color</span><span class="o">-</span><span class="n">words</span> <span class="n">master</span><span class="o">.</span><span class="n">.otherbranch</span> <span class="sr">/*  Shows diff in color */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">branch</span> <span class="o">--</span><span class="n">merged</span> <span class="sr">/* Shows any merged branches */</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">/* Rename Branch */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">branch</span> <span class="o">-</span><span class="n">m</span> <span class="n">oldname</span> <span class="n">newname</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">/* Delete  Branch */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">branch</span> <span class="o">-</span><span class="n">d</span> <span class="n">nameofbranch</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">/* Merge Branch  */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">merge</span> <span class="n">branchname</span> <span class="sr">/* Be on the receiver branch to merge the other branch */</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">/* Merge Conflicts between the same file on 2 branches are marked in HEAD and other branch */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">merge</span> <span class="o">--</span><span class="nb">abort</span> <span class="sr">/*  Abort basically cancels the merge */</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Manually Fix Files and Commit - The Stash</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">stash</span> <span class="n">save</span> <span class="s2">&quot;message&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">stash</span> <span class="n">list</span> <span class="sr">/* Shows whats in stash */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">stash</span> <span class="n">show</span> <span class="o">-</span><span class="nb">p</span> <span class="n">stash</span><span class="err">@</span><span class="p">{</span><span class="mi">0</span><span class="p">}</span> <span class="sr">/* Show the diff in the stash */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">stash</span> <span class="n">pop</span> <span class="n">stash</span><span class="err">@</span><span class="p">{</span><span class="mi">0</span><span class="p">}</span> <span class="sr">/* Restores the stash deletes the tash */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">stash</span> <span class="n">apply</span> <span class="n">stash</span><span class="err">@</span><span class="p">{</span><span class="mi">0</span><span class="p">}</span> <span class="sr">/* Restores the stash and keeps the stash */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">stash</span> <span class="n">clear</span> <span class="sr">/* Removes all stash */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">stash</span> <span class="n">drop</span> <span class="n">stash</span><span class="err">@</span><span class="p">{</span><span class="mi">0</span><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Remotes Commands</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">remote</span> <span class="n">add</span> <span class="n">origin</span> <span class="ss">https</span><span class="p">:</span><span class="sr">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">bunlong</span><span class="o">/</span><span class="nb">test</span><span class="o">.</span><span class="n">git</span> <span class="sr">/* Origin can be named whateve followed by the remote */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">remote</span> <span class="sr">/* To show all remotes */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">remote</span> <span class="n">show</span> <span class="n">origin</span> <span class="sr">/* To see remote URL*/</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">remote</span> <span class="n">remove</span> <span class="n">origin</span> <span class="sr">/* To remove remote */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">remote</span> <span class="n">rm</span> <span class="n">origin</span> <span class="sr">/* To remove remote */</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Clone project. Push from local to Remote</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">/* Cloning a GitHub Repo - create and get the URL of a new repository from GitHub, then clone that to your local repo, example below uses local repo named &#39;nameoffolder&#39; */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="nb">clone</span> <span class="ss">https</span><span class="p">:</span><span class="sr">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">bunlong</span><span class="o">/</span><span class="nb">test</span><span class="o">.</span><span class="n">git</span> <span class="n">nameoffolder</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">push</span> <span class="o">-</span><span class="n">u</span> <span class="n">origin</span> <span class="n">master</span> <span class="sr">/* Push to remote(origin) and branch(master) */</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">/* Push to Remote from Local - more - since when we pushed the local to remote we used -u parameter then the remote branch is tracked to the local branch and we just need to use... */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">push</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">push</span> <span class="n">origin</span> <span class="n">newbranch</span> <span class="sr">/* Push a branch to a remote */</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Fetch Changes from a Cloned Repository</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">fetch</span> <span class="n">origin</span> <span class="sr">/* Pulls down latest committs from remote origin/m</span><span class="n">aster</span> <span class="ow">not</span> <span class="n">origin</span><span class="p">,</span> <span class="n">also</span> <span class="n">pull</span> <span class="n">down</span> <span class="n">any</span> <span class="n">branches</span> <span class="n">pushed</span> <span class="n">to</span> <span class="no">Repo</span> <span class="no">Fetch</span> <span class="n">before</span> <span class="n">you</span> <span class="n">work</span> <span class="no">Fetch</span> <span class="n">before</span> <span class="n">you</span> <span class="n">pull</span> <span class="no">Fetch</span> <span class="n">often</span> <span class="o">*/</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Merge with origin/master</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">merge</span> <span class="n">origin</span><span class="o">/</span><span class="n">master</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Fetch + Merge data ==> Pull</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">merge</span> <span class="n">origin</span><span class="o">/</span><span class="n">master</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Get Remote Branch</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">branch</span> <span class="n">branch_name</span> <span class="n">origin</span><span class="o">/</span><span class="n">branch_name</span> <span class="sr">/* This will bring the remote branch to local and track with the remote */</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Delete Branch</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">branch</span> <span class="o">-</span><span class="n">d</span> <span class="n">branch_name</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Checkout and Switch Branch and Track to Remote</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">checkout</span> <span class="o">-</span><span class="n">b</span> <span class="n">nontracking</span> <span class="n">origin</span><span class="o">/</span><span class="n">nontracking</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Remove Remote Branch</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">push</span> <span class="n">origin</span> <span class="o">--</span><span class="n">delete</span> <span class="n">branch</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Undoing Changes</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">checkout</span> <span class="n">path</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">file</span> <span class="sr">/* Restores a file before it is staged */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">reset</span> <span class="no">HEAD</span> <span class="n">path</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">file</span> <span class="sr">/* If it is staged - restores a file from last commit and then git checkout path-to-file */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">checkout</span> <span class="no">HEAD</span><span class="o">^</span> <span class="n">path</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">file</span> <span class="sr">/* If is staged and committed - restores from last commit */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">reset</span> <span class="o">--</span><span class="n">hard</span> <span class="no">HEAD</span><span class="o">^</span> <span class="sr">/* Restore prior commit */</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Tag</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">tag</span> <span class="o">-</span><span class="n">a</span> <span class="n">v1</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span> <span class="o">-</span><span class="n">m</span> <span class="s2">&quot;message&quot;</span> <span class="sr">/* Tagging a commit with a version number*/</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">push</span> <span class="o">--</span><span class="n">tags</span> <span class="sr">/* Pushes tag info to master remote */</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">/* You can checkout a commit and add a tag to that commit by checking out its SHA */</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">git</span> <span class="n">checkout</span> <span class="n">f1f4a3d</span> <span class="sr">/* Checking out a commit - see the commit SHAS by git log */</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -2348,6 +1991,10 @@ The service command also provides some other methods such as <code>restart</code
 </section><section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/09/13/gulp-concat-combining-multiple-files-into-one/">Gulp – Concat: Combining Multiple Files Into One</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2016/08/28/gulp-moving-files/">Gulp – Moving Files</a>
@@ -2371,10 +2018,6 @@ The service command also provides some other methods such as <code>restart</code
     
       <li class="post">
         <a href="/blog/2016/07/22/application-steps-for-applying-to-study-masters-in-computer-science-at-maharishi-university-of-management-usa/">Application Steps for Applying to Study Masters in Computer Science at MAHARISHI UNIVERSITY of MANAGEMENT USA</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/07/22/the-requirements-to-applying-to-study-masters-in-computer-science-at-maharishi-university-of-management-usa/">The Requirements to Applying to Study Masters in Computer Science at MAHARISHI UNIVERSITY of MANAGEMENT USA</a>
       </li>
     
   </ul>
@@ -2448,7 +2091,7 @@ The service command also provides some other methods such as <code>restart</code
       </li>
     
       <li>
-        <a href="/blog/categories/gulp/">Gulp [ 4 ]</a>
+        <a href="/blog/categories/gulp/">Gulp [ 5 ]</a>
       </li>
     
   </ul>

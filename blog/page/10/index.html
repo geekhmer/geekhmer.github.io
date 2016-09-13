@@ -79,6 +79,228 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/05/05/where-does-your-code-go-in-rails-application/">Where Does Your Code Go in Rails Application?</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-05-05T08:50:00+07:00" pubdate data-updated="true">May 5<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/ruby_on_rails.png" width="400" alt="Where Does Your Code Go in Rails Application?" />
+</p>
+
+
+
+
+<p>
+  After you finish the Rails tutorials and start your own app, things get confusing something like where does your non-CRUD and general logic go?
+</p>
+
+
+
+
+<p>
+  You can&#8217;t build the app you&#8217;ve been dreaming of without some general, non-Rails logic. So where do you put your code, and still keep things simple?
+</p>
+
+
+
+
+<p>
+  <strong>The Easy Place to Start</strong><br/>
+  when I have logic that feels related to an existing ActiveRecord model, I&#8217;ll start by putting it into that model. For example if I had a Game model and I want to import a bunch of games from CSV files, I would put that method right onto the Game class.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/models/game.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Game</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">parse_from_csv</span><span class="p">(</span><span class="n">csv_string</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">games</span> <span class="o">=</span> <span class="o">[]</span>
+</span><span class='line'>    <span class="no">CSV</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">csv_string</span><span class="p">,</span> <span class="n">quote_char</span><span class="p">:</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">row</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">games</span> <span class="o">&lt;&lt;</span> <span class="no">Game</span><span class="o">.</span><span class="n">from_csv_row</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">row</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">==</span> <span class="s1">&#39;G&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>    <span class="n">games</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">from_csv_row</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+</span><span class='line'>    <span class="no">Game</span><span class="o">.</span><span class="n">new</span><span class="p">({</span>
+</span><span class='line'>      <span class="n">dgs_game_id</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">opponent_name</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">2</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">created_at</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">4</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">updated_at</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">4</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>    <span class="p">})</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  You have all the information your methods need right at hand. it&#8217;s easily testable. And it&#8217;s probably where a new contributor world look for that logic first.
+</p>
+
+
+
+
+<p>
+  But if you keep adding and changing that model, it&#8217;ll get big and complicated. Different parts of the model will interact in strange ways. The more you change it, the harder it will be to change.
+</p>
+
+
+
+
+<p>
+  In that case, you would probably want to refactor that code out to a non-ActiveRecord model.
+</p>
+
+
+
+
+<p>
+  <strong>Non-ActiveRecord Models</strong><br/>
+  You can write your own Ruby code, in plain Ruby objects, and use them in your Rails app. These objects can still be called models, because they&#8217;re modeling part of your problem. They just don&#8217;t have an ActiveRecord database storing their data.
+</p>
+
+
+
+
+<p>
+  The next time I worked on that game CSV parser, the Game class was getting a little too big. So I moved the parser logic into its own GameCSVParser class.
+</p>
+
+
+
+
+<p>
+  Non-ActiveRecord class looks like:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/models/game_csv_parser.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">GameCSVParser</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">csv_string</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@rows</span> <span class="o">=</span> <span class="no">CSV</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">csv_string</span><span class="p">,</span> <span class="n">quote_char</span><span class="p">:</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">games</span>
+</span><span class='line'>    <span class="n">game_rows</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">row</span><span class="o">|</span> <span class="no">Game</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">game_attributes</span><span class="p">(</span><span class="n">row</span><span class="p">))</span> <span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">game_rows</span>
+</span><span class='line'>    <span class="vi">@rows</span><span class="o">.</span><span class="n">select</span> <span class="p">{</span> <span class="o">|</span><span class="n">row</span><span class="o">|</span> <span class="n">is_game_row?</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">game_attributes</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>      <span class="n">dgs_game_id</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">opponent_name</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">2</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">created_at</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">4</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">updated_at</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">4</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">is_game_row?</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">row</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">==</span> <span class="s1">&#39;G&#39;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  I will go right to creating a new plain Ruby object if the logic I&#8217;m adding doesn&#8217;t feel related to any specific ActiveRecord model. Of if the code seems like it should be a part of a thing that doesn&#8217;t exist yet in the app. Otherwise, they mostly pop up through refactoring.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/05/02/ruby-on-rails-charting-with-chartkick-gem/">Ruby on Rails Charting With Chartkick Gem</a></h1>
     
     
@@ -2413,112 +2635,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/04/18/hash-data-in-ruby/">Hash Data in Ruby</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-04-18T17:25:00+07:00" pubdate data-updated="true">Apr 18<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/ruby_on_rails.png" width="400" alt="Hash Data in Ruby" />
-</p>
-
-
-
-
-<p>
-  Somethings we need to utilize hashing algorithms in Ruby and/or Rails. Examples of this include verifying file integrity, hashing passwords, and much more. In this brief article we will show you how to hash data in various formats.
-</p>
-
-
-
-
-<p>
-  <strong>Calculate an MD5 Hash</strong><br/>
-  The venerable MD5 algorithm is an older and simpler hashing algorithm. Please note that MD5 is considered insecure due to the fact it can be brute forced relatively quickly, so you should use this algorithm with extreme care. To use MD5, simply use the following code:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">hash</span> <span class="o">=</span> <span class="ss">Digest</span><span class="p">:</span><span class="ss">:MD5</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(</span><span class="s2">&quot;this is a test&quot;</span><span class="p">)</span> <span class="c1"># =&gt; &quot;54b0c58c7ce9f2a8b551351102ee0938&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Calculate a SHA-1 Hash</strong><br/>
-  SHA-1 hashes are much more secure. SHA-1 can be used for passwords and file hashing, but it&#8217;s recommended that you move to SHA-2 (SHA256, SHA384, and SHA512) as soon as you can as they are even more secure. SHA-1 is also an excellent choice for maintaining file integrity.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">hash</span> <span class="o">=</span> <span class="ss">Digest</span><span class="p">:</span><span class="ss">:SHA1</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(</span><span class="s2">&quot;this is a test&quot;</span><span class="p">)</span> <span class="c1"># =&gt; &quot;fa26be19de6bff93f70bc2308434e4a440bbad02&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Calculate a SHA-2 hash: SHA256, SHA384, and SHA512</strong><br/>
-  HA-2 includes a number of different digest lengths, with SHA-512 in theory being the most secure. Calculating these hashes is just as easy.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">Digest</span><span class="p">:</span><span class="ss">:SHA256</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(</span><span class="s2">&quot;this is a test&quot;</span><span class="p">)</span> <span class="c1"># =&gt; &quot;2e99758548972a8e8822ad47fa1017ff72f06f3ff6a016851f45c398732bc50c&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="nb">hash</span> <span class="o">=</span> <span class="ss">Digest</span><span class="p">:</span><span class="ss">:SHA384</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(</span><span class="s2">&quot;this is a test&quot;</span><span class="p">)</span> <span class="c1"># =&gt; &quot;43382a8cc650904675c9d62d785786e368f3a99db99aeaaa7b76b02530677154d09c0b6bd2e21b4329fd41543b9a785b&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="nb">hash</span> <span class="o">=</span> <span class="ss">Digest</span><span class="p">:</span><span class="ss">:SHA512</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(</span><span class="s2">&quot;this is a test&quot;</span><span class="p">)</span> <span class="c1"># =&gt; &quot;7d0a8468ed220400c0b8e6f335baa7e070ce880a37e2ac5995b9a97b809026de626da636ac7365249bb974c719edf543b52ed286646f437dc7f810cc2068375c&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/11/">&larr; Older</a>
@@ -2543,6 +2659,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/09/13/gulp-concat-combining-multiple-files-into-one/">Gulp – Concat: Combining Multiple Files Into One</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/08/28/gulp-moving-files/">Gulp – Moving Files</a>
       </li>
     
@@ -2564,10 +2684,6 @@
     
       <li class="post">
         <a href="/blog/2016/07/22/application-steps-for-applying-to-study-masters-in-computer-science-at-maharishi-university-of-management-usa/">Application Steps for Applying to Study Masters in Computer Science at MAHARISHI UNIVERSITY of MANAGEMENT USA</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/07/22/the-requirements-to-applying-to-study-masters-in-computer-science-at-maharishi-university-of-management-usa/">The Requirements to Applying to Study Masters in Computer Science at MAHARISHI UNIVERSITY of MANAGEMENT USA</a>
       </li>
     
   </ul>
@@ -2641,7 +2757,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/gulp/">Gulp [ 4 ]</a>
+        <a href="/blog/categories/gulp/">Gulp [ 5 ]</a>
       </li>
     
   </ul>

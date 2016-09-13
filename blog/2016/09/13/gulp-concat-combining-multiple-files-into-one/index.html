@@ -1,0 +1,641 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Gulp – Concat: Combining multiple files into one - GeeKhmer</title>
+  <meta name="author" content="Bunlong Van">
+  
+  
+  <meta name="description" content="The biggest website of computer programming, Ruby, Ruby on Rails, Erlang, Chicagoboss and Javascript in Southeast Asia.">
+
+  <meta name="keywords" content="Gulp, Gulp – Concat Combining multiple files into one">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://geekhmer.github.io/blog/2016/09/13/gulp-concat-combining-multiple-files-into-one">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="" rel="alternate" title="GeeKhmer" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+<link href="/stylesheets/jquery.fancybox.css" media="screen, projection" rel="stylesheet" type="text/css">
+<script src="/javascripts/libs/jquery.fancybox.pack.js"></script>
+<script src="/javascripts/init_fancybox.js"></script>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1>
+    <!-- <a href="/">GeeKhmer</a> -->
+    <div class="logo" />
+  </h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation">
+  <form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:geekhmer.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+  </form>
+
+<ul class="subscription" data-subscription="rss">
+  
+  
+</ul>
+<ul class="main-navigation">
+  <li><a href="/">Home</a></li>
+  <li><a href="/blog/archives">Articles</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/team">Team</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Gulp – Concat: Combining Multiple Files Into One</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-09-13T09:35:00+07:00" pubdate data-updated="true">Sep 13<span>th</span>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>
+  <img src="/images/gulp.jpg" width="600" alt="Gulp, Gulp – Concat: Combining multiple files into one" />
+</p>
+
+
+
+
+<p>
+  Printing Hello and moving files is rather boring. Let’s do something productive.
+</p>
+
+
+
+
+<p>
+  When we create websites, we are always trying to deliver the best experience possible.
+  This includes having our webpages displaying fast. Back in the day, this meant having
+  all our styles in one css file.
+</p>
+
+
+
+
+<p>
+  While this made our webpages load faster, it made maintaining the css file a night-mare!
+</p>
+
+
+
+
+<p>
+  These days we can use multiple css files for better organization and then concat (meaning merge or combine) the files together into one large file.
+</p>
+
+
+
+
+<p>
+  We left our project looking like:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">/build</span>
+</span><span class='line'><span class="sr">  /s</span><span class="n">tyles</span>
+</span><span class='line'>    <span class="n">some_styles</span><span class="o">.</span><span class="n">css</span>
+</span><span class='line'>    <span class="n">more_styles</span><span class="o">.</span><span class="n">css</span>
+</span><span class='line'><span class="sr">/node_modules</span>
+</span><span class='line'><span class="sr">/</span><span class="n">contents</span>
+</span><span class='line'>  <span class="sr">/styles</span>
+</span><span class='line'><span class="sr">    some_styles.css</span>
+</span><span class='line'><span class="sr">    more_styles.css</span>
+</span><span class='line'><span class="sr">gulpfile.js</span>
+</span><span class='line'><span class="sr">package.json</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Right now, we have two separate css files in our build/styles folder. We are going to use a gulp plugin to concat all our css files in the styles folder.
+</p>
+
+
+
+
+<p>
+  Gulp contains some basic tasks, but the power of gulp is the customization you can bring into your build process by using plugins.
+</p>
+
+
+
+
+<p>
+  For a list of all the gulp plugins available, go to <a href="http://gulpjs.com/plugins/" target="_blank">http://gulpjs.com/plugins/</a>
+</p>
+
+
+
+
+<p>
+  To concat the files together, we will need to install one of these plugins.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">npm</span> <span class="n">install</span> <span class="n">gulp</span><span class="o">-</span><span class="n">concat</span> <span class="o">--</span><span class="n">save</span><span class="o">-</span><span class="n">dev</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We can then update our default gulp task to concat the files.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>gulpfile.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">var</span> <span class="n">gulp</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s1">&#39;gulp&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="n">var</span> <span class="n">concat</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s1">&#39;gulp-concat&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">gulp</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="o">[]</span><span class="p">,</span> <span class="n">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Concating and moving all the css files in styles folder&quot;</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">gulp</span><span class="o">.</span><span class="n">src</span><span class="p">(</span><span class="s2">&quot;contents/styles/**.css&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">concat</span><span class="p">(</span><span class="s1">&#39;main.css&#39;</span><span class="p">))</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">gulp</span><span class="o">.</span><span class="n">dest</span><span class="p">(</span><span class="s1">&#39;build/styles&#39;</span><span class="p">));</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Couple of things have changed, can you spot them? First, we had to reference the gulp plugin with:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">var</span> <span class="n">concat</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s1">&#39;gulp-concat&#39;</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We chose to label this <code>concat</code>. Obviously we could call it anything we want, but concat communicates what the plugin does to those reading our build script.
+</p>
+
+
+
+
+<p>
+  Second, we added another step to our task. In between the <code>src</code> and the <code>pipe(gulp.dest...)</code> steps, we added <code>pipe(concat(...))</code>.
+</p>
+
+
+
+
+<p>
+  Gulp works by streaming files from one process to another. This allows us to create complex build tasks out of small, simple steps. Composition == winning.
+</p>
+
+
+
+
+<p>
+  Now run our gulp task:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">gulp</span>
+</span><span class='line'><span class="no">Using</span> <span class="n">gulpfile</span> <span class="o">~</span><span class="sr">/YOUR_DIRECTORY/</span><span class="n">gulpfile</span><span class="o">.</span><span class="n">js</span>
+</span><span class='line'><span class="no">Starting</span> <span class="s1">&#39;default&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="no">Moving</span> <span class="n">all</span> <span class="n">the</span> <span class="n">css</span> <span class="n">files</span> <span class="k">in</span> <span class="n">styles</span> <span class="n">folder</span>
+</span><span class='line'><span class="no">Finished</span> <span class="s1">&#39;default&#39;</span> <span class="n">after</span> <span class="mi">6</span><span class="o">.</span><span class="mi">09</span> <span class="n">ms</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Our task will read all the css files in the <code>styles</code> folder, combine them into one <code>main.css</code> file, and then place that file in the <code>build/styles</code> folder.
+</p>
+
+
+
+
+<p>
+  Our project should now look like:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">/build</span>
+</span><span class='line'><span class="sr">  /s</span><span class="n">tyles</span>
+</span><span class='line'>    <span class="n">main</span><span class="o">.</span><span class="n">css</span>
+</span><span class='line'>    <span class="n">more_styles</span><span class="o">.</span><span class="n">css</span>
+</span><span class='line'>    <span class="n">some_styles</span><span class="o">.</span><span class="n">css</span>
+</span><span class='line'><span class="sr">/node_modules</span>
+</span><span class='line'><span class="sr">/s</span><span class="n">tyles</span>
+</span><span class='line'>  <span class="n">more_styles</span><span class="o">.</span><span class="n">css</span>
+</span><span class='line'>  <span class="n">some_styles</span><span class="o">.</span><span class="n">css</span>
+</span><span class='line'><span class="n">gulpfile</span><span class="o">.</span><span class="n">js</span>
+</span><span class='line'><span class="n">package</span><span class="o">.</span><span class="n">json</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Notice the more_styles.css and some_styles.css files are still in our build folder. :(
+</p>
+
+
+
+
+<p>
+  We don’t want those chumps there anymore. In the next chapter we will learn how to
+  get rid of those files.
+</p>
+
+
+
+
+<p>
+  So far so good, That’s it!!! See ya!!! :)
+</p>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Bunlong Van</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-09-13T09:35:00+07:00" pubdate data-updated="true">Sep 13<span>th</span>, 2016</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/gulp/'>Gulp</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://geekhmer.github.io/blog/2016/09/13/gulp-concat-combining-multiple-files-into-one/" data-via="" data-counturl="http://geekhmer.github.io/blog/2016/09/13/gulp-concat-combining-multiple-files-into-one/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2016/08/28/gulp-moving-files/" title="Previous Post: Gulp – Moving Files">&laquo; Gulp – Moving Files</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Like To News Article</h1>
+  <ul>
+    <li>
+      <div class="fb-page" data-href="https://www.facebook.com/geekhmer" data-small-header="false" data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true" data-show-posts="false"><div class="fb-xfbml-parse-ignore"><blockquote cite="https://www.facebook.com/geekhmer"><a href="https://www.facebook.com/geekhmer">GeeKhmer</a></blockquote></div></div>
+    </li>
+  </ul>
+</section><section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/09/13/gulp-concat-combining-multiple-files-into-one/">Gulp – Concat: Combining Multiple Files Into One</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/28/gulp-moving-files/">Gulp – Moving Files</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/28/gulp-hello-world/">Gulp – Hello World</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/28/gulp-installation/">Gulp – Installation</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/09/what-is-gulp/">What Is Gulp?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/07/25/facebook-fan-page-auto-like-revised/">Facebook Fan Page Auto Like - Revised</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/07/22/application-steps-for-applying-to-study-masters-in-computer-science-at-maharishi-university-of-management-usa/">Application Steps for Applying to Study Masters in Computer Science at MAHARISHI UNIVERSITY of MANAGEMENT USA</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Category</h1>
+  <ul id="recent_posts">
+    
+      <li>
+        <a href="/blog/categories/facebook/">Facebook [ 5 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby/">Ruby [ 108 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/heroku/">Heroku [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 104 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/testing/">Testing [ 5 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/layout/">Layout [ 3 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/ruby-metaprogramming/">Ruby metaprogramming [ 4 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/websocket/">Websocket [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/front-end-mvc-framework/">Front-end mvc framework [ 1 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/javascript/">Javascript [ 25 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/erlang/">Erlang [ 20 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/design-pattern/">Design pattern [ 1 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/other/">Other [ 40 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/reactjs/">Reactjs [ 18 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/startup/">Startup [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/cambodia-hacker-place/">Cambodia hacker place [ 2 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/gulp/">Gulp [ 5 ]</a>
+      </li>
+    
+  </ul>
+</section><section>
+  <h1>Notes</h1>
+  <ul id="recent_posts">
+    <li>
+      <a href="http://vimcommands.github.io/" target="_blank">Vim Commands</a>
+    </li>
+    <li>
+      <a href="http://ruby-hacking-style-guide.github.io/" target="_blank">Ruby Hacking Style Guide</a>
+    </li>
+  </ul>
+</section><section>
+  <h1>References</h1>
+  <ul id="recent_posts">
+    <li>
+      <a href="http://www.erlang.org/" target="_blank">
+        <img src="/images/logo_erlang.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://www.chicagoboss.org/" target="_blank">
+        <img src="/images/logo_chicagoboss.svg" />
+      </a>
+    </li>
+    <li>
+      <a href="https://www.ruby-lang.org/en/" target="_blank">
+        <img src="/images/logo_ruby.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://guides.rubyonrails.org" target="_blank">
+        <img src="/images/logo_rails_guides.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://railscasts.com" target="_blank">
+        <img src="/images/logo_rails_casts.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://github.com" target="_blank">
+        <img src="/images/logo_github.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://www.linode.com" target="_blank">
+        <img src="/images/logo_linode.png" />
+      </a>
+    </li>
+    <li>
+      <a href="http://newrelic.com" target="_blank">
+        <img src="/images/logo_newrelic.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://developers.facebook.com/" target="_blank">
+        <img src="/images/logo_facebook.png" />
+      </a>
+    </li>
+    <li>
+      <a href="https://facebook.github.io/react/" target="_blank">
+        <img src="/images/logo_react.png" />
+      </a>
+    </li>
+  </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 GeeKhmer in Phnom Penh, Cambodia.
+</p>
+
+</footer>
+  
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=1451301955117043&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
