@@ -79,6 +79,437 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/06/06/how-to-use-link-to-in-ruby-on-rails/">How to Use Link_to in Ruby on Rails?</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-06-06T21:39:00+07:00" pubdate data-updated="true">Jun 6<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="How to Use link_to in Ruby on Rails?" />
+</p>
+
+
+
+
+<p>
+  Even after many years of using Ruby on Rails I still have trouble remembering how to properly use all those options available for the link_to helper. Three out of five times I have to fire up the docs and search for the examples (cause that&#8217;s how I like to read the docs).
+</p>
+
+
+
+
+<p>
+  <strong>Having Documentation in Hand</strong><br/>
+  Using documentation locally is helpful, especially if you can integrate it into your editor. Personally I&#8217;m using the <code>ri</code> docs with Vim but I guess all those other editors can be configured to access it. If not you can always use ri in your terminal of choice.
+</p>
+
+
+
+
+<p>
+  Another favourite of mine is the awesome ApiDock. You can even see other people&#8217;s comments on the docs and in many cases there you can find examples that are not present in the official docs.
+</p>
+
+
+
+
+<p>
+  Another very good option (if you&#8217;re on a mac) is to use Dash. It&#8217;s easy to integrate in your editor or you can just fire it up with a system shortcut whenever you need to access the docs.
+</p>
+
+
+
+
+<p>
+  That being said, I&#8217;m gonna list out a few of the more common examples I use in hopes that they will be useful for both you and me whenever I need to revisit <code>link_to</code>&#8217;s docs again.
+</p>
+
+
+
+
+<p>
+  <strong>The Simplest Form</strong><br/>
+  The most common and straightforward way of using <code>link_to</code> is to create a barebones (no magic) link. So, assuming your root route points to &#8216;/&#8217;, the way you would use the helper is:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= link_to &quot;Home&quot;, root_path %&gt;</span>
+</span><span class='line'><span class="sx"># =</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/&quot;</span><span class="o">&gt;</span><span class="no">Home</span><span class="o">&lt;</span><span class="sr">/a&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Link-ing to a Resource</strong><br/>
+  Another common variant is linking to a resource (a user&#8217;s profile for example). Let&#8217;s say the user&#8217;s model is called User and that a @user ivar points to the user record who&#8217;s id is 1. Creating a link to the user&#8217;s profile will look like the following:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= link_to &quot;Profile&quot;, user_path(@user) %&gt;</span>
+</span><span class='line'><span class="sx"># =</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/users/1&quot;</span><span class="o">&gt;</span><span class="no">Profile</span><span class="o">&lt;</span><span class="sr">/a&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  There&#8217;s also a shorter version that will do the same thing. It&#8217;s got some magic to it (like most things in Rails) but it also looks prettier and there&#8217;s less to type (two stones with one bird).
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= link_to &quot;Profile&quot;, @user %&gt;</span>
+</span><span class='line'><span class="sx"># =</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/users/1&quot;</span><span class="o">&gt;</span><span class="no">Profile</span><span class="o">&lt;</span><span class="sr">/a&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Using link_to with a Block</strong><br/>
+  This is somewhat of a lesser known/used option of <code>link_to</code> but it&#8217;s useful nonetheless and it also makes the code more readable. So in those cases where the link text is long and/or ugly, or it doesn&#8217;t really fit on a 80 chars line, you can pass the link text inside a block.
+</p>
+
+
+
+
+<p>
+  To make the example more obvious, I&#8217;m gonna do a before and after kind of thing.
+</p>
+
+
+
+
+<p>
+  Before:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= link_to &quot;&lt;span class=</span><span class="s1">&#39;home-link&#39;</span><span class="o">&gt;</span><span class="no">Home</span><span class="o">&lt;</span><span class="sr">/span&gt;&quot;.html_safe, root_path %&gt;</span>
+</span><span class='line'><span class="sr"># =&gt; &lt;a href=&quot;/</span><span class="s2">&quot;&gt;&lt;span class=&quot;</span><span class="n">home</span><span class="o">-</span><span class="n">link</span><span class="s2">&quot;&gt;Home&lt;/span&gt;&lt;/a&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  After:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= link_to root_path do %&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%=</span> <span class="n">content_tag</span> <span class="ss">:span</span><span class="p">,</span> <span class="s2">&quot;Home&quot;</span><span class="p">,</span> <span class="ss">:class</span> <span class="o">=&gt;</span> <span class="s2">&quot;home-link&quot;</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">&lt;% end %&gt;</span>
+</span><span class='line'><span class="c1"># =&gt; &lt;a href=&quot;/&quot;&gt;&lt;span class=&quot;home-link&quot;&gt;Home&lt;/span&gt;&lt;/a&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  In this case I&#8217;ve purposely chosen a less uglier link text, but usually the link text will be something like an image tag or a span with an icon inside it (or any other ugly html code you can think of).
+</p>
+
+
+
+
+<p>
+  <strong>Adding html classes and/or id to Your Link</strong><br/>
+  Another very common task you&#8217;ll use is to add a html class or id to your links.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= link_to &quot;Section&quot;, root_path, :class =</span><span class="o">&gt;</span> <span class="s2">&quot;my-class&quot;</span><span class="p">,</span> <span class="ss">:id</span> <span class="o">=&gt;</span> <span class="s2">&quot;my-id&quot;</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx"># =&gt;</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;my-class&quot;</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;my-id&quot;</span><span class="o">&gt;</span><span class="no">Section</span><span class="o">&lt;</span><span class="sr">/a&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>How to Delete a Record with link_to</strong><br/>
+  Calling the <code>destroy</code> action of a REST-ful controller requires a <code>DELETE</code> request and that can be easily achieved by passing the <code>:method => :delete</code> hash as an option to the <code>link_to</code> helper.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= link_to &quot;Remove&quot;, @user, :method =</span><span class="o">&gt;</span> <span class="ss">:delete</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx"># =&gt;</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">rel</span><span class="o">=</span><span class="s2">&quot;nofollow&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">method</span><span class="o">=</span><span class="s2">&quot;delete&quot;</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/users/1&quot;</span><span class="o">&gt;</span><span class="no">Remove</span><span class="o">&lt;</span><span class="sr">/a&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Note that the <code>rel="nofollow"</code> is auto-magically added by Rails as an SEO bonus.
+</p>
+
+
+
+
+<p>
+  <strong>Require Confirmation for Deleting a Record</strong><br/>
+  You will probably want some sort of confirmation when removing objects to prevent accidental deletes. The easiest way to add that is with a simple javascript alert box that will ask the user to confirm his delete request.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= link_to &quot;Remove&quot;, @user, :method =</span><span class="o">&gt;</span> <span class="ss">:delete</span><span class="p">,</span> <span class="ss">:data</span> <span class="o">=&gt;</span> <span class="p">{</span><span class="ss">:confirm</span> <span class="o">=&gt;</span> <span class="s2">&quot;You Sure?&quot;</span><span class="p">}</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx"># =&gt;</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">data</span><span class="o">-</span><span class="n">confirm</span><span class="o">=</span><span class="s2">&quot;You Sure?&quot;</span> <span class="n">rel</span><span class="o">=</span><span class="s2">&quot;nofollow&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">method</span><span class="o">=</span><span class="s2">&quot;delete&quot;</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/users/1&quot;</span><span class="o">&gt;</span><span class="no">Remove</span><span class="o">&lt;</span><span class="sr">/a&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Link-ing to an Image with link_to</strong><br/>
+  It might be that you want to make your links prettier or that you want to have some nice buttons, or even a logo click-able or whatever the reason for using click-able images is, you&#8217;ll want to add your image inside the link. Making an image link-able is pretty straight forward. Just add the <code>image_tag</code> where the link text would go and you&#8217;re done.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= link_to image_tag(&#39;logo.png&#39;), root_path %&gt;</span>
+</span><span class='line'><span class="sx"># =</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/&quot;</span><span class="o">&gt;&lt;</span><span class="n">img</span> <span class="n">src</span><span class="o">=</span><span class="s2">&quot;/assets/logo-c88948e05e11587af2c23747862ca433.png&quot;</span> <span class="n">alt</span><span class="o">=</span><span class="s2">&quot;Logo&quot;</span><span class="o">&gt;&lt;</span><span class="sr">/a&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  You can also pass the image in a block if you like that style better.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= link_to root_path do %&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%=</span> <span class="n">image_tag</span><span class="p">(</span><span class="s1">&#39;logo.png&#39;</span><span class="p">)</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">&lt;% end %&gt;</span>
+</span><span class='line'><span class="c1"># =&gt; &lt;a href=&quot;/&quot;&gt;&lt;img src=&quot;/assets/logo-c88948e05e11587af2c23747862ca433.png&quot; alt=&quot;Logo&quot;&gt;&lt;/a&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  A nice side-effect of using the <code>image_tag</code> helper is that it will add the asset digest to your image.
+</p>
+
+
+
+
+<p>
+  <strong>Adding an alt Attribute to the Image</strong><br/>
+  As you&#8217;ve seen in the previous example, I didn&#8217;t specify an alt attribute but the link_to helper generated one. The generated alt tag is just the name of the image file, capitalized. In case you want (and you should want) to override the alt attribute, it&#8217;s very easy to do; just add your own alt attribute like so:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= link_to image_tag(&#39;logo.png&#39;), root_path, :alt =</span><span class="o">&gt;</span> <span class="s2">&quot;MyLogo&quot;</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx"># =&gt;</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/&quot;</span><span class="o">&gt;&lt;</span><span class="n">img</span> <span class="n">src</span><span class="o">=</span><span class="s2">&quot;/assets/logo-c88948e05e11587af2c23747862ca433.png&quot;</span> <span class="n">alt</span><span class="o">=</span><span class="s2">&quot;MyLogo&quot;</span><span class="o">&gt;&lt;</span><span class="sr">/a&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Alt attributes are beneficial for SEO purposes and they also aid those visitors who use text readers or non graphical browsers.
+</p>
+
+
+
+
+<p>
+  <strong>Link-ing to an Image</strong><br/>
+  There are times when you might want to link to an image (not necessarily with an image). This can be confusing because you need your image to contain the image digest generated by the asset pipeline. There&#8217;s a helper that provides just that and it&#8217;s called <code>image_path</code>.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= link_to &quot;Logo&quot;, image_path(&#39;logo.png&#39;) %&gt;</span>
+</span><span class='line'><span class="sx"># =</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/assets/logo-c88948e05e11587af2c23747862ca433.png&quot;</span><span class="o">&gt;</span><span class="no">Logo</span><span class="o">&lt;</span><span class="sr">/a&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Anchors with link_to</strong><br/>
+  You might need to point to a specific section (anchor) in the page which you can identify by it&#8217;s dom ID. So let&#8217;s say on the target page we have a section that has the <code>id="interesting-section"</code>. In order to point our link to that section, we&#8217;ll need to add the anchor to the generated link.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= link_to &quot;Section&quot;, root_path(:anchor =</span><span class="o">&gt;</span> <span class="s2">&quot;interesting-section&quot;</span><span class="p">)</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx"># =&gt;</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/#interesting-section&quot;</span><span class="o">&gt;</span><span class="no">Section</span><span class="o">&lt;</span><span class="sr">/a&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Ajax Links with link_to Remote</strong><br/>
+  You can add the <code>:remote => true</code> option to the link to tell Rails that you want to handle the link via javascript. This option will automatically send an ajax request (handled via the jQuery UJS adapter).
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= link_to &quot;Ajax&quot;, root_path, :remote =</span><span class="o">&gt;</span> <span class="kp">true</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx"># =&gt;</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">data</span><span class="o">-</span><span class="n">remote</span><span class="o">=</span><span class="s2">&quot;true&quot;</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/&quot;</span><span class="o">&gt;</span><span class="no">Ajax</span><span class="o">&lt;</span><span class="sr">/a&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Opening the link in a new tab or window</strong><br/>
+  For a good user experience and because you&#8217;ll want your user not to leave your website if possible, you should make all your external links open in a separate tab or window. You can achieve this by using the <code>target="_blank"</code> html attribute which in Rails speak will look like this:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= link_to &quot;Google&quot;, &quot;http://google.com&quot;, :target =</span><span class="o">&gt;</span> <span class="s2">&quot;_blank&quot;</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx"># =&gt;</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">target</span><span class="o">=</span><span class="s2">&quot;_blank&quot;</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;http://google.com&quot;</span><span class="o">&gt;</span><span class="no">Google</span><span class="o">&lt;</span><span class="sr">/a&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>POST-ing Using link_to</strong><br/>
+  Sending a post request via a link is something that the html cannot do. You can only use it to make <code>GET</code> requests, not <code>POST</code>. That being said, Rails has some magic tricks for you.
+</p>
+
+
+
+
+<p>
+  By providing the <code>:method => :post</code> option, Rails will create a form and submit it via javascript. Note that you need the <code>jquery-rails</code> gem for this to work, if you don&#8217;t have it, there won&#8217;t be any magic happening and your links will default to a GET request.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= link_to &quot;Post&quot;, root_path, :method =</span><span class="o">&gt;</span> <span class="ss">:post</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx"># =&gt;</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">rel</span><span class="o">=</span><span class="s2">&quot;nofollow&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">method</span><span class="o">=</span><span class="s2">&quot;post&quot;</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/&quot;</span><span class="o">&gt;</span><span class="no">Post</span><span class="o">&lt;</span><span class="sr">/a&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Adding More Params to the POST Request</strong><br/>
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= link_to &quot;Create User&quot;, users_path(:email =</span><span class="o">&gt;</span> <span class="s2">&quot;jdoe@email.com&quot;</span><span class="p">,</span> <span class="ss">:password</span> <span class="o">=&gt;</span> <span class="s2">&quot;secret&quot;</span><span class="p">),</span> <span class="ss">:method</span> <span class="o">=&gt;</span> <span class="ss">:post</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx"># =&gt;</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">rel</span><span class="o">=</span><span class="s2">&quot;nofollow&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">method</span><span class="o">=</span><span class="s2">&quot;post&quot;</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/users?email=jdoe%40email.com&amp;amp;password=secret&quot;</span><span class="o">&gt;</span><span class="no">Create</span> <span class="no">User</span><span class="o">&lt;</span><span class="sr">/a&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  These are some of the more common ways I&#8217;ve used link_to but I&#8217;m sure there are many others. So if you have any other examples I could add to the article.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/06/05/how-to-spend-less-time-and-money-on-growing-your-business/">How to Spend Less Time and Money on Growing Your Business?</a></h1>
     
     
@@ -1680,183 +2111,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/05/13/awesome-jquery-tricks/">Awesome jQuery Tricks</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-05-13T12:30:00+07:00" pubdate data-updated="true">May 13<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/jquery_logo.png" width="500" alt="Awesome jQuery Tricks" />
-</p>
-
-
-
-
-<p>
-  As we all know, jQuery is an awesome library and has transformed the internet as we know it. In this article we will cover 5 extremely useful jQuery tricks that you can use in your sites. Let&#8217;s get started.
-</p>
-
-
-
-
-<p>
-  <strong>Gracefully Degrade Broken Images</strong><br/>
-  Broken images can be a pain to deal with. They degrade the user experience and can be difficult to find without scanning your site regularly with a 3rd party tool. Luckily it&#8217;s easy to substitute broken images with an image that you specify using jQuery. the <code>error</code> callback of an image gets fired any time an image can&#8217;t be successfully loaded by the browser. For example:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;img&#39;</span><span class="p">).</span><span class="nx">error</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
-</span><span class='line'>  <span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;src&#39;</span><span class="p">,</span> <span class="err">&#39;</span><span class="nx">images</span><span class="o">/</span><span class="nx">missing</span><span class="p">.</span><span class="nx">png</span><span class="err">’</span><span class="p">);</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The code above would replace any broken images with an image in the images folder called missing.png. You could also do something like make an AJAX request to your server to log the location of the broken image.
-</p>
-
-
-
-
-<p>
-  <strong>Wait For an Image to Be Loaded</strong><br/>
-  Sometimes you need to wait for an image to be loaded before continuing to process events. This is most often useful with libraries like the <a href="http://masonry.desandro.com/" target="_blank">jQuery Masonry library</a>, where images can affect the size of the overall content. Fortunately this is easy with the load callback. For example:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;img&#39;</span><span class="p">).</span><span class="nx">load</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="c1">// Do stuff here...</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The above code would wait for the image to be loaded and then execute the code specified in the callback.
-</p>
-
-
-
-
-<p>
-  <strong>Zebra Stripe a Table</strong><br/>
-  Sometimes we want our tables to alternating odd/even colors. While this is possible using CSS3, older browsers don&#8217;t support most CSS3 features. Using this script allows our tables to be striped across all browsers.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;table tr:even&#39;</span><span class="p">).</span><span class="nx">css</span><span class="p">(</span><span class="s1">&#39;background&#39;</span><span class="p">,</span> <span class="s1">&#39;#f7f7f7&#39;</span><span class="p">);</span> <span class="c1">// Strip every even row</span>
-</span><span class='line'><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;table tr:odd&#39;</span><span class="p">).</span><span class="nx">css</span><span class="p">(</span><span class="s1">&#39;background&#39;</span><span class="p">,</span> <span class="s1">&#39;#f7f7f7&#39;</span><span class="p">);</span> <span class="c1">// Stripe every odd row</span>
-</span><span class='line'><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;table &gt; tbody &gt; tr:even&#39;</span><span class="p">).</span><span class="nx">css</span><span class="p">(</span><span class="s1">&#39;background&#39;</span><span class="p">,</span> <span class="s1">&#39;#f7f7f7&#39;</span><span class="p">);</span> <span class="c1">// Only stripe the table body</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The above code will do striping as noted in the comments.
-</p>
-
-
-
-
-<p>
-  <strong>Preloading Images</strong><br/>
-  If your page uses a lot of images that aren&#8217;t visible initially, it might be worth it to preload them. This simple script listed below does exactly that.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">$</span><span class="p">.</span><span class="nx">preloadImages</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;&lt;img /&gt;&quot;</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;src&quot;</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">[</span><span class="nx">i</span><span class="p">]);</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">$</span><span class="p">.</span><span class="nx">preloadImages</span><span class="p">(</span><span class="s2">&quot;images/myimage1.jpg&quot;</span><span class="p">,</span><span class="s2">&quot;images/myimage2.jpg&quot;</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Detect Mobile Devices</strong><br/>
-  Sometimes we need a &#8216;check all&#8217; checkbox for our web pages that selects every checkbox in a fieldset. The code below lets you easily accomplish this.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.checkall&#39;</span><span class="p">).</span><span class="nx">click</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">parents</span><span class="p">(</span><span class="s1">&#39;fieldset:eq(0)&#39;</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;:checkbox&#39;</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;checked&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">checked</span><span class="p">);</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/9/">&larr; Older</a>
@@ -1872,6 +2126,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/09/26/gulp-cleaning-our-build-folder/">Gulp – Cleaning Our Build Folder</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2016/09/13/gulp-concat-combining-multiple-files-into-one/">Gulp – Concat: Combining Multiple Files Into One</a>
@@ -1895,10 +2153,6 @@
     
       <li class="post">
         <a href="/blog/2016/07/25/facebook-fan-page-auto-like-revised/">Facebook Fan Page Auto Like - Revised</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/07/22/application-steps-for-applying-to-study-masters-in-computer-science-at-maharishi-university-of-management-usa/">Application Steps for Applying to Study Masters in Computer Science at MAHARISHI UNIVERSITY of MANAGEMENT USA</a>
       </li>
     
   </ul>
@@ -1972,7 +2226,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/gulp/">Gulp [ 5 ]</a>
+        <a href="/blog/categories/gulp/">Gulp [ 6 ]</a>
       </li>
     
   </ul>
