@@ -79,6 +79,188 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/11/21/reactjs-mixins/">ReactJS Mixins</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-11-21T18:10:00+07:00" pubdate data-updated="true">Nov 21<span>st</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/reactjs.png" width="600" alt="ReactJS Mixins" />
+</p>
+
+
+
+
+<p>
+  Components are the best way to reuse code in React, but sometimes very different components may share some common functionality. These are sometimes called cross-cutting concerns. React provides mixins to solve this problem.
+</p>
+
+
+
+
+<p>
+  Example:
+</p>
+
+
+
+
+<p>
+  Let&#8217;s create a simple mixin that uses lifecycle methods for using in two components.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">meta</span> <span class="nx">charset</span><span class="o">=</span><span class="s2">&quot;UTF-8&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;&lt;</span><span class="err">/title&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;http://fb.me/react-0.12.2.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;http://fb.me/JSXTransformer-0.12.2.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/head&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/jsx&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">ReactMixin</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">getInitialState</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="p">{</span><span class="nx">count</span><span class="o">:</span> <span class="mi">0</span><span class="p">}</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">componentWillMount</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;will mount&#39;</span><span class="p">);</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">incrementCount</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span><span class="nx">count</span><span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">count</span><span class="o">+</span><span class="mi">1</span><span class="p">});</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">App</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
+</span><span class='line'>      <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span><span class="p">(</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+</span><span class='line'>            <span class="o">&lt;</span><span class="nx">Button</span> <span class="nx">txt</span><span class="o">=</span><span class="s2">&quot;this is the button&quot;</span> <span class="o">/&gt;</span>
+</span><span class='line'>            <span class="o">&lt;</span><span class="nx">br</span><span class="o">/&gt;</span>
+</span><span class='line'>            <span class="o">&lt;</span><span class="nx">Label</span> <span class="nx">txt</span><span class="o">=</span><span class="s2">&quot;this is the label&quot;</span> <span class="o">/&gt;</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="err">/div&gt;</span>
+</span><span class='line'>        <span class="p">);</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">Button</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
+</span><span class='line'>      <span class="nx">mixins</span><span class="o">:</span> <span class="p">[</span><span class="nx">ReactMixin</span><span class="p">],</span>
+</span><span class='line'>      <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="o">&lt;</span><span class="nx">button</span> <span class="nx">onClick</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">incrementCount</span><span class="p">}</span><span class="o">&gt;</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">txt</span><span class="p">}</span> <span class="o">-</span> <span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">count</span><span class="p">}</span><span class="o">&lt;</span><span class="err">/button&gt;</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">Label</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
+</span><span class='line'>      <span class="nx">mixins</span><span class="o">:</span> <span class="p">[</span><span class="nx">ReactMixin</span><span class="p">],</span>
+</span><span class='line'>      <span class="nx">componentWillMount</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">setInterval</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">incrementCount</span><span class="p">,</span> <span class="mi">1000</span><span class="p">);</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="o">&lt;</span><span class="nx">label</span><span class="o">&gt;</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">txt</span><span class="p">}</span> <span class="o">-</span> <span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">count</span><span class="p">}</span><span class="o">&lt;</span><span class="err">/label&gt;</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">ReactDOM</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="o">&lt;</span><span class="nx">App</span> <span class="o">/&gt;</span><span class="p">,</span> <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">);</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="err">/script&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/body&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far go good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/11/21/reactjs-component-lifecycle-unmounting/">ReactJS Component Lifecycle Unmounting</a></h1>
     
     
@@ -1699,187 +1881,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/11/07/reactjs-jsx/">ReactJS JSX</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-11-07T10:21:00+07:00" pubdate data-updated="true">Nov 7<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/reactjs.png" width="600" alt="ReactJS JSX" />
-</p>
-
-
-
-
-<p>
-  <strong>What is JSX?</strong><br/>
-  <a href="https://facebook.github.io/jsx/" target="_blank">JSX</a> is a JavaScript syntax extension that looks similar to XML. You can use a simple JSX transform with ReactJS.
-</p>
-
-
-
-
-<p>
-  It&#8217;s more familiar for casual developers such as designers.
-</p>
-
-
-
-
-<p>
-  XML has the benefit of balanced opening and closing tags. This helps make large trees easier to read than function calls or object literals.
-</p>
-
-
-
-
-<p>
-  <strong>Why JSX?</strong><br/>
-  You don&#8217;t have to use JSX with React. You can just use plain JS. However, we recommend using JSX because it is a concise and familiar syntax for defining tree structures with attributes.
-</p>
-
-
-
-
-<p>
-  <strong>How to use?</strong><br/>
-  To start using the JSX library, you need to download a single javascript file from <a href="https://facebook.github.io/react/docs/getting-started.html" target="_blank">Facebook Starter Kit</a> and include in header tag:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;JSXTransformer.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The JSX library can also be used directly from the <a href="https://cdnjs.com/libraries/react/" target="_blank">Facebook CDN</a> to increase the performance of the page load by including the link below in header tag:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;http://fb.me/JSXTransformer-0.12.2.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Example:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>helloworld.html </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">meta</span> <span class="nx">charset</span><span class="o">=</span><span class="s2">&quot;UTF-8&quot;</span> <span class="o">/&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;</span><span class="nx">Hello</span> <span class="nx">World</span><span class="o">&lt;</span><span class="err">/title&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;react.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;JSXTransformer.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="err">/head&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>      <span class="kd">var</span> <span class="nx">App</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
-</span><span class='line'>        <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>          <span class="k">return</span> <span class="p">(</span><span class="o">&lt;</span><span class="nx">h1</span><span class="o">&gt;</span><span class="nx">Hello</span> <span class="nx">World</span><span class="o">&lt;</span><span class="err">/h1&gt;);</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>      <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="nx">React</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="o">&lt;</span><span class="nx">App</span> <span class="o">/&gt;</span><span class="p">,</span> <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">);</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="err">/script&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="err">/body&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="err">/html&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Transform</strong><br/>
-  React JSX transforms from an XML-like syntax into native JavaScript. XML elements, attributes and children are transformed into arguments that are passed to <code>React.createElement</code>.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="c1">// Input (JSX):</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">App</span> <span class="o">/&gt;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Output (JS):</span>
-</span><span class='line'><span class="nx">React</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="nx">App</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/6/">&larr; Older</a>
@@ -1895,6 +1896,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/10/04/gulp-streams/">Gulp – Streams</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2016/10/03/gulp-minify-our-css/">Gulp – Minify Our CSS</a>
@@ -1918,10 +1923,6 @@
     
       <li class="post">
         <a href="/blog/2016/08/28/gulp-installation/">Gulp – Installation</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/08/09/what-is-gulp/">What Is Gulp?</a>
       </li>
     
   </ul>
@@ -1995,7 +1996,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/gulp/">Gulp [ 7 ]</a>
+        <a href="/blog/categories/gulp/">Gulp [ 8 ]</a>
       </li>
     
   </ul>
