@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2016-10-11T21:32:41+07:00</updated>
+  <updated>2016-10-11T22:10:58+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,139 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Gulp – Uglify]]></title>
+    <link href="http://geekhmer.github.io/blog/2016/10/11/gulp-uglify/"/>
+    <updated>2016-10-11T22:02:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2016/10/11/gulp-uglify</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/bunlong_gulp.jpg" width="600" alt="Gulp, Gulp – Uglify" />
+</p>
+
+
+
+
+<p>
+  For JavaScript files we also want to uglify them. Uglifying JavaScript involves changing variable and function names to reduce their size. So a variable named customer might be renamed to x. JavaScript engines don’t care about descriptive names, only developers. So how do we uglify JavaScript files with gulp?
+</p>
+
+
+
+
+<p>
+  I know what you are going to say: &#8220;Blah, blah, blah&#8230; there is a plugin.&#8221; and you are correct.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">npm</span> <span class="n">install</span> <span class="n">gulp</span><span class="o">-</span><span class="n">uglify</span> <span class="o">--</span><span class="n">save</span><span class="o">-</span><span class="n">dev</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  For more information on <code>gulp-uglify</code> check out <a href="https://www.npmjs.org/package/gulp-uglify" target="_blank">https://www.npmjs.org/package/gulp-uglify</a>.
+</p>
+
+
+
+
+<p>
+  While we are uglifying the file, we will also concat all our JavaScript files together and move them to <code>build/javascripts</code>.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>gulpfile.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="n">var</span> <span class="n">uglify</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s1">&#39;gulp-uglify&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">gulp</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;javascript&#39;</span><span class="p">,</span> <span class="n">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Validate, Concat, Uglify, and Move all the javascript files&quot;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">return</span> <span class="n">gulp</span><span class="o">.</span><span class="n">src</span><span class="p">(</span><span class="s2">&quot;contents/javascripts/**.js&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">jsValidate</span><span class="p">())</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="n">notify</span><span class="o">.</span><span class="n">onError</span><span class="p">(</span><span class="n">function</span><span class="p">(</span><span class="n">error</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">error</span><span class="o">.</span><span class="n">message</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}))</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">uglify</span><span class="p">())</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">concat</span><span class="p">(</span><span class="s1">&#39;main.js&#39;</span><span class="p">))</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">gulp</span><span class="o">.</span><span class="n">dest</span><span class="p">(</span><span class="s1">&#39;build/javascripts&#39;</span><span class="p">));</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  When you run our gulp javascript task now, we should see that our javascript files were uglified, concated, and moved to the build folder.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">gulp</span> <span class="n">javascript</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Using</span> <span class="n">gulpfile</span> <span class="o">~</span><span class="sr">/YOUR_DIRECTORY/</span><span class="n">gulpFile</span><span class="o">.</span><span class="n">js</span>
+</span><span class='line'><span class="no">Starting</span> <span class="s1">&#39;javascript&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="no">Validate</span><span class="p">,</span> <span class="no">Concat</span><span class="p">,</span> <span class="no">Uglify</span><span class="p">,</span> <span class="ow">and</span> <span class="no">Move</span> <span class="n">all</span> <span class="n">the</span> <span class="n">javascript</span> <span class="n">files</span>
+</span><span class='line'><span class="no">Finished</span> <span class="s1">&#39;javascript&#39;</span> <span class="n">after</span> <span class="mi">55</span> <span class="n">ms</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If you have an error here, be sure to check that your JavaScript is valid. Remember we were testing that last section.
+</p>
+
+
+
+
+<p>
+  The build script should create our <code>/build/javascripts/main.js</code> file.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>/build/javascripts/main.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">function</span> <span class="no">OMG</span><span class="p">(){</span><span class="n">var</span> <span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">;</span><span class="k">return</span> <span class="n">n</span><span class="o">+</span><span class="mi">10</span><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Gulp – Notify Pop Up]]></title>
@@ -3427,251 +3560,6 @@ The service command also provides some other methods such as <code>restart</code
 
 <p>
   So far so good take it easy&#8230; let create a Fun Workplace&#8230; :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Executing Background Tasks with Scheduler in Rails]]></title>
-    <link href="http://geekhmer.github.io/blog/2016/03/04/executing-background-tasks-with-scheduler-in-rails/"/>
-    <updated>2016-03-04T16:42:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2016/03/04/executing-background-tasks-with-scheduler-in-rails</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/happy_ruby_on_rails.jpg" width="400" alt="Executing Background Tasks with Scheduler in Rails" />
-</p>
-
-
-
-
-<p>
-  <a href="https://rubygems.org/gems/rufus-scheduler/versions/3.2.0" target="_blank">rufus-scheduler</a> is a handy gem that allows you to perform background jobs. In this article we will show you how to use rufus-scheduler in your Rails applications. Let&#8217;s get started:
-</p>
-
-
-
-
-<h3>Setup</h3>
-
-
-
-
-<p>
-  In order to use rufus-scheduler, we must first add the rufus-scheduler gem to our Gemfile. To do this, open up your Gemfile and add in the line listed below:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Gemfile </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;rufus-scheduler&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Run a bundle install to install the gem:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Great, we need to create an initializer that will contain the jobs we wish to schedule. Create a new initializer called scheduler.rb in the <code>config/initializers</code> directory and add in the code listed below:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>config/initializers/scheduler.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;rufus-scheduler&#39;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">scheduler</span> <span class="o">=</span> <span class="ss">Rufus</span><span class="p">:</span><span class="ss">:Scheduler</span><span class="o">::</span><span class="n">singleton</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># jobs go below here.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now we are ready to schedule jobs.
-</p>
-
-
-
-
-<h3>Scheduling the Jobs</h3>
-
-
-
-
-<p>
-  rufus-scheduler provides a simple syntax for scheduling jobs. You can schedule both one time jobs and recurring jobs. One time jobs can be either scheduled at a specific time, or you can tell rufus to wait a specific amount of time before running the job (a delayed job). For recurring jobs and delayed jobs, you can either use a simple plain English (30m = 30 minutes, etc.) format or you can use the cron format for scheduling jobs. For this article we&#8217;ll focus on the English format:
-</p>
-
-
-
-
-<p>
-  <strong>Recurring the Jobs</strong><br/>
-  Scheduling recurring jobs is easy. Simply use the following format in your scheduler.rb file:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>config/initializers/scheduler.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">scheduler</span><span class="o">.</span><span class="n">every</span> <span class="s1">&#39;5s&#39;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="c1"># do stuff</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The code above would perform your background task every 5 seconds. The list below will give you an idea of what time units are supported:
-</p>
-
-
-
-
-<p>
-  <strong>s</strong> Example: 5s - seconds, specifies the number of seconds you wish to wait.<br/>
-  <strong>m</strong> Example: 5m - the number of minutes you wish to wait.<br/>
-  <strong>h</strong> Example: 5h - the number of hours you wish to wait.<br/>
-  <strong>d</strong> Example: 5d - the number of days you wish to wait.<br/>
-  <strong>w</strong> Example: 5w - the number of weeks you wish to wait.<br/>
-  <strong>M</strong> Example: 5M - the number of months you wish to wait.<br/>
-  <strong>y</strong> Example: 1y - the number of years you wish to wait.
-</p>
-
-
-
-
-<p>
-  For example, the following code would tell rufus you wish to schedule a job for every 11 and a half hours:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>config/initializers/scheduler.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">scheduler</span><span class="o">.</span><span class="n">every</span> <span class="s1">&#39;11h30m&#39;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="c1"># do stuff</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Scheduling a delayed job is easy. The syntax is similar to the recurring syntax listed above, but we use the <code>.in</code> method instead of <code>.every</code>. For example, the following code would run a task 4 hours after the server starts:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>config/initializers/scheduler.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">scheduler</span><span class="o">.</span><span class="n">in</span> <span class="s1">&#39;4h&#39;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="c1"># do stuff</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Scheduling the Jobs for Specific Dates/Times</strong><br/>
-  You can also schedule a job for a specific date and time. To do this we use the at method. For example, the following code would run at 12:01am on December 1st, 2017:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>config/initializers/scheduler.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">scheduler</span><span class="o">.</span><span class="n">at</span> <span class="s1">&#39;2017/12/01 00:01:00&#39;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="c1"># do stuff</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<h3>Important Caveats</h3>
-
-
-
-
-<p>
-  1. Because rufus-scheduler runs in process, the scheduler will reset if your Rails server gets restarted. This means that the timer for your jobs will get reset, so don&#8217;t count on any monthly or yearly jobs getting called. If you need to persist jobs across server resets, use a job backend. We will show you how to do this in another article.<br/>
-  2. Rufus does not work with Active Job.<br/>
-  3. Some additional setup is needed for production environments (see below).
-</p>
-
-
-
-
-<h3>Production Setup</h3>
-
-
-
-
-<p>
-  Production servers require a bit of additional setup. On most production web servers, idle Ruby processes are killed. In order for rufus to work, you&#8217;ll need to stop this from happening. For Passenger/Nginx you can copy the following code below to your <code>nginx.conf</code> config file for your website after the line that says <code>passenger_enabled on;</code>.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>nginx.conf </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">passenger_spawn_method</span> <span class="n">direct</span><span class="p">;</span>
-</span><span class='line'><span class="n">passenger_min_instances</span> <span class="mi">1</span><span class="p">;</span>
-</span><span class='line'><span class="n">passenger_pool_idle_time</span> <span class="mi">0</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  rufus-scheduler is a simple, easy to use scheduler that provides great functionality. It can be used for stuff like sending emails, cleaning up temp files, and much more.
-</p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
 </p>
 
 ]]></content>
