@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2016-10-11T20:45:03+07:00</updated>
+  <updated>2016-10-11T21:32:41+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,150 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Gulp – Notify Pop Up]]></title>
+    <link href="http://geekhmer.github.io/blog/2016/10/11/gulp-notify-pop-up/"/>
+    <updated>2016-10-11T21:11:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2016/10/11/gulp-notify-pop-up</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/bunlong_gulp.jpg" width="600" alt="Gulp, Gulp – Notify Pop Up" />
+</p>
+
+
+
+
+<p>
+  In the previous article, we used gulp to validate our JavaScript. The error message would appear in the console. While this is awesome, there is a chance we could miss it.
+</p>
+
+
+
+
+<p>
+  Let’s use notifications to display a pop up window when we have a JavaScript error.
+</p>
+
+
+
+
+<p>
+  There is a gulp plugin to send notifications.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">npm</span> <span class="n">install</span> <span class="n">gulp</span><span class="o">-</span><span class="n">notify</span> <span class="o">--</span><span class="n">save</span><span class="o">-</span><span class="n">dev</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  For more information on <code>gulp-notify</code> check out <a href="https://www.npmjs.org/package/gulp-notify" target="_blank">https://www.npmjs.org/package/gulp-notify</a>
+</p>
+
+
+
+
+<p>
+  Remember that gulp uses node’s streaming. It shouldn’t be a surprise that when <code>gulp-jsvalidate</code> finds an error, it emits an error event.
+</p>
+
+
+
+
+<p>
+  All we need to do is handle the event and use <code>gulp-notify</code> to send a notification with the error message.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>gulpfile.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="n">var</span> <span class="n">notify</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s1">&#39;gulp-notify&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="n">gulp</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;javascript&#39;</span><span class="p">,</span> <span class="n">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Validate JavaScript&quot;</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">gulp</span><span class="o">.</span><span class="n">src</span><span class="p">(</span><span class="s2">&quot;contents/javascripts/**.js&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">jsValidate</span><span class="p">())</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="n">notify</span><span class="o">.</span><span class="n">onError</span><span class="p">(</span><span class="n">function</span><span class="p">(</span><span class="n">error</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">error</span><span class="o">.</span><span class="n">message</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}));</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Since our JavaScript is now valid, we need to make it invalid so we can see the error message.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>/contests/javascript/somejs.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">function</span> <span class="no">OMG</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">var</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">10</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now when we run gulp javascript we will get a notification window that an error was found.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">gulp</span> <span class="n">javascript</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Using</span> <span class="n">gulpfile</span> <span class="o">~</span><span class="sr">/YOUR_DIRECTORY/</span><span class="n">gulpFile</span><span class="o">.</span><span class="n">js</span>
+</span><span class='line'><span class="no">Starting</span> <span class="s1">&#39;javascript&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="no">Validate</span> <span class="no">JavaScript</span>
+</span><span class='line'><span class="n">gulp</span><span class="o">-</span><span class="ss">notify</span><span class="p">:</span> <span class="o">[</span><span class="no">Error</span> <span class="n">running</span> <span class="no">Gulp</span><span class="o">]</span> <span class="no">Line</span> <span class="mi">3</span><span class="p">:</span> <span class="no">Unexpected</span> <span class="n">token</span> <span class="o">*</span>
+</span><span class='line'><span class="s1">&#39;javascript&#39;</span> <span class="n">errored</span> <span class="n">after</span> <span class="mi">41</span> <span class="n">ms</span> <span class="no">Line</span> <span class="mi">3</span><span class="p">:</span> <span class="no">Unexpected</span> <span class="n">token</span> <span class="o">*</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Gulp – Validate JavaScript]]></title>
@@ -3528,125 +3672,6 @@ The service command also provides some other methods such as <code>restart</code
 
 <p>
   So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[4 Startups Mark Zuckerberg Created Before Facebook]]></title>
-    <link href="http://geekhmer.github.io/blog/2016/03/01/4-startups-mark-zuckerberg-created-before-facebook/"/>
-    <updated>2016-03-01T14:19:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2016/03/01/4-startups-mark-zuckerberg-created-before-facebook</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/facebook.jpg" width="500" alt="4 Startups Mark Zuckerberg Created Before Facebook" />
-</p>
-
-
-
-
-<p>
-  <strong>1. ZuckNet</strong><br/>
-  Mark’s father – Edward Zuckerberg was a dental practitioner, who ran his clinic from the first floor of their home. This made communication between the family members a hassle, because everyone was always running up and down the stairs. To combat with this problem, 11 year old Zuckerberg came up with the idea of an intranet that allowed anyone to login from any computer in the house and send a message. This served as an instant chat system, that was exclusive just to the Zuckerberg family. Randi Zukerberg, Mark’s elder sister, later told People.com how his this was &#8220;the first example of when he started building things-and he never stopped.&#8221;
-</p>
-
-
-
-
-<p>
-  Another interesting fact about ZuckNet is that it was quite similar to the very popular AOL instant that into existence, later the same year. To quote Randi again, Mark was &#8216;10 levels ahead&#8217; even at 11.
-</p>
-
-
-
-
-<p>
-  <strong>2. Synapse Media Player</strong><br/>
-</p>
-
-
-
-
-<p>
-  <img src="http://geekhmer.github.io/images/synapse.jpg" width="500" alt="4 Startups Mark Zuckerberg Created Before Facebook" />
-</p>
-
-
-
-
-<p>
-  In high school, Zuckerberg wrote a computer program that used machine learning to determine a user&#8217;s music listening habits and recommended more music based on the genre, artist, taste, which was pretty much like what Last.fm does today. This app was built in 2000, and was featured by SlashDot and PC magazine back then with an amazing review + a rating of 3 on 5.
-</p>
-
-
-
-
-<p>
-  Both Microsoft and AOL approached Zuckerberg for buying Synapse + a job offer, but he turned them down and posted the app online for free. He also turned down a full-time employment opportunity at the two corporate giants and went on to enroll at Harvard.
-</p>
-
-
-
-
-<p>
-  An excerpt from the review: &#8220;This is by far the most innovative media player I have see to date the only function I find it lacking is a more advanced tag editor and the ability to group by Album.&#8221;
-</p>
-
-
-
-
-<p>
-  <strong>3. CourseMatch</strong><br/>
-  By the time Zuckerberg started classes at Harvard, he was already known as the, &#8216;Programming prodigy&#8217;. As an early project in his sophomore year, he started CourseMatch, which helped the students at Harvard in picking the courses they want, at the start of every semester. Through CourseMatch, you could see the number of students enrolled in a particular course and a list of all the people who signed up for the same course, allowing you to find out all the courses your class-mates were taking, before making a choice.
-</p>
-
-
-
-
-<p>
-  <strong>4. FaceMash</strong><br/>
-</p>
-
-
-
-
-<p>
-  <img src="http://geekhmer.github.io/images/facemash.jpg" width="500" alt="4 Startups Mark Zuckerberg Created Before Facebook" />
-</p>
-
-
-
-
-<p>
-  FaceMash is by far the most talked about things that Zuckerberg created as it is said to have initiated the beginning of Facebook. FaceMash presented the user with two pictures of either male or female students at Harvard and asked them to choose the better looking one.
-</p>
-
-
-
-
-<p>
-  Arie Hasit, Zuckerberg&#8217;s room-mate at Harvard explained that he had built the Website &#8216;just for fun&#8217;.
-</p>
-
-
-
-
-<p>
-  The Website soon went viral after its launch over the weekend. The traffic was so overwhelming that it lead to the shutting down of one of the Harvard’s network switches making it impossible for a group of students to access the internet.
-</p>
-
-
-
-
-<p>
-  The site was taken down by Harvard management four hours later, after multiple complaints from students stating that their pictures were used in FaceMash without prior permission.
-</p>
-
-
-
-
-<p>
-  FaceMash also landed Zuckerberg into trouble.He was brought before the administrative board and was charged with  violation of internet privacy rules and reach of computer security. He was made to publicly apologize, while the student paper wrote articles about how &#8216;inappropriate the whole concept of FaceMash was&#8217;.
 </p>
 
 ]]></content>
