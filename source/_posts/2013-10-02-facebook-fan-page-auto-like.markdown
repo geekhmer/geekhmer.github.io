@@ -85,3 +85,7 @@ description: Facebook fan page auto Like
 <p>
   You can download the <a href="https://github.com/Bunlong/facebook_auto_like" target="_blank">source code</a> and try it out.
 </p>
+
+<p>
+  The code in this article is no longer working. Here is "<a href="http://geekhmer.github.io/blog/2016/07/25/facebook-fan-page-auto-like-revised/" target="_blank">Facebook Fan Page Auto Like - Revised</a>"
+</p>
