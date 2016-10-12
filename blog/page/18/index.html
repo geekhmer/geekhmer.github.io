@@ -79,6 +79,276 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/01/17/erlang-modules-and-compiling/">Erlang Modules and Compiling</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-17T11:09:00+07:00" pubdate data-updated="true">Jan 17<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/logo_erlang.png" alt="Erlang Variables" />
+</p>
+
+
+
+
+<p>
+  Erlang code is divided into modules. A module consists of a sequence of attributes and function declarations, each terminated by period (.). It provided the contained functions with a common namespace as well, You can imagine a module as a package in Java, or a header file in C. Program in Erlang spans over more than one modules.
+</p>
+
+
+
+
+<p>
+  Example:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>m.erl </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">-</span><span class="n">module</span><span class="p">(</span><span class="n">m</span><span class="p">)</span><span class="o">.</span>          <span class="o">%</span> <span class="k">module</span> <span class="nn">attribute</span>
+</span><span class='line'><span class="o">-</span><span class="n">export</span><span class="p">(</span><span class="o">[</span><span class="n">fact</span><span class="o">/</span><span class="mi">1</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>   <span class="o">%</span> <span class="k">module</span> <span class="nn">attribute</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">fact</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="k">when</span> <span class="n">N</span><span class="o">&gt;</span><span class="mi">0</span> <span class="o">-&gt;</span>  <span class="sx">% beginning </span><span class="n">of</span> <span class="n">function</span> <span class="n">declaration</span>
+</span><span class='line'>  <span class="n">N</span> <span class="o">*</span> <span class="n">fact</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>     <span class="o">%</span>  <span class="o">|</span>
+</span><span class='line'><span class="n">fact</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span>           <span class="sx">%  </span><span class="o">|</span>
+</span><span class='line'>  <span class="mi">1</span><span class="o">.</span>                 <span class="o">%</span> <span class="k">end</span> <span class="n">of</span> <span class="n">function</span> <span class="n">declaration</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <h3>Defining Modules</h3>
+  Assume that we want to create a module that will contain our own implementation of list functions and name it mlists.<br/>
+  First, we create a file named mlists.erl that will contain the module. The container file and the module names have to be the same.
+</p>
+
+
+
+
+<p>
+  <h3>Calling a Module&#8217;s Function</h3>
+  The calling function of a module, convention in Erlang is <code>module:function(argument1, argument2, ...)</code>.
+</p>
+
+
+
+
+<p>
+  Example:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">max</span><span class="p">(</span><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="mi">3</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <h3>Calling a Module Function within the Module</h3>
+  A function defined within the module file can be called either as <code>module_name:function(arguments1, argument2, ...)</code>, or <code>function(arguments1, argument2, ...)</code>, so the module name can be skipped.
+</p>
+
+
+
+
+<p>
+  <h3>Modules Attributes</h3>
+  Then we need to define the module’s attributes. An attribute is the information that we provide to the Erlang compiler. It is placed as a directive (usually) in the top of the file and has the <code>-attribute_name(attribue_value(s)).</code> format. The one attribute that we have to define is the one providing the module name.
+</p>
+
+
+
+
+<p>
+  <strong>-module(Module).</strong><br/>
+  Module declaration, defining the name of the module. The name Module, an atom, should be the same as the file name minus the extension erl. Otherwise code loading will not work as intended. 
+</p>
+
+
+
+
+<p>
+  Example in the top of mlists.erl place:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>mlists.erl </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">-</span><span class="n">module</span><span class="p">(</span><span class="n">mlists</span><span class="p">)</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>-export(Functions).</strong><br/>
+  Exported functions is used to define which functions the module exports, where &#8220;exports&#8221; means that they will be available to be called outside the module.
+</p>
+
+
+
+
+<p>
+  All the functions that are not exported by the module are only visible within the file, similar with the private functions in Ruby, Java and the static ones in C.
+</p>
+
+
+
+
+<p>
+  Example:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>mlists.erl </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">-</span><span class="n">module</span><span class="p">(</span><span class="n">mlists</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">-</span><span class="n">export</span><span class="p">(</span><span class="o">[</span><span class="n">function1</span><span class="o">/</span><span class="n">arity1</span><span class="p">,</span> <span class="n">function2</span><span class="o">/</span><span class="n">arity2</span><span class="p">,</span> <span class="o">.</span><span class="n">.</span><span class="o">.]</span><span class="p">)</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>-import(Module,Functions).</strong></br>
+  You can use this directive in order to import the selected exported functions of a module in the namespace of another one. It means that if you do so, you will be able to call the functions without the module prefix. Although in some cases it could be convenient, it is not recommended to use this directive, because it decreases the code’s readability.
+</p>
+
+
+
+
+<p>
+  <strong>-compile(Options).</strong><br/>
+  Compile is used to pass compilation instructions to the compiler.
+</p>
+
+
+
+
+<p>
+  Example:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">-</span><span class="n">compile</span><span class="p">(</span><span class="o">[</span><span class="n">export_all</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>-on_load(Function).</strong><br/>
+  Names a function that should be run automatically when a module a loaded.
+</p>
+
+
+
+
+<p>
+  <h3>Compiling Modules</h3>
+  Erlang programs must be compiled to object code. The compiler can generate a new file which contains the object code. The current abstract machine which runs the object code is called BEAM. To compile the modules start an Erlang emulator on the folder that contains your source files. In order to compile a .erl, using <code>c(Module)</code> Bult-in Function.
+</p>
+
+
+
+
+<p>
+  Example:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="n">c</span><span class="p">(</span><span class="n">mlist</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="n">mlist</span><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If there is no error occurs, the compiler generates the compiled .beam file.
+</p>
+
+
+
+
+<p>
+  <h3>Loading a Module</h3>
+  The object code must be loaded into the Erlang runtime system. To load the modules start an Erlang emulator on the folder that contains your source files. In order to load a compiled module .beam, using <code>l(Module)</code> Bult-in Function.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="n">l</span><span class="p">(</span><span class="n">mlist</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="p">{</span><span class="n">module</span><span class="p">,</span> <span class="n">mlist</span><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  I promise, from now on the posts will be far more interesting. Next one, or two posts will be about defining functions in Erlang. You can imagine how important functions are for a functional programming language. see ya! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/01/16/erlang-datatypes/">Erlang Datatypes</a></h1>
     
     
@@ -1778,168 +2048,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/31/private-doesnt-apply-to-class-method-and-define-method/">Private Doesn&#8217;t Apply to Class Method and Define Method</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-31T11:00:00+07:00" pubdate data-updated="true">Dec 31<span>st</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/rights_and_wrongsof_ruby.jpg" width="400" alt="Ruby - Check for nil Without Using an Explicit if" />
-</p>
-
-
-
-
-<p>
-  Ruby&#8217;s private keyword might do a lot less than you think.
-</p>
-
-
-
-
-<p>
-  <strong>The &#8220;private&#8221; does not apply to class methods defined on self</strong>
-</p>
-
-
-
-
-<p>
-  This does not make anything private:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Klass</span>
-</span><span class='line'>  <span class="kp">private</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">print</span>
-</span><span class='line'>    <span class="s1">&#39;Hello&#39;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You need to use private_class_method instead:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Klass</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">print</span>
-</span><span class='line'>    <span class="s1">&#39;Hello&#39;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nb">private_class_method</span> <span class="ss">:print</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>The &#8220;private&#8221; does not apply to define_method</strong>
-</p>
-
-
-
-
-<p>
-  This does not make anything private:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Klass</span>
-</span><span class='line'>  <span class="kp">private</span>
-</span><span class='line'>  <span class="n">define_method</span> <span class="ss">:print</span> <span class="k">do</span>
-</span><span class='line'>    <span class="s1">&#39;Hello&#39;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You need to use private with an argument instead:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Klass</span>
-</span><span class='line'>  <span class="n">define_method</span> <span class="ss">:print</span> <span class="k">do</span>
-</span><span class='line'>    <span class="s1">&#39;Hello&#39;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kp">private</span> <span class="ss">:print</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/19/">&larr; Older</a>
@@ -1964,6 +2072,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/10/12/gulp-web-server/">Gulp – Web Server</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/10/12/gulp-watch/">Gulp – Watch</a>
       </li>
     
@@ -1985,10 +2097,6 @@
     
       <li class="post">
         <a href="/blog/2016/10/11/gulp-validate-javascript/">Gulp – Validate JavaScript</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/10/10/gulp-handling-errors-with-streams/">Gulp – Handling Errors With Streams</a>
       </li>
     
   </ul>
@@ -2062,7 +2170,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/gulp/">Gulp [ 15 ]</a>
+        <a href="/blog/categories/gulp/">Gulp [ 16 ]</a>
       </li>
     
   </ul>

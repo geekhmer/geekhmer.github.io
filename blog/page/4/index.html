@@ -79,6 +79,74 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2016/02/09/why-do-i-do-this-dot-dot-dot-why-do-i-blog-why-do-i-email-every-week/">Why Do I Do This&#8230; Why Do I Blog? Why Do I Email Every Week?</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-02-09T14:30:00+07:00" pubdate data-updated="true">Feb 9<span>th</span>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/keep_doing_this.png" width="600" alt="Why Do I Do This... Why Do I Blog? Why Do I Email Every Week?" />
+</p>
+
+
+
+
+<p>
+  With all the hate, all the times I’ve been called a spammer, scammer, deceptive, and just about every other negative thing you can imagine, it would be easy for me to quit. So what keeps me going?
+</p>
+
+
+
+
+<p>
+  It’s true. I get a lot of very negative feedback on the things I do.
+</p>
+
+
+
+
+<p>
+  It hurts. It sucks. It makes me want to quit. But I keep going anyways. Because every now and then, I get an email from guys in USA&#8230; an email that gives me fuel for the fire that I’ve started&#8230; an email that makes me believe that what I am doing is important – not for me, not because I have anything special or unique, but because my mundane and ordinary problems and solutions are the same mundane and ordinary problems that other people need to solve. And sometimes, the impact of my solutions are far beyond anything that I ever expected.
+</p>
+
+
+
+
+<p>
+  <strong>That One Moment Of Impact</strong><br/>
+  So why do I keep going? It’s that one positive note&#8230; that tweet from some random person&#8230; that person who takes the time to reply to an email and let me know that I’ve made an impact&#8230; this is why I do what I do.
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2016/02/09/what-will-they-say-about-you-when-youre-gone/">What Will They Say About You When You’re Gone?</a></h1>
     
     
@@ -1369,143 +1437,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/01/23/rails-5-actioncable-architecture-and-concepts/">Rails 5 ActionCable Architecture and Concepts</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-01-23T00:23:00+07:00" pubdate data-updated="true">Jan 23<span>rd</span>, 2016</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/rail_5_beta_1.jpg" width="600" alt="Rails 5 ActionCable Architecture and Concepts" />
-</p>
-
-
-
-
-<p>
-  ActionCable is an component of Ruby on Rails 5.0 - it is the first &#8220;official&#8221; solution for integrating websocket communication with Rails. 
-</p>
-
-
-
-
-<p>
-  <strong>Websocket Concepts</strong><br/>
-  The basic protocol that is pervasive in browser server interaction is HTTP. This is the protocol that gets used when a browser asks for an HTML page, JavaScript or CSS assets.
-</p>
-
-
-
-
-<p>
-  An HTTP connection is typically short-lived, initiated by the browser and ends when the application server has returned a response. This poses a problem given an event that browsers need to know about, but have not asked for - the server has no way to send data to the browser unasked.
-</p>
-
-
-
-
-<p>
-  Before websockets, developers have opted for polling loops or long-running http requests (ActionController::Live) to solve such cases, both of which have their own technical difficulties.
-</p>
-
-
-
-
-<p>
-  Websockets enable browsers and application servers to keep an open connection, enabling both parties to initiate sending data to each other. Given a websocket connection, a server will send an event message to the browser through an open websocket connection, enabling direct interaction between events on a server and the browser.
-</p>
-
-
-
-
-<p>
-  <strong>ActionCable Architecture and Concepts</strong><br/>
-  Traditionally, the websocket way of handling connections did not integrate well into a Rails application - the process of handling a request in Rails is fundamentally aligned with the request-response-end way HTTP connections are handled.
-</p>
-
-
-
-
-<p>
-  As such, ActionCable does not hook into the typical Rails MVC handling of requests, but adds another entry point to a Rails application - the ActionCable server: This server is, as of now, started as a different process dedicated to handling multiple open websocket connections while loading all components of the Rails application and providing developers the comfort of using its components. The Rails server will propagate messages to the ActionCable server by pushing them to a queue that the ActionCable server is listening to. In the current implementation, this role is given to a Redis instance.
-</p>
-
-
-
-
-<p>
-  We can explore the architecture and the way communication works between the components using the example of a chat application: It allows multiple users to connect to it and send messages to each other. Users receive messages from other users immediately i.e. users will not need to refresh the browser to see a new message but see it pop up at the end of the message list. You know, a chat like you would expect.
-</p>
-
-
-
-
-<p>
-  Let&#8217;s trace one possible way of propagation of a user’s message:<br/>
-  - A user opens the page in his browser which in turn opens a websocket connection to the ActionCable server (Websocket).<br/>
-  - A user sends the message by remote form submission to the Rails server (HTTP).<br/>
-  - The Rails server persists the message and publishes a message including the user and the message body to the queue. It sends an acknowledgement to the user. This ends the HTTP request.<br/>
-  - The ActionCable server receives the published message from the queue. It publishes the user and message body to all relevant open websocket connections.<br/>
-  - All relevant browsers connected to the ActionCable server receive the message and show it in the DOM.
-</p>
-
-
-
-
-<p>
-  <img src="/images/rails_5_actioncable_concepts.png" width="600" alt="Rails 5 ActionCable Architecture and Concepts" />
-</p>
-
-
-
-
-<p>
-  To allow for differentiation between different groups of users, ActionCable uses the concept of channels: A user may subscribe to a select few of all available channels and thus only receive messages meant for the given channels. If the chat application were to have multiple &#8220;rooms&#8221;, a user could subscribe to each room via a designated channel.
-</p>
-
-
-
-
-<p>
-  On the technical side, ActionCable uses EventMachine to handle connections and spawns a new Ruby thread for handling messages. This means that an ActionCable server will need to be multi-threaded.
-</p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/5/">&larr; Older</a>
@@ -1530,6 +1461,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/10/12/gulp-web-server/">Gulp – Web Server</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/10/12/gulp-watch/">Gulp – Watch</a>
       </li>
     
@@ -1551,10 +1486,6 @@
     
       <li class="post">
         <a href="/blog/2016/10/11/gulp-validate-javascript/">Gulp – Validate JavaScript</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/10/10/gulp-handling-errors-with-streams/">Gulp – Handling Errors With Streams</a>
       </li>
     
   </ul>
@@ -1628,7 +1559,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/gulp/">Gulp [ 15 ]</a>
+        <a href="/blog/categories/gulp/">Gulp [ 16 ]</a>
       </li>
     
   </ul>
