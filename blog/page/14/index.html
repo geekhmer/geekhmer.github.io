@@ -79,6 +79,248 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/03/17/single-responsibility-principle-in-ruby/">Single Responsibility Principle in Ruby</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-03-17T20:55:00+07:00" pubdate data-updated="true">Mar 17<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/rights_and_wrongsof_ruby.jpg" width="400" alt="Single Responsibility Principle in Ruby" />
+</p>
+
+
+
+
+<p>
+  Assume that we already had the code:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AuthenticatesUser</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">authenticate</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">matches?</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+</span><span class='line'>     <span class="n">do_some_authentication</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="k">raise</span> <span class="no">NotAllowedError</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">matches?</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="n">find_from_db</span><span class="p">(</span><span class="ss">:user</span><span class="p">,</span> <span class="n">email</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">user</span><span class="o">.</span><span class="n">encrypted_password</span> <span class="o">==</span> <span class="n">encrypt</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The AuthenticatesUser class is responsible for authenticating the user as well as knowing if the email and password match the ones in the database. It has two responsibilities, and according to the principle it should only have one, let&#8217;s extract one.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AuthenticatesUser</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">authenticate</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="no">MatchesPasswords</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span><span class="o">.</span><span class="n">matches?</span>
+</span><span class='line'>     <span class="n">do_some_authentication</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="k">raise</span> <span class="no">NotAllowedError</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">MatchesPasswords</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+</span><span class='line'>     <span class="vi">@email</span> <span class="o">=</span> <span class="n">email</span>
+</span><span class='line'>     <span class="vi">@password</span> <span class="o">=</span> <span class="n">password</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">matches?</span>
+</span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="n">find_from_db</span><span class="p">(</span><span class="ss">:user</span><span class="p">,</span> <span class="vi">@email</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">user</span><span class="o">.</span><span class="n">encrypted_password</span> <span class="o">==</span> <span class="n">encrypt</span><span class="p">(</span><span class="vi">@password</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  I&#8217;ve used a refactoring technique called &#8220;Extract Class&#8221; and then use it on the class I already had, this is called sharing behaviour through &#8220;Composition&#8221;.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/03/16/push-to-multiple-git-repositories/">Push to Multiple Git Repositories</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-03-16T20:37:00+07:00" pubdate data-updated="true">Mar 16<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/logo_git.png" alt="Push to Multiple Git Repositories" />
+</p>
+
+
+
+
+<p>
+  Here&#8217;s a cool little trick I&#8217;ve found out about the other day. Even though Git is a distributed revision control system, there are times when you need to push to two systems at once. In my case those systems are Github and Heroku. Here is a simple way to do it by modifying your .git/config file.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="n">core</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">repositoryformatversion</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'>  <span class="n">filemode</span> <span class="o">=</span> <span class="kp">true</span>
+</span><span class='line'>  <span class="n">bare</span> <span class="o">=</span> <span class="kp">false</span>
+</span><span class='line'>  <span class="n">logallrefupdates</span> <span class="o">=</span> <span class="kp">true</span>
+</span><span class='line'><span class="o">[</span><span class="n">remote</span> <span class="s2">&quot;heroku&quot;</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">url</span> <span class="o">=</span> <span class="n">git</span><span class="vi">@heroku</span><span class="o">.</span><span class="n">com</span><span class="ss">:pgsearch</span><span class="o">.</span><span class="n">git</span>
+</span><span class='line'>  <span class="n">fetch</span> <span class="o">=</span> <span class="o">+</span><span class="n">refs</span><span class="o">/</span><span class="n">heads</span><span class="o">/*</span><span class="ss">:refs</span><span class="o">/</span><span class="n">remotes</span><span class="o">/</span><span class="n">heroku</span><span class="o">/*</span>
+</span><span class='line'><span class="o">[</span><span class="n">remote</span> <span class="s2">&quot;github&quot;</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">url</span> <span class="o">=</span> <span class="n">git</span><span class="vi">@github</span><span class="o">.</span><span class="n">com</span><span class="ss">:Bunlong</span><span class="o">/</span><span class="n">rvm</span><span class="o">.</span><span class="n">git</span>
+</span><span class='line'>  <span class="n">fetch</span> <span class="o">=</span> <span class="o">+</span><span class="n">refs</span><span class="o">/</span><span class="n">heads</span><span class="o">/*</span><span class="ss">:refs</span><span class="o">/</span><span class="n">remotes</span><span class="o">/</span><span class="n">github</span><span class="o">/*</span>
+</span><span class='line'><span class="o">[</span><span class="n">remote</span> <span class="s2">&quot;origin&quot;</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">url</span> <span class="o">=</span> <span class="n">git</span><span class="vi">@heroku</span><span class="o">.</span><span class="n">com</span><span class="ss">:pgsearch</span><span class="o">.</span><span class="n">git</span>
+</span><span class='line'>  <span class="n">url</span> <span class="o">=</span> <span class="n">git</span><span class="vi">@github</span><span class="o">.</span><span class="n">com</span><span class="ss">:Bunlong</span><span class="o">/</span><span class="n">rvm</span><span class="o">.</span><span class="n">git</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The &#8220;heroku&#8221; and &#8220;github&#8221; remotes are generated by git and are created in the setup instructional steps of each service respectively. I went ahead and manually added the remote &#8220;origin&#8221; and just copied the url variable from the other remotes. You&#8217;ll now be able to push to both by calling &#8220;git push origin&#8221; and then you can fetch from each one as individually needed.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/03/16/why-choose-ruby-on-rails-framework/">Why Choose Ruby on Rails Framework?</a></h1>
     
     
@@ -2402,560 +2644,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/23/slim-on-rails/">Slim on Rails</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-23T00:12:00+07:00" pubdate data-updated="true">Feb 23<span>rd</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/ruby_on_rails.png" width="400" alt="Slim on Rails" />
-</p>
-
-
-
-
-<p>
-  The first thing you need to do is add a couple gems to the Gemfile. The slim gem tells Rails how to parse the Slim syntax. The slim-rails gem overrides the Rails generators for ERB and replaces them with Slim generators. Add these gems to your Gemfile as below:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Gemfile </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;slim&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 2.0.3&#39;</span>
-</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;slim-rails&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 2.1.5&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Then run <code>bundle install</code> to install the gems:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Then generate a Homes controller with a show action by running the command below:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="no">Homes</span> <span class="n">show</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Notice that the generated view ends in .slim, Rails has generated a slim file for us, courtesy of the slim-rails gem. Now let&#8217;s modify our routes file to set up a resource and add a root path. Open up your routes file (<code>config/routes.rb</code>) and modify it so that it looks somethings like:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>routes.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;homes#show&quot;</span>
-</span><span class='line'><span class="n">resource</span> <span class="ss">:home</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:show</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now you are ready to play with Slim. Open up the show view for homes (<code>app/views/homes/show.html.slim</code>) and modify it so that it looks somethings like:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>show.html.slim </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">javascript</span><span class="p">:</span>
-</span><span class='line'>  <span class="n">alert</span><span class="p">(</span><span class="s2">&quot;HELLO!!!!!&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="n">h1</span> <span class="no">Welcome</span> <span class="n">to</span> <span class="n">my</span> <span class="n">site</span>
-</span><span class='line'><span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="n">inline</span> <span class="n">html</span> <span class="n">is</span> <span class="n">supported</span><span class="o">&lt;</span><span class="sr">/b&gt;</span>
-</span><span class='line'><span class="sr">p</span>
-</span><span class='line'><span class="sr">  | The time is </span><span class="si">#{</span> <span class="no">Time</span><span class="o">.</span><span class="n">now</span> <span class="si">}</span><span class="sr">, </span>
-</span><span class='line'><span class="sr">    I Like to program in Ruby on Rails.</span>
-</span><span class='line'><span class="sr">#hashtag I threw a hashtag in here!</span>
-</span><span class='line'><span class="sr">#classy I&#39;m classy!</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">p = Random.rand(10)</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">- if Random.rand(6) == 1</span>
-</span><span class='line'><span class="sr">  |Lucky number 1!  You win!</span>
-</span><span class='line'><span class="sr">br</span>
-</span><span class='line'><span class="sr">br</span>
-</span><span class='line'><span class="sr">small Goodbye!</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Which translates to:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">script</span> <span class="n">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="n">alert</span><span class="p">(</span><span class="s2">&quot;HELLO!!!!!&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/script&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;Welcome to my site&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="n">inline</span> <span class="n">html</span> <span class="n">is</span> <span class="n">supported</span><span class="o">&lt;</span><span class="sr">/b&gt;</span>
-</span><span class='line'><span class="sr">&lt;p&gt;The time is 2015-02-22 00:24:59 - 0400, I Like to program in Ruby on Rails.&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;hashtag&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="n">I</span> <span class="n">threw</span> <span class="n">a</span> <span class="n">hashtag</span> <span class="k">in</span> <span class="n">here!</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;div id=&quot;classy&quot;&gt;</span>
-</span><span class='line'><span class="sr">  I&#39;m classy!</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="mi">2</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'><span class="sr">&lt;br&gt;</span>
-</span><span class='line'><span class="sr">&lt;br&gt;</span>
-</span><span class='line'><span class="sr">&lt;small&gt;Goodbye!&lt;/sm</span><span class="n">all</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it! See ya! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/22/slim-template-language/">Slim Template Language</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-22T22:29:00+07:00" pubdate data-updated="true">Feb 22<span>nd</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/ruby_on_rails.png" width="400" alt="Slim Template Language" />
-</p>
-
-
-
-
-<p>
-  Slim is a replacement for ERB, similar to HAML. Slim provides a nice lean syntax that&#8217;s easy to pick up and learn. In this article we will learn how to use Slim. Let’s run through this with me.
-</p>
-
-
-
-
-<p>
-  <strong>Basic Syntax</strong><br/>
-  Slim is actually really easy to learn. Indentation matters, but the indentation depth can be chosen as you like. If you want to first indent 2 spaces, then 5 spaces, it&#8217;s your choice.
-</p>
-
-
-
-
-<p>
-  Example: 
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">p</span>
-</span><span class='line'>  <span class="o">|</span> <span class="no">This</span> <span class="n">is</span> <span class="n">a</span> <span class="n">very</span> <span class="n">long</span> <span class="n">paragraph</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Which translates to:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="no">This</span> <span class="n">is</span> <span class="n">a</span> <span class="n">very</span> <span class="n">long</span> <span class="n">paragraph</span><span class="o">.</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  In the above example you&#8217;ll notice two things. First, the pipe (|) character is used to delimit free-form text on a new line. Second, we simply used p to specify the paragraph tag. This works for any tag, for instance you could just as easily have done:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">h1</span>
-</span><span class='line'>  <span class="o">|</span> <span class="no">Large</span> <span class="no">Title</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Or more simply:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">h1</span> <span class="no">Large</span> <span class="no">Title</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  In the above example that we didn&#8217;t specify the pipe (|) character. The pipe (|) character is only needed if we are entering free-form text on a new line.
-</p>
-
-
-
-
-<p>
-  You can create a div with a default class by using:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Which translates to:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;class&quot;</span><span class="o">&gt;&lt;</span><span class="sr">/div&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You can create a div with an id by using:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#id</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Which translates to:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="o">&gt;&lt;</span><span class="sr">/div&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  What about html attributes? Well, we specify them similarly to how we would in html:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">meta</span> <span class="nb">name</span><span class="o">=</span><span class="s2">&quot;viewport&quot;</span> <span class="n">content</span><span class="o">=</span><span class="s2">&quot;width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Which translates to:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">meta</span> <span class="nb">name</span><span class="o">=</span><span class="s2">&quot;viewport&quot;</span> <span class="n">content</span><span class="o">=</span><span class="s2">&quot;width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no&quot;</span><span class="o">&gt;&lt;</span><span class="sr">/meta&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  To specify a doctype:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">doctype</span> <span class="n">html</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Which translates to:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;!</span><span class="no">DOCTYPE</span> <span class="n">html</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Well, all is great, but what about Ruby code? Inserting Ruby code is pretty easy. Code that doesn&#8217;t return a result, such as if statements or loops, are prefixed with a dash (-).
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">-</span> <span class="k">if</span> <span class="vi">@products</span><span class="o">.</span><span class="n">nil?</span>
-</span><span class='line'>  <span class="nb">p</span> <span class="no">No</span> <span class="n">results</span> <span class="n">found</span><span class="o">.</span> <span class="no">Please</span> <span class="n">try</span> <span class="n">again</span><span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Which is equivalent to:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">if</span> <span class="vi">@products</span><span class="o">.</span><span class="n">nil?</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="no">No</span> <span class="n">results</span> <span class="n">found</span><span class="o">.</span>  <span class="no">Please</span> <span class="n">try</span> <span class="n">again</span><span class="o">.</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Slim will auto close your Ruby code as well, so end isn&#8217;t needed.
-</p>
-
-
-
-
-<p>
-  If you have code that returns output, such as the printing of a variable or property, you can use the equal (=) sign.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">=</span> <span class="n">current_user</span><span class="o">.</span><span class="n">name</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Which is equivalent to:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">current_user</span><span class="o">.</span><span class="n">name</span> <span class="o">%&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Your strings are Rubyized:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">|</span> <span class="no">Hello</span> <span class="c1">#{user.name}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You can embed javascript as well:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">javascript</span><span class="p">:</span>
-</span><span class='line'>  <span class="n">alert</span><span class="p">(</span><span class="s2">&quot;hello world!&quot;</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it! See ya! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/15/">&larr; Older</a>
@@ -2980,6 +2668,14 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/10/12/gulp-creating-a-webpage/">Gulp – Creating a Webpage</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/10/12/gulp-testing-with-jasmine/">Gulp – Testing With Jasmine</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/10/11/gulp-uglify/">Gulp – Uglify</a>
       </li>
     
@@ -2997,14 +2693,6 @@
     
       <li class="post">
         <a href="/blog/2016/10/04/gulp-streams/">Gulp – Streams</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/10/03/gulp-minify-our-css/">Gulp – Minify Our CSS</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/09/26/gulp-cleaning-our-build-folder/">Gulp – Cleaning Our Build Folder</a>
       </li>
     
   </ul>
@@ -3078,7 +2766,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/gulp/">Gulp [ 12 ]</a>
+        <a href="/blog/categories/gulp/">Gulp [ 14 ]</a>
       </li>
     
   </ul>

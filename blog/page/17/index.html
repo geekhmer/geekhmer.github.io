@@ -79,6 +79,926 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/01/26/erlang-concurrency/">Erlang Concurrency</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-26T18:46:00+07:00" pubdate data-updated="true">Jan 26<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/logo_erlang.png" alt="Erlang Concurrency" />
+</p>
+
+
+
+
+<p>
+  Concurrency is defined as “the temporal property of two things happening at the same time”. In Computer Science, the definition is “concurrency is a property of systems in which several computations are executing simultaneously, and potentially interacting with each other. The computations may be executing on multiple cores in the same chip, preemptively time-shared threads on the same processor, or executed on physically separated processors.”
+</p>
+
+
+
+
+<p>
+  Erlang was built with concurrency and fault-tolerance in mind.
+</p>
+
+
+
+
+<p>
+  <h3>Processes</h3>
+</p>
+
+
+
+
+<p>
+  The granularity of concurrency in Erlang is a process. A process is an activity/task that runs concurrently with and independently from the other processes (though processes can interact with each other using messages, links, etc.). Processes in Erlang are different than the processes and threads most people are familiar with. Erlang processes are lightweight, operate in (memory) isolation from other processes, and are scheduled by the Erlang’s Virtual Machine (VM). The creation time of process is very low, the memory footprint of a just spawned process is very small, and a single Erlang VM can have millions of processes running.
+</p>
+
+
+
+
+<p>
+  <h3>Messaging Passing</h3>
+</p>
+
+
+
+
+<p>
+  The communication model (among processes) in Erlang is message passing. Erlang processes share no memory. The way that processes communicate is via message passing (asynchronous). Every process (even the shell) holds a mailbox queue where incoming messages are placed until received by the process. Message passing is asynchronous because the sending process does not block on send. Sending a message in Erlang is a non-blocking operation that always succeed (more in the next post).
+</p>
+
+
+
+
+<p>
+  <h3>Why Message Passing?</h3>
+</p>
+
+
+
+
+<p>
+  We are so used to the shared memory model, why changing it? Here are some characteristics that are part of Erlang mostly because of the message passing memory model.
+</p>
+
+
+
+
+<p>
+  <strong>Crash Independency</strong><br/>
+  Message passing allows for easier distributed programming. Imagine if you want to distribute an application that uses shared memory. To do this, one should either use a message passing solution (such as MPI) or a Distributed Shared Memory system (DSM), that also uses message passing to operate. Why not using message passing in the first place? Especially in Erlang, message passing allows for location transparency (when sending a message there is no difference to the programmer if the receiver resides in the local or a remote node).
+</p>
+
+
+
+
+<p>
+  <h3>Creating Processes</h3>
+</p>
+
+
+
+
+<p>
+  Erlang provides Built-In Functions that are used to spawn new processes. The simplest one is spawn/1|3 (the 1|3 denotes that both spawn/1 and spawn/3 functions exist).
+</p>
+
+
+
+
+<p>
+  <strong>Pid Datatype</strong><br/>
+  Pid stands for Process identifier and is the datatype used for the unique process, identifiers that are assigned to every process.
+</p>
+
+
+
+
+<p>
+  <strong>spawn/1|3</strong><br/>
+  Creates a new process and returns its pid. The new process is placed in the system scheduler queue, so it will be run some time later.
+</p>
+
+
+
+
+<p>
+  <strong>spawn/1</strong><br/>
+  Called as spawn(Fun). The new process will run function Fun with an empty list ([]) as input.
+</p>
+
+
+
+
+<p>
+  <strong>spawn/3</strong><br/>
+  Called as spawn(Module, Function, Args). The new process will run function Module:Function with the elements of the list Args as input.
+</p>
+
+
+
+
+<p>
+  Example:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>process.erl </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">-</span><span class="n">module</span><span class="p">(</span><span class="n">process</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">-</span><span class="n">export</span><span class="p">(</span><span class="o">[</span><span class="n">start</span><span class="o">/</span><span class="mi">0</span><span class="p">,</span> <span class="n">say_something</span><span class="o">/</span><span class="mi">2</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">say_something</span><span class="p">(</span><span class="n">_What</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">done</span><span class="p">;</span>
+</span><span class='line'><span class="n">say_something</span><span class="p">(</span><span class="no">What</span><span class="p">,</span> <span class="no">Times</span><span class="p">)</span> <span class="o">-&gt;</span>
+</span><span class='line'>  <span class="ss">io</span><span class="p">:</span><span class="nb">format</span><span class="p">(</span><span class="s2">&quot;~p~n&quot;</span><span class="p">,</span> <span class="o">[</span><span class="no">What</span><span class="o">]</span><span class="p">),</span>
+</span><span class='line'>  <span class="n">say_something</span><span class="p">(</span><span class="no">What</span><span class="p">,</span> <span class="no">Times</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">start</span><span class="p">()</span> <span class="o">-&gt;</span>
+</span><span class='line'>  <span class="n">spawn</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">say_something</span><span class="p">,</span> <span class="o">[</span><span class="s2">&quot;hello&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span><span class="p">),</span>
+</span><span class='line'>  <span class="n">spawn</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">say_something</span><span class="p">,</span> <span class="o">[</span><span class="s2">&quot;bonjour&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>process1.erl </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">-</span><span class="n">module</span><span class="p">(</span><span class="n">process1</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">-</span><span class="n">export</span><span class="p">(</span><span class="o">[</span><span class="n">start</span><span class="o">/</span><span class="mi">0</span><span class="p">,</span> <span class="n">ping</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">pong</span><span class="o">/</span><span class="mi">0</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">ping</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="no">Pong_Pid</span><span class="p">)</span> <span class="o">-&gt;</span>
+</span><span class='line'>  <span class="no">Pong_Pid</span> <span class="o">!</span> <span class="n">finished</span><span class="p">,</span>
+</span><span class='line'>  <span class="ss">io</span><span class="p">:</span><span class="nb">format</span><span class="p">(</span><span class="s2">&quot;ping finished~n&quot;</span><span class="p">,</span> <span class="o">[]</span><span class="p">);</span>
+</span><span class='line'><span class="n">ping</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="no">Pong_Pid</span><span class="p">)</span> <span class="o">-&gt;</span>
+</span><span class='line'>  <span class="no">Pong_Pid</span> <span class="o">!</span> <span class="p">{</span><span class="n">ping</span><span class="p">,</span> <span class="nb">self</span><span class="p">()},</span>
+</span><span class='line'>  <span class="n">receive</span>
+</span><span class='line'>    <span class="n">pong</span> <span class="o">-&gt;</span>
+</span><span class='line'>      <span class="ss">io</span><span class="p">:</span><span class="nb">format</span><span class="p">(</span><span class="s2">&quot;ping received pong~n&quot;</span><span class="p">,</span> <span class="o">[]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span><span class="p">,</span>
+</span><span class='line'>  <span class="n">ping</span><span class="p">(</span><span class="n">N</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="no">Pong_Pid</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">pong</span><span class="p">()</span> <span class="o">-&gt;</span>
+</span><span class='line'>  <span class="n">receive</span>
+</span><span class='line'>    <span class="n">finished</span> <span class="o">-&gt;</span>
+</span><span class='line'>      <span class="ss">io</span><span class="p">:</span><span class="nb">format</span><span class="p">(</span><span class="s2">&quot;pong finished~n&quot;</span><span class="p">,</span> <span class="o">[]</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">{</span><span class="n">ping</span><span class="p">,</span> <span class="no">Ping_Pid</span><span class="p">}</span> <span class="o">-&gt;</span>
+</span><span class='line'>      <span class="ss">io</span><span class="p">:</span><span class="nb">format</span><span class="p">(</span><span class="s2">&quot;pong received ping~n&quot;</span><span class="p">,</span> <span class="o">[]</span><span class="p">),</span>
+</span><span class='line'>      <span class="no">Ping_Pid</span> <span class="o">!</span> <span class="n">pong</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">pong</span><span class="p">()</span>
+</span><span class='line'>  <span class="k">end</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">start</span><span class="p">()</span> <span class="o">-&gt;</span>
+</span><span class='line'>  <span class="no">Pong_Pid</span> <span class="o">=</span> <span class="n">spawn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">pong</span><span class="p">,</span> <span class="o">[]</span><span class="p">),</span>
+</span><span class='line'>  <span class="n">spawn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">ping</span><span class="p">,</span> <span class="o">[</span><span class="mi">3</span><span class="p">,</span> <span class="no">Pong_Pid</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <h3>Creating Linked Processes</h3>
+</p>
+
+
+
+
+<p>
+  A very useful feature is to create a new process that is linked to the “parent” one. The link between them guarantees that if one of the two fails (finishes abnormally), the other one also stops executing. This feature is very helpful because it reduces the need for “cleaning up” in case of a failure. Instead of explicitely handling an error, the “let it fail and let someone else handle it” philosophy can be used. The BIF(s) providing this functionality are the spawn_link/1|3.
+</p>
+
+
+
+
+<p>
+  <strong>link/1</strong><br/>
+  Creates a bidirectional link between the calling process and another process (or port), if there is not such a link already. If a process attempts to create a link to itself, nothing is done. Returns true.
+</p>
+
+
+
+
+<p>
+  <strong>spawn_link/1|3</strong><br/>
+  Provides the same functionality as spawn/1|3 with the addition that a link is atomically created between the caller and the newly spawned process.
+</p>
+
+
+
+
+<p>
+  <strong>spawn_link/1</strong><br/>
+  Same call convention as spawn/1.
+</p>
+
+
+
+
+<p>
+  <strong>spawn_link/3</strong><br/>
+  Same call convention as spawn/3.
+</p>
+
+
+
+
+<p>
+  Example:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">spawnLink</span><span class="p">()</span> <span class="o">-&gt;</span>
+</span><span class='line'>  <span class="n">spawn</span><span class="p">(</span><span class="n">fun</span> <span class="n">spawnLink_</span><span class="o">/</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">spawnLink_</span><span class="p">()</span> <span class="o">-&gt;</span>
+</span><span class='line'>  <span class="n">spawn_link</span><span class="p">(?</span><span class="no">MODULE</span><span class="p">,</span> <span class="n">sayExit</span><span class="p">,</span> <span class="o">[]</span><span class="p">),</span>
+</span><span class='line'>  <span class="n">justLoop</span><span class="p">()</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">justLoop</span><span class="p">()</span> <span class="o">-&gt;</span>
+</span><span class='line'>  <span class="n">justLoop</span><span class="p">()</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">sayExit</span><span class="p">()</span> <span class="o">-&gt;</span>
+</span><span class='line'>  <span class="ss">timer</span><span class="p">:</span><span class="nb">sleep</span><span class="p">(</span><span class="mi">4000</span><span class="p">),</span>
+</span><span class='line'>  <span class="ss">erlang</span><span class="p">:</span><span class="n">kill</span><span class="p">(</span><span class="n">not_catched</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="n">c</span><span class="p">(</span><span class="n">spawning</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="p">{</span><span class="n">ok</span><span class="p">,</span><span class="n">spawning</span><span class="p">}</span>
+</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="no">Pid</span> <span class="o">=</span> <span class="ss">spawning</span><span class="p">:</span><span class="n">spawnLink</span><span class="p">()</span><span class="o">.</span>
+</span><span class='line'><span class="o">&lt;</span><span class="mi">0</span><span class="o">.</span><span class="mi">42</span><span class="o">.</span><span class="mi">0</span><span class="o">&gt;</span>
+</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="ss">erlang</span><span class="p">:</span><span class="n">is_process_alive</span><span class="p">(</span><span class="no">Pid</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="kp">true</span>
+</span><span class='line'><span class="mi">4</span><span class="o">&gt;</span> <span class="ss">erlang</span><span class="p">:</span><span class="n">is_process_alive</span><span class="p">(</span><span class="no">Pid</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="kp">true</span>
+</span><span class='line'><span class="mi">5</span><span class="o">&gt;</span> <span class="ss">erlang</span><span class="p">:</span><span class="n">is_process_alive</span><span class="p">(</span><span class="no">Pid</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">=</span><span class="no">ERROR</span> <span class="no">REPORT</span><span class="o">====</span> <span class="mi">7</span><span class="o">-</span><span class="no">May</span><span class="o">-</span><span class="mi">2011</span><span class="o">::</span><span class="mi">12</span><span class="p">:</span><span class="mi">24</span><span class="p">:</span><span class="mi">54</span> <span class="o">===</span>
+</span><span class='line'><span class="no">Error</span> <span class="k">in</span> <span class="n">process</span> <span class="o">&lt;</span><span class="mi">0</span><span class="o">.</span><span class="mi">43</span><span class="o">.</span><span class="mi">0</span><span class="o">&gt;</span> <span class="n">with</span> <span class="nb">exit</span> <span class="ss">value</span><span class="p">:</span> <span class="p">{</span><span class="k">undef</span><span class="p">,</span><span class="o">[</span><span class="p">{</span><span class="n">erlang</span><span class="p">,</span><span class="n">kill</span><span class="p">,</span><span class="o">[</span><span class="n">not_</span>
+</span><span class='line'><span class="kp">false</span>
+</span><span class='line'><span class="mi">6</span><span class="o">&gt;</span> <span class="ss">erlang</span><span class="p">:</span><span class="n">is_process_alive</span><span class="p">(</span><span class="no">Pid</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="kp">false</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <h3>Other Processes’-related Built-In Functions</h3>
+</p>
+
+
+
+
+<p>
+  There are several other BIFs related to processes. The following are some commonly used.
+</p>
+
+
+
+
+<p>
+  <strong>is_pid/1</strong><br/>
+  Returns true if the argument is a pid, else false.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="no">Pid</span> <span class="o">=</span> <span class="n">spawn</span><span class="p">(</span><span class="n">io</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="o">[</span><span class="s2">&quot;Hello~n&quot;</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="no">Hello</span>
+</span><span class='line'><span class="o">&lt;</span><span class="mi">0</span><span class="o">.</span><span class="mi">37</span><span class="o">.</span><span class="mi">0</span><span class="o">&gt;</span>
+</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="n">is_pid</span><span class="p">(</span><span class="no">Pid</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="kp">true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>is_process_alive/1</strong><br/>
+  Called as is_process_alive(Pid). Pid must refer to a process at the local node. Returns true if the process exists and is alive, that is not exiting and has not exited. Otherwise, returns false.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="n">is_process_alive</span><span class="p">(</span><span class="nb">self</span><span class="p">())</span><span class="o">.</span>
+</span><span class='line'><span class="kp">true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>list_to_pid/1</strong><br/>
+  Transforms the input string to a pid. This BIF is intended to be used for debugging and not in the application development.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="no">Pid</span> <span class="o">==</span> <span class="n">list_to_pid</span><span class="p">(</span><span class="s2">&quot;&lt;0.39.0&gt;&quot;</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="kp">true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>pid_to_list/1</strong><br/>
+  Returns the textual representation of a pid. This BIF is intended to be used for debugging only.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="no">StringPid</span> <span class="o">=</span> <span class="n">pid_to_list</span><span class="p">(</span><span class="no">Pid</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="s2">&quot;&lt;0.37.0&gt;&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>register/2</strong><br/>
+  Registers a process (or a port) with a name. This name can be later used to refer to the process.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="no">ShellPid</span> <span class="o">=</span> <span class="nb">self</span><span class="p">()</span><span class="o">.</span>
+</span><span class='line'><span class="o">&lt;</span><span class="mi">0</span><span class="o">.</span><span class="mi">99</span><span class="o">.</span><span class="mi">0</span><span class="o">&gt;</span>
+</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="n">register</span><span class="p">(</span><span class="n">shell</span><span class="p">,</span> <span class="no">ShellPid</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="kp">true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>registered/0</strong><br/>
+  Returns a list with the names of all registered processes.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="n">registered</span><span class="p">()</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="n">init</span><span class="p">,</span><span class="n">shell</span><span class="p">,</span><span class="n">error_logger</span><span class="p">,</span><span class="n">rex</span><span class="p">,</span><span class="n">kernel_sup</span><span class="p">,</span><span class="n">inet_db</span><span class="p">,</span>
+</span><span class='line'> <span class="n">global_name_server</span><span class="p">,</span><span class="n">file_server_2</span><span class="p">,</span><span class="n">code_server</span><span class="p">,</span>
+</span><span class='line'> <span class="n">erl_prim_loader</span><span class="p">,</span><span class="n">user_drv</span><span class="p">,</span><span class="n">standard_error_sup</span><span class="p">,</span>
+</span><span class='line'> <span class="n">application_controller</span><span class="p">,</span><span class="n">standard_error</span><span class="p">,</span><span class="n">kernel_safe_sup</span><span class="p">,</span><span class="n">user</span><span class="p">,</span>
+</span><span class='line'> <span class="n">global_group</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>self/0</strong><br/>
+  One of the most commonly used BIF, returns the pid of the calling processes. As you will see in the next post (about messaging), self is used in almost every message send.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="no">ShellPid</span> <span class="o">=</span> <span class="nb">self</span><span class="p">()</span><span class="o">.</span>
+</span><span class='line'><span class="o">&lt;</span><span class="mi">0</span><span class="o">.</span><span class="mi">44</span><span class="o">.</span><span class="mi">0</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>erlang:send/2|3</strong><br/>
+  Sends a message to a process. You will see message sending in detail in the next post.
+</p>
+
+
+
+
+<p>
+  <strong>erlang:send_after/3</strong><br/>
+  Sends a message after a given amount of time.
+</p>
+
+
+
+
+<p>
+  <strong>unlink/1</strong><br/>
+  Removes the link between two processes. Returns true even if there is no exist link.
+</p>
+
+
+
+
+<p>
+  <strong>unregister/1</strong><br/>
+  Called as unregister(Name). Removes the association between the Name and the process which it is associated with.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="n">unregister</span><span class="p">(</span><span class="n">shell</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="kp">true</span>
+</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="n">registered</span><span class="p">()</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="n">init</span><span class="p">,</span><span class="n">error_logger</span><span class="p">,</span><span class="n">rex</span><span class="p">,</span><span class="n">kernel_sup</span><span class="p">,</span><span class="n">inet_db</span><span class="p">,</span>
+</span><span class='line'> <span class="n">global_name_server</span><span class="p">,</span><span class="n">file_server_2</span><span class="p">,</span><span class="n">code_server</span><span class="p">,</span>
+</span><span class='line'> <span class="n">erl_prim_loader</span><span class="p">,</span><span class="n">user_drv</span><span class="p">,</span><span class="n">standard_error_sup</span><span class="p">,</span>
+</span><span class='line'> <span class="n">application_controller</span><span class="p">,</span><span class="n">standard_error</span><span class="p">,</span><span class="n">kernel_safe_sup</span><span class="p">,</span><span class="n">user</span><span class="p">,</span>
+</span><span class='line'> <span class="n">global_group</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>whereis/1</strong><br/>
+  Called as whereis(Name). Returns the pid of the process that is register with the name Name.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="n">whereis</span><span class="p">(</span><span class="n">shell</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">&lt;</span><span class="mi">0</span><span class="o">.</span><span class="mi">44</span><span class="o">.</span><span class="mi">0</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/24/erlang-list-comprehension/">Erlang List Comprehension</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-24T21:02:00+07:00" pubdate data-updated="true">Jan 24<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/logo_erlang.png" alt="Erlang List Comprehension" />
+</p>
+
+
+
+
+<p>
+  <h3>Syntax:</h3>
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="no">Expression</span> <span class="o">||</span> <span class="no">Generators1</span><span class="p">,</span> <span class="no">Guards1</span><span class="p">,</span> <span class="no">Generators2</span><span class="p">,</span> <span class="o">.</span><span class="n">.</span><span class="o">.]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p><p>
+  <strong>Expression</strong><br/>
+  The expression specifies the elements of the result. Example: <code>[I || &lt;&ndash; [1, 2, 3]]</code> returns the input list element as is.
+</p></p>
+
+<p><p>
+  <strong>Generators</strong><br/>
+  Generators create the data used in ther filter-map operations. A generator has the &ldquo;Pattern &lt;&ndash; Data&rdquo; format, where &ldquo;Data&rdquo; is a list or an expression that results to a list and Pattern is a pattern used to match with the elements of the list. This pattern can be used to disassembly elements. Example two valid generators are <code>I &lt;&ndash; lists:seq(1, 10)</code> and <code>{X, Y} &lt;&ndash; [{&lsquo;A&rsquo;, &lsquo;Excellent&rsquo;}, {&lsquo;B&rsquo;, &lsquo;Good&rsquo;}, {&lsquo;C&rsquo;, &lsquo;Fair&rsquo;}]</code>.
+</p></p>
+
+<p><p>
+  <strong>Guards</strong><br/>
+  Guards are expression that return either true or false, the same as the guards we have seen in the previous posts. They apply to the variables that are on the left of the guard and the ones that are accessible to the scope where the comprehension runs. Example: <code>I &lt;&ndash; [1, 2, 3, 4], I rem 1 == 0</code> is a valid generator.
+</p></p>
+
+<p><p>
+  <h3>Example:</h3>
+</p></p>
+
+<p><p>
+  I will show some examples that implements some list functions. The most of them already exists in the lists module as I did in the past, I will add these functions to the module called mylists.
+</p></p>
+
+<p><p>
+  <strong>map/2</strong><br/>
+  The results contains the elements of the input list after applied to the input function.
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sx">% Generator: </span><span class="n">the</span> <span class="n">items</span> <span class="n">of</span> <span class="n">the</span> <span class="n">list</span> <span class="n">provided</span>
+</span><span class='line'><span class="sx">% Guard: </span><span class="n">no</span> <span class="n">guard</span> <span class="n">expression</span><span class="p">,</span> <span class="n">all</span> <span class="n">items</span> <span class="n">are</span> <span class="n">kept</span>
+</span><span class='line'><span class="sx">% Expression: </span><span class="n">the</span> <span class="n">item</span> <span class="n">from</span> <span class="n">the</span> <span class="n">generator</span> <span class="n">after</span> <span class="n">applied</span> <span class="n">to</span> <span class="n">the</span> <span class="no">Function</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">map</span><span class="p">(</span><span class="no">Function</span><span class="p">,</span> <span class="no">List</span><span class="p">)</span> <span class="o">&ndash;&gt;</span>
+</span><span class='line'>  <span class="o">[</span><span class="no">Function</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="no">List</span><span class="o">].</span>
+</span><span class='line'>
+</span><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">map</span><span class="p">(</span><span class="n">fun</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="o">&ndash;&gt;</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">I</span> <span class="k">end</span><span class="p">,</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">10</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  <strong>deleteall/2</strong><br/>
+  Deletes all occurrences of an element from the list.
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sx">% Generator: </span><span class="n">the</span> <span class="n">items</span> <span class="n">of</span> <span class="n">the</span> <span class="n">list</span> <span class="n">provided</span>
+</span><span class='line'><span class="sx">% Guard: </span><span class="n">the</span> <span class="n">item</span> <span class="n">should</span> <span class="ow">not</span> <span class="n">be</span> <span class="n">equal</span> <span class="p">(</span><span class="n">both</span> <span class="n">value</span> <span class="ow">and</span> <span class="n">type</span><span class="p">)</span> <span class="n">with</span> <span class="n">the</span> <span class="no">Elem</span>
+</span><span class='line'><span class="sx">% Expression: </span><span class="n">keep</span> <span class="n">the</span> <span class="n">elements</span> <span class="n">of</span> <span class="n">the</span> <span class="n">list</span> <span class="n">that</span> <span class="s2">&quot;pass&quot;</span> <span class="n">the</span> <span class="n">guard</span> <span class="nb">test</span><span class="p">,</span> <span class="n">as</span> <span class="n">they</span> <span class="n">are</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">deleteall</span><span class="p">(</span><span class="no">Elem</span><span class="p">,</span> <span class="no">List</span><span class="p">)</span> <span class="o">&ndash;&gt;</span>
+</span><span class='line'>  <span class="o">[</span><span class="n">I</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="no">List</span><span class="p">,</span> <span class="n">I</span> <span class="o">=</span><span class="sr">/= Elem].</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">1&gt; mylists:deleteall(3, [1, 2, 3, 4, 3, 2, 1]).</span>
+</span><span class='line'><span class="sr">[1,2,4,2,1]</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  <strong>partition/2</strong><br/>
+  Partition a list into two, according to if the elements satisfy or not a given predicate.
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">partition</span><span class="p">(</span><span class="no">Pred</span><span class="p">,</span> <span class="no">List</span><span class="p">)</span> <span class="o">&ndash;&gt;</span>
+</span><span class='line'>  <span class="p">{</span><span class="o">[</span><span class="n">I</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="no">List</span><span class="p">,</span> <span class="no">Pred</span><span class="p">(</span><span class="n">I</span><span class="p">)</span><span class="o">]</span><span class="p">,</span> <span class="o">[</span><span class="n">I</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="no">List</span><span class="p">,</span> <span class="ow">not</span><span class="p">(</span><span class="no">Pred</span><span class="p">(</span><span class="n">I</span><span class="p">))</span><span class="o">]</span><span class="p">}</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">% an </span><span class="n">alternative</span> <span class="n">implementation</span>
+</span><span class='line'><span class="n">partition2</span><span class="p">(</span><span class="no">Pred</span><span class="p">,</span> <span class="no">List</span><span class="p">)</span> <span class="o">&ndash;&gt;</span>
+</span><span class='line'>    <span class="no">Sat</span> <span class="o">=</span> <span class="n">filter</span><span class="p">(</span><span class="no">Pred</span><span class="p">,</span> <span class="no">List</span><span class="p">),</span>
+</span><span class='line'>    <span class="p">{</span><span class="no">Sat</span><span class="p">,</span> <span class="no">List</span> <span class="o">&mdash;</span> <span class="no">Sat</span><span class="p">}</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">partition</span><span class="p">(</span><span class="n">fun</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="o">&ndash;&gt;</span> <span class="n">is_atom</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="k">end</span><span class="p">,</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="mi">3</span><span class="o">.</span><span class="mi">0</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="p">{</span><span class="o">[</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="o">]</span><span class="p">,</span><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">.</span><span class="mi">0</span><span class="o">]</span><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  <strong>replicated/2</strong><br/>
+  Creates a list of Items of length Times.
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sx">% Generator: </span><span class="n">only</span> <span class="n">used</span> <span class="k">for</span> <span class="n">fixing</span> <span class="n">the</span> <span class="n">length</span>
+</span><span class='line'><span class="sx">% Expression: </span><span class="n">a</span> <span class="n">fixed</span> <span class="n">item</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">replicated</span><span class="p">(</span><span class="no">Item</span><span class="p">,</span> <span class="no">Times</span><span class="p">)</span> <span class="o">&ndash;&gt;</span>
+</span><span class='line'>  <span class="o">[</span><span class="no">Item</span> <span class="o">||</span> <span class="n">_</span> <span class="o">&lt;&ndash;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">seq</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="no">Times</span><span class="p">)</span><span class="o">].</span>
+</span><span class='line'>
+</span><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">replicated</span><span class="p">(</span><span class="s1">&#39;:&ndash;)&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="s1">&#39;:&ndash;)&#39;</span><span class="p">,</span><span class="s1">&#39;:&ndash;)&#39;</span><span class="p">,</span><span class="s1">&#39;:&ndash;)&#39;</span><span class="p">,</span><span class="s1">&#39;:&ndash;)&#39;</span><span class="p">,</span><span class="s1">&#39;:&ndash;)&#39;</span><span class="p">,</span><span class="s1">&#39;:&ndash;)&#39;</span><span class="p">,</span><span class="s1">&#39;:&ndash;)&#39;</span><span class="p">,</span><span class="s1">&#39;:&ndash;)&#39;</span><span class="p">,</span><span class="s1">&#39;:&ndash;)&#39;</span><span class="p">,</span><span class="s1">&#39;:&ndash;)&#39;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  <strong>replicate_items/2</strong><br/>
+  Replicates each elements of the list Times times.
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">replicate_items</span><span class="p">(</span><span class="no">Times</span><span class="p">,</span> <span class="no">List</span><span class="p">)</span> <span class="o">&ndash;&gt;</span>
+</span><span class='line'>  <span class="ss">mylists</span><span class="p">:</span><span class="n">flatten</span><span class="p">(</span><span class="o">[[</span><span class="no">Item</span> <span class="o">||</span> <span class="n">_</span> <span class="o">&lt;&ndash;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">seq</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="no">Times</span><span class="p">)</span><span class="o">]</span> <span class="o">||</span> <span class="no">Item</span> <span class="o">&lt;&ndash;</span> <span class="no">List</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">% same </span><span class="n">as</span>
+</span><span class='line'><span class="sx">% replicate_items(Times, </span><span class="no">List</span><span class="p">)</span> <span class="o">&ndash;&gt;</span>
+</span><span class='line'><span class="sx">%  </span> <span class="ss">mylists</span><span class="p">:</span><span class="n">flatten</span><span class="p">(</span><span class="o">[</span><span class="n">replicated</span><span class="p">(</span><span class="no">Item</span><span class="p">,</span> <span class="no">Times</span><span class="p">)</span> <span class="o">||</span> <span class="no">Item</span> <span class="o">&lt;&ndash;</span> <span class="no">List</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">replicate_items</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="n">a</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">c</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  <strong>member/2</strong><br/>
+  Returns true if an element is a member of the list, else returns false.
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">member</span><span class="p">(</span><span class="no">Elem</span><span class="p">,</span> <span class="no">List</span><span class="p">)</span> <span class="o">&ndash;&gt;</span>
+</span><span class='line'>  <span class="o">[]</span> <span class="o">/=</span> <span class="o">[</span><span class="n">ok</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="no">List</span><span class="p">,</span> <span class="n">I</span> <span class="o">==</span> <span class="no">Elem</span><span class="o">].</span>
+</span><span class='line'>
+</span><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">member</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="kp">true</span>
+</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">member</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">aa</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="kp">false</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  <strong>member_times/2</strong><br/>
+  Returns the number of occurences of an element in a list.
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">member_times</span><span class="p">(</span><span class="no">Elem</span><span class="p">,</span> <span class="no">List</span><span class="p">)</span> <span class="o">&ndash;&gt;</span>
+</span><span class='line'>  <span class="n">length</span><span class="p">(</span><span class="o">[</span><span class="n">ok</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="no">List</span><span class="p">,</span> <span class="n">I</span> <span class="o">==</span> <span class="no">Elem</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">member_times</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="mi">2</span>
+</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">member_times</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="mi">1</span>
+</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">member_times</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="mi">0</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  <strong>quicksort/1</strong><br/>
+  This is the famous Quicksort implementation that is often used to show the power and compactness of Erlang.
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">qsort</span><span class="p">(</span><span class="o">[]</span><span class="p">)</span> <span class="o">&ndash;&gt;</span>
+</span><span class='line'>  <span class="o">[]</span><span class="p">;</span>
+</span><span class='line'><span class="n">qsort</span><span class="p">(</span><span class="o">[</span><span class="no">Pivot</span> <span class="o">|</span> <span class="no">List</span><span class="o">]</span><span class="p">)</span> <span class="o">&ndash;&gt;</span>
+</span><span class='line'>  <span class="n">qsort</span><span class="p">(</span><span class="o">[</span><span class="n">I</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="no">List</span><span class="p">,</span> <span class="n">I</span> <span class="o">&lt;</span> <span class="no">Pivot</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="o">++</span>
+</span><span class='line'>  <span class="o">[</span><span class="no">Pivot</span> <span class="o">|</span> <span class="n">qsort</span><span class="p">(</span><span class="o">[</span><span class="n">I</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="no">List</span><span class="p">,</span> <span class="n">I</span> <span class="o">&gt;=</span> <span class="no">Pivot</span><span class="o">]</span><span class="p">)</span><span class="o">].</span>
+</span><span class='line'>
+</span><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="ss">mylists</span><span class="p">:</span><span class="n">qsort</span><span class="p">(</span><span class="o">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">9</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  <strong>Multiple Generators</strong><br/>
+  Now I will present some examples with multiple generators.
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="o">[</span><span class="p">{</span><span class="n">I</span><span class="p">,</span> <span class="n">J</span><span class="p">}</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span><span class="p">,</span> <span class="n">J</span> <span class="o">&lt;&ndash;</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">]].</span>
+</span><span class='line'><span class="o">[</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="n">a</span><span class="p">},{</span><span class="mi">1</span><span class="p">,</span><span class="n">b</span><span class="p">},{</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="p">},{</span><span class="mi">2</span><span class="p">,</span><span class="n">a</span><span class="p">},{</span><span class="mi">2</span><span class="p">,</span><span class="n">b</span><span class="p">},{</span><span class="mi">2</span><span class="p">,</span><span class="n">c</span><span class="p">},{</span><span class="mi">3</span><span class="p">,</span><span class="n">a</span><span class="p">},{</span><span class="mi">3</span><span class="p">,</span><span class="n">b</span><span class="p">},{</span><span class="mi">3</span><span class="p">,</span><span class="n">c</span><span class="p">}</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">% duplicate </span><span class="n">list</span>
+</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="o">[</span><span class="n">I</span> <span class="o">||</span> <span class="n"><em></span> <span class="o">&lt;&ndash;</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="o">]</span><span class="p">,</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]].</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">% duplicate </span><span class="n">elements</span>
+</span><span class='line'><span class="mi">3</span><span class="o">&gt;</span> <span class="o">[</span><span class="n">I</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span><span class="p">,</span> <span class="n">J</span> <span class="o">&lt;&ndash;</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="o">]].</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">% discard </span><span class="n">elements</span> <span class="ow">and</span> <span class="n">duplicate</span> <span class="n">the</span> <span class="n">others</span>
+</span><span class='line'><span class="mi">4</span><span class="o">&gt;</span> <span class="no">Discard</span> <span class="o">=</span> <span class="o">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="o">].</span>
+</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="o">]</span>
+</span><span class='line'><span class="mi">5</span><span class="o">&gt;</span> <span class="o">[</span><span class="n">I</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="o">]</span><span class="p">,</span> <span class="ow">not</span><span class="p">(</span><span class="ss">lists</span><span class="p">:</span><span class="n">member</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="no">Discard</span><span class="p">)),</span> <span class="n"></em></span> <span class="o">&lt;&ndash;</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="o">]].</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">6</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">% subsequences</span>
+</span><span class='line'><span class="sx">8&gt; </span><span class="o">[[</span><span class="n">I</span> <span class="o">||</span> <span class="n">I</span> <span class="o">&lt;&ndash;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">seq</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">J</span><span class="p">)</span><span class="o">]</span> <span class="o">||</span> <span class="n">J</span> <span class="o">&lt;&ndash;</span> <span class="ss">lists</span><span class="p">:</span><span class="n">seq</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span><span class="o">].</span>
+</span><span class='line'><span class="o">[[</span><span class="mi">1</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="o">]]</span>
+</span></code></pre></td></tr></table></div></figure></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/01/22/erlang-list-and-list-module/">Erlang List &amp; List Module</a></h1>
     
     
@@ -2331,253 +3251,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/16/erlang-variables/">Erlang Variables</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-16T21:46:00+07:00" pubdate data-updated="true">Jan 16<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/logo_erlang.png" alt="Erlang Variables" />
-</p>
-
-
-
-
-<p>
-  <strong>Dynamic Datatyping</strong><br/>
-  Erlang is a dynamic datatyping programming language. That means that when &#8220;declaring&#8221; a variable you do not need to statically specify the datatypes. For example, this is how we declare and initialize an integer in Erlang:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">I</span> <span class="o">=</span> <span class="mi">17</span><span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  This approach has both advantages and disadvantages. Advantages: when programming, it is fast and convenient as we don&#8217;t need to declare the variables datatypes. Disadvantages: In big projects it can lead to code readability problems unless well documented.
-</p>
-
-
-
-
-<p>
-  <strong>Variables Declaration</strong><br/>
-  Erlang is influenced by <a href="http://en.wikipedia.org/wiki/Prolog">Prolog</a>. As with Prolog variables is a string consisting of letters, numbers and underscore characters, and beginning with an upper-case letter or underscore.<br/>
-</p>
-
-
-
-
-<p>
-  Example:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">X</span>
-</span><span class='line'><span class="no">Name1</span>
-</span><span class='line'><span class="no">PhoneNumber</span>
-</span><span class='line'><span class="no">Phone_number</span>
-</span><span class='line'><span class="n">_</span>
-</span><span class='line'><span class="n">_Height</span>
-</span><span class='line'><span class="o">[</span><span class="n">H</span><span class="o">|</span><span class="n">_</span><span class="o">]</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Variable Assignement</strong><br/>
-  Another feature that Erlang inherited from Prolog is binding with pattern matching. In a nutshell, a value is not assigned to a variable but bound with pattern matching. The most important thing is that variables in Erlang are single assignement, it mean that once bound to a value, their value cannot change for their lifetime.<br/>
-</p>
-
-
-
-
-<p>
-  Example (open terminator and try the following):
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">&gt;</span> <span class="no">Age</span> <span class="o">=</span> <span class="mi">10</span><span class="o">.</span>
-</span><span class='line'><span class="mi">10</span>
-</span><span class='line'><span class="mi">2</span><span class="o">&gt;</span> <span class="no">Age</span> <span class="o">=</span> <span class="mi">11</span><span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  We will get an error:
-</p>
-
-
-
-
-<p>
-  <code>** exception error: no match of right hand side value 11</code>
-</p>
-
-
-
-
-<p>
-  The problem is that A is bound to the value 10, so Erlang tries to pattern match 10 with the value 11 which is impossible.
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/16/introduction-to-erlang-and-chicagoboss-framework/">Introduction to Erlang and Chicagoboss Framework</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-16T08:38:00+07:00" pubdate data-updated="true">Jan 16<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/logo_erlang.png" alt="Introduction to Erlang and Chicagoboss Framework" />
-</p>
-
-
-
-
-<p>
-  <strong><a href="http://www.erlang.org/" target="_blank">Erlang</a></strong> is a programming language used to build massively scalable soft real-time systems with requirements on high availability. Some of its uses are in telecoms, banking, e-commerce, computer telephony and instant messaging. Erlang&#8217;s runtime system has built-in support for concurrency, distribution and fault tolerance.
-</p>
-
-
-
-
-<p>
-  <strong>Erlang</strong> is the most advanced open-source server platform in existence, but it seems almost no one knows about it. <strong>Erlang</strong> can handle hundreds of thousands of simultaneous connections, it can spawn millions of simultaneous processes in under a second, server code can be upgraded, in production, without any interruption of service, and errors are handled in such a way that server crashes are extremely uncommon.
-</p>
-
-
-
-
-<p>
-  What is not to like? Why isn&#8217;t the entire world programming in <strong>Erlang</strong>? Well, <strong>Erlang</strong> is a functional language, which means that to implement any algorithms, you must use recursion instead of familiar “for” and “while” loops. Unlike every major scripting language, there is no built-in syntax for dictionaries or hash maps. And to actually write a functioning server, you must learn an additional layer of magic known as OTP. These barriers, in my opinion, have prevented <strong>Erlang</strong> from gaining much traction outside of Scandinavia.
-</p>
-
-
-
-
-<p>
-  <img src="/images/logo_chicagoboss.svg" alt="Introduction to Erlang and Chicagoboss Framework" />
-</p>
-
-
-
-
-<p>
-  But <strong><a href="http://www.chicagoboss.org/" target="_blank">Chicagoboss Framwork</a></strong> changes all that. It makes <strong>Erlang</strong> accessible to hackers
-  who just want to write a reliable website in a nifty language. Boss uses code generation to get around the historic hash-map quandary, and takes care of all the OTP business so that you can focus on writing the features you need for your website. As for the supposed burdens of functional programming, I find that recursion is rarely necessary in workaday web programming; I would guess that 99% of server application code simply shuttles data to and from a database, so in the course of building a website, the pedestrian procedural programmer will hardly miss his “do/while” loops.
-</p>
-
-
-
-
-<p>
-  If you are an experienced web programmer, you&#8217;ll probably enjoy all the
-  amenities that CB has to offer: an advanced ORM with support for database associations, sharding, and caching. lightning-fast templates compiled down to <strong>Erlang</strong> bytecode, automatic recompiling and in-browser error reporting, simple directives for reloads and redirects, routes for constructing URLs and handling requests, full frameworks for sending and receiving email, a built-in message queue, a framework for writing and running functional tests, and a first-of-its-kind event system for monitoring the data model.
-</p>
-
-
-
-
-<p>
-  In the end, by combining the <strong>Erlang</strong> platform with its own innovations,
-  <strong>Chicagoboss Framwork</strong> makes websites a delight to develop and a joy to deploy. Boss applications can be written in the same time or less as equivalent Rails applications, and they will almost never crash or leak memory. Since the underlying networking is all asynchronous, you can easily write concurrent services, such as chat, that previously were only possible in callback-based frameworks (such as Nginx, Node.js, Twisted, or Perlbal).
-</p>
-
-
-
-
-<p>
-  The importance of this advancement cannot be overstated. It is now feasible for a very small team to develop and operate a database-driven, highly interactive, heavily trafficked website with very little capital outlay. Although <strong>Chicagoboss Framwork</strong> can’t tell you how to acquire users, the rest of this manual will show you everything you need to do to handle their requests and (with luck) fulfill their desires.
-</p>
-
-
-
-
-<p>
-  Reference: <a href="http://www.erlang.org/" target="_blank">www.erlang.org</a>, <a href="http://www.chicagoboss.org/" target="_blank">www.chicagoboss.org</a>
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/18/">&larr; Older</a>
@@ -2602,6 +3275,14 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/10/12/gulp-creating-a-webpage/">Gulp – Creating a Webpage</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/10/12/gulp-testing-with-jasmine/">Gulp – Testing With Jasmine</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/10/11/gulp-uglify/">Gulp – Uglify</a>
       </li>
     
@@ -2619,14 +3300,6 @@
     
       <li class="post">
         <a href="/blog/2016/10/04/gulp-streams/">Gulp – Streams</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/10/03/gulp-minify-our-css/">Gulp – Minify Our CSS</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/09/26/gulp-cleaning-our-build-folder/">Gulp – Cleaning Our Build Folder</a>
       </li>
     
   </ul>
@@ -2700,7 +3373,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/gulp/">Gulp [ 12 ]</a>
+        <a href="/blog/categories/gulp/">Gulp [ 14 ]</a>
       </li>
     
   </ul>
