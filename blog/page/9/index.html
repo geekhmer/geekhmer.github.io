@@ -79,6 +79,692 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/06/08/master-ruby-blocks/">Master Ruby Blocks</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-06-08T20:29:00+07:00" pubdate data-updated="true">Jun 8<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="Master Ruby Blocks" />
+</p>
+
+
+
+
+<p>
+  Blocks are one of the most powerful and often overlooked feature of ruby. I must confess that it took me a while to figure out how ruby blocks work and how they can be useful in practice.
+</p>
+
+
+
+
+<p>
+  There is something about <code>yield</code> that makes blocks very hard to understand at first. I&#8217;m going to talk about some of the concepts and provide a few examples so by the end of this post you&#8217;ll have a solid understanding of ruby blocks.
+</p>
+
+
+
+
+<p>
+  <strong>The basics: What are ruby blocks?</strong><br/>
+  1. What are ruby blocks?<br/>
+  2. How yield works?<br/>
+  3. What does <code>&block</code> mean?<br/>
+  4. Return value<br/>
+  5. How does <code>.map(&:something)</code> work?<br/>
+  6. Iterators and how to build one yourself<br/>
+  7. Initialize objects with default values using blocks<br/>
+  8. Ruby block examples
+</p>
+
+
+
+
+<p>
+  <strong>What are ruby blocks?</strong><br/>
+  A block is basically just code that you put inside <code>do</code> and <code>end</code>. That&#8217;s it. &#8220;But where&#8217;s the magic?&#8221; you might ask. We&#8217;ll get there in just a minute but first things first.
+</p>
+
+
+
+
+<p>
+  You can write the block in two ways:<br/>
+  1. Multi-line, between <code>do</code> and <code>end</code><br/>
+  2. Inline, between <code>{</code> and <code>}</code>
+</p>
+
+
+
+
+<p>
+  Both versions will do the exact same thing so it&#8217;s up to you which one you choose. As a general style-guide, it&#8217;s better to use the multi-line version if your code has more than one line, just to make it easier to read.
+</p>
+
+
+
+
+<p>
+  Here&#8217;s a basic example of a multi-line block:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">n</span><span class="o">|</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;Number </span><span class="si">#{</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  It&#8217;s called a multi-line block because it&#8217;s not inline, not because it&#8217;s got more than one line of code (which is not the case here). The same example can be written with an inline block:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span><span class="n">each</span> <span class="p">{</span><span class="o">|</span><span class="n">n</span><span class="o">|</span> <span class="nb">puts</span> <span class="s2">&quot;Number </span><span class="si">#{</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Both versions will print numbers 1, 2 and 3 in order. The little n letter you see between the pipes (<code>|n|</code>) is called a block parameter and it&#8217;s value in this case is going to be each of the numbers in turn, in the order they are listed inside the array. So for the first iteration, the value of n will be 1, then for the second iteration, the value will be 2, and then 3.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Number</span> <span class="mi">1</span>
+</span><span class='line'><span class="no">Number</span> <span class="mi">2</span>
+</span><span class='line'><span class="no">Number</span> <span class="mi">3</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="kp">nil</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>How yield works?</strong><br/>
+  Here&#8217;s the bad wolf. This guy is responsible for all the confusion and magic around ruby blocks. I think most of the confusion comes from the way it calls the block and how it&#8217;s passing parameters to it. We&#8217;ll be looking at both scenarios in this section.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">my_method</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;reached the top&quot;</span>
+</span><span class='line'>  <span class="k">yield</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;reached the bottom&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">my_method</span> <span class="k">do</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;reached yield&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">reached</span> <span class="n">the</span> <span class="n">top</span>
+</span><span class='line'><span class="n">reached</span> <span class="k">yield</span>
+</span><span class='line'><span class="n">reached</span> <span class="n">the</span> <span class="n">bottom</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="kp">nil</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So basically when the execution of <code>my_method</code> reaches the line with the call to <code>yield</code>, the code inside the block gets executed. Then, when the code inside the block finishes, the execution of <code>my_method</code> continues.
+</p>
+
+
+
+
+<p>
+  <img src="/images/ruby_block_flow.png" alt="Ruby Block Flow" />
+</p>
+
+
+
+
+<p>
+  <strong>Passing blocks to methods</strong><br/>
+  A method doesn&#8217;t need to specify the block in it&#8217;s signature in order to receive a block parameter. You can just pass a block to any function but unless that function calls <code>yield</code>, the block won&#8217;t get executed.
+</p>
+
+
+
+
+<p>
+  On the other hand, if you do call <code>yield</code> in your method, then the block parameter becomes mandatory and the method will raise an exception if it doesn&#8217;t receive a block.
+</p>
+
+
+
+
+<p>
+  If you want to make the block an optional parameter, you can use the <code>block_given?</code> method which will return either true or false depending on if a block was passed in to the method or not.
+</p>
+
+
+
+
+<p>
+  <strong>Yield takes parameters too</strong><br/>
+  Any parameter passed to <code>yield</code> will serve as a parameter to the block. So when the block runs, it can use the parameters passed in from the original method. Those parameters can be variables local to the method in which <code>yield</code> lives in.
+</p>
+
+
+
+
+<p>
+  The order of the arguments is important because the order you use to pass in the parameters is the order in which the block receives them.
+</p>
+
+
+
+
+<p>
+  <img src="/images/ruby_block_arguments.png" alt="Ruby Block Arguments" />
+</p>
+
+
+
+
+<p>
+  One thing to note here is that the parameters inside the block are local to the block (unlike those passed in from the method to the block).
+</p>
+
+
+
+
+<p>
+  <strong>What does &block (ampersand parameter) mean?</strong><br/>
+  You&#8217;ve probably seen this <code>&block</code> all over the place in ruby code. It&#8217;s how you can pass a reference to the block (instead of a local variable) to a method. In fact, ruby allows you to pass any object to a method as if it were a block. The method will try to use the passed in object if it&#8217;s already a block but if it&#8217;s not a block it will call to_proc on it in an attempt to convert it to a block.
+</p>
+
+
+
+
+<p>
+  Also note that the <code>block</code> part (without the ampersand) is just a name for the reference, you can use whatever name you like if it makes more sense to you.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">my_method</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="n">block</span>
+</span><span class='line'>  <span class="n">block</span><span class="o">.</span><span class="n">call</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">my_method</span> <span class="p">{</span> <span class="nb">puts</span> <span class="s2">&quot;Hello!&quot;</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#&lt;Proc:0x0000010124e5a8@tmp/example.rb:6&gt;</span>
+</span><span class='line'><span class="no">Hello</span><span class="o">!</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Return value</strong><br/>
+  <code>yield</code> returns the last evaluated expression (from inside the block). So in other words, the value that <code>yield</code> returns is the value the block returns.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">my_method</span>
+</span><span class='line'>  <span class="n">value</span> <span class="o">=</span> <span class="k">yield</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;value is: </span><span class="si">#{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">my_method</span> <span class="k">do</span>
+</span><span class='line'>  <span class="mi">2</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">value</span> <span class="n">is</span> <span class="mi">2</span>
+</span><span class='line'>  <span class="o">=&gt;</span> <span class="kp">nil</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>How does .map(&:something) work?</strong><br/>
+  You&#8217;ve probably used shortcuts like <code>.map(&:capitalize)</code> a lot, especially if you&#8217;ve done any Rails coding. It&#8217;s a very clean shortcut to <code>.map { |title| title.capitalize }</code>.
+</p>
+
+
+
+
+<p>
+  But how does it really work?
+</p>
+
+
+
+
+<p>
+  It turns out that the Symbol class implements the to_proc method which will unwrap the short version into it&#8217;s longer variant. Nice right?
+</p>
+
+
+
+
+<p>
+  <strong>Iterators and how to build one yourself</strong><br/>
+  You can call yield as many times as you want inside a method. That&#8217;s basically how iterators work. Calling <code>yield</code> for each of the elements in the array mimics the behavior of the built in ruby iterators.
+</p>
+
+
+
+
+<p>
+  Let&#8217;s see how we can write a method similar to the map method in ruby.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">my_map</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">new_array</span> <span class="o">=</span> <span class="o">[]</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">for</span> <span class="n">element</span> <span class="k">in</span> <span class="n">array</span>
+</span><span class='line'>    <span class="n">new_array</span><span class="o">.</span><span class="n">push</span> <span class="k">yield</span> <span class="n">element</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">new_array</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">my_map</span><span class="p">(</span><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">number</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">number</span> <span class="o">*</span> <span class="mi">2</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">2</span>
+</span><span class='line'><span class="mi">4</span>
+</span><span class='line'><span class="mi">6</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Initialize objects with default values</strong><br/>
+  A cool pattern we can use with ruby blocks is to initialize an object with default values. You&#8217;ve probably seen this pattern if you&#8217;ve ever ventured into a .gemspec file from any ruby gem.
+</p>
+
+
+
+
+<p>
+  The way it works is, you have an initializer that calls <code>yield(self)</code>. In the context of the <code>initialize</code> method, <code>self</code> is the object being initialized.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Car</span>
+</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:color</span><span class="p">,</span> <span class="ss">:doors</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span>
+</span><span class='line'>    <span class="k">yield</span><span class="p">(</span><span class="nb">self</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">car</span> <span class="o">=</span> <span class="no">Car</span><span class="o">.</span><span class="n">new</span> <span class="k">do</span> <span class="o">|</span><span class="n">c</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">c</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;Red&quot;</span>
+</span><span class='line'>  <span class="n">c</span><span class="o">.</span><span class="n">doors</span> <span class="o">=</span> <span class="mi">4</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="s2">&quot;My car&#39;s color is </span><span class="si">#{</span><span class="n">car</span><span class="o">.</span><span class="n">color</span><span class="si">}</span><span class="s2"> and it&#39;s got </span><span class="si">#{</span><span class="n">car</span><span class="o">.</span><span class="n">doors</span><span class="si">}</span><span class="s2"> doors.&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">My</span> <span class="n">car</span><span class="s1">&#39;s color is Red and it&#39;</span><span class="n">s</span> <span class="n">got</span> <span class="mi">4</span> <span class="n">doors</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Ruby blocks examples</strong><br/>
+  Examples are all the rage these days so let&#8217;s try to find a few interesting ways of using blocks in real world (or as close to real world as possible) scenarios.
+</p>
+
+
+
+
+<p>
+  <strong>Wrap text in html tags</strong><br/>
+  Blocks are the perfect candidate whenever you need to wrap a chunk of dynamic code within some static code. So for example if you want to generate an html tag for some text. The text is the dynamic part (cause you never know what you&#8217;ll want to wrap) and the tags are the static part, they never change.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">wrap_in_h1</span>
+</span><span class='line'>  <span class="s2">&quot;&lt;h1&gt;</span><span class="si">#{</span><span class="k">yield</span><span class="si">}</span><span class="s2">&lt;/h1&gt;&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">wrap_in_h1</span> <span class="p">{</span> <span class="s2">&quot;Here&#39;s my heading&quot;</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># =&gt; &quot;&lt;h1&gt;Here&#39;s my heading&lt;/h1&gt;&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">wrap_in_h1</span> <span class="p">{</span> <span class="s2">&quot;Ha&quot;</span> <span class="o">*</span> <span class="mi">3</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># =&gt; &quot;&lt;h1&gt;HaHaHa&lt;/h1&gt;&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Note that the power of using blocks over methods is when you need to reuse some of the behavior but do something slightly different with it. So let&#8217;s say we have a string we want to wrap inside html tags and then do something different with it.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">wrap_in_tags</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">html</span> <span class="o">=</span> <span class="s2">&quot;&lt;</span><span class="si">#{</span><span class="n">tag</span><span class="si">}</span><span class="s2">&gt;</span><span class="si">#{</span><span class="n">text</span><span class="si">}</span><span class="s2">&lt;/</span><span class="si">#{</span><span class="n">tag</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
+</span><span class='line'>  <span class="k">yield</span> <span class="n">html</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">wrap_in_tags</span><span class="p">(</span><span class="s2">&quot;title&quot;</span><span class="p">,</span> <span class="s2">&quot;Hello&quot;</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">html</span><span class="o">|</span> <span class="no">Mailer</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">html</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="n">wrap_in_tags</span><span class="p">(</span><span class="s2">&quot;title&quot;</span><span class="p">,</span> <span class="s2">&quot;Hello&quot;</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">html</span><span class="o">|</span> <span class="no">Page</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="ss">:body</span> <span class="o">=&gt;</span> <span class="n">html</span><span class="p">)</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  In the first case we&#8217;re sending the <title>Hello</title> string via email and in the second case we&#8217;re creating a Page record. Both cases use the same method but they do different things.
+</p>
+
+
+
+
+<p>
+  <strong>Take a note</strong><br/>
+  Let&#8217;s say we want to build a way to quickly store ideas into a database table. For that to work we want to pass in the note and have the method deal with the database connections. Ideally we&#8217;d like to call <code>Note.create { "Nice day today" }</code> and not worry about opening and closing database connections. So let&#8217;s do this.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Note</span>
+</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:note</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">note</span><span class="o">=</span><span class="kp">nil</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@note</span> <span class="o">=</span> <span class="n">note</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;@note is </span><span class="si">#{</span><span class="vi">@note</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">create</span>
+</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">connect</span>
+</span><span class='line'>    <span class="n">note</span> <span class="o">=</span> <span class="kp">new</span><span class="p">(</span><span class="k">yield</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">note</span><span class="o">.</span><span class="n">write</span>
+</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">disconnect</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">write</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;Writing </span><span class="se">\&quot;</span><span class="si">#{</span><span class="vi">@note</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2"> to the database.&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">connect</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;Connecting to the database...&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">disconnect</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;Disconnecting from the database...&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Note</span><span class="o">.</span><span class="n">create</span> <span class="p">{</span> <span class="s2">&quot;Foo&quot;</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Connecting</span> <span class="n">to</span> <span class="n">the</span> <span class="n">database</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="vi">@note</span> <span class="n">is</span> <span class="no">Foo</span>
+</span><span class='line'><span class="no">Writing</span> <span class="s2">&quot;Foo&quot;</span> <span class="n">to</span> <span class="n">the</span> <span class="n">database</span><span class="o">.</span>
+</span><span class='line'><span class="no">Disconnecting</span> <span class="n">from</span> <span class="n">the</span> <span class="n">database</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The implementation details of connecting, writing and disconnecting to and from the database were left out since they&#8217;re out of the scope of this article.
+</p>
+
+
+
+
+<p>
+  <strong>Find divisible elements of an array</strong><br/>
+  It seems like I&#8217;m getting further and further away from &#8220;the real world scenario&#8221; but anyways, I&#8217;m gonna shoot one last example. So let&#8217;s say you want to get every element of an array that is divisible by 3 (or any number you choose), how would you do that with ruby blocks?
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Fixnum</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">to_proc</span>
+</span><span class='line'>    <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="k">do</span> <span class="o">|</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">obj</span> <span class="o">%</span> <span class="nb">self</span> <span class="o">==</span> <span class="mi">0</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">numbers</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="o">].</span><span class="n">select</span><span class="p">(</span><span class="o">&amp;</span><span class="mi">3</span><span class="p">)</span>
+</span><span class='line'><span class="nb">puts</span> <span class="n">numbers</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">3</span>
+</span><span class='line'><span class="mi">6</span>
+</span><span class='line'><span class="mi">9</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  You can think of blocks as simply a chunk of code, and yield allows you to inject that code at some place into a method. That means you can have one method work in different ways, you don&#8217;t have to write multiple methods (you can reuse one method to do different things).
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/06/06/how-to-use-link-to-in-ruby-on-rails/">How to Use Link_to in Ruby on Rails?</a></h1>
     
     
@@ -1874,243 +2560,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/05/14/code-concerns-in-rails-4-models/">Code Concerns in Rails 4 Models</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-05-14T12:48:00+07:00" pubdate data-updated="true">May 14<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="Code Concerns in Rails 4 Models" />
-</p>
-
-
-
-
-<p>
-  You may have noticed that Rails 4 creates a new folder called concerns. Concerns are pieces of code that allow you to better organize the code that you write. This feature has actually been around for a long time prior to Rails 4, Rails 4 merely creates the folders for you and sets up the environment. In this article, we focus primarily on Rails 4.0, but it should apply equally to 3.2.x or even 3.0.x and earlier.
-</p>
-
-
-
-
-<p>
-  Here is a simple example, lets say we have a model called user. In this model we would typically have something like this:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">has_secure_password</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">authenticate</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="n">find_by_email</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">user</span> <span class="k">if</span> <span class="o">!</span><span class="n">user</span><span class="o">.</span><span class="n">nil?</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">create_password_reset_token</span>
-</span><span class='line'>    <span class="n">logger</span><span class="o">.</span><span class="n">warn</span> <span class="s2">&quot;Create password reset token code goes here.&quot;</span>
-</span><span class='line'>    <span class="kp">false</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  We can create a a file in the app/models/concerns folder called authentication.rb (app/models/concerns/authentication.rb) and place the following code in it:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Authentication</span>
-</span><span class='line'>  <span class="kp">extend</span> <span class="ss">ActiveSupport</span><span class="p">:</span><span class="ss">:Concern</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">included</span> <span class="k">do</span>
-</span><span class='line'>    <span class="n">has_secure_password</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">ClassMethods</span>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">authenticate</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
-</span><span class='line'>      <span class="n">user</span> <span class="o">=</span> <span class="n">find_by_email</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
-</span><span class='line'>      <span class="n">user</span> <span class="k">if</span> <span class="n">user</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">create_password_reset_token</span>
-</span><span class='line'>    <span class="n">logger</span><span class="o">.</span><span class="n">warn</span> <span class="s2">&quot;Create password reset token code goes here.&quot;</span>
-</span><span class='line'>    <span class="kp">false</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now, lets refactor the User model to use the new code. Change the users model (app/models/user.rb) so that it looks like this:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="kp">include</span> <span class="no">Authentication</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now if you start the rails server and attempt to authenticate, you&#8217;ll notice that the functionality hasn&#8217;t changed at all. That&#8217;s the idea! You can use this method for organizing and DRYing up your code.
-</p>
-
-
-
-
-<p>
-  The extend <code>ActiveSupport::Concern</code> tells rails that we are creating a concern.
-</p>
-
-
-
-
-<p>
-  The code contained within the included block will be executed within the context of the class that is including the module. This is perfect for including functionality provided by 3rd party gems, etc.
-</p>
-
-
-
-
-<p>
-  Next you will notice the <code>module ClassMethods</code> block. The code contained within this block will be added to the Class itself. For example, the code above adds an authenticate function to the User class. This allows you to do User.authenticate(email, password) instead of User.find_by_email(email).authenticate(password).
-</p>
-
-
-
-
-<p>
-  Finally you will see the last bit of code, the <code>create_password_reset_token</code> function. Code not included in the <code>ClassMethods</code> block or the <code>included</code> block will be included as instance methods. For example, You could do <code>@user = User.find(params[:id])</code> and then do <code>@user.create_password_reset_token</code> to create a password reset token for the specified user.
-</p>
-
-
-
-
-<p>
-  Now, all of this is great, but what benefit do you get from organizing your code in this fashion? Well, lets look at a good example of how utilizing this functionality of Rails can save you time and make your code much cleaner. Lets say we have a number of different models, BlogPosts, Articles, Comments, etc and we want to add tagging functionality that will allow the user to tag each object as something. Utilizing concerns we can quickly and easily do this:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Taggable</span>
-</span><span class='line'>  <span class="kp">extend</span> <span class="ss">ActiveSupport</span><span class="p">:</span><span class="ss">:Concern</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">included</span> <span class="k">do</span>
-</span><span class='line'>    <span class="n">has_many</span> <span class="ss">:taggings</span><span class="p">,</span> <span class="ss">as</span><span class="p">:</span> <span class="ss">:taggable</span><span class="p">,</span> <span class="ss">dependent</span><span class="p">:</span> <span class="ss">:destroy</span>
-</span><span class='line'>    <span class="n">has_many</span> <span class="ss">:tags</span><span class="p">,</span> <span class="ss">through</span><span class="p">:</span> <span class="ss">:taggings</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">tag_names</span>
-</span><span class='line'>    <span class="n">tags</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:name</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  In this simple example, you&#8217;ll see that simply including Taggable on your modules will (with the database structure in place of course) make your models taggable. This code can quickly and easily be spread upon as many models as needed. Well that&#8217;s it! Concerns are a great way to keep your code organized and DRY.
-</p>
-
-
-
-
-<p>
-  So far so good, That it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/10/">&larr; Older</a>
@@ -2135,6 +2584,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/12/24/jack-ma-the-economic-club-of-new-york/">Jack Ma - the Economic Club of New York</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/10/30/gulp-markdown/">Gulp – Markdown</a>
       </li>
     
@@ -2156,10 +2609,6 @@
     
       <li class="post">
         <a href="/blog/2016/10/12/gulp-testing-with-jasmine/">Gulp – Testing With Jasmine</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/10/11/gulp-uglify/">Gulp – Uglify</a>
       </li>
     
   </ul>
@@ -2234,6 +2683,10 @@
     
       <li>
         <a href="/blog/categories/gulp/">Gulp [ 18 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/other/">Other [ 1 ]</a>
       </li>
     
   </ul>
