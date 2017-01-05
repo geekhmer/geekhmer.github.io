@@ -79,243 +79,6 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2015/05/14/code-concerns-in-rails-4-models/">Code Concerns in Rails 4 Models</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-05-14T12:48:00+07:00" pubdate data-updated="true">May 14<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="Code Concerns in Rails 4 Models" />
-</p>
-
-
-
-
-<p>
-  You may have noticed that Rails 4 creates a new folder called concerns. Concerns are pieces of code that allow you to better organize the code that you write. This feature has actually been around for a long time prior to Rails 4, Rails 4 merely creates the folders for you and sets up the environment. In this article, we focus primarily on Rails 4.0, but it should apply equally to 3.2.x or even 3.0.x and earlier.
-</p>
-
-
-
-
-<p>
-  Here is a simple example, lets say we have a model called user. In this model we would typically have something like this:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">has_secure_password</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">authenticate</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="n">find_by_email</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">user</span> <span class="k">if</span> <span class="o">!</span><span class="n">user</span><span class="o">.</span><span class="n">nil?</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">create_password_reset_token</span>
-</span><span class='line'>    <span class="n">logger</span><span class="o">.</span><span class="n">warn</span> <span class="s2">&quot;Create password reset token code goes here.&quot;</span>
-</span><span class='line'>    <span class="kp">false</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  We can create a a file in the app/models/concerns folder called authentication.rb (app/models/concerns/authentication.rb) and place the following code in it:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Authentication</span>
-</span><span class='line'>  <span class="kp">extend</span> <span class="ss">ActiveSupport</span><span class="p">:</span><span class="ss">:Concern</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">included</span> <span class="k">do</span>
-</span><span class='line'>    <span class="n">has_secure_password</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">ClassMethods</span>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">authenticate</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
-</span><span class='line'>      <span class="n">user</span> <span class="o">=</span> <span class="n">find_by_email</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
-</span><span class='line'>      <span class="n">user</span> <span class="k">if</span> <span class="n">user</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">create_password_reset_token</span>
-</span><span class='line'>    <span class="n">logger</span><span class="o">.</span><span class="n">warn</span> <span class="s2">&quot;Create password reset token code goes here.&quot;</span>
-</span><span class='line'>    <span class="kp">false</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now, lets refactor the User model to use the new code. Change the users model (app/models/user.rb) so that it looks like this:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="kp">include</span> <span class="no">Authentication</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now if you start the rails server and attempt to authenticate, you&#8217;ll notice that the functionality hasn&#8217;t changed at all. That&#8217;s the idea! You can use this method for organizing and DRYing up your code.
-</p>
-
-
-
-
-<p>
-  The extend <code>ActiveSupport::Concern</code> tells rails that we are creating a concern.
-</p>
-
-
-
-
-<p>
-  The code contained within the included block will be executed within the context of the class that is including the module. This is perfect for including functionality provided by 3rd party gems, etc.
-</p>
-
-
-
-
-<p>
-  Next you will notice the <code>module ClassMethods</code> block. The code contained within this block will be added to the Class itself. For example, the code above adds an authenticate function to the User class. This allows you to do User.authenticate(email, password) instead of User.find_by_email(email).authenticate(password).
-</p>
-
-
-
-
-<p>
-  Finally you will see the last bit of code, the <code>create_password_reset_token</code> function. Code not included in the <code>ClassMethods</code> block or the <code>included</code> block will be included as instance methods. For example, You could do <code>@user = User.find(params[:id])</code> and then do <code>@user.create_password_reset_token</code> to create a password reset token for the specified user.
-</p>
-
-
-
-
-<p>
-  Now, all of this is great, but what benefit do you get from organizing your code in this fashion? Well, lets look at a good example of how utilizing this functionality of Rails can save you time and make your code much cleaner. Lets say we have a number of different models, BlogPosts, Articles, Comments, etc and we want to add tagging functionality that will allow the user to tag each object as something. Utilizing concerns we can quickly and easily do this:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Taggable</span>
-</span><span class='line'>  <span class="kp">extend</span> <span class="ss">ActiveSupport</span><span class="p">:</span><span class="ss">:Concern</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">included</span> <span class="k">do</span>
-</span><span class='line'>    <span class="n">has_many</span> <span class="ss">:taggings</span><span class="p">,</span> <span class="ss">as</span><span class="p">:</span> <span class="ss">:taggable</span><span class="p">,</span> <span class="ss">dependent</span><span class="p">:</span> <span class="ss">:destroy</span>
-</span><span class='line'>    <span class="n">has_many</span> <span class="ss">:tags</span><span class="p">,</span> <span class="ss">through</span><span class="p">:</span> <span class="ss">:taggings</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">tag_names</span>
-</span><span class='line'>    <span class="n">tags</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:name</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  In this simple example, you&#8217;ll see that simply including Taggable on your modules will (with the database structure in place of course) make your models taggable. This code can quickly and easily be spread upon as many models as needed. Well that&#8217;s it! Concerns are a great way to keep your code organized and DRY.
-</p>
-
-
-
-
-<p>
-  So far so good, That it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
       <h1 class="entry-title"><a href="/blog/2015/05/13/awesome-jquery-tricks/">Awesome jQuery Tricks</a></h1>
     
     
@@ -2987,6 +2750,270 @@
 
     </article>
   
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/05/06/fast-rails-api/">Fast Rails API</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-05-06T10:41:00+07:00" pubdate data-updated="true">May 6<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/fast_rails_api.png" alt="Fast Rails API" />
+</p>
+
+
+
+
+<p>
+  Rendering JSON is pretty easy in Rails.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="vi">@statuses</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  It works well if there are small number of records to be returned. But what happens when we need to return 10,000 records at once? Things slow down dramatically and the most time-consuming parts are JSON serialization and database operations.
+</p>
+
+
+
+
+<p>
+  <strong>Include only Required Attributes</strong><br/>
+  The first obvious thing is generating JSON with only attributes that we need.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="vi">@statuses</span><span class="p">,</span> <span class="nb">methods</span><span class="p">:</span> <span class="o">[</span><span class="ss">:latitude</span><span class="p">,</span> <span class="ss">:longitude</span><span class="p">,</span> <span class="ss">:timestamp</span><span class="p">,</span> <span class="ss">:virtual_odometer</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Tidying JSON gives over 20% performance
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">default</span>    <span class="mi">5</span><span class="o">.</span><span class="mi">940000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">080000</span>   <span class="mi">6</span><span class="o">.</span><span class="mo">020000</span> <span class="p">(</span>  <span class="mi">6</span><span class="o">.</span><span class="mi">094221</span><span class="p">)</span>
+</span><span class='line'><span class="n">attrs</span>      <span class="mi">4</span><span class="o">.</span><span class="mi">820000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">4</span><span class="o">.</span><span class="mi">830000</span> <span class="p">(</span>  <span class="mi">4</span><span class="o">.</span><span class="mi">932337</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Select only Required Columns</strong><br/>
+  Second, we should consider selecting only required columns when we don’t need all of them.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="vi">@statuses</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">[</span><span class="ss">:latitude</span><span class="p">,</span> <span class="ss">:longitude</span><span class="p">,</span> <span class="ss">:timestamp</span><span class="p">,</span> <span class="ss">:virtual_odometer</span><span class="o">]</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  It’ll help us to avoid transferring a huge amount of data to the application from the database and gives 2x speed up.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">default</span>    <span class="mi">5</span><span class="o">.</span><span class="mi">940000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">080000</span>   <span class="mi">6</span><span class="o">.</span><span class="mo">020000</span> <span class="p">(</span>  <span class="mi">6</span><span class="o">.</span><span class="mi">094221</span><span class="p">)</span>
+</span><span class='line'><span class="n">attrs</span>      <span class="mi">4</span><span class="o">.</span><span class="mi">820000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">4</span><span class="o">.</span><span class="mi">830000</span> <span class="p">(</span>  <span class="mi">4</span><span class="o">.</span><span class="mi">932337</span><span class="p">)</span>
+</span><span class='line'><span class="nb">select</span>     <span class="mi">2</span><span class="o">.</span><span class="mi">170000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">020000</span>   <span class="mi">2</span><span class="o">.</span><span class="mi">190000</span> <span class="p">(</span>  <span class="mi">2</span><span class="o">.</span><span class="mi">222277</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Don’t Instantiate ActiveRecord Objects If Possible</strong><br/>
+  Let’s implement a method to return “lightning” array of hashes instead of ActiveRecord instances.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">lightning</span>
+</span><span class='line'>  <span class="n">connection</span><span class="o">.</span><span class="n">select_all</span><span class="p">(</span><span class="nb">select</span><span class="p">(</span><span class="o">[</span><span class="ss">:latitude</span><span class="p">,</span> <span class="ss">:longitude</span><span class="p">,</span> <span class="ss">:timestamp</span><span class="p">,</span> <span class="ss">:virtual_odometer</span><span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">arel</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">attrs</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">attrs</span><span class="o">.</span><span class="n">each_key</span> <span class="k">do</span> <span class="o">|</span><span class="kp">attr</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">attrs</span><span class="o">[</span><span class="kp">attr</span><span class="o">]</span> <span class="o">=</span> <span class="n">type_cast_attribute</span><span class="p">(</span><span class="kp">attr</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Returns array of hashes instead of array of single column values. Invoke a new method in controller.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="vi">@statuses</span><span class="o">.</span><span class="n">lightning</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Using lightweight hashes makes JSON rendering 2x faster.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">default</span>    <span class="mi">5</span><span class="o">.</span><span class="mi">940000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">080000</span>   <span class="mi">6</span><span class="o">.</span><span class="mo">020000</span> <span class="p">(</span>  <span class="mi">6</span><span class="o">.</span><span class="mi">094221</span><span class="p">)</span>
+</span><span class='line'><span class="n">attrs</span>      <span class="mi">4</span><span class="o">.</span><span class="mi">820000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">4</span><span class="o">.</span><span class="mi">830000</span> <span class="p">(</span>  <span class="mi">4</span><span class="o">.</span><span class="mi">932337</span><span class="p">)</span>
+</span><span class='line'><span class="nb">select</span>     <span class="mi">2</span><span class="o">.</span><span class="mi">170000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">020000</span>   <span class="mi">2</span><span class="o">.</span><span class="mi">190000</span> <span class="p">(</span>  <span class="mi">2</span><span class="o">.</span><span class="mi">222277</span><span class="p">)</span>
+</span><span class='line'><span class="n">lightning</span>  <span class="mi">1</span><span class="o">.</span><span class="mi">120000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">1</span><span class="o">.</span><span class="mi">130000</span> <span class="p">(</span>  <span class="mi">1</span><span class="o">.</span><span class="mi">148763</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<h3>
+  Fastest JSON
+</h3>
+
+
+
+
+<p>
+  There are several JSON libraries available:<br/>
+  - <a href="https://github.com/flori/json" target="_blank">JSON</a> - The default JSON gem with C-extensions (ships with Ruby 1.9).<br/>
+  - <a href="https://github.com/brianmario/yajl-ruby" target="_blank">YAJL</a> - Yet Another JSON Library.<br/>
+  - <a href="https://github.com/ohler55/oj" target="_blank">OJ</a> - Optimized JSON.
+</p>
+
+
+
+
+<p>
+  It’s a good idea to use the fastest dumper of them.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">json</span>       <span class="mi">0</span><span class="o">.</span><span class="mi">810000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">020000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">830000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mi">841307</span><span class="p">)</span>
+</span><span class='line'><span class="n">yajl</span>       <span class="mi">0</span><span class="o">.</span><span class="mi">760000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">020000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">780000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mi">809903</span><span class="p">)</span>
+</span><span class='line'><span class="n">oj</span>         <span class="mi">0</span><span class="o">.</span><span class="mi">640000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">650000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mi">666230</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  But we prefer <a href="https://github.com/rails-api/active_model_serializers" target="_blank">active_model_serializers</a> which it run faster than OJ.
+</p>
+
+
+
+
+<p>
+  Summarized benchmark results are:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">user</span>     <span class="nb">system</span>      <span class="n">total</span>        <span class="n">real</span>
+</span><span class='line'><span class="n">default</span>    <span class="mi">5</span><span class="o">.</span><span class="mi">940000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">080000</span>   <span class="mi">6</span><span class="o">.</span><span class="mo">020000</span> <span class="p">(</span>  <span class="mi">6</span><span class="o">.</span><span class="mi">094221</span><span class="p">)</span>
+</span><span class='line'><span class="n">attrs</span>      <span class="mi">4</span><span class="o">.</span><span class="mi">820000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">4</span><span class="o">.</span><span class="mi">830000</span> <span class="p">(</span>  <span class="mi">4</span><span class="o">.</span><span class="mi">932337</span><span class="p">)</span>
+</span><span class='line'><span class="nb">select</span>     <span class="mi">2</span><span class="o">.</span><span class="mi">170000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">020000</span>   <span class="mi">2</span><span class="o">.</span><span class="mi">190000</span> <span class="p">(</span>  <span class="mi">2</span><span class="o">.</span><span class="mi">222277</span><span class="p">)</span>
+</span><span class='line'><span class="n">lightning</span>  <span class="mi">1</span><span class="o">.</span><span class="mi">120000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">1</span><span class="o">.</span><span class="mi">130000</span> <span class="p">(</span>  <span class="mi">1</span><span class="o">.</span><span class="mi">148763</span><span class="p">)</span>
+</span><span class='line'><span class="n">json</span>       <span class="mi">0</span><span class="o">.</span><span class="mi">810000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">020000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">830000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mi">841307</span><span class="p">)</span>
+</span><span class='line'><span class="n">yajl</span>       <span class="mi">0</span><span class="o">.</span><span class="mi">760000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">020000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">780000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mi">809903</span><span class="p">)</span>
+</span><span class='line'><span class="n">oj</span>         <span class="mi">0</span><span class="o">.</span><span class="mi">640000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">650000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mi">666230</span><span class="p">)</span>
+</span><span class='line'><span class="n">ams</span>        <span class="mi">0</span><span class="o">.</span><span class="mi">270000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">000000</span>   <span class="mi">0</span><span class="o">.</span><span class="mi">270000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mi">272239</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/11/">&larr; Older</a>
@@ -3011,10 +3038,6 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2016/12/24/jack-ma-the-economic-club-of-new-york/">Jack Ma - the Economic Club of New York</a>
-      </li>
-    
-      <li class="post">
         <a href="/blog/2016/10/30/gulp-markdown/">Gulp – Markdown</a>
       </li>
     
@@ -3036,6 +3059,10 @@
     
       <li class="post">
         <a href="/blog/2016/10/12/gulp-testing-with-jasmine/">Gulp – Testing With Jasmine</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/10/11/gulp-uglify/">Gulp – Uglify</a>
       </li>
     
   </ul>
@@ -3110,10 +3137,6 @@
     
       <li>
         <a href="/blog/categories/gulp/">Gulp [ 18 ]</a>
-      </li>
-    
-      <li>
-        <a href="/blog/categories/other/">Other [ 1 ]</a>
       </li>
     
   </ul>
@@ -3191,7 +3214,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2016 GeeKhmer in Phnom Penh, Cambodia.
+  Copyright &copy; 2017 GeeKhmer in Phnom Penh, Cambodia.
 </p>
 
 </footer>
