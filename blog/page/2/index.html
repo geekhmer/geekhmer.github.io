@@ -79,6 +79,163 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2016/10/10/gulp-handling-errors-with-streams/">Gulp – Handling Errors With Streams</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-10-10T22:08:00+07:00" pubdate data-updated="true">Oct 10<span>th</span>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/gulpjs.jpg" width="600" alt="Gulp, Gulp – Handling Errors with Streams" />
+</p>
+
+
+
+
+<p>
+  What if the file was named incorrectly? What happens?
+</p>
+
+
+
+
+<p>
+  Change the string <code>index.html</code> to <code>OMG_WRONG_FILE.html</code> and rerun the script.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>/streams.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">var</span> <span class="n">fs</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s2">&quot;fs&quot;</span><span class="p">);</span>
+</span><span class='line'><span class="n">var</span> <span class="n">stream</span> <span class="o">=</span> <span class="n">fs</span><span class="o">.</span><span class="n">createReadStream</span><span class="p">(</span><span class="n">__dirname</span> <span class="o">+</span> <span class="s2">&quot;/contents/OMG_WRONG_FILE.html&quot;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">stream</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">function</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="sr">//</span> <span class="n">just</span> <span class="n">output</span> <span class="n">chunk</span> <span class="n">to</span> <span class="n">terminal</span>
+</span><span class='line'>  <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">toString</span><span class="p">());</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">stream</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="n">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;END&quot;</span><span class="p">);</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Running the script this time results in:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">node</span> <span class="n">streams</span><span class="o">.</span><span class="n">js</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">events</span><span class="o">.</span><span class="n">js</span><span class="p">:</span><span class="mi">72</span>
+</span><span class='line'>        <span class="kp">throw</span> <span class="n">er</span><span class="p">;</span> <span class="sr">//</span> <span class="no">Unhandled</span> <span class="s1">&#39;error&#39;</span> <span class="n">event</span>
+</span><span class='line'>
+</span><span class='line'><span class="ss">Error</span><span class="p">:</span> <span class="no">ENOENT</span><span class="p">,</span> <span class="nb">open</span> <span class="s1">&#39;~/YOUR_DIRECTORY/OMG_WRONG_FILE.html&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If we read the error message carefully, then we can see that there is an error event we can listen to. So lets listen for that event.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>/streams.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="n">stream</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="n">function</span><span class="p">(</span><span class="n">er</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="n">er</span><span class="p">);</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now we rerun the script and see:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">node</span> <span class="n">streams</span><span class="o">.</span><span class="n">js</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">error</span> <span class="p">{</span> <span class="o">[</span><span class="ss">Error</span><span class="p">:</span> <span class="no">ENOENT</span><span class="p">,</span> <span class="nb">open</span> <span class="s1">&#39;/Users/bunlong/js/gulp/contents/OMG_WRONG_FILE.html&#39;</span><span class="o">]</span>
+</span><span class='line'>  <span class="ss">errno</span><span class="p">:</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span>
+</span><span class='line'>  <span class="ss">code</span><span class="p">:</span> <span class="s1">&#39;ENOENT&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="ss">path</span><span class="p">:</span> <span class="s1">&#39;~/YOUR_DIRECTORY/contents/OMG_WRONG_FILE.html&#39;</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And that is it for now. We will come back and use some of what we learned later.
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2016/10/04/gulp-streams/">Gulp – Streams</a></h1>
     
     
@@ -1750,405 +1907,6 @@ platform.
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/07/13/setup-and-deploy-ruby-on-rails-on-ubuntu-16-dot-04-or-latest/">Setup and Deploy Ruby on Rails on Ubuntu 16.04 or Latest</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-07-13T15:00:00+07:00" pubdate data-updated="true">Jul 13<span>th</span>, 2016</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/rails_nginx_ubuntu.jpg" width="600" alt="Setup and Deploy Ruby On Rails on Ubuntu 16.04 or Latest" />
-</p>
-
-
-
-
-<p>
-  Since we setup Ubuntu for our development environment, we also want to use it in production. This keeps your application running consistently between development and production. 
-</p>
-
-
-
-
-<h3>Install Ruby</h3>
-
-
-
-
-<p>
-  The first step is to install some dependencies for Ruby:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
-</span><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">git</span><span class="o">-</span><span class="n">core</span> <span class="n">curl</span> <span class="n">zlib1g</span><span class="o">-</span><span class="n">dev</span> <span class="n">build</span><span class="o">-</span><span class="n">essential</span> <span class="n">libssl</span><span class="o">-</span><span class="n">dev</span> <span class="n">libreadline</span><span class="o">-</span><span class="n">dev</span> <span class="n">libyaml</span><span class="o">-</span><span class="n">dev</span> <span class="n">libsqlite3</span><span class="o">-</span><span class="n">dev</span> <span class="n">sqlite3</span> <span class="n">libxml2</span><span class="o">-</span><span class="n">dev</span> <span class="n">libxslt1</span><span class="o">-</span><span class="n">dev</span> <span class="n">libcurl4</span><span class="o">-</span><span class="n">openssl</span><span class="o">-</span><span class="n">dev</span> <span class="n">python</span><span class="o">-</span><span class="n">software</span><span class="o">-</span><span class="n">properties</span> <span class="n">libffi</span><span class="o">-</span><span class="n">dev</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Next we&#8217;re going to be installing Ruby using rvm:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">libgdbm</span><span class="o">-</span><span class="n">dev</span> <span class="n">libncurses5</span><span class="o">-</span><span class="n">dev</span> <span class="n">automake</span> <span class="n">libtool</span> <span class="n">bison</span> <span class="n">libffi</span><span class="o">-</span><span class="n">dev</span>
-</span><span class='line'><span class="n">gpg</span> <span class="o">--</span><span class="n">keyserver</span> <span class="ss">hkp</span><span class="p">:</span><span class="sr">//</span><span class="n">keys</span><span class="o">.</span><span class="n">gnupg</span><span class="o">.</span><span class="n">net</span> <span class="o">--</span><span class="n">recv</span><span class="o">-</span><span class="n">keys</span> <span class="mi">409</span><span class="no">B6B1796C275462A1703113804BB82D39DC0E3</span>
-</span><span class='line'><span class="n">curl</span> <span class="o">-</span><span class="n">sSL</span> <span class="ss">https</span><span class="p">:</span><span class="sr">//</span><span class="n">get</span><span class="o">.</span><span class="n">rvm</span><span class="o">.</span><span class="n">io</span> <span class="o">|</span> <span class="n">bash</span> <span class="o">-</span><span class="n">s</span> <span class="n">stable</span>
-</span><span class='line'><span class="n">source</span> <span class="o">~</span><span class="sr">/.rvm/s</span><span class="n">cripts</span><span class="o">/</span><span class="n">rvm</span>
-</span><span class='line'><span class="n">rvm</span> <span class="n">install</span> <span class="mi">2</span><span class="o">.</span><span class="mi">3</span><span class="o">.</span><span class="mi">1</span>
-</span><span class='line'><span class="n">rvm</span> <span class="n">use</span> <span class="mi">2</span><span class="o">.</span><span class="mi">3</span><span class="o">.</span><span class="mi">1</span> <span class="o">--</span><span class="n">default</span>
-</span><span class='line'><span class="n">ruby</span> <span class="o">-</span><span class="n">v</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The last step is to install Bundler
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="n">install</span> <span class="n">bundler</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<h3>Install Nginx</h3>
-
-
-
-
-<p>
-  Phusion is the company that develops Passenger and they recently put out an official Ubuntu package that ships with Nginx and Passenger pre-installed.
-</p>
-
-
-
-
-<p>
-  We&#8217;ll be using that to setup our production server because it&#8217;s very easy to setup:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">key</span> <span class="n">adv</span> <span class="o">--</span><span class="n">keyserver</span> <span class="ss">hkp</span><span class="p">:</span><span class="sr">//</span><span class="n">keyserver</span><span class="o">.</span><span class="n">ubuntu</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="mi">80</span> <span class="o">--</span><span class="n">recv</span><span class="o">-</span><span class="n">keys</span> <span class="mi">561</span><span class="no">F9B9CAC40B2F7</span>
-</span><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">apt</span><span class="o">-</span><span class="n">transport</span><span class="o">-</span><span class="n">https</span> <span class="n">ca</span><span class="o">-</span><span class="n">certificates</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># Add Passenger APT repository</span>
-</span><span class='line'><span class="n">sudo</span> <span class="n">sh</span> <span class="o">-</span><span class="n">c</span> <span class="s1">&#39;echo deb https://oss-binaries.phusionpassenger.com/apt/passenger xenial main &gt; /etc/apt/sources.list.d/passenger.list&#39;</span>
-</span><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># Install Passenger &amp; Nginx</span>
-</span><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">nginx</span><span class="o">-</span><span class="n">extras</span> <span class="n">passenger</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>So now we have Nginx and passenger installed. We can manage the Nginx webserver by using the service command:</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">service</span> <span class="n">nginx</span> <span class="n">start</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-The service command also provides some other methods such as <code>restart</code> and <code>stop</code> that allow you to easily restart and stop your webserver.
-</p>
-
-
-
-
-<p>Next, we need to update the Nginx configuration to point Passenger to the version of Ruby that we&#8217;re using. You&#8217;ll want to open up <code>/etc/nginx/nginx.conf</code> in your favorite editor. I like to use vim, so I&#8217;d run this command:</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">vim</span> <span class="sr">/etc/n</span><span class="n">ginx</span><span class="o">/</span><span class="n">nginx</span><span class="o">.</span><span class="n">conf</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>Find the following lines, and uncomment them:</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">##</span>
-</span><span class='line'><span class="c1"># Phusion Passenger config</span>
-</span><span class='line'><span class="c1">##</span>
-</span><span class='line'><span class="c1"># Uncomment it if you installed passenger or passenger-enterprise</span>
-</span><span class='line'><span class="c1">##</span>
-</span><span class='line'>
-</span><span class='line'><span class="kp">include</span> <span class="sr">/etc/n</span><span class="n">ginx</span><span class="o">/</span><span class="n">passenger</span><span class="o">.</span><span class="n">conf</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>Once you&#8217;ve configured <code>/etc/nginx/nginx.conf</code> , you can run <code>sudo service nginx restart</code> to restart Nginx with the new Passenger configuration.</p>
-
-
-
-
-<h3>Install MySQL and PostgreSQL</h3>
-
-
-
-
-<p>Setting up your production database is pretty easy. Make sure to keep in mind that you should use a different password for your production databases.</p>
-
-
-
-
-<p>Depending on what database you want to use, follow the steps related to the database:</p>
-
-
-
-
-<p>
-  <strong>Install MySQL</strong><br/>
-  All you need to do in order to install MySQL is to run the following command:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">mysql</span><span class="o">-</span><span class="n">server</span> <span class="n">mysql</span><span class="o">-</span><span class="n">client</span> <span class="n">libmysqlclient</span><span class="o">-</span><span class="n">dev</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>You can use the root user and password set during installation for your database or you can add a new user to MySQL.</p>
-
-
-
-
-<p>
-  <strong>Install PostgreSQL</strong><br/>
-  We can install PostgreSQL like so:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">postgresql</span> <span class="n">postgresql</span><span class="o">-</span><span class="n">contrib</span> <span class="n">libpq</span><span class="o">-</span><span class="n">dev</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>Next we need to setup the postgres user:</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">su</span> <span class="o">-</span> <span class="n">postgres</span>
-</span><span class='line'><span class="n">createuser</span> <span class="o">--</span><span class="n">pwprompt</span>
-</span><span class='line'><span class="nb">exit</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>The password you type in here will be the one to put in your <code>my_app/current/config/database.yml</code> later when you deploy your app for the first time.</p>
-
-
-
-
-<h3>Adding The Nginx Host</h3>
-
-
-
-
-<p>In order to get Nginx to respond with the Rails app, we need to modify it&#8217;s sites-enabled.</p>
-
-
-
-
-<p>Open up <code>/etc/nginx/sites-enabled/default</code> in your text editor and we will replace the file&#8217;s contents with the following:</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">server</span> <span class="p">{</span>
-</span><span class='line'>  <span class="n">listen</span> <span class="mi">80</span> <span class="n">default_server</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">listen</span> <span class="o">[::]</span><span class="p">:</span><span class="mi">80</span> <span class="n">default_server</span> <span class="n">ipv6only</span><span class="o">=</span><span class="n">on</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">server_name</span> <span class="n">mydomain</span><span class="o">.</span><span class="n">com</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">passenger_enabled</span> <span class="n">on</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">rails_env</span>    <span class="n">production</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">root</span>         <span class="sr">/home/</span><span class="n">deploy</span><span class="o">/</span><span class="n">myapp</span><span class="o">/</span><span class="kp">public</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1"># redirect server error pages to the static page /50x.html</span>
-</span><span class='line'>  <span class="n">error_page</span>   <span class="mi">500</span> <span class="mi">502</span> <span class="mi">503</span> <span class="mi">504</span>  <span class="o">/</span><span class="mi">50</span><span class="n">x</span><span class="o">.</span><span class="n">html</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">location</span> <span class="o">=</span> <span class="sr">/50x.html {</span>
-</span><span class='line'><span class="sr">    root   html;</span>
-</span><span class='line'><span class="sr">  }</span>
-</span><span class='line'><span class="sr">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>This is our Nginx configuration for a server listening on port 80. You need to change the server_name values to match the domain you want to use and in root replace &#8220;myapp&#8221; with the name of your application.</p>
-
-
-
-
-<h3>Connect The Database</h3>
-
-
-
-
-<p>
-  The file <code>config/database.yml</code> needs to be updated for the production database server username, password, and host. You can set host to &#8220;localhost&#8221; and you will have to create a database on the server with the same name by using command:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">create</span> <span class="no">RAILS_ENV</span><span class="o">=</span><span class="n">production</span>
-</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span> <span class="no">RAILS_ENV</span><span class="o">=</span><span class="n">production</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>Then run command below to minify or compress JavaScript and CSS assets:</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">assets</span><span class="p">:</span><span class="n">precompile</span> <span class="no">RAILS_ENV</span><span class="o">=</span><span class="n">production</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<h3>Setup Secret Key Base</h3>
-
-
-
-
-<p>Go to your rails app directory and run command below to generate secret key base:</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="n">secret</span> <span class="no">RAILS_ENV</span><span class="o">=</span><span class="n">production</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Go to <code>/yourapp/config/secrets.yml</code> and set production secret_key_base. Then reload Nginx using command line: <code>sudo service nginx reload</code>
-</p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -2171,6 +1929,10 @@ The service command also provides some other methods such as <code>restart</code
 </section><section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2017/01/05/create-content-with-multiple-features-with-ckeditor-gem/">Create Content With Multiple Features With CKEditor Gem</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2016/10/30/gulp-markdown/">Gulp – Markdown</a>
@@ -2196,10 +1958,6 @@ The service command also provides some other methods such as <code>restart</code
         <a href="/blog/2016/10/12/gulp-testing-with-jasmine/">Gulp – Testing With Jasmine</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2016/10/11/gulp-uglify/">Gulp – Uglify</a>
-      </li>
-    
   </ul>
 </section>
 <section>
@@ -2211,7 +1969,7 @@ The service command also provides some other methods such as <code>restart</code
       </li>
     
       <li>
-        <a href="/blog/categories/ruby/">Ruby [ 108 ]</a>
+        <a href="/blog/categories/ruby/">Ruby [ 109 ]</a>
       </li>
     
       <li>
@@ -2219,7 +1977,7 @@ The service command also provides some other methods such as <code>restart</code
       </li>
     
       <li>
-        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 104 ]</a>
+        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 105 ]</a>
       </li>
     
       <li>

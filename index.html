@@ -79,6 +79,425 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2017/01/05/create-content-with-multiple-features-with-ckeditor-gem/">Create Content With Multiple Features With CKEditor Gem</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2017-01-05T23:13:00+07:00" pubdate data-updated="true">Jan 5<span>th</span>, 2017</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/ckeditor.png" width="600" alt="Create content with multiple features with CKEditor Gem" />
+</p>
+
+
+
+
+<p>
+  <strong>Setup & Usage</strong><br/>
+  First, we need to add the CKEditor gem to our Gemfile. Open up your Gemfile and add the line listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s2">&quot;ckeditor&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Next, open up the terminal and run a bundle install to install the gem:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Great, now lets create a sample model and accompanying controller that will be used to store our data. Open up and run the command below to create the Magazine model and migrate the database:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">resource</span> <span class="no">Magazine</span> <span class="n">title</span> <span class="ss">body</span><span class="p">:</span><span class="n">text</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now, open your routes file and add the following line to your routes:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>routes.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;magazines#index&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now, lets add the CKEditor javascript include to our application.js. Modify your application.js file so that it looks like the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>application.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">//</span> <span class="no">This</span> <span class="n">is</span> <span class="n">a</span> <span class="n">manifest</span> <span class="n">file</span> <span class="n">that</span><span class="s1">&#39;ll be compiled into application.js, which will include all the files</span>
+</span><span class='line'><span class="s1">// listed below.</span>
+</span><span class='line'><span class="s1">//</span>
+</span><span class='line'><span class="s1">// Any JavaScript/Coffee file within this directory, lib/assets/javascripts, vendor/assets/javascripts,</span>
+</span><span class='line'><span class="s1">// or any plugin&#39;</span><span class="n">s</span> <span class="n">vendor</span><span class="o">/</span><span class="n">assets</span><span class="o">/</span><span class="n">javascripts</span> <span class="n">directory</span> <span class="n">can</span> <span class="n">be</span> <span class="n">referenced</span> <span class="n">here</span> <span class="n">using</span> <span class="n">a</span> <span class="n">relative</span> <span class="n">path</span><span class="o">.</span>
+</span><span class='line'><span class="sr">//</span>
+</span><span class='line'><span class="sr">//</span> <span class="no">It</span><span class="s1">&#39;s not advisable to add code directly here, but if you do, it&#39;</span><span class="n">ll</span> <span class="n">appear</span> <span class="n">at</span> <span class="n">the</span> <span class="n">bottom</span> <span class="n">of</span> <span class="n">the</span>
+</span><span class='line'><span class="sr">//</span> <span class="n">compiled</span> <span class="n">file</span><span class="o">.</span> <span class="no">JavaScript</span> <span class="n">code</span> <span class="k">in</span> <span class="n">this</span> <span class="n">file</span> <span class="n">should</span> <span class="n">be</span> <span class="n">added</span> <span class="n">after</span> <span class="n">the</span> <span class="n">last</span> <span class="n">require_</span><span class="o">*</span> <span class="n">statement</span><span class="o">.</span>
+</span><span class='line'><span class="sr">//</span>
+</span><span class='line'><span class="sr">//</span> <span class="no">Read</span> <span class="no">Sprockets</span> <span class="no">README</span> <span class="p">(</span><span class="ss">https</span><span class="p">:</span><span class="sr">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">rails</span><span class="o">/</span><span class="n">sprockets</span><span class="c1">#sprockets-directives) for details</span>
+</span><span class='line'><span class="sr">//</span> <span class="n">about</span> <span class="n">supported</span> <span class="n">directives</span><span class="o">.</span>
+</span><span class='line'><span class="sr">//</span>
+</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">jquery</span>
+</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">jquery_ujs</span>
+</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">ckeditor</span><span class="o">/</span><span class="n">init</span>
+</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">turbolinks</span>
+</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="n">require_tree</span> <span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Great, now we need to add some code to the magazines controller. Add the following code to the magazines controller:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>magazines_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">MagazinesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>    <span class="vi">@magazines</span> <span class="o">=</span> <span class="no">Magazine</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="s2">&quot;created_at DESC&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>    <span class="vi">@magazine</span> <span class="o">=</span> <span class="no">Magazine</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">new</span>
+</span><span class='line'>    <span class="vi">@magazine</span> <span class="o">=</span> <span class="no">Magazine</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="vi">@magazine</span> <span class="o">=</span> <span class="no">Magazine</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">magazine_params</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="vi">@magazine</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'>      <span class="n">redirect_to</span> <span class="n">magazines_path</span><span class="p">,</span> <span class="ss">notice</span><span class="p">:</span> <span class="s2">&quot;The magazines has been successfully created.&quot;</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="n">render</span> <span class="ss">action</span><span class="p">:</span> <span class="s2">&quot;new&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">edit</span>
+</span><span class='line'>    <span class="vi">@magazine</span> <span class="o">=</span> <span class="no">Magazine</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">update</span>
+</span><span class='line'>    <span class="vi">@magazine</span> <span class="o">=</span> <span class="no">Magazine</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="vi">@magazine</span><span class="o">.</span><span class="n">update_attributes</span><span class="p">(</span><span class="n">magazine_params</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">redirect_to</span> <span class="n">magazines_path</span><span class="p">,</span> <span class="ss">notice</span><span class="p">:</span> <span class="s2">&quot;The magazine has been successfully updated.&quot;</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="n">render</span> <span class="ss">action</span><span class="p">:</span> <span class="s2">&quot;edit&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">magazine_params</span>
+</span><span class='line'>    <span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:magazine</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:title</span><span class="p">,</span> <span class="ss">:body</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  This code enables the ability to read, write, and update the magazines in our example. Now for the views, first lets create the index view:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>index.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= link_to &quot;New Magazine&quot;, new_magazine_path %&gt;</span>
+</span><span class='line'><span class="sx">&lt;% @magazines.each do |magazine| %&gt;</span>
+</span><span class='line'><span class="sx">  &lt;h3&gt;&lt;%=</span> <span class="n">magazine</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">html_safe</span> <span class="sx">%&gt;&lt;/h3&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;&lt;</span><span class="sx">%= magazine.body.html_safe %&gt;&lt;/p&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%=</span> <span class="n">link_to</span> <span class="s2">&quot;Edit Magazine&quot;</span><span class="p">,</span> <span class="n">edit_magazine_path</span><span class="p">(</span><span class="n">magazine</span><span class="p">)</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;% if magazine != @magazines.last %&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">hr</span> <span class="sr">/&gt;</span>
+</span><span class='line'><span class="sr">  &lt;% end %&gt;</span>
+</span><span class='line'><span class="sr">&lt;% end %&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now, lets create a partial to store the form. Create a file called app/views/_form.html.erb and add the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>_form.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">% if </span><span class="vi">@magazine</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">any?</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;ul&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="sx">%= @magazine.errors.full_messages.each do |message| %&gt;</span>
+</span><span class='line'><span class="sx">        &lt;li&gt;&lt;%=</span> <span class="n">message</span> <span class="sx">%&gt;&lt;/li&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="sx">% end %&gt;</span>
+</span><span class='line'><span class="sx">  &lt;/ul&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% end %&gt;</span>
+</span><span class='line'><span class="sx">&lt;%= form_for @magazine do |f| %&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="sx">%= f.label :title %&gt;</span>
+</span><span class='line'><span class="sx">  &lt;/div&gt;</span>
+</span><span class='line'><span class="sx">  &lt;div&gt;</span>
+</span><span class='line'><span class="sx">    &lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">text_field</span> <span class="ss">:title</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;/div&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="sx">%= f.label :body %&gt;</span>
+</span><span class='line'><span class="sx">  &lt;/div&gt;</span>
+</span><span class='line'><span class="sx">  &lt;div&gt;</span>
+</span><span class='line'><span class="sx">    &lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">cktext_area</span> <span class="ss">:body</span><span class="p">,</span> <span class="ss">rows</span><span class="p">:</span> <span class="mi">10</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;/div&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">submit</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;/div&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% end </span><span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now, lets create the new view. Create the app/views/magazines/new.html.erb file and add the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>new.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span> <span class="no">New</span> <span class="no">Magazine</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
+</span><span class='line'><span class="sr">&lt;%= render &quot;form&quot; %&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now, if you visit the new magazines page on your development server you will see that CKEditor appears.
+</p>
+
+
+
+
+<p>
+  Next lets create the edit view. Create the app/views/magazines/edit.html.erb file and add the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>edit.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= &quot;Editing </span><span class="si">#{</span><span class="vi">@magazine</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="sx">&quot; %&gt;</span>
+</span><span class='line'><span class="sx">&lt;%=</span> <span class="n">render</span> <span class="s2">&quot;form&quot;</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Great, now when you click &#8216;edit magazine&#8217; on any magazine, it will show the CKEditor for editing.
+</p>
+
+
+
+
+<p>
+  <strong>Images Using Paperclip</strong><br/>
+  In order to integrate images via paperclip, a few more steps are required. Note that you must have ImageMagick installed for this to work. First, lets include the paperclip gem:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s2">&quot;paperclip&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Next, we need to run a generator provided by ckeditor. This generator will create the necessary models that will be used to store image data. Run the command below:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">generate</span> <span class="ss">ckeditor</span><span class="p">:</span><span class="n">install</span> <span class="o">--</span><span class="n">orm</span><span class="o">=</span><span class="n">active_record</span> <span class="o">--</span><span class="n">backend</span><span class="o">=</span><span class="n">paperclip</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, if you restart your rails server and refresh the page, you will be able to click the images button, upload an image, and insert it into your articles.
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2016/10/30/gulp-markdown/">Gulp – Markdown</a></h1>
     
     
@@ -1563,163 +1982,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/10/10/gulp-handling-errors-with-streams/">Gulp – Handling Errors With Streams</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-10-10T22:08:00+07:00" pubdate data-updated="true">Oct 10<span>th</span>, 2016</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/gulpjs.jpg" width="600" alt="Gulp, Gulp – Handling Errors with Streams" />
-</p>
-
-
-
-
-<p>
-  What if the file was named incorrectly? What happens?
-</p>
-
-
-
-
-<p>
-  Change the string <code>index.html</code> to <code>OMG_WRONG_FILE.html</code> and rerun the script.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>/streams.js </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">var</span> <span class="n">fs</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s2">&quot;fs&quot;</span><span class="p">);</span>
-</span><span class='line'><span class="n">var</span> <span class="n">stream</span> <span class="o">=</span> <span class="n">fs</span><span class="o">.</span><span class="n">createReadStream</span><span class="p">(</span><span class="n">__dirname</span> <span class="o">+</span> <span class="s2">&quot;/contents/OMG_WRONG_FILE.html&quot;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">stream</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">function</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="sr">//</span> <span class="n">just</span> <span class="n">output</span> <span class="n">chunk</span> <span class="n">to</span> <span class="n">terminal</span>
-</span><span class='line'>  <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">toString</span><span class="p">());</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">stream</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="n">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;END&quot;</span><span class="p">);</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Running the script this time results in:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">node</span> <span class="n">streams</span><span class="o">.</span><span class="n">js</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">events</span><span class="o">.</span><span class="n">js</span><span class="p">:</span><span class="mi">72</span>
-</span><span class='line'>        <span class="kp">throw</span> <span class="n">er</span><span class="p">;</span> <span class="sr">//</span> <span class="no">Unhandled</span> <span class="s1">&#39;error&#39;</span> <span class="n">event</span>
-</span><span class='line'>
-</span><span class='line'><span class="ss">Error</span><span class="p">:</span> <span class="no">ENOENT</span><span class="p">,</span> <span class="nb">open</span> <span class="s1">&#39;~/YOUR_DIRECTORY/OMG_WRONG_FILE.html&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  If we read the error message carefully, then we can see that there is an error event we can listen to. So lets listen for that event.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>/streams.js </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
-</span><span class='line'><span class="n">stream</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="n">function</span><span class="p">(</span><span class="n">er</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="n">er</span><span class="p">);</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now we rerun the script and see:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">node</span> <span class="n">streams</span><span class="o">.</span><span class="n">js</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">error</span> <span class="p">{</span> <span class="o">[</span><span class="ss">Error</span><span class="p">:</span> <span class="no">ENOENT</span><span class="p">,</span> <span class="nb">open</span> <span class="s1">&#39;/Users/bunlong/js/gulp/contents/OMG_WRONG_FILE.html&#39;</span><span class="o">]</span>
-</span><span class='line'>  <span class="ss">errno</span><span class="p">:</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span>
-</span><span class='line'>  <span class="ss">code</span><span class="p">:</span> <span class="s1">&#39;ENOENT&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="ss">path</span><span class="p">:</span> <span class="s1">&#39;~/YOUR_DIRECTORY/contents/OMG_WRONG_FILE.html&#39;</span> <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  And that is it for now. We will come back and use some of what we learned later.
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1740,6 +2002,10 @@
 </section><section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2017/01/05/create-content-with-multiple-features-with-ckeditor-gem/">Create Content With Multiple Features With CKEditor Gem</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2016/10/30/gulp-markdown/">Gulp – Markdown</a>
@@ -1765,10 +2031,6 @@
         <a href="/blog/2016/10/12/gulp-testing-with-jasmine/">Gulp – Testing With Jasmine</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2016/10/11/gulp-uglify/">Gulp – Uglify</a>
-      </li>
-    
   </ul>
 </section>
 <section>
@@ -1780,7 +2042,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby/">Ruby [ 108 ]</a>
+        <a href="/blog/categories/ruby/">Ruby [ 109 ]</a>
       </li>
     
       <li>
@@ -1788,7 +2050,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 104 ]</a>
+        <a href="/blog/categories/ruby-on-rails/">Ruby on rails [ 105 ]</a>
       </li>
     
       <li>
