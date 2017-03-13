@@ -79,6 +79,203 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2016/10/11/gulp-validate-javascript/">Gulp – Validate JavaScript</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-10-11T11:42:00+07:00" pubdate data-updated="true">Oct 11<span>th</span>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/bunlong_gulp.jpg" width="600" alt="Gulp, Gulp – Validate JavaScript" />
+</p>
+
+
+
+
+<p>
+  The web runs on more than HTML and CSS, It runs on JavaScript. Let’s perform some common JavaScript build operations with gulp.
+</p>
+
+
+
+
+<p>
+  We will first look into validating our JavaScript using gulp.
+</p>
+
+
+
+
+<p>
+  And yes&#8230; there is a plugin for that.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">npm</span> <span class="n">install</span> <span class="n">gulp</span><span class="o">-</span><span class="n">jsvalidate</span> <span class="o">--</span><span class="n">save</span><span class="o">-</span><span class="n">dev</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  For more information on <code>gulp-jsvalidate</code> check out <a href="https://github.com/sindresorhus/gulp-jsvalidate" target="_blank">https://github.com/sindresorhus/gulp-jsvalidate</a>.
+</p>
+
+
+
+
+<p>
+  We will now create a new Javascript task in our <code>gulpfile.js</code>. At first, all we will do is validate our Javascript in a new <code>/contents/javascripts</code> folder.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>/gulpfile.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="n">var</span> <span class="n">jsValidate</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s1">&#39;gulp-jsvalidate&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="n">gulp</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;javascript&#39;</span><span class="p">,</span> <span class="n">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Validate JavaScript&quot;</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">gulp</span><span class="o">.</span><span class="n">src</span><span class="p">(</span><span class="s2">&quot;contents/javascripts/**.js&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">jsValidate</span><span class="p">());</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Time to test out our new task and plugin. Create a javascript file and make a syntax error.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>/contents/javascript/somejs.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">function</span> <span class="no">OMG</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">var</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span><span class="p">;</span> <span class="sr">//</span> <span class="n">this</span> <span class="n">is</span> <span class="ow">not</span> <span class="n">valid!</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">10</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now when we run our javascript task, we will get an error message in the terminator:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">gulp</span> <span class="n">javascript</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Using</span> <span class="n">gulpfile</span> <span class="o">~</span><span class="sr">/YOUR_DIRECTORY/</span><span class="n">gulpfile</span><span class="o">.</span><span class="n">js</span>
+</span><span class='line'><span class="no">Starting</span> <span class="s1">&#39;javascript&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="s1">&#39;javascript&#39;</span> <span class="n">errored</span> <span class="n">after</span> <span class="mi">14</span> <span class="n">ms</span> <span class="no">Line</span> <span class="mi">3</span><span class="p">:</span> <span class="no">Unexpected</span> <span class="n">token</span> <span class="o">*</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  When we fix the error and then run our gulp task, we won’t get that error message:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>/contents/javascript/somejs.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">function</span> <span class="no">OMG</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">var</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">10</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">gulp</span> <span class="n">javascript</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Using</span> <span class="n">gulpfile</span> <span class="o">~</span><span class="sr">/YOUR_DIRECTORY/</span><span class="n">gulpfile</span><span class="o">.</span><span class="n">js</span>
+</span><span class='line'><span class="no">Starting</span> <span class="s1">&#39;javascript&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="no">Validate</span> <span class="no">JavaScript</span>
+</span><span class='line'><span class="no">Finished</span> <span class="s1">&#39;javascript&#39;</span> <span class="n">after</span> <span class="mi">14</span> <span class="n">ms</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Sweet codes! Gulp can now check if our JavaScript is valid. But the error message in the console is rather bland, lets find a better way to tell us that we messed up.
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2016/10/10/gulp-handling-errors-with-streams/">Gulp – Handling Errors With Streams</a></h1>
     
     
@@ -1710,203 +1907,6 @@ platform.
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/07/25/facebook-fan-page-auto-like-revised/">Facebook Fan Page Auto Like - Revised</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-07-25T22:47:00+07:00" pubdate data-updated="true">Jul 25<span>th</span>, 2016</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/facebook_like.jpg" width="450" alt="Facebook Fan Page Auto Like" />
-</p>
-
-
-
-
-<p>
-  Due Facebook Graph API was changed/updated so my previous article &#8221;<a href="http://geekhmer.github.io/blog/2013/10/02/facebook-fan-page-auto-like" target="_blank">Facebook Fan Page Auto Like</a>&#8221; is no longer working. And here is what I revised.
-</p>
-
-
-
-
-<p>
-  Well, the process is when someone click anywhere on your site they will automatically like your page, no need to put like button.
-</p>
-
-
-
-
-<p>
-  Follow the step below to make it work:
-</p>
-
-
-
-
-<p>
-  <strong>1. Put the below code in head tag</strong>
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Check the body are clicked yet </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
-</span><span class='line'><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">interval</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kd">function</span> <span class="nx">updateActiveElement</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">activeElement</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;fb-iframe&quot;</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">clearInterval</span><span class="p">(</span><span class="nx">interval</span><span class="p">);</span>
-</span><span class='line'>      <span class="nx">bodyClicked</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">$</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">interval</span> <span class="o">=</span> <span class="nx">setInterval</span><span class="p">(</span><span class="s2">&quot;updateActiveElement();&quot;</span><span class="p">,</span> <span class="mi">50</span><span class="p">);</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="nt">&lt;/script&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>2. Put the below code in body tag:</strong>
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Load facebook fan page like button & hide it </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">&quot;overflow: hidden; width: 10px; height: 12px; position: absolute; filter:alpha(opacity=0); -moz-opacity:0.0; -khtml-opacity: 0.0; opacity: 0.0;&quot;</span> <span class="na">id=</span><span class="s">&quot;iframe-wrapper&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;iframe</span> <span class="na">src=</span><span class="s">&quot;https://www.facebook.com/plugins/like.php?href=https://www.facebook.com/FACEBOOK_PAGE_NAME_URL&amp;send=false&amp;layout=button_count&amp;width=450&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;font&amp;height=21&amp;confirm=false&quot;</span> <span class="na">scrolling=</span><span class="s">&quot;no&quot;</span> <span class="na">frameborder=</span><span class="s">&quot;0&quot;</span> <span class="na">style=</span><span class="s">&quot;border:none;overflow:hidden;width:450px;height:21px;&quot;</span> <span class="na">allowTransparency=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;&lt;/iframe&gt;</span>
-</span><span class='line'><span class="nt">&lt;/div&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  And then find FACEBOOK_PAGE_NAME_URL in src iframe and replace it with your facebook fan page url (ex: <a href="http://www.facebook.com/geekhmer" target="_blank">http://www.facebook.com/GeeKhmer</a>).
-</p>
-
-
-
-
-<p>
-  <strong>3. Put the below code anywhere in html tag:</strong>
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Set mousemove event to body & when body are clicked, it auto click on facebook like button </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">bodyClicked</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">iframeWrapper</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;iframe-wrapper&#39;</span><span class="p">);</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">standardBody</span><span class="o">=</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">compatMode</span><span class="o">==</span><span class="s2">&quot;CSS1Compat&quot;</span><span class="p">)</span> <span class="o">?</span> <span class="nb">document</span><span class="p">.</span><span class="nx">documentElement</span> <span class="o">:</span> <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kd">function</span> <span class="nx">mouseFollower</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c1">// for internet explorer</span>
-</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">iframeWrapper</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">top</span> <span class="o">=</span> <span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">y</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span><span class="o">+</span><span class="nx">standardBody</span><span class="p">.</span><span class="nx">scrollTop</span><span class="o">+</span><span class="s1">&#39;px&#39;</span><span class="p">;</span>
-</span><span class='line'>      <span class="nx">iframeWrapper</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">left</span> <span class="o">=</span> <span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">x</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span><span class="o">+</span><span class="nx">standardBody</span><span class="p">.</span><span class="nx">scrollLeft</span><span class="o">+</span><span class="s1">&#39;px&#39;</span><span class="p">;</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>    <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">iframeWrapper</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">top</span> <span class="o">=</span> <span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">pageY</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;px&#39;</span><span class="p">;</span>
-</span><span class='line'>      <span class="nx">iframeWrapper</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">left</span> <span class="o">=</span> <span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">pageX</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;px&#39;</span><span class="p">;</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nb">document</span><span class="p">.</span><span class="nx">onmousemove</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="nx">bodyClicked</span> <span class="o">==</span> <span class="kc">false</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">mouseFollower</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="nt">&lt;/script&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, That’s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -1931,6 +1931,10 @@ platform.
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2017/03/13/why-i-do-combining-apache-and-nginx-together/">Why I Do Combining Apache and Nginx Together?</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2017/01/05/create-content-with-multiple-features-with-ckeditor-gem/">Create Content With Multiple Features With CKEditor Gem</a>
       </li>
     
@@ -1952,10 +1956,6 @@ platform.
     
       <li class="post">
         <a href="/blog/2016/10/12/gulp-creating-a-webpage/">Gulp – Creating a Webpage</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/10/12/gulp-testing-with-jasmine/">Gulp – Testing With Jasmine</a>
       </li>
     
   </ul>
@@ -2013,7 +2013,7 @@ platform.
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 38 ]</a>
+        <a href="/blog/categories/other/">Other [ 39 ]</a>
       </li>
     
       <li>
