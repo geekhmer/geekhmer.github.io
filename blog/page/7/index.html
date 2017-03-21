@@ -79,6 +79,168 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/11/18/reactjs-ownership/">ReactJS Ownership</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-11-18T17:36:00+07:00" pubdate data-updated="true">Nov 18<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/reactjs.png" width="600" alt="ReactJS Ownership" />
+</p>
+
+
+
+
+<p>
+  In React, an owner is the component that sets the props of other components. More formally, if a component X is created in component Y&#8217;s render() method, it is said that X is owned by Y.
+</p>
+
+
+
+
+<p>
+  Example:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">meta</span> <span class="nx">charset</span><span class="o">=</span><span class="s2">&quot;UTF-8&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;&lt;</span><span class="err">/title&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;http://fb.me/react-0.12.2.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;http://fb.me/JSXTransformer-0.12.2.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/head&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/jsx&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">App</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
+</span><span class='line'>      <span class="nx">getInitialState</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="p">{</span>
+</span><span class='line'>          <span class="nx">txt</span><span class="o">:</span> <span class="s1">&#39;&#39;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">update</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span><span class="nx">txt</span><span class="o">:</span> <span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">value</span><span class="p">});</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="p">(</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+</span><span class='line'>            <span class="o">&lt;</span><span class="nx">Widget</span> <span class="nx">txt</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">txt</span><span class="p">}</span> <span class="nx">update</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">update</span><span class="p">}</span> <span class="o">/&gt;</span>
+</span><span class='line'>            <span class="o">&lt;</span><span class="nx">Widget</span> <span class="nx">txt</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">txt</span><span class="p">}</span> <span class="nx">update</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">update</span><span class="p">}</span> <span class="o">/&gt;</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="err">/div&gt;</span>
+</span><span class='line'>        <span class="p">);</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">Widget</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
+</span><span class='line'>      <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="p">(</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+</span><span class='line'>            <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span> <span class="nx">onChange</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">update</span><span class="p">}</span> <span class="o">/&gt;</span>
+</span><span class='line'>            <span class="o">&lt;</span><span class="nx">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>            <span class="o">&lt;</span><span class="nx">b</span><span class="o">&gt;</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">txt</span><span class="p">}</span><span class="o">&lt;</span><span class="err">/b&gt;</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="err">/div&gt;</span>
+</span><span class='line'>        <span class="p">);</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">React</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="o">&lt;</span><span class="nx">App</span> <span class="nx">txt</span><span class="o">=</span><span class="s2">&quot;this is the txt prop&quot;</span> <span class="o">/&gt;</span><span class="p">,</span> <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">);</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="err">/script&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/body&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The example above Widget component is owned by App component.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/11/14/reactjs-state/">ReactJS State</a></h1>
     
     
@@ -2205,403 +2367,6 @@ React events:<br/>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/07/14/using-recaptcha-in-ruby-on-rails-application/">Using reCAPTCHA in Ruby on Rails Application</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-07-14T23:44:00+07:00" pubdate data-updated="true">Jul 14<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  For a site with lots of user generated content, fighting spammers can be a never ending battle. Luckily, we can use a service called reCAPTCHA to help keep spammers off our site. reCAPTCHA works by displaying an image on screen and asking the user to type what they see in the image. This works because, the spammer&#8217;s spambots are unable to read the image and unable to proceed with filling out the form. reCAPTCHA is just one of a number of tools we can use to prevent spammers from abusing our websites.
-</p>
-
-
-
-
-<p>
-  <strong>Setup Account</strong><br/>
-  First, we need to create a reCAPTCHA account. Visit the <a href="http://www.google.com/recaptcha/intro/index.html" target="_blank">reCAPTCHA</a> website and click the button that says &#8216;Get reCAPTCHA&#8217;.
-</p>
-
-
-
-
-<p>
-  <img src="/images/reCAPTCHA_1.png" width="600" alt="Using reCAPTCHA in Ruby on Rails Application" />
-</p>
-
-
-
-
-<p>
-  On the next screen enter your label, domain, owners and check the box that says &#8216;Get alerts about this site&#8217; then click the &#8216;Register&#8217; button.
-</p>
-
-
-
-
-<p>
-  <img src="/images/reCAPTCHA_2.png" width="600" alt="Using reCAPTCHA in Ruby on Rails Application" />
-</p>
-
-
-
-
-<p>
-  Make sure you copy the public key and private key and save it somewhere, you will need this information when adding reCAPTCHA to your Rails application.
-</p>
-
-
-
-
-<p>
-  <strong>Setup Rails Application</strong><br/>
-  Now we have an account, it&#8217;s time to set up our Ruby on Rails application. The first thing we will need to do is include the recaptcha gem in our Gemfile. Add the following lines to your gemfile. Note that the bcrypt-ruby gem is used for our example user signup form. You don&#8217;t have to include this in your application if you aren&#8217;t using it for user authentication.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Gemfile </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;recaptcha&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 0.3.5&#39;</span>
-</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;bcrypt-ruby&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 3.1.2&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Next run a bundle install to install the gem:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Next create an initializer for recaptcha that will contain the public and private keys we mentioned earlier. Create a new initializer called recaptcha.rb and add the code listed below, make sure to modify it to contain your public and private keys.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>config/initializers.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Recaptcha</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
-</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">public_key</span>  <span class="o">=</span> <span class="s1">&#39;Replace with your public key&#39;</span>
-</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">private_key</span> <span class="o">=</span> <span class="s1">&#39;Replace with your private key&#39;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Next create a model called User that we will use to test the reCAPTCHA functionality. Run the following commands to create the user model:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="n">user</span> <span class="nb">name</span> <span class="n">email</span> <span class="n">password_digest</span>
-</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Next, open your User model and modify it:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/models/user.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">has_secure_password</span>
-</span><span class='line'>  <span class="n">validates_presence_of</span> <span class="ss">:password</span><span class="p">,</span> <span class="ss">on</span><span class="p">:</span> <span class="ss">:create</span>
-</span><span class='line'>  <span class="n">validates</span> <span class="ss">:email</span><span class="p">,</span> <span class="ss">uniqueness</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Next create a couple controllers that will handle our user input. The first controller, Home, will provide a simple landing page that contains a sign up link. The second controller, Users, will process the actual user signup request. Run the commands below to create the controllers.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="no">Home</span> <span class="n">show</span>
-</span><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="no">Users</span> <span class="kp">new</span> <span class="n">create</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now edit our routes file to set up a few routes for the controllers we just created. Modify the routes file so that it looks like the code listed below, being sure not to overwrite your application name on the first line:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>config/routes.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">ReCAPTCHAExample</span><span class="p">:</span><span class="ss">:Application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">resource</span> <span class="ss">:home</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:show</span><span class="o">]</span><span class="p">,</span> <span class="ss">controller</span><span class="p">:</span> <span class="ss">:home</span>
-</span><span class='line'>  <span class="n">resource</span> <span class="ss">:users</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:new</span><span class="p">,</span> <span class="ss">:create</span><span class="o">]</span>
-</span><span class='line'>  <span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;home#show&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Next open up your home/show view and modify it so that it looks like the code listed below:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/views/home/show.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Welcome</span><span class="o">!&lt;</span><span class="sr">/h3&gt;</span>
-</span><span class='line'><span class="sr">&lt;p&gt;</span>
-</span><span class='line'><span class="sr">Click the link below to sign up for an account.</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;%=</span> <span class="n">link_to</span> <span class="s2">&quot;Sign Up!&quot;</span><span class="p">,</span> <span class="n">new_users_path</span> <span class="o">%&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Next open up the users/new view and modify it so that it looks like the code listed below:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/views/users/new.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">New</span> <span class="no">User</span> <span class="no">Sign</span> <span class="no">Up</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
-</span><span class='line'><span class="sr">&lt;% if !@user.errors.empty? %&gt;</span>
-</span><span class='line'><span class="sr">  &lt;ul&gt;</span>
-</span><span class='line'><span class="sr">    &lt;% @user.errors.full_messages.each do |message| %&gt;</span>
-</span><span class='line'><span class="sr">      &lt;li&gt;&lt;%= message %&gt;&lt;/</span><span class="n">li</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="sx">% end %&gt;</span>
-</span><span class='line'><span class="sx">  &lt;/ul&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sx">% end %&gt;</span>
-</span><span class='line'><span class="sx">&lt;%= form_for User.new do |f| %&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="sx">%= f.label :name %&gt;</span>
-</span><span class='line'><span class="sx">    &lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">text_field</span> <span class="ss">:name</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">  &lt;/div&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="sx">%= f.label :email %&gt;</span>
-</span><span class='line'><span class="sx">    &lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">text_field</span> <span class="ss">:email</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">  &lt;/div&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="sx">%= f.label :password %&gt;</span>
-</span><span class='line'><span class="sx">    &lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">password_field</span> <span class="ss">:password</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">  &lt;/div&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="sx">%= f.label :password_confirmation %&gt;</span>
-</span><span class='line'><span class="sx">    &lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">password_field</span> <span class="ss">:password_confirmation</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">  &lt;/div&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="sx">%= recaptcha_tags %&gt;</span>
-</span><span class='line'><span class="sx">  &lt;/div&gt;</span>
-</span><span class='line'><span class="sx">  &lt;div&gt;</span>
-</span><span class='line'><span class="sx">    &lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">submit</span> <span class="s2">&quot;Sign Up&quot;</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">  &lt;/div&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sx">% end </span><span class="o">%&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Most of the code is self explanatory, however, you&#8217;ll notice the recaptcha_tags method being called. This method is responsible for rendering the reCAPTCHA.
-</p>
-
-
-
-
-<p>
-  Next open up our users controller and add some code to handle the request. Modify your users controller so that it looks like the code listed below.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/controllers/users_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">UsersController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">new</span>
-</span><span class='line'>    <span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
-</span><span class='line'>    <span class="n">captcha_message</span> <span class="o">=</span> <span class="s2">&quot;The data you entered for the CAPTCHA wasn&#39;t correct.  Please try again&quot;</span>
-</span><span class='line'>    <span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">user_params</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">if</span> <span class="o">!</span><span class="n">verify_recaptcha</span><span class="p">(</span><span class="ss">model</span><span class="p">:</span> <span class="vi">@user</span><span class="p">,</span> <span class="ss">message</span><span class="p">:</span> <span class="n">captcha_message</span><span class="p">)</span> <span class="o">||</span> <span class="o">!</span><span class="vi">@user</span><span class="o">.</span><span class="n">save</span>
-</span><span class='line'>      <span class="n">render</span> <span class="s2">&quot;new&quot;</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kp">private</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">user_params</span>
-</span><span class='line'>    <span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span> <span class="ss">:email</span><span class="p">,</span> <span class="ss">:password</span><span class="p">,</span> <span class="ss">:password_confirmation</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Almost done! Now lets open up our users/create view and add the following code.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/views/users/create.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Thank</span> <span class="no">You</span><span class="o">!&lt;</span><span class="sr">/h3&gt;</span>
-</span><span class='line'><span class="sr">&lt;p&gt;</span>
-</span><span class='line'><span class="sr">Thanks for signing up!</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now if you start a rails server and navigate to http://localhost:3000 we will see a sign up link. if you click on the sign up link you will be presented with a sign up form, complete with a captcha to fill out. You&#8217;ll notice that filling out the captcha wrongly results in a validation error message, and filling out the correct information allows the user signup to proceed.
-</p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/8/">&larr; Older</a>
@@ -2626,6 +2391,10 @@ React events:<br/>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2017/03/21/generating-income-on-the-internet-using-social-media/">Generating Income on the Internet Using Social Media</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2017/03/19/copy-to-clipboard-without-flash-with-clipboard-dot-js/">Copy to Clipboard Without Flash With Clipboard.js</a>
       </li>
     
@@ -2647,10 +2416,6 @@ React events:<br/>
     
       <li class="post">
         <a href="/blog/2016/10/12/gulp-live-reload/">Gulp – Live Reload</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/10/12/gulp-web-server/">Gulp – Web Server</a>
       </li>
     
   </ul>
@@ -2725,6 +2490,10 @@ React events:<br/>
     
       <li>
         <a href="/blog/categories/gulp/">Gulp [ 18 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/internet-marketing/">Internet marketing [ 1 ]</a>
       </li>
     
   </ul>
