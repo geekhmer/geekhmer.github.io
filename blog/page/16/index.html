@@ -79,6 +79,145 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/02/27/how-to-debug-a-ruby-on-rails-application/">How to Debug a Ruby on Rails Application</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-27T00:35:00+07:00" pubdate data-updated="true">Feb 27<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/ruby_on_rails.png" width="400" alt="How to Debug a Ruby on Rails Application" />
+</p>
+
+
+
+
+<p>
+  This article I will show you how you can easily debug your Ruby on Rails application.
+</p>
+
+
+
+
+<p>
+  <strong>Setup</strong><br/>
+  If you’re using the default Rails Rack server, Webrick – the best debugging tool I’ve been able to find out there is <code>pry</code>. First you need to add the pry gem to your Gemfile. Since this is used for development purposes. Open up your Gemfile file so that it looks sometings like:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">group</span> <span class="ss">:development</span><span class="p">,</span> <span class="ss">:test</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">gem</span> <span class="s1">&#39;pry&#39;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then run <code>bundle install</code> to install it:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Usage</strong><br/>
+  Basically, Whenever one of your actions crashes and you can’t figure out straight away what caused it to crash. What you need to do is invoke <code>binding.pry</code> somewhere in your code, which will create a Pry session at the point it’s called. This will pretty much open a &#8216;developer console&#8217; where you can play around with all the objects that have been defined up until you called <code>binding.pry</code>. Then you can then easily debug your action, like you’d regularly do in an irb console. When you’re done with the Pry session the program will resume.
+</p>
+
+
+
+
+<p>
+  Here’s how this would work in a regular create action from Users controller:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>users_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>  <span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">user_params</span><span class="p">)</span>
+</span><span class='line'>  <span class="nb">binding</span><span class="o">.</span><span class="n">pry</span> <span class="c1"># Start a pry session to see if the new user looks the way we want</span>
+</span><span class='line'>  <span class="k">if</span> <span class="n">user</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'>     <span class="n">flash</span><span class="o">.</span><span class="n">now</span><span class="o">[</span><span class="ss">:success</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;User saved successfully&quot;</span>
+</span><span class='line'>     <span class="n">sign_in</span> <span class="n">user</span>
+</span><span class='line'>     <span class="n">redirect_to</span> <span class="n">user</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>     <span class="n">flash</span><span class="o">.</span><span class="n">now</span><span class="o">[</span><span class="ss">:error</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;Something went wrong: </span><span class="si">#{</span><span class="n">user</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">full_messages</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>     <span class="n">render</span> <span class="s1">&#39;new&#39;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Well, after you run the create action – you should view the Pry session in the console, where your rails server is running.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See yar!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/02/23/actionpack-variants-on-rails/">ActionPack Variants on Rails</a></h1>
     
     
@@ -2150,221 +2289,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/19/ruby-on-rails-model-change-tracking-with-activemodel-dirty/">Ruby on Rails Model Change Tracking With ActiveModel::Dirty</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-19T09:09:00+07:00" pubdate data-updated="true">Feb 19<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/move_to_rails.png" alt="Ruby on Rails Model Change Tracking with ActiveModel::Dirty" />
-</p>
-
-
-
-
-<p>
-  ActiveModel::Dirty is a library that is built into Ruby on Rails that allows you to quickly and easily track what attributes on a model have changed. This article will show you how to use it.
-</p>
-
-
-
-
-<p>
-  <strong>Checking Whenever the Model Has Changed</strong><br/>
-  Checking whether the model has changed using the <code>changed?</code> method:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">changed?</span>  <span class="c1"># =&gt; false</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  If you change an attribute on the model, the <code>changed?</code> method will returns true:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Mac Pro&quot;</span>
-</span><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">changed?</span> <span class="c1"># =&gt; true</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Tracking the Change</strong><br/>
-  You can track what the change by using the <code>attr_change</code> method:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">name_change</span> <span class="c1"># =&gt; [&quot;Mac Pro&quot;, &quot;IBM ThinkPad&quot;]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You can get a list of all of the changed attributes on the model as well:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">changed</span> <span class="c1"># =&gt; [&quot;name&quot;]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You can get the original value using the <code>attr_was</code> method as well:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">name_was</span> <span class="c1">#=&gt; &quot;IBM ThinkPad&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You can view a list of all of the original values using the <code>changed_attributes</code> method as well:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">changed_attributes</span> <span class="c1"># =&gt; {&quot;name&quot; =&gt; &quot;IBM ThinkPad&quot;}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You can list all of the changes on the model using the <code>changes</code> method as well:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">changes</span> <span class="c1"># =&gt; {&quot;name&quot; =&gt; [&quot;IBM ThinkPad&quot;, &quot;Mac Pro&quot;]}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You can view changes that were made even after the model was saved using the <code>previous_changes</code> method as well:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">pre</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;prettyprint&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="n">product</span><span class="o">.</span><span class="n">save</span>
-</span><span class='line'>  <span class="n">product</span><span class="o">.</span><span class="n">changes</span> <span class="c1"># =&gt; {}</span>
-</span><span class='line'>  <span class="n">product</span><span class="o">.</span><span class="n">previous_changes</span> <span class="c1"># =&gt; {&quot;name&quot; =&gt; [&quot;IBM ThinkPad&quot;, &quot;Mac Pro&quot;]}</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/pre&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You can view changes that were made even after the model was saved using the <code>previous_changes</code> method as well:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">pre</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;prettyprint&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="n">product</span><span class="o">.</span><span class="n">save</span>
-</span><span class='line'>  <span class="n">product</span><span class="o">.</span><span class="n">changes</span> <span class="c1"># =&gt; {}</span>
-</span><span class='line'>  <span class="n">product</span><span class="o">.</span><span class="n">previous_changes</span> <span class="c1"># =&gt; {&quot;name&quot; =&gt; [&quot;IBM ThinkPad&quot;, &quot;Mac Pro&quot;]}</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/pre&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You can reset the model using the reload! method as well:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">reload!</span>
-</span><span class='line'><span class="n">product</span><span class="o">.</span><span class="n">previous_changes</span> <span class="c1"># =&gt; {}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, for more detail <a href="http://api.rubyonrails.org/classes/ActiveModel/Dirty.html" target="_blank">Ruby on Rails API</a>. That&#8217;s it! See ya!
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/17/">&larr; Older</a>
@@ -2389,6 +2313,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2017/04/03/sell-me-this-pen/">Simple Sales Framework for &#8220;Sell Me This Pen&#8221;</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2017/03/27/why-is-website-maintenance-important/">Why Is Website Maintenance Important?</a>
       </li>
     
@@ -2410,10 +2338,6 @@
     
       <li class="post">
         <a href="/blog/2017/03/13/why-i-do-combining-apache-and-nginx-together/">Why I Do Combining Apache and Nginx Together?</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/01/05/create-content-with-multiple-features-with-ckeditor-gem/">Create Content With Multiple Features With CKEditor Gem</a>
       </li>
     
   </ul>
@@ -2491,7 +2415,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/internet-marketing/">Internet marketing [ 1 ]</a>
+        <a href="/blog/categories/internet-marketing/">Internet marketing [ 2 ]</a>
       </li>
     
   </ul>
