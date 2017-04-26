@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2017-04-03T23:53:29+07:00</updated>
+  <updated>2017-04-26T22:53:52+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,710 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Installation and Configuration Nginx as Reverse Proxy for Apache on Ubuntu Server]]></title>
+    <link href="http://geekhmer.github.io/blog/2017/04/26/installation-and-configuration-nginx-as-reverse-proxy-for-apache-on-ubuntu-server/"/>
+    <updated>2017-04-26T16:11:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2017/04/26/installation-and-configuration-nginx-as-reverse-proxy-for-apache-on-ubuntu-server</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/nginx_apache.jpg" width="600" alt="Installation and Configuration Nginx as Reverse Proxy for Apache on Ubuntu Server" />
+</p>
+
+
+
+
+<p>
+  In this article, I will show you how to install and configure Nginx as a caching reverse proxy for an Apache web server on Ubuntu, Nginx is used as the front-end and Apache as the back-end. 
+</p>
+
+
+
+
+<p>
+  Nginx will run on port 80 to respond to requests from user/browser, the request will be forwarded to the Apache server that is running on port 7070.
+</p>
+
+
+
+
+<p>
+  <h3>Apache</h3>
+</p>
+
+
+
+
+<p>
+  <strong>Install Apache & PHP</strong><br/>
+  Log into your ubuntu server with SSH and switch to root user by running:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">su</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then install apache with the apt-get command:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">apache2</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Once apache is installed, we must install PHP as apache module for this tutorial:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">php5</span> <span class="n">php5</span><span class="o">-</span><span class="n">mysql</span> <span class="n">libapache2</span><span class="o">-</span><span class="n">mod</span><span class="o">-</span><span class="n">php5</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Configure Apache and PHP</strong><br/>
+  By default, apache listens on port 80. We have to configure apache to run on port 7070 for our proxy setup as port 80 will be used by nginx later.
+</p>
+
+
+
+
+<p>
+  If you want to change the port for apache web server, you must edit the apache configuration file <code>/etc/apache2/ports.conf</code>, and then proceed with the virtual host configuration in the <code>/etc/apache2/sites-available/</code> directory.
+</p>
+
+
+
+
+<p>
+  First change the Apache port to 7070 by editing the file <code>ports.conf</code> with the vim editor:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">vim</span> <span class="sr">/etc/</span><span class="n">apache2</span><span class="o">/</span><span class="n">ports</span><span class="o">.</span><span class="n">conf</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And then change port 80 to 7070:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>ports.conf </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Listen</span> <span class="mi">7070</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And then save and exit.
+</p>
+
+
+
+
+<p>
+  And now go to the virtualhost directory and edit the file <code>000-default.conf</code>:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">vim</span> <span class="sr">/etc/</span><span class="n">apache2</span><span class="o">/</span><span class="n">sites</span><span class="o">-</span><span class="n">available</span><span class="o">/</span><span class="mo">000</span><span class="o">-</span><span class="n">default</span><span class="o">.</span><span class="n">conf</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And then make sure your configuration is same as below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>000-default.conf </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="no">VirtualHost</span> <span class="o">*</span><span class="p">:</span><span class="mi">7070</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="no">ServerName</span> <span class="n">www</span><span class="o">.</span><span class="n">reverse</span><span class="o">.</span><span class="n">com</span>
+</span><span class='line'>  <span class="no">ServerAlias</span> <span class="n">reverse</span><span class="o">.</span><span class="n">com</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="no">ServerAdmin</span> <span class="n">webmaster</span><span class="vi">@localhost</span>
+</span><span class='line'>  <span class="no">DocumentRoot</span> <span class="sr">/var/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">geekhmer</span><span class="o">-</span><span class="n">dev</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">&lt;</span><span class="no">Directory</span> <span class="s2">&quot;/var/www/html/geekhmer-dev&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="no">RewriteEngine</span> <span class="no">On</span>
+</span><span class='line'>    <span class="no">RewriteBase</span> <span class="o">/</span>
+</span><span class='line'>    <span class="no">RewriteRule</span> <span class="o">^</span><span class="n">index</span><span class="p">\</span><span class="o">.</span><span class="n">php</span><span class="err">$</span> <span class="o">-</span> <span class="o">[</span><span class="n">L</span><span class="o">]</span>
+</span><span class='line'>    <span class="no">RewriteCond</span> <span class="sx">%{REQUEST_FILENAME}</span> <span class="o">!-</span><span class="n">f</span>
+</span><span class='line'>    <span class="no">RewriteCond</span> <span class="sx">%{REQUEST_FILENAME}</span> <span class="o">!-</span><span class="n">d</span>
+</span><span class='line'>    <span class="no">RewriteRule</span> <span class="o">.</span> <span class="sr">/index.php [L]</span>
+</span><span class='line'><span class="sr">  &lt;/</span><span class="no">Directory</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="no">ErrorLog</span> <span class="err">$</span><span class="p">{</span><span class="no">APACHE_LOG_DIR</span><span class="p">}</span><span class="o">/</span><span class="n">geekhmer</span><span class="o">-</span><span class="n">dev_error</span><span class="o">.</span><span class="n">log</span>
+</span><span class='line'>  <span class="no">CustomLog</span> <span class="err">$</span><span class="p">{</span><span class="no">APACHE_LOG_DIR</span><span class="p">}</span><span class="o">/</span><span class="n">geekhmer</span><span class="o">-</span><span class="n">dev_access</span><span class="o">.</span><span class="n">log</span> <span class="n">combined</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/VirtualHost&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And then save and exit.
+</p>
+
+
+
+
+<p>
+  Next test the configuration and restart apache:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">apachectl</span> <span class="n">configtest</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">systemctl</span> <span class="n">restart</span> <span class="n">apache2</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then we verify that the apache and php is working by creating a new file with the name <code>info.php</code> in the directory <code>/var/www/html/</code>.
+
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">echo</span> <span class="s2">&quot;&lt;?php phpinfo(); ?&gt;&quot;</span> <span class="o">&gt;</span> <span class="sr">/var/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">info</span><span class="o">.</span><span class="n">php</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Visit your site www.reverse.com:7070/info.php.
+</p>
+
+
+
+
+<p>
+  <h3>Nginx</h3>
+</p>
+
+
+
+
+<p>
+  <strong>Install Nginx</strong><br/>
+  Let install Nginx with the following apt-get command:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">nginx</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Configure Nginx</strong><br/>
+  Once Nginx is installed, configure Nginx to act as reverse proxy for the apache web server that running on port 7070.
+</p>
+
+
+
+
+<p>
+  Go to the nginx configuration directory and edit the file <code>nginx.conf</code>:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">vim</span> <span class="sr">/etc/n</span><span class="n">ginx</span><span class="o">/</span><span class="n">nginx</span><span class="o">.</span><span class="n">conf</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And then enable Gzip compression for Nginx by uncomment the gzip lines below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>nginx.conf </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">##</span>
+</span><span class='line'><span class="c1"># Gzip Settings</span>
+</span><span class='line'><span class="c1">##</span>
+</span><span class='line'><span class="n">gzip</span> <span class="n">on</span><span class="p">;</span>
+</span><span class='line'><span class="n">gzip_disable</span> <span class="s2">&quot;msie6&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">gzip_vary</span> <span class="n">on</span><span class="p">;</span>
+</span><span class='line'><span class="n">gzip_proxied</span> <span class="n">any</span><span class="p">;</span>
+</span><span class='line'><span class="n">gzip_comp_level</span> <span class="mi">6</span><span class="p">;</span>
+</span><span class='line'><span class="n">gzip_buffers</span> <span class="mi">16</span> <span class="mi">8</span><span class="n">k</span><span class="p">;</span>
+</span><span class='line'><span class="n">gzip_http_version</span> <span class="mi">1</span><span class="o">.</span><span class="mi">1</span><span class="p">;</span>
+</span><span class='line'><span class="n">gzip_types</span> <span class="n">text</span><span class="o">/</span><span class="n">plain</span> <span class="n">text</span><span class="o">/</span><span class="n">css</span> <span class="n">application</span><span class="o">/</span><span class="n">json</span> <span class="n">application</span><span class="o">/</span><span class="n">javascript</span> <span class="n">text</span><span class="o">/</span><span class="n">xml</span> <span class="n">application</span><span class="o">/</span><span class="n">xml</span> <span class="n">application</span><span class="o">/</span><span class="n">xml</span><span class="o">+</span><span class="n">rss</span> <span class="n">text</span><span class="o">/</span>    <span class="n">javascript</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The most important is:<br/>
+  - gzip on : to turn gzip compression.<br/>
+  - gzip_types : is list of MIME-types which you want to turn the compression.<br/>
+  - gzip_proxied any : is enable compression for proxied request.
+</p>
+
+
+
+
+<p>
+  Under gzip settings, add these proxy cache settings:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>nginx.conf </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">##</span>
+</span><span class='line'><span class="c1"># Proxy Cache Settings</span>
+</span><span class='line'><span class="c1">##</span>
+</span><span class='line'><span class="n">proxy_cache_path</span> <span class="sr">/var/</span><span class="n">cache</span> <span class="n">levels</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span> <span class="n">keys_zone</span><span class="o">=</span><span class="n">reverse_cache</span><span class="p">:</span><span class="mi">60</span><span class="n">m</span> <span class="n">inactive</span><span class="o">=</span><span class="mi">90</span><span class="n">m</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">1000</span><span class="n">m</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The important is:<br/>
+  - The directory for the proxy cache is /var/cache.<br/>
+  - levels : is a directive that tells Nginx how the cache is saved in file system.
+<br/>
+  - key_zone : is just a name of the cache zone, you can choose it freely, but don&#8217;t add special chars or whitespace in the name. I will use the name &#8220;reverse_cache&#8221; here.
+</p>
+
+
+
+
+<p>
+  And then save and exit.
+</p>
+
+
+
+
+<p>
+  And then we will configure proxy params in <code>/etc/nginx/proxy_params</code> file for using in virtualhost later.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">vim</span> <span class="sr">/etc/n</span><span class="n">ginx</span><span class="o">/</span><span class="n">proxy_params</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Paste the configuration below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>proxy_params </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">proxy_set_header</span> <span class="n">X</span><span class="o">-</span><span class="no">Real</span><span class="o">-</span><span class="no">IP</span> <span class="vg">$remote_addr</span><span class="p">;</span>
+</span><span class='line'><span class="n">proxy_set_header</span> <span class="n">X</span><span class="o">-</span><span class="no">Forwarded</span><span class="o">-</span><span class="no">For</span> <span class="vg">$proxy_add_x_forwarded_for</span><span class="p">;</span>
+</span><span class='line'><span class="n">proxy_set_header</span> <span class="no">Host</span> <span class="vg">$http_host</span><span class="p">;</span>
+</span><span class='line'><span class="n">proxy_set_header</span> <span class="n">X</span><span class="o">-</span><span class="no">Forwarded</span><span class="o">-</span><span class="no">Proto</span> <span class="vg">$scheme</span><span class="p">;</span>
+</span><span class='line'><span class="n">proxy_set_header</span> <span class="n">X</span><span class="o">-</span><span class="no">Forwarded</span><span class="o">-</span><span class="no">Host</span> <span class="vg">$host</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">##</span>
+</span><span class='line'><span class="c1"># Cache configuration</span>
+</span><span class='line'><span class="c1">##</span>
+</span><span class='line'><span class="n">proxy_cache</span> <span class="n">reverse_cache</span><span class="p">;</span>
+</span><span class='line'><span class="n">proxy_cache_valid</span> <span class="mi">3</span><span class="n">s</span><span class="p">;</span>
+</span><span class='line'><span class="n">proxy_no_cache</span> <span class="vg">$cookie_PHPSESSID</span><span class="p">;</span>
+</span><span class='line'><span class="n">proxy_cache_bypass</span> <span class="vg">$cookie_PHPSESSID</span><span class="p">;</span>
+</span><span class='line'><span class="n">proxy_cache_key</span> <span class="s2">&quot;$scheme$host$request_uri&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="n">add_header</span> <span class="n">X</span><span class="o">-</span><span class="no">Cache</span> <span class="vg">$upstream_cache_status</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And then save and exit.
+</p>
+
+
+
+
+<p>
+  Now we will configure a virtualhost in the directory <code>/etc/nginx/sites-available</code>.  And I will create a new virtualhost configuration file named <code>reverse.conf</code>. Just got to the directory and create new file with vim:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">vim</span> <span class="sr">/etc/n</span><span class="n">ginx</span><span class="o">/</span><span class="n">sites</span><span class="o">-</span><span class="n">available</span><span class="o">/</span><span class="n">reverse</span><span class="o">.</span><span class="n">conf</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Paste the configuration below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>reverse.conf </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">server</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">listen</span> <span class="mi">80</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># Site Directory same in the apache virtualhost configuration</span>
+</span><span class='line'>  <span class="n">root</span> <span class="sr">/var/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">geekhmer_dev</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">index</span> <span class="n">index</span><span class="o">.</span><span class="n">php</span> <span class="n">index</span><span class="o">.</span><span class="n">html</span> <span class="n">index</span><span class="o">.</span><span class="n">htm</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># Domain</span>
+</span><span class='line'>  <span class="n">server_name</span> <span class="n">www</span><span class="o">.</span><span class="n">reverse</span><span class="o">.</span><span class="n">com</span> <span class="n">reverse</span><span class="o">.</span><span class="n">com</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">location</span> <span class="o">/</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">try_files</span> <span class="vg">$uri</span> <span class="vi">@proxy</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">location</span> <span class="vi">@proxy</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">proxy_pass</span> <span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="mi">127</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="p">:</span><span class="mi">7070</span><span class="p">;</span>
+</span><span class='line'>    <span class="kp">include</span> <span class="sr">/etc/n</span><span class="n">ginx</span><span class="o">/</span><span class="n">proxy_params</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">location</span> <span class="o">~*</span> <span class="p">\</span><span class="o">.</span><span class="n">php</span><span class="err">$</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">proxy_pass</span> <span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="mi">127</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="p">:</span><span class="mi">7070</span><span class="p">;</span>
+</span><span class='line'>    <span class="kp">include</span> <span class="sr">/etc/n</span><span class="n">ginx</span><span class="o">/</span><span class="n">proxy_params</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># Enable Cache the file 30 days</span>
+</span><span class='line'>  <span class="n">location</span> <span class="o">~*</span> <span class="o">.</span><span class="p">(</span><span class="n">jpg</span><span class="o">|</span><span class="n">png</span><span class="o">|</span><span class="n">gif</span><span class="o">|</span><span class="n">jpeg</span><span class="o">|</span><span class="n">css</span><span class="o">|</span><span class="n">mp3</span><span class="o">|</span><span class="n">wav</span><span class="o">|</span><span class="n">swf</span><span class="o">|</span><span class="n">mov</span><span class="o">|</span><span class="n">doc</span><span class="o">|</span><span class="n">pdf</span><span class="o">|</span><span class="n">xls</span><span class="o">|</span><span class="n">ppt</span><span class="o">|</span><span class="n">docx</span><span class="o">|</span><span class="n">pptx</span><span class="o">|</span><span class="n">xlsx</span><span class="o">|</span><span class="n">css</span><span class="o">|</span><span class="n">js</span><span class="p">)</span><span class="err">$</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">proxy_cache_valid</span> <span class="mi">200</span> <span class="mi">120</span><span class="n">m</span><span class="p">;</span>
+</span><span class='line'>    <span class="c1"># expires max;</span>
+</span><span class='line'>    <span class="n">expires</span> <span class="mi">30</span><span class="n">d</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">proxy_cache</span> <span class="n">reverse_cache</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">access_log</span> <span class="n">off</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># Disable Cache for the file type html, json</span>
+</span><span class='line'>  <span class="n">location</span> <span class="o">~*</span> <span class="o">.</span><span class="p">(?</span><span class="ss">:manifest</span><span class="o">|</span><span class="n">appcache</span><span class="o">|</span><span class="n">html?</span><span class="o">|</span><span class="n">xml</span><span class="o">|</span><span class="n">json</span><span class="p">)</span><span class="err">$</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">expires</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">location</span> <span class="o">~</span> <span class="sr">/\.ht {</span>
+</span><span class='line'><span class="sr">    deny all;</span>
+</span><span class='line'><span class="sr">  }</span>
+</span><span class='line'><span class="sr">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And then save and exit.
+</p>
+
+
+
+
+<p>
+  And then activate the new virtualhost configuration:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="sr">/etc/n</span><span class="n">ginx</span><span class="o">/</span><span class="n">sites</span><span class="o">-</span><span class="n">available</span><span class="o">/</span><span class="n">reverse</span><span class="o">.</span><span class="n">conf</span> <span class="sr">/etc/n</span><span class="n">ginx</span><span class="o">/</span><span class="n">sites</span><span class="o">-</span><span class="n">enabled</span><span class="o">/</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And then we will test the nginx configuration and restart nginx:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">nginx</span> <span class="o">-</span><span class="n">t</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">systemctl</span> <span class="n">restart</span> <span class="n">nginx</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Nginx is configured as reverse proxy now. You can test it with curl:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">curl</span> <span class="o">-</span><span class="n">I</span> <span class="n">www</span><span class="o">.</span><span class="n">reverse</span><span class="o">.</span><span class="n">com</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">curl</span> <span class="o">-</span><span class="n">I</span> <span class="n">www</span><span class="o">.</span><span class="n">reverse</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">info</span><span class="o">.</span><span class="n">php</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <h3>Configure Logging</h3>
+</p>
+
+
+
+
+<p>
+  I will configure apache to log the real ip of the visitor instead of the local IP.
+</p>
+
+
+
+
+<p>
+  Let go to install the apache module <code>libapache2-mod-rpaf</code> and edit the module configuration file:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">libapache2</span><span class="o">-</span><span class="n">mod</span><span class="o">-</span><span class="n">rpaf</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">vim</span> <span class="sr">/etc/</span><span class="n">apache2</span><span class="o">/</span><span class="n">mods</span><span class="o">-</span><span class="n">available</span><span class="o">/</span><span class="n">rpaf</span><span class="o">.</span><span class="n">conf</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Add the server IP to the line 10. My server IP is: 192.168.1.117.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>rpaf.conf </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">RPAFproxy_ips</span> <span class="mi">127</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span> <span class="mi">192</span><span class="o">.</span><span class="mi">168</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">117</span> <span class="o">::</span><span class="mi">1</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And then save and exit.
+</p>
+
+
+
+
+<p>
+  And then restart apache:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">systemctl</span> <span class="n">restart</span> <span class="n">apache2</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Test rpaf by viewing the apache access log with the tail command:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">tail</span> <span class="o">-</span><span class="n">f</span> <span class="sr">/var/</span><span class="n">log</span><span class="o">/</span><span class="n">apache2</span><span class="o">/</span><span class="n">geekhmer</span><span class="o">-</span><span class="n">dev_access</span><span class="o">.</span><span class="n">log</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Nginx is installed as reverse proxy in front of the Apache web server. If a visitor requests a php file, the request will be passed to apache on port 7070, and you can see the real ip visitor on the apache log file.
+</p>
+
+
+
+
+<p>
+  <h3>Conclusion</h3>
+</p>
+
+
+
+
+<p>
+  Nginx is fast and popular web server with low memory usage that can act as web server and reverse proxy for HTTP and HTTPS protocol. Nginx reverse proxy for apache is a setup that uses Nginx as front end, and apache as back end. Nginx handles the incoming request from the browser and passes it to the apache backend. In this tutorial, we have setup a configuration for nginx as http cache that caches PHP file requests and images.
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Simple Sales Framework for "Sell me this pen"]]></title>
@@ -2844,146 +3548,6 @@
 </span><span class='line'><span class="sr">&lt;/</span><span class="n">body</span><span class="o">&gt;</span>
 </span><span class='line'><span class="o">&lt;</span><span class="sr">/html&gt;</span>
 </span><span class='line'><span class="sr">END</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, That’s it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Gulp – Minify Our CSS]]></title>
-    <link href="http://geekhmer.github.io/blog/2016/10/03/gulp-minify-our-css/"/>
-    <updated>2016-10-03T16:22:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2016/10/03/gulp-minify-our-css</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/gulpjs.jpg" width="600" alt="Gulp, Gulp – Minify Our CSS" />
-</p>
-
-
-
-
-<p>
-  Now since we have our css in a single file, we can continue to increase the performance of our site by minifying our css. 
-</p>
-
-
-
-
-<p>
-  Minifying is the process of eliminating all the unnecessary formatting in a css file. Human’s need spaces and tabs (also known as white space) to more easily read the styles. A browser doesn’t care about white space so we can make the file smaller by removing them.
-</p>
-
-
-
-
-<p>
-  You should start seeing a pattern when using gulp&#8230; because for this we need to use a plugin:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">npm</span> <span class="n">install</span> <span class="n">gulp</span><span class="o">-</span><span class="n">minify</span><span class="o">-</span><span class="n">css</span> <span class="o">--</span><span class="n">save</span><span class="o">-</span><span class="n">dev</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  For more information on gulp-minify-css, check out <a href="https://www.npmjs.org/package/gulp-minify-css" target="_blank">https://www.npmjs.org/package/gulp-minify-css</a>.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>gulpfile.js </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">var</span> <span class="n">gulp</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s1">&#39;gulp&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="n">var</span> <span class="n">concat</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s1">&#39;gulp-concat&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="n">var</span> <span class="n">clean</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s1">&#39;gulp-rimraf&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="n">var</span> <span class="n">cssmin</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s2">&quot;gulp-minify-css&quot;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">gulp</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;clean&#39;</span><span class="p">,</span> <span class="o">[]</span><span class="p">,</span> <span class="n">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Clean all files in build folder&quot;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">return</span> <span class="n">gulp</span><span class="o">.</span><span class="n">src</span><span class="p">(</span><span class="s2">&quot;build/*&quot;</span><span class="p">,</span> <span class="p">{</span> <span class="ss">read</span><span class="p">:</span> <span class="kp">false</span> <span class="p">})</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">clean</span><span class="p">());</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">gulp</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="o">[</span><span class="s1">&#39;clean&#39;</span><span class="o">]</span><span class="p">,</span> <span class="n">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Concat, move, and minify all the css files in styles folder&quot;</span><span class="p">);</span>
-</span><span class='line'>  <span class="k">return</span> <span class="n">gulp</span><span class="o">.</span><span class="n">src</span><span class="p">(</span><span class="s2">&quot;contents/styles/**.css&quot;</span><span class="p">)</span>
-</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">concat</span><span class="p">(</span><span class="s1">&#39;main.min.css&#39;</span><span class="p">))</span>
-</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">cssmin</span><span class="p">())</span>
-</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">gulp</span><span class="o">.</span><span class="n">dest</span><span class="p">(</span><span class="s1">&#39;build/styles&#39;</span><span class="p">));</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Open up your terminator to run gulp:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">gulp</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Using</span> <span class="n">gulpfile</span> <span class="o">~</span><span class="sr">/YOUR_DIRECTORY/</span><span class="n">gulpFile</span><span class="o">.</span><span class="n">js</span>
-</span><span class='line'><span class="no">Starting</span> <span class="s1">&#39;clean&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
-</span><span class='line'><span class="no">Clean</span> <span class="n">all</span> <span class="n">files</span> <span class="k">in</span> <span class="n">build</span> <span class="n">folder</span>
-</span><span class='line'><span class="no">Finished</span> <span class="s1">&#39;clean&#39;</span> <span class="n">after</span> <span class="mi">18</span> <span class="n">ms</span>
-</span><span class='line'><span class="no">Starting</span> <span class="s1">&#39;default&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
-</span><span class='line'><span class="no">Concat</span><span class="p">,</span> <span class="n">move</span><span class="p">,</span> <span class="ow">and</span> <span class="n">minify</span> <span class="n">all</span> <span class="n">the</span> <span class="n">css</span> <span class="n">files</span> <span class="k">in</span> <span class="n">styles</span> <span class="n">folder</span>
-</span><span class='line'><span class="no">Finished</span> <span class="s1">&#39;default&#39;</span> <span class="n">after</span> <span class="mi">40</span> <span class="n">ms</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Our <code>build/styles/main.min.css</code> should now look like:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">p</span><span class="p">{</span><span class="n">font</span><span class="o">-</span><span class="ss">size</span><span class="p">:</span><span class="mi">30</span><span class="n">px</span><span class="p">}</span><span class="n">h1</span><span class="p">{</span><span class="ss">color</span><span class="p">:</span><span class="n">red</span><span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
