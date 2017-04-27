@@ -9,7 +9,8 @@ layout: page
   <div class="team-content">
     <p>
       <strong>Bunlong VAN</strong><br/>
-      Software as a Service (SaaS) Consultant, Software Craftsman, Full-Stack Software Engineer & Ruby/Rails Engineer.<br/><br/>
+      Go-to Guy, Software as a Service (SaaS) Consultant, Software Craftsman, Full-Stack Software Engineer.<br/>
+      E-mail: <a href="mailto:bunlong.van@gmail.com">bunlong.van@gmail.com</a>
     </p>
   </div>
 </div>

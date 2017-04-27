@@ -20,5 +20,5 @@ layout: page
 
 <p>
   <strong>Contacting Us</strong><br/>
-  If there are any questions about programming or any feedback you may contact us via email: geekhmer@gmail.com.
+  If there are any questions about programming or any feedback you may contact us via email: <a href="mailto:geekhmer@gmail.com">geekhmer@gmail.com</a> or <a href="mailto:bunlong.van@gmail.com">bunlong.van@gmail.com</a>.
 </p>
