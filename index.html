@@ -79,6 +79,1019 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2017/06/10/laravel-composer/">Laravel Composer</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2017-06-10T22:57:00+07:00" pubdate data-updated="true">Jun 10<span>th</span>, 2017</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  Laravel is a great PHP framework. Currently, it is the most PHP framework which a lot of companies and people all over the world use it to build amazing applications. In this tutorial, I&#8217;ll show you how easy it is to build a web application with Laravel and add authentication to it.
+</p>
+
+
+
+
+<p>
+  Laravel is a free, open-source PHP framework designed for building web applications with an expressive and elegant syntax. Laravel saves you time and effort because it ships with a lot of features. These amazing features include:
+</p>
+
+
+
+
+<p>
+  - Database Migrations<br/>
+  - ORM (Object-relational mapping)<br/>
+  - Authorization and Policies<br/>
+  - Scheduler<br/>
+  - &#8230; etc
+</p>
+
+
+
+
+<p>
+  Laravel come with the <a href="https://laravel.com/docs/5.4" target="_blank">documentation</a> is very detailed and there is a large community based around Laravel.
+</p>
+
+
+
+
+<p>
+  <strong>Let&#8217;s Get Started</strong><br/>
+  Laravel use <a href="https://getcomposer.org/" target="_blank">Composer</a> to manage its dependencies. So, before using Laravel, make sure you have Composer installed on your machine.
+</p>
+
+
+
+
+<p>
+  We can install Laravel by issuing the Composer <code>create-project</code> command in your terminal like so:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">composer</span> <span class="nx">create</span><span class="o">-</span><span class="nx">project</span> <span class="o">--</span><span class="nx">prefer</span><span class="o">-</span><span class="nx">dist</span> <span class="nx">laravel</span><span class="o">/</span><span class="nx">laravel</span> <span class="nx">blog</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Explore Directory Structure</strong><br/>
+  Laravel follow the <code>Model-View-Controller</code> design pattern.
+</p>
+
+
+
+
+<p>
+  <img src="/images/mvc-diagram.png" width="600" alt="MVC" />
+</p>
+
+
+
+
+<p>
+  - <code>Models</code> query the database and returns the data.<br/>
+  - <code>Views</code> displays the model data, and sends user actions (e.g. button clicks) to the controller.<br/>
+  - <code>Controllers</code> handle user requests from the view, retrieve data from the Models and pass them back into the views.
+</p>
+
+
+
+
+<p>
+  The app directory of Laravel application:
+</p>
+
+
+
+
+<p>
+  - <code>Console</code> - contains all your Artisan commands .<br/>
+  - <code>Http</code> - contains all your controllers, middleware, requests and routes file.<br/>
+  - <code>Providers</code> - contains all your application service providers.<br/>
+  - <code>Events</code> - contains all your event classes.<br/>
+  - <code>Exceptions</code> - contains your application exception handler and custom exception classes.<br/>
+  - <code>Jobs</code> - contains all the jobs queued by your application.<br/>
+  - <code>Listeners</code> - contains all the handler classes for your events.<br/>
+  - <code>Policies</code> - contains the authorization policy classes for your application.<br/>
+  - <code>boostrap</code> - contains your framework autoloading files and generated cache files.<br/>
+  - <code>config</code> - contains your app&#8217;s configuration files.<br/>
+  - <code>database</code> - contains your database migrations and seeds.<br/>
+  - <code>public</code> - contains your assets(images, JavaScript, css etc).<br/>
+  - <code>resources</code> - contains your views and localization files.<br/>
+  - <code>storage</code> - contains all your compiled Blade templates, file caches and logs.<br/>
+  - <code>tests</code> - contains all your tests.<br/>
+  - <code>vendor</code> - contains your app dependencies.<br/>
+</p>
+
+
+
+
+<p>
+  <strong>Setting Up Authentication</strong><br/>
+  Laravel comes with authentication. You just have to configure it. Next, open up your terminal and run this command like so:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">make</span><span class="o">:</span><span class="nx">auth</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  As you can see, some files have been copied into our application, the routes have also been updated. The route file has been populated with additional information like so:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Route::auth() is a method that cleanly encapsulates all the login and register routes.
+</p>
+
+
+
+
+<p>
+  And the views needed for authentication are in the <code>resources/views/auth</code> directory.
+</p>
+
+
+
+
+<p>
+  The base layout for our application has also been configured in the <code>resources/views/layouts</code> directory.
+</p>
+
+
+
+
+<p>
+  But you are free to customize them however you wish. Open up your <code>welcome.blade.php</code> and configure it like so:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">@</span><span class="k">extends</span><span class="p">(</span><span class="s1">&#39;layouts.app&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">@</span><span class="nx">section</span><span class="p">(</span><span class="s1">&#39;content&#39;</span><span class="p">)</span>
+</span><span class='line'>  <span class="o">@</span><span class="k">if</span><span class="p">(</span><span class="nx">Auth</span><span class="o">::</span><span class="na">check</span><span class="p">())</span>
+</span><span class='line'>  <span class="o">@</span><span class="k">endif</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">@</span><span class="k">if</span><span class="p">(</span><span class="nx">Auth</span><span class="o">::</span><span class="na">guest</span><span class="p">())</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;/login&quot;</span> <span class="nx">class</span><span class="o">=</span><span class="s2">&quot;btn btn-info&quot;</span><span class="o">&gt;</span> <span class="nx">You</span> <span class="nx">need</span> <span class="nx">to</span> <span class="nx">login</span> <span class="nx">to</span> <span class="nx">see</span> <span class="nx">the</span> <span class="k">list</span> <span class="err">😜😜</span> <span class="o">&gt;&gt;&lt;/</span><span class="nx">a</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">@</span><span class="k">endif</span>
+</span><span class='line'><span class="o">@</span><span class="nx">endsection</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <code>Auth::check()</code> - You can check if a user is authenticated or not via this method from the Auth Facade. It returns true if a user is logged-in and false if a user is not. 
+</p>
+
+
+
+
+<p>
+  <code>Auth::guest()</code> - This does the opposite of Auth::check(). It returns true if a user is not logged-in and false if a user is logged-in.
+</p>
+
+
+
+
+<p>
+  <strong>Run Migrations</strong><br/>
+  Migrations are like version control for your database, allowing a team to easily modify and share the application&#8217;s database schema.
+</p>
+
+
+
+
+<p>
+   In Laravel, they are placed in the database/migrations directory.
+</p>
+
+
+
+
+<p>
+  For us, the user migration files comes by default with a fresh Laravel install. Check the database/migrations directory to ensure you have at least two migration files named <code>xxx_create_users_table.php</code>.
+</p>
+
+
+
+
+<p>
+  Now run this command from your terminal:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">migrate</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The users and password_resets table will be created on running this command. Ensure the appropriate database name has been set in your <code>.env</code> file. 
+</p>
+
+
+
+
+<p>
+  <strong>Path Customization</strong><br/>
+  Open up AuthController.php in <code>app/Http/Controllers/Auth</code> directory. There is a <code>$redirectTo</code> variable like so:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="sd">/**</span>
+</span><span class='line'><span class="sd">* Where to redirect users after login / registration.</span>
+</span><span class='line'><span class="sd">*</span>
+</span><span class='line'><span class="sd">* @var string</span>
+</span><span class='line'><span class="sd">*/</span>
+</span><span class='line'><span class="k">protected</span> <span class="nv">$redirectTo</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  It can be configured to whatever route you want the user to be redirected to just after registration or login.
+</p>
+
+
+
+
+<p>
+  <strong>Using the Auth Middleware</strong><br/>
+  Middlewares provide a convenient mechanism for filtering HTTP requests entering your application. For example, Laravel includes a middleware that verifies the user of your application is authenticated. If the user is not authenticated, the middleware will redirect the user to the login screen.
+</p>
+
+
+
+
+<p>
+Let&#8217;s check out how the auth middleware works. Add a new route to your routes.php file like so:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">Route</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/got&#39;</span><span class="p">,</span> <span class="p">[</span>
+</span><span class='line'>  <span class="s1">&#39;middleware&#39;</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s1">&#39;auth&#39;</span><span class="p">],</span>
+</span><span class='line'>  <span class="s1">&#39;uses&#39;</span> <span class="o">=&gt;</span> <span class="k">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>   <span class="k">echo</span> <span class="s2">&quot;You are allowed to view this page!&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}]);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now, log out, then try to access that route, you will be redirected back to the /login route. The Laravel auth middleware intercepted the request, checked if the user was logged-in, discovered that the user was not logged-in, then redirected the user back to the login page.
+</p>
+
+
+
+
+<p>
+  <strong>Setting Up The Controller</strong><br/>
+  Open up your terminal and run the command below to create a Task controller:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">make</span><span class="o">:</span><span class="nx">controller</span> <span class="nx">TasksController</span> <span class="o">--</span><span class="nx">resource</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Setting Up The Model</strong><br/>
+  Laravel Models are stored by default in the root of the app directory. The User model ships with the Laravel framework. Only the User model is needed in this application so we won&#8217;t create any additional models. However, if you want to create more models, you can simply run the command below like so:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">make</span><span class="o">:</span><span class="nx">model</span> <span class="o">&lt;</span><span class="nx">modelName</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Creating A Record</strong><br/>
+  Continuing with our controller, let’s create the page where we’ll actually perform this action. In our <code>TasksController</code>, let’s return a view like this:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="k">public</span> <span class="k">function</span> <span class="nf">create</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">view</span><span class="p">(</span><span class="s1">&#39;tasks.create&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And now, in our views directory, let’s create <code>tasks/create.blade.php</code>, and enter some content:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">@</span><span class="k">extends</span><span class="p">(</span><span class="s1">&#39;layouts.master&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">@</span><span class="nx">section</span><span class="p">(</span><span class="s1">&#39;content&#39;</span><span class="p">)</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">h1</span><span class="o">&gt;</span><span class="nx">Add</span> <span class="nx">a</span> <span class="k">New</span> <span class="nx">Task</span><span class="o">&lt;/</span><span class="nx">h1</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">p</span> <span class="nx">class</span><span class="o">=</span><span class="s2">&quot;lead&quot;</span><span class="o">&gt;</span><span class="nx">Add</span> <span class="nx">to</span> <span class="nx">your</span> <span class="nx">task</span> <span class="k">list</span> <span class="nx">below</span><span class="o">.&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">hr</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">@</span><span class="nx">stop</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+At this point, we could manually create a form, and Laravel offers a package to lighten this load for us – <code>Illuminate/Html</code>. Let’s pull that in quickly by running the following command:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">composer</span> <span class="k">require</span> <span class="nx">illuminate</span><span class="o">/</span><span class="nx">html</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now, inside our <code>config/app.php</code> file, let’s add the service provider to the list:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="s1">&#39;Illuminate\Html\HtmlServiceProvider&#39;</span><span class="p">,</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+Let’s add the aliases:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="s1">&#39;Form&#39;</span>      <span class="o">=&gt;</span> <span class="s1">&#39;Illuminate\Html\FormFacade&#39;</span><span class="p">,</span>
+</span><span class='line'><span class="s1">&#39;Html&#39;</span>      <span class="o">=&gt;</span> <span class="s1">&#39;Illuminate\Html\HtmlFacade&#39;</span><span class="p">,</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We can now easily create a form in our <code>create.blade.php</code> file in views directory. Let’s go ahead and do that using the form facade and blade syntax:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="p">{</span><span class="o">!!</span> <span class="nx">Form</span><span class="o">::</span><span class="na">open</span><span class="p">([</span>
+</span><span class='line'>    <span class="s1">&#39;route&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;tasks.store&#39;</span>
+</span><span class='line'><span class="p">])</span> <span class="o">!!</span><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">class</span><span class="o">=</span><span class="s2">&quot;form-group&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>      <span class="p">{</span><span class="o">!!</span> <span class="nx">Form</span><span class="o">::</span><span class="na">label</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="s1">&#39;Title:&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;class&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;control-label&#39;</span><span class="p">])</span> <span class="o">!!</span><span class="p">}</span>
+</span><span class='line'>      <span class="p">{</span><span class="o">!!</span> <span class="nx">Form</span><span class="o">::</span><span class="na">text</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="k">null</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;class&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;form-control&#39;</span><span class="p">])</span> <span class="o">!!</span><span class="p">}</span>
+</span><span class='line'>  <span class="o">&lt;/</span><span class="nx">div</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">class</span><span class="o">=</span><span class="s2">&quot;form-group&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>      <span class="p">{</span><span class="o">!!</span> <span class="nx">Form</span><span class="o">::</span><span class="na">label</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;Description:&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;class&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;control-label&#39;</span><span class="p">])</span> <span class="o">!!</span><span class="p">}</span>
+</span><span class='line'>      <span class="p">{</span><span class="o">!!</span> <span class="nx">Form</span><span class="o">::</span><span class="na">textarea</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="k">null</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;class&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;form-control&#39;</span><span class="p">])</span> <span class="o">!!</span><span class="p">}</span>
+</span><span class='line'>  <span class="o">&lt;/</span><span class="nx">div</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">{</span><span class="o">!!</span> <span class="nx">Form</span><span class="o">::</span><span class="na">submit</span><span class="p">(</span><span class="s1">&#39;Create New Task&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;class&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;btn btn-primary&#39;</span><span class="p">])</span> <span class="o">!!</span><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">{</span><span class="o">!!</span> <span class="nx">Form</span><span class="o">::</span><span class="na">close</span><span class="p">()</span> <span class="o">!!</span><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And Our store method should now look like this:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="k">public</span> <span class="k">function</span> <span class="nf">store</span><span class="p">(</span><span class="nx">Request</span> <span class="nv">$request</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="c1">// dd($request-&gt;all());</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">validate</span><span class="p">(</span><span class="nv">$request</span><span class="p">,</span> <span class="p">[</span>
+</span><span class='line'>    <span class="s1">&#39;title&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;required&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s1">&#39;description&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;required&#39;</span>
+</span><span class='line'>  <span class="p">]);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nv">$input</span> <span class="o">=</span> <span class="nv">$request</span><span class="o">-&gt;</span><span class="na">all</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">Task</span><span class="o">::</span><span class="na">create</span><span class="p">(</span><span class="nv">$input</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">Session</span><span class="o">::</span><span class="na">flash</span><span class="p">(</span><span class="s1">&#39;flash_message&#39;</span><span class="p">,</span> <span class="s1">&#39;Task successfully added!&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">redirect</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">back</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Laravel by default prevents mass assignment, which is a good thing. This just means that we have to declare which fields are mass-assignable. I suggest you read up on this, but here’s what our updated Task model will look like:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="k">class</span> <span class="nc">Task</span> <span class="k">extends</span> <span class="nx">Model</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="sd">/**</span>
+</span><span class='line'><span class="sd">   * Fillable fields</span>
+</span><span class='line'><span class="sd">   * </span>
+</span><span class='line'><span class="sd">   * @var array</span>
+</span><span class='line'><span class="sd">   */</span>
+</span><span class='line'>  <span class="k">protected</span> <span class="nv">$fillable</span> <span class="o">=</span> <span class="p">[</span>
+</span><span class='line'>    <span class="s1">&#39;title&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s1">&#39;description&#39;</span>
+</span><span class='line'>  <span class="p">];</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And then we add error message to our blade template:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">@</span><span class="k">if</span><span class="p">(</span><span class="nx">Session</span><span class="o">::</span><span class="na">has</span><span class="p">(</span><span class="s1">&#39;flash_message&#39;</span><span class="p">))</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">class</span><span class="o">=</span><span class="s2">&quot;alert alert-success&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">&lt;/</span><span class="nx">div</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">@</span><span class="k">endif</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Reading Records</strong><br/>
+  Back in our index method, we can now output all tasks that we’ve created so far. Add this to the index method:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="k">public</span> <span class="k">function</span> <span class="nf">index</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="nv">$tasks</span> <span class="o">=</span> <span class="nx">Task</span><span class="o">::</span><span class="na">all</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">view</span><span class="p">(</span><span class="s1">&#39;tasks.index&#39;</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">withTasks</span><span class="p">(</span><span class="nv">$tasks</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We can access and output the tasks like this:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">@</span><span class="k">foreach</span><span class="p">(</span><span class="nv">$tasks</span> <span class="k">as</span> <span class="nv">$task</span><span class="p">)</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">h3</span><span class="o">&gt;&lt;/</span><span class="nx">h3</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;&quot;</span> <span class="nx">class</span><span class="o">=</span><span class="s2">&quot;btn btn-info&quot;</span><span class="o">&gt;</span><span class="nx">View</span> <span class="nx">Task</span><span class="o">&lt;/</span><span class="nx">a</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;&quot;</span> <span class="nx">class</span><span class="o">=</span><span class="s2">&quot;btn btn-primary&quot;</span><span class="o">&gt;</span><span class="nx">Edit</span> <span class="nx">Task</span><span class="o">&lt;/</span><span class="nx">a</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">hr</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">@</span><span class="k">endforeach</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  As before, we’ll create a <code>show.blade.php</code> file and extend our master layout:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">@</span><span class="k">extends</span><span class="p">(</span><span class="s1">&#39;layouts.master&#39;</span><span class="p">)</span>
+</span><span class='line'>  <span class="o">@</span><span class="nx">section</span><span class="p">(</span><span class="s1">&#39;content&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">h1</span><span class="o">&gt;&lt;/</span><span class="nx">h1</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">p</span> <span class="nx">class</span><span class="o">=</span><span class="s2">&quot;lead&quot;</span><span class="o">&gt;&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">hr</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;&quot;</span> <span class="nx">class</span><span class="o">=</span><span class="s2">&quot;btn btn-info&quot;</span><span class="o">&gt;</span><span class="nx">Back</span> <span class="nx">to</span> <span class="nx">all</span> <span class="nx">tasks</span><span class="o">&lt;/</span><span class="nx">a</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;&quot;</span> <span class="nx">class</span><span class="o">=</span><span class="s2">&quot;btn btn-primary&quot;</span><span class="o">&gt;</span><span class="nx">Edit</span> <span class="nx">Task</span><span class="o">&lt;/</span><span class="nx">a</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">class</span><span class="o">=</span><span class="s2">&quot;pull-right&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;#&quot;</span> <span class="nx">class</span><span class="o">=</span><span class="s2">&quot;btn btn-danger&quot;</span><span class="o">&gt;</span><span class="nx">Delete</span> <span class="k">this</span> <span class="nx">task</span><span class="o">&lt;/</span><span class="nx">a</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;/</span><span class="nx">div</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">@</span><span class="nx">stop</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And our show medtho should look like so:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="k">public</span> <span class="k">function</span> <span class="nf">show</span><span class="p">(</span><span class="nv">$id</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="nv">$task</span> <span class="o">=</span> <span class="nx">Task</span><span class="o">::</span><span class="na">findOrFail</span><span class="p">(</span><span class="nv">$id</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">view</span><span class="p">(</span><span class="s1">&#39;tasks.show&#39;</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">withTask</span><span class="p">(</span><span class="nv">$task</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Updating A Record Using Form-Model Binding</strong><br/>
+</p>
+
+
+
+
+<p>
+  In the TasksController, we can update the edit method to this:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="k">public</span> <span class="k">function</span> <span class="nf">edit</span><span class="p">(</span><span class="nv">$id</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="nv">$task</span> <span class="o">=</span> <span class="nx">Task</span><span class="o">::</span><span class="na">findOrFail</span><span class="p">(</span><span class="nv">$id</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">view</span><span class="p">(</span><span class="s1">&#39;tasks.edit&#39;</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">withTask</span><span class="p">(</span><span class="nv">$task</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  It’s no different this time, so we’ll create the <code>edit.blade.php</code> file and edit method:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="k">public</span> <span class="k">function</span> <span class="nf">edit</span><span class="p">(</span><span class="nv">$id</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">view</span><span class="p">(</span><span class="s1">&#39;tasks.edit&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And here’s the view:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">@</span><span class="k">extends</span><span class="p">(</span><span class="s1">&#39;layouts.master&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">@</span><span class="nx">section</span><span class="p">(</span><span class="s1">&#39;content&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">h1</span><span class="o">&gt;</span><span class="nx">Editing</span> <span class="s2">&quot;&quot;</span><span class="o">&lt;/</span><span class="nx">h1</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span> <span class="nx">class</span><span class="o">=</span><span class="s2">&quot;lead&quot;</span><span class="o">&gt;</span><span class="nx">Edit</span> <span class="k">and</span> <span class="nx">save</span> <span class="k">this</span> <span class="nx">task</span> <span class="nx">below</span><span class="p">,</span> <span class="k">or</span> <span class="o">&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="o">&gt;</span><span class="nx">go</span> <span class="nx">back</span> <span class="nx">to</span> <span class="nx">all</span> <span class="nx">tasks</span><span class="o">.&lt;/</span><span class="nx">a</span><span class="o">&gt;&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">hr</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">@</span><span class="k">include</span><span class="p">(</span><span class="s1">&#39;partials.alerts.errors&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">@</span><span class="k">if</span><span class="p">(</span><span class="nx">Session</span><span class="o">::</span><span class="na">has</span><span class="p">(</span><span class="s1">&#39;flash_message&#39;</span><span class="p">))</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">class</span><span class="o">=</span><span class="s2">&quot;alert alert-success&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">&lt;/</span><span class="nx">div</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">@</span><span class="k">endif</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">{</span><span class="o">!!</span> <span class="nx">Form</span><span class="o">::</span><span class="na">model</span><span class="p">(</span><span class="nv">$task</span><span class="p">,</span> <span class="p">[</span>
+</span><span class='line'>  <span class="s1">&#39;method&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;PATCH&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;route&#39;</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s1">&#39;tasks.update&#39;</span><span class="p">,</span> <span class="nv">$task</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">]</span>
+</span><span class='line'><span class="p">])</span> <span class="o">!!</span><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">div</span> <span class="nx">class</span><span class="o">=</span><span class="s2">&quot;form-group&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="p">{</span><span class="o">!!</span> <span class="nx">Form</span><span class="o">::</span><span class="na">label</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="s1">&#39;Title:&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;class&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;control-label&#39;</span><span class="p">])</span> <span class="o">!!</span><span class="p">}</span>
+</span><span class='line'>  <span class="p">{</span><span class="o">!!</span> <span class="nx">Form</span><span class="o">::</span><span class="na">text</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="k">null</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;class&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;form-control&#39;</span><span class="p">])</span> <span class="o">!!</span><span class="p">}</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="nx">div</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">div</span> <span class="nx">class</span><span class="o">=</span><span class="s2">&quot;form-group&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="p">{</span><span class="o">!!</span> <span class="nx">Form</span><span class="o">::</span><span class="na">label</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;Description:&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;class&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;control-label&#39;</span><span class="p">])</span> <span class="o">!!</span><span class="p">}</span>
+</span><span class='line'>  <span class="p">{</span><span class="o">!!</span> <span class="nx">Form</span><span class="o">::</span><span class="na">textarea</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="k">null</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;class&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;form-control&#39;</span><span class="p">])</span> <span class="o">!!</span><span class="p">}</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="nx">div</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">{</span><span class="o">!!</span> <span class="nx">Form</span><span class="o">::</span><span class="na">submit</span><span class="p">(</span><span class="s1">&#39;Update Task&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;class&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;btn btn-primary&#39;</span><span class="p">])</span> <span class="o">!!</span><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">{</span><span class="o">!!</span> <span class="nx">Form</span><span class="o">::</span><span class="na">close</span><span class="p">()</span> <span class="o">!!</span><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">@</span><span class="nx">stop</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Let’s jump into our update method now, Here’s what the method looks like:
+</p>
+
+
+<p></p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="k">public</span> <span class="k">function</span> <span class="nf">update</span><span class="p">(</span><span class="nv">$id</span><span class="p">,</span> <span class="nx">Request</span> <span class="nv">$request</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="nv">$task</span> <span class="o">=</span> <span class="nx">Task</span><span class="o">::</span><span class="na">findOrFail</span><span class="p">(</span><span class="nv">$id</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">validate</span><span class="p">(</span><span class="nv">$request</span><span class="p">,</span> <span class="p">[</span>
+</span><span class='line'>    <span class="s1">&#39;title&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;required&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s1">&#39;description&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;required&#39;</span>
+</span><span class='line'>  <span class="p">]);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nv">$input</span> <span class="o">=</span> <span class="nv">$request</span><span class="o">-&gt;</span><span class="na">all</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nv">$task</span><span class="o">-&gt;</span><span class="na">fill</span><span class="p">(</span><span class="nv">$input</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">save</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">Session</span><span class="o">::</span><span class="na">flash</span><span class="p">(</span><span class="s1">&#39;flash_message&#39;</span><span class="p">,</span> <span class="s1">&#39;Task successfully added!&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">redirect</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">back</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Deleting A Record</strong><br/>
+  Here’s our updated show template incorporating the delete form:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">@</span><span class="k">extends</span><span class="p">(</span><span class="s1">&#39;layouts.master&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">@</span><span class="nx">section</span><span class="p">(</span><span class="s1">&#39;content&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">h1</span><span class="o">&gt;&lt;/</span><span class="nx">h1</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span> <span class="nx">class</span><span class="o">=</span><span class="s2">&quot;lead&quot;</span><span class="o">&gt;&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">hr</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">div</span> <span class="nx">class</span><span class="o">=</span><span class="s2">&quot;row&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">class</span><span class="o">=</span><span class="s2">&quot;col-md-6&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;&quot;</span> <span class="nx">class</span><span class="o">=</span><span class="s2">&quot;btn btn-info&quot;</span><span class="o">&gt;</span><span class="nx">Back</span> <span class="nx">to</span> <span class="nx">all</span> <span class="nx">tasks</span><span class="o">&lt;/</span><span class="nx">a</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;&quot;</span> <span class="nx">class</span><span class="o">=</span><span class="s2">&quot;btn btn-primary&quot;</span><span class="o">&gt;</span><span class="nx">Edit</span> <span class="nx">Task</span><span class="o">&lt;/</span><span class="nx">a</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;/</span><span class="nx">div</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">class</span><span class="o">=</span><span class="s2">&quot;col-md-6 text-right&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="p">{</span><span class="o">!!</span> <span class="nx">Form</span><span class="o">::</span><span class="na">open</span><span class="p">([</span>
+</span><span class='line'>      <span class="s1">&#39;method&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;DELETE&#39;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s1">&#39;route&#39;</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s1">&#39;tasks.destroy&#39;</span><span class="p">,</span> <span class="nv">$task</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">]</span>
+</span><span class='line'>    <span class="p">])</span> <span class="o">!!</span><span class="p">}</span>
+</span><span class='line'>    <span class="p">{</span><span class="o">!!</span> <span class="nx">Form</span><span class="o">::</span><span class="na">submit</span><span class="p">(</span><span class="s1">&#39;Delete this task?&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;class&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;btn btn-danger&#39;</span><span class="p">])</span> <span class="o">!!</span><span class="p">}</span>
+</span><span class='line'>    <span class="p">{</span><span class="o">!!</span> <span class="nx">Form</span><span class="o">::</span><span class="na">close</span><span class="p">()</span> <span class="o">!!</span><span class="p">}</span>
+</span><span class='line'>  <span class="o">&lt;/</span><span class="nx">div</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="nx">div</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">@</span><span class="nx">stop</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Inside our TaskController, we can handle the request in the destroy method like so:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="k">public</span> <span class="k">function</span> <span class="nf">destroy</span><span class="p">(</span><span class="nv">$id</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="nv">$task</span> <span class="o">=</span> <span class="nx">Task</span><span class="o">::</span><span class="na">findOrFail</span><span class="p">(</span><span class="nv">$id</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nv">$task</span><span class="o">-&gt;</span><span class="na">delete</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">Session</span><span class="o">::</span><span class="na">flash</span><span class="p">(</span><span class="s1">&#39;flash_message&#39;</span><span class="p">,</span> <span class="s1">&#39;Task successfully deleted!&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">redirect</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">route</span><span class="p">(</span><span class="s1">&#39;tasks.index&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2017/05/22/new-way-to-develop-react-app-with-create-react-app-no-build-configuration/">New Way to Develop React App With Create React App (No Build Configuration)</a></h1>
     
     
@@ -2071,425 +3084,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2017/01/05/create-content-with-multiple-features-with-ckeditor-gem/">Create Content With Multiple Features With CKEditor Gem</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2017-01-05T23:13:00+07:00" pubdate data-updated="true">Jan 5<span>th</span>, 2017</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/ckeditor.png" width="600" alt="Create content with multiple features with CKEditor Gem" />
-</p>
-
-
-
-
-<p>
-  <strong>Setup & Usage</strong><br/>
-  First, we need to add the CKEditor gem to our Gemfile. Open up your Gemfile and add the line listed below:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Gemfile </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s2">&quot;ckeditor&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Next, open up the terminal and run a bundle install to install the gem:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Great, now lets create a sample model and accompanying controller that will be used to store our data. Open up and run the command below to create the Magazine model and migrate the database:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">resource</span> <span class="no">Magazine</span> <span class="n">title</span> <span class="ss">body</span><span class="p">:</span><span class="n">text</span>
-</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now, open your routes file and add the following line to your routes:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>routes.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;magazines#index&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now, lets add the CKEditor javascript include to our application.js. Modify your application.js file so that it looks like the code listed below:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>application.js </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">//</span> <span class="no">This</span> <span class="n">is</span> <span class="n">a</span> <span class="n">manifest</span> <span class="n">file</span> <span class="n">that</span><span class="s1">&#39;ll be compiled into application.js, which will include all the files</span>
-</span><span class='line'><span class="s1">// listed below.</span>
-</span><span class='line'><span class="s1">//</span>
-</span><span class='line'><span class="s1">// Any JavaScript/Coffee file within this directory, lib/assets/javascripts, vendor/assets/javascripts,</span>
-</span><span class='line'><span class="s1">// or any plugin&#39;</span><span class="n">s</span> <span class="n">vendor</span><span class="o">/</span><span class="n">assets</span><span class="o">/</span><span class="n">javascripts</span> <span class="n">directory</span> <span class="n">can</span> <span class="n">be</span> <span class="n">referenced</span> <span class="n">here</span> <span class="n">using</span> <span class="n">a</span> <span class="n">relative</span> <span class="n">path</span><span class="o">.</span>
-</span><span class='line'><span class="sr">//</span>
-</span><span class='line'><span class="sr">//</span> <span class="no">It</span><span class="s1">&#39;s not advisable to add code directly here, but if you do, it&#39;</span><span class="n">ll</span> <span class="n">appear</span> <span class="n">at</span> <span class="n">the</span> <span class="n">bottom</span> <span class="n">of</span> <span class="n">the</span>
-</span><span class='line'><span class="sr">//</span> <span class="n">compiled</span> <span class="n">file</span><span class="o">.</span> <span class="no">JavaScript</span> <span class="n">code</span> <span class="k">in</span> <span class="n">this</span> <span class="n">file</span> <span class="n">should</span> <span class="n">be</span> <span class="n">added</span> <span class="n">after</span> <span class="n">the</span> <span class="n">last</span> <span class="n">require_</span><span class="o">*</span> <span class="n">statement</span><span class="o">.</span>
-</span><span class='line'><span class="sr">//</span>
-</span><span class='line'><span class="sr">//</span> <span class="no">Read</span> <span class="no">Sprockets</span> <span class="no">README</span> <span class="p">(</span><span class="ss">https</span><span class="p">:</span><span class="sr">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">rails</span><span class="o">/</span><span class="n">sprockets</span><span class="c1">#sprockets-directives) for details</span>
-</span><span class='line'><span class="sr">//</span> <span class="n">about</span> <span class="n">supported</span> <span class="n">directives</span><span class="o">.</span>
-</span><span class='line'><span class="sr">//</span>
-</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">jquery</span>
-</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">jquery_ujs</span>
-</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">ckeditor</span><span class="o">/</span><span class="n">init</span>
-</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">turbolinks</span>
-</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="n">require_tree</span> <span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Great, now we need to add some code to the magazines controller. Add the following code to the magazines controller:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>magazines_controller.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">MagazinesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
-</span><span class='line'>    <span class="vi">@magazines</span> <span class="o">=</span> <span class="no">Magazine</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="s2">&quot;created_at DESC&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
-</span><span class='line'>    <span class="vi">@magazine</span> <span class="o">=</span> <span class="no">Magazine</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">new</span>
-</span><span class='line'>    <span class="vi">@magazine</span> <span class="o">=</span> <span class="no">Magazine</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
-</span><span class='line'>    <span class="vi">@magazine</span> <span class="o">=</span> <span class="no">Magazine</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">magazine_params</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">if</span> <span class="vi">@magazine</span><span class="o">.</span><span class="n">save</span>
-</span><span class='line'>      <span class="n">redirect_to</span> <span class="n">magazines_path</span><span class="p">,</span> <span class="ss">notice</span><span class="p">:</span> <span class="s2">&quot;The magazines has been successfully created.&quot;</span>
-</span><span class='line'>    <span class="k">else</span>
-</span><span class='line'>      <span class="n">render</span> <span class="ss">action</span><span class="p">:</span> <span class="s2">&quot;new&quot;</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">edit</span>
-</span><span class='line'>    <span class="vi">@magazine</span> <span class="o">=</span> <span class="no">Magazine</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">update</span>
-</span><span class='line'>    <span class="vi">@magazine</span> <span class="o">=</span> <span class="no">Magazine</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">if</span> <span class="vi">@magazine</span><span class="o">.</span><span class="n">update_attributes</span><span class="p">(</span><span class="n">magazine_params</span><span class="p">)</span>
-</span><span class='line'>      <span class="n">redirect_to</span> <span class="n">magazines_path</span><span class="p">,</span> <span class="ss">notice</span><span class="p">:</span> <span class="s2">&quot;The magazine has been successfully updated.&quot;</span>
-</span><span class='line'>    <span class="k">else</span>
-</span><span class='line'>      <span class="n">render</span> <span class="ss">action</span><span class="p">:</span> <span class="s2">&quot;edit&quot;</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kp">private</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">magazine_params</span>
-</span><span class='line'>    <span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:magazine</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:title</span><span class="p">,</span> <span class="ss">:body</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  This code enables the ability to read, write, and update the magazines in our example. Now for the views, first lets create the index view:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>index.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= link_to &quot;New Magazine&quot;, new_magazine_path %&gt;</span>
-</span><span class='line'><span class="sx">&lt;% @magazines.each do |magazine| %&gt;</span>
-</span><span class='line'><span class="sx">  &lt;h3&gt;&lt;%=</span> <span class="n">magazine</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">html_safe</span> <span class="sx">%&gt;&lt;/h3&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;&lt;</span><span class="sx">%= magazine.body.html_safe %&gt;&lt;/p&gt;</span>
-</span><span class='line'><span class="sx">  &lt;%=</span> <span class="n">link_to</span> <span class="s2">&quot;Edit Magazine&quot;</span><span class="p">,</span> <span class="n">edit_magazine_path</span><span class="p">(</span><span class="n">magazine</span><span class="p">)</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">  &lt;% if magazine != @magazines.last %&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">hr</span> <span class="sr">/&gt;</span>
-</span><span class='line'><span class="sr">  &lt;% end %&gt;</span>
-</span><span class='line'><span class="sr">&lt;% end %&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now, lets create a partial to store the form. Create a file called app/views/_form.html.erb and add the code listed below:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>_form.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">% if </span><span class="vi">@magazine</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">any?</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">  &lt;ul&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="sx">%= @magazine.errors.full_messages.each do |message| %&gt;</span>
-</span><span class='line'><span class="sx">        &lt;li&gt;&lt;%=</span> <span class="n">message</span> <span class="sx">%&gt;&lt;/li&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="sx">% end %&gt;</span>
-</span><span class='line'><span class="sx">  &lt;/ul&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sx">% end %&gt;</span>
-</span><span class='line'><span class="sx">&lt;%= form_for @magazine do |f| %&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="sx">%= f.label :title %&gt;</span>
-</span><span class='line'><span class="sx">  &lt;/div&gt;</span>
-</span><span class='line'><span class="sx">  &lt;div&gt;</span>
-</span><span class='line'><span class="sx">    &lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">text_field</span> <span class="ss">:title</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">  &lt;/div&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="sx">%= f.label :body %&gt;</span>
-</span><span class='line'><span class="sx">  &lt;/div&gt;</span>
-</span><span class='line'><span class="sx">  &lt;div&gt;</span>
-</span><span class='line'><span class="sx">    &lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">cktext_area</span> <span class="ss">:body</span><span class="p">,</span> <span class="ss">rows</span><span class="p">:</span> <span class="mi">10</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">  &lt;/div&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">submit</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">  &lt;/div&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sx">% end </span><span class="o">%&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now, lets create the new view. Create the app/views/magazines/new.html.erb file and add the code listed below:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>new.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span> <span class="no">New</span> <span class="no">Magazine</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
-</span><span class='line'><span class="sr">&lt;%= render &quot;form&quot; %&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now, if you visit the new magazines page on your development server you will see that CKEditor appears.
-</p>
-
-
-
-
-<p>
-  Next lets create the edit view. Create the app/views/magazines/edit.html.erb file and add the code listed below:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>edit.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= &quot;Editing </span><span class="si">#{</span><span class="vi">@magazine</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="sx">&quot; %&gt;</span>
-</span><span class='line'><span class="sx">&lt;%=</span> <span class="n">render</span> <span class="s2">&quot;form&quot;</span> <span class="o">%&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Great, now when you click &#8216;edit magazine&#8217; on any magazine, it will show the CKEditor for editing.
-</p>
-
-
-
-
-<p>
-  <strong>Images Using Paperclip</strong><br/>
-  In order to integrate images via paperclip, a few more steps are required. Note that you must have ImageMagick installed for this to work. First, lets include the paperclip gem:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Gemfile </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s2">&quot;paperclip&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Next, we need to run a generator provided by ckeditor. This generator will create the necessary models that will be used to store image data. Run the command below:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">generate</span> <span class="ss">ckeditor</span><span class="p">:</span><span class="n">install</span> <span class="o">--</span><span class="n">orm</span><span class="o">=</span><span class="n">active_record</span> <span class="o">--</span><span class="n">backend</span><span class="o">=</span><span class="n">paperclip</span>
-</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, if you restart your rails server and refresh the page, you will be able to click the images button, upload an image, and insert it into your articles.
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -2510,6 +3104,10 @@
 </section><section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2017/06/10/laravel-composer/">Laravel Composer</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2017/05/22/new-way-to-develop-react-app-with-create-react-app-no-build-configuration/">New Way to Develop React App With Create React App (No Build Configuration)</a>
@@ -2533,10 +3131,6 @@
     
       <li class="post">
         <a href="/blog/2017/03/21/generating-income-on-the-internet-using-social-media/">Generating Income on the Internet Using Social Media</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/03/19/copy-to-clipboard-without-flash-with-clipboard-dot-js/">Copy to Clipboard Without Flash With Clipboard.js</a>
       </li>
     
   </ul>
@@ -2594,7 +3188,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 43 ]</a>
+        <a href="/blog/categories/other/">Other [ 44 ]</a>
       </li>
     
       <li>
