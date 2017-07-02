@@ -79,6 +79,166 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2016/10/11/gulp-uglify/">Gulp – Uglify</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-10-11T22:02:00+07:00" pubdate data-updated="true">Oct 11<span>th</span>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/bunlong_gulp.jpg" width="600" alt="Gulp, Gulp – Uglify" />
+</p>
+
+
+
+
+<p>
+  For JavaScript files we also want to uglify them. Uglifying JavaScript involves changing variable and function names to reduce their size. So a variable named customer might be renamed to x. JavaScript engines don’t care about descriptive names, only developers. So how do we uglify JavaScript files with gulp?
+</p>
+
+
+
+
+<p>
+  I know what you are going to say: &#8220;Blah, blah, blah&#8230; there is a plugin.&#8221; and you are correct.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">npm</span> <span class="n">install</span> <span class="n">gulp</span><span class="o">-</span><span class="n">uglify</span> <span class="o">--</span><span class="n">save</span><span class="o">-</span><span class="n">dev</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  For more information on <code>gulp-uglify</code> check out <a href="https://www.npmjs.org/package/gulp-uglify" target="_blank">https://www.npmjs.org/package/gulp-uglify</a>.
+</p>
+
+
+
+
+<p>
+  While we are uglifying the file, we will also concat all our JavaScript files together and move them to <code>build/javascripts</code>.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>gulpfile.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="n">var</span> <span class="n">uglify</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s1">&#39;gulp-uglify&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">gulp</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;javascript&#39;</span><span class="p">,</span> <span class="n">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Validate, Concat, Uglify, and Move all the javascript files&quot;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">return</span> <span class="n">gulp</span><span class="o">.</span><span class="n">src</span><span class="p">(</span><span class="s2">&quot;contents/javascripts/**.js&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">jsValidate</span><span class="p">())</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="n">notify</span><span class="o">.</span><span class="n">onError</span><span class="p">(</span><span class="n">function</span><span class="p">(</span><span class="n">error</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">error</span><span class="o">.</span><span class="n">message</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}))</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">uglify</span><span class="p">())</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">concat</span><span class="p">(</span><span class="s1">&#39;main.js&#39;</span><span class="p">))</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">gulp</span><span class="o">.</span><span class="n">dest</span><span class="p">(</span><span class="s1">&#39;build/javascripts&#39;</span><span class="p">));</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  When you run our gulp javascript task now, we should see that our javascript files were uglified, concated, and moved to the build folder.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">gulp</span> <span class="n">javascript</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Using</span> <span class="n">gulpfile</span> <span class="o">~</span><span class="sr">/YOUR_DIRECTORY/</span><span class="n">gulpFile</span><span class="o">.</span><span class="n">js</span>
+</span><span class='line'><span class="no">Starting</span> <span class="s1">&#39;javascript&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="no">Validate</span><span class="p">,</span> <span class="no">Concat</span><span class="p">,</span> <span class="no">Uglify</span><span class="p">,</span> <span class="ow">and</span> <span class="no">Move</span> <span class="n">all</span> <span class="n">the</span> <span class="n">javascript</span> <span class="n">files</span>
+</span><span class='line'><span class="no">Finished</span> <span class="s1">&#39;javascript&#39;</span> <span class="n">after</span> <span class="mi">55</span> <span class="n">ms</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If you have an error here, be sure to check that your JavaScript is valid. Remember we were testing that last section.
+</p>
+
+
+
+
+<p>
+  The build script should create our <code>/build/javascripts/main.js</code> file.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>/build/javascripts/main.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">function</span> <span class="no">OMG</span><span class="p">(){</span><span class="n">var</span> <span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">;</span><span class="k">return</span> <span class="n">n</span><span class="o">+</span><span class="mi">10</span><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2016/10/11/gulp-notify-pop-up/">Gulp – Notify Pop Up</a></h1>
     
     
@@ -1888,104 +2048,6 @@ You might have been wondering what the empty array (<code>[]</code>) was before 
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/08/28/gulp-installation/">Gulp – Installation</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-08-28T14:06:00+07:00" pubdate data-updated="true">Aug 28<span>th</span>, 2016</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/gulp.jpg" width="600" alt="Gulp – Installation" />
-</p>
-
-
-
-
-<p>
-  This article provides a step-by-step procedure of Gulp installation.
-</p>
-
-
-
-
-<p>
-  <strong>Node.js Installation</strong><br/>
-  Run the setup to install the Node.js on your computer <a href="https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-16-04" target="_blank">here</a>.<br/>
-  Then open up the terminator in your system and enter the following command. It will display the installed Node.js version. 
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">node</span> <span class="o">-</span><span class="n">v</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  In the terminator, enter the following command to display the version of npm (Node.js package manager) which is used to install modules. It will display the installed Node.js version.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">npm</span> <span class="o">-</span><span class="n">v</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Gulp Installation</strong><br/>
-  In the terminator, enter the following command to install Gulp. Adding “-g” flag ensures that the Gulp is globally available for any project.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gulp</span> <span class="o">-</span><span class="n">v</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, That’s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/4/">&larr; Older</a>
@@ -2010,6 +2072,10 @@ You might have been wondering what the empty array (<code>[]</code>) was before 
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2017/07/02/laravel-5-dot-x-x-create-customer-helper/">Laravel 5.x.x Create Customer Helper</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2017/06/30/hello-laravel-5-dot-x-x/">Hello Laravel 5.x.x</a>
       </li>
     
@@ -2031,10 +2097,6 @@ You might have been wondering what the empty array (<code>[]</code>) was before 
     
       <li class="post">
         <a href="/blog/2017/04/03/sell-me-this-pen/">Simple Sales Framework for &#8220;Sell Me This Pen&#8221;</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/03/27/why-is-website-maintenance-important/">Why Is Website Maintenance Important?</a>
       </li>
     
   </ul>
@@ -2116,7 +2178,7 @@ You might have been wondering what the empty array (<code>[]</code>) was before 
       </li>
     
       <li>
-        <a href="/blog/categories/laravel/">Laravel [ 2 ]</a>
+        <a href="/blog/categories/laravel/">Laravel [ 3 ]</a>
       </li>
     
   </ul>
