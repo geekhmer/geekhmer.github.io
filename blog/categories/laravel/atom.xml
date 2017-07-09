@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Laravel | GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/blog/categories/laravel/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2017-07-02T20:15:54+07:00</updated>
+  <updated>2017-07-10T00:51:58+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,338 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Laravel 5.x.x Route &amp; SEO]]></title>
+    <link href="http://geekhmer.github.io/blog/2017/07/09/laravel-5-dot-x-x-route-and-seo/"/>
+    <updated>2017-07-09T10:49:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2017/07/09/laravel-5-dot-x-x-route-and-seo</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/laravel_news_letter.png" width="600" alt="Laravel 5.x.x Route and SEO" />
+</p>
+
+
+
+
+<p>
+  SEO stands for "search engine optimization". URLs is an important thing in getting found on the web. In this article I will implement routes and SEO friendly URLs for Laravel project.
+</p>
+
+
+
+
+<p>
+  <strong>Things that Affect SEO</strong><br/>
+  The following are some of the things that search engines such as Google Search consider when evaluating web sites:<br/>
+  1. Website speed<br/>
+  - No one waiting to visit a websites that take forever to load. We all love fast websites. The goal should be to keep the load time under 2 seconds. If you can get it under a second that is even much better. You need to test your web application for speed and optimize if necessary.<br/>
+  2. Responsive designs<br/>
+  - Mobile devices have a market share of internet usage. Since user experience matters to search engines, you need to ensure that the web site displays properly in mobile devices, tablets and desktops as well.<br/>
+  3. Keywords<br/>
+  - Search engines look at keywords when querying billions of indexed websites. As a developer you have to ensure that you provide title tags, meta description and HTML H2 heading that the content writers can use to place keywords.<br/>
+  4. Social media statistics<br/>
+  - If you read something cool on the web, you naturally share it on social media. This is a stamp of approval to search engines. Your have to include tools on the web site that will make it easy for the visitors to share the contents.<br/>
+  5. Website URLs<br/>
+  - The URLs should be keyword rich and words should be separated by dashes and not underscores.
+</p>
+
+
+
+
+<p>
+  <strong>How to Implement SEO Friendly URLS in Laravel</strong><br/>
+  Now we have to cover the basics SEO and we will map routes to controllers and create a single controller for all routes. The following table shows the URLs that will be implemented:
+</p>
+
+
+
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>URLs</th>
+      <th>Method</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>/</td>
+      <td>index</td>
+      <td>Home page</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>/products</td>
+      <td>products</td>
+      <td>Products page</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>/products/details/{id}</td>
+      <td>product_details(id)</td>
+      <td>Product detailed based on product id</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>/products/category</td>
+      <td>product_categories</td>
+      <td>Product categories</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>/products/brands</td>
+      <td>product_brands</td>
+      <td>Product brands</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>/blog</td>
+      <td>blog</td>
+      <td>Blog postings list</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>/blog/post/{id}</td>
+      <td>blog_post{id}</td>
+      <td>Blog post content</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>/contact-us</td>
+      <td>contact_us</td>
+      <td>Contact us page</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>/login</td>
+      <td>login</td>
+      <td>Login user</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>/logout</td>
+      <td>logout</td>
+      <td>Logout user</td>
+    </tr>
+    <tr>
+      <td>11</td>
+      <td>/cart</td>
+      <td>cart</td>
+      <td>Cart contents</td>
+    </tr>
+    <tr>
+      <td>12</td>
+      <td>/checkout</td>
+      <td>checkout</td>
+      <td>Checkout shopper</td>
+    </tr>
+    <tr>
+      <td>13</td>
+      <td>/search/{query}</td>
+      <td>search</td>
+      <td>Search results</td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+
+<br/>
+
+
+
+
+<p>
+  For this section assumes you have created the tutorial project. If you haven’t done so yet then read this <a href="http://geekhmer.github.io/blog/2017/06/30/hello-laravel-5-dot-x-x/">Laravel Hello World</a>. We use the artisan command line tool to generate the codes for ShopController.php controller.
+</p>
+
+
+
+
+<p>
+  Then open up your terminator and run the following command to browse to the project. Assumed that you are using Laravel plugin web server. 
+</p>
+
+
+<p>{% codeblock lang:php %}
+php artisan serve
+{% endcodeblock %}</p>
+
+<p>
+  Then run the following command to generate the Shop controller:
+</p>
+
+
+<p>{% codeblock lang:php %}
+php artisan make:controller ShopController
+{% endcodeblock %}</p>
+
+<p>
+  Open up /app/Http/Controllers/ShopController.php and replace the generated codes with the following codes below:
+</p>
+
+
+<p>{% codeblock ShopController.php lang:php %}
+&lt;?php</p>
+
+<p>namespace App\Http\Controllers;</p>
+
+<p>use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;</p>
+
+<p>class ShopController extends Controller {</p>
+
+<p>  public function index() {</p>
+
+<pre><code>return 'index page';
+</code></pre>
+
+<p>  }</p>
+
+<p>  public function products() {</p>
+
+<pre><code>return 'products page';
+</code></pre>
+
+<p>  }</p>
+
+<p>  public function product_details($id) {</p>
+
+<pre><code>return 'product details page';
+</code></pre>
+
+<p>  }</p>
+
+<p>  public function product_categories() {</p>
+
+<pre><code>return 'product categories page';
+</code></pre>
+
+<p>  }</p>
+
+<p>  public function product_brands() {</p>
+
+<pre><code>return 'product brands page';
+</code></pre>
+
+<p>  }</p>
+
+<p>  public function blog() {</p>
+
+<pre><code>return 'blog page';
+</code></pre>
+
+<p>  }</p>
+
+<p>  public function blog_post($id) {</p>
+
+<pre><code>return 'blog post page';
+</code></pre>
+
+<p>  }</p>
+
+<p>  public function contact_us() {</p>
+
+<pre><code>return 'contact us page';
+</code></pre>
+
+<p>  }</p>
+
+<p>  public function login() {</p>
+
+<pre><code>return 'login page';
+</code></pre>
+
+<p>  }</p>
+
+<p>  public function logout() {</p>
+
+<pre><code>return 'logout page';
+</code></pre>
+
+<p>  }</p>
+
+<p>  public function cart() {</p>
+
+<pre><code>return 'cart page';
+</code></pre>
+
+<p>  }</p>
+
+<p>  public function checkout() {</p>
+
+<pre><code>return 'checkout page';
+</code></pre>
+
+<p>  }</p>
+
+<p>  public function search($query) {</p>
+
+<pre><code>return "$query search page";
+</code></pre>
+
+<p>  }
+}
+{% endcodeblock %}</p>
+
+<p>
+  The above code defines functions that will responds to the routes.
+</p>
+
+
+
+
+<p>
+  And then we will add routes that will call the methods in the controllers.
+</p>
+
+
+
+
+<p>
+  Open up <code>web.php</code> in /routes folder and replace the code with the following:
+</p>
+
+
+<p>{% codeblock web.php lang:php %}
+&lt;?php</p>
+
+<p>/<em>
+|&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;
+| Web Routes
+|&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the &ldquo;web&rdquo; middleware group. Now create something great!
+|
+</em>/</p>
+
+<p>Route::get(&lsquo;/&rsquo;,&lsquo;ShopController@index&rsquo;);
+Route::get(&lsquo;/products&rsquo;,&lsquo;ShopController@products&rsquo;);
+Route::get(&lsquo;/products/details/{id}&rsquo;,&lsquo;ShopController@product_details&rsquo;);
+Route::get(&lsquo;/products/categories&rsquo;,&lsquo;ShopController@product_categories&rsquo;);
+Route::get(&lsquo;/products/brands&rsquo;,&lsquo;ShopController@product_brands&rsquo;);
+Route::get(&lsquo;/blog&rsquo;,&lsquo;ShopController@blog&rsquo;);
+Route::get(&lsquo;/blog/post/{id}&rsquo;,&lsquo;ShopController@blog_post&rsquo;);
+Route::get(&lsquo;/contact-us&rsquo;,&lsquo;ShopController@contact_us&rsquo;);
+Route::get(&lsquo;/login&rsquo;,&lsquo;ShopController@login&rsquo;);
+Route::get(&lsquo;/logout&rsquo;,&lsquo;ShopController@logout&rsquo;);
+Route::get(&lsquo;/cart&rsquo;,&lsquo;ShopController@cart&rsquo;);
+Route::get(&lsquo;/checkout&rsquo;,&lsquo;ShopController@checkout&rsquo;);
+Route::get(&lsquo;/search/{query}&rsquo;,&lsquo;ShopController@search&rsquo;);
+{% endcodeblock %}</p>
+
+<p>
+  So far so good, That's it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Laravel 5.x.x Create Custom Helper]]></title>
@@ -38,9 +370,9 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">composer</span> <span class="nx">create</span><span class="o">-</span><span class="nx">project</span> <span class="nx">laravel</span><span class="o">/</span><span class="nx">laravel</span> <span class="nx">laravel_helper</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:php %}
+composer create-project laravel/laravel laravel_helper
+{% endcodeblock %}</p>
 
 <p>
   <strong>Customer Helpers’ Dir</strong><br/>
@@ -70,32 +402,20 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>UserHelper.php </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="o">?</span><span class="nx">php</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="k">namespace</span> <span class="nx">App\Helpers</span><span class="p">;</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="k">class</span> <span class="nc">UserHelper</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">public</span> <span class="k">static</span> <span class="k">function</span> <span class="nf">full_name</span><span class="p">(</span><span class="nv">$first_name</span><span class="p">,</span> <span class="nv">$last_name</span><span class="p">)</span> <span class="p">{</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="k">return</span> <span class="nv">$first_name</span> <span class="o">.</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span> <span class="nv">$last_name</span><span class="p">;</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="nx">code</span><span class="o">&gt;&lt;/</span><span class="nx">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock UserHelper.php lang:php %}
+&lt;?php</p>
+
+<p>namespace App\Helpers;</p>
+
+<p>class UserHelper {
+  public static function full_name($first_name, $last_name) {</p>
+
+<pre><code>return $first_name . ', '. $last_name;   
+</code></pre>
+
+<p>  }
+}
+{% endcodeblock %}</p>
 
 <p>
   - <code>namespace App\Helpers;</code>: defines the Helpers namespace.<br/>
@@ -125,89 +445,53 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">make</span><span class="o">:</span><span class="nx">provider</span> <span class="nx">HelperServiceProvider</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:php %}
+php artisan make:provider HelperServiceProvider
+{% endcodeblock %}</p>
 
 <p>
   And then add the following code below in <code>HelperServiceProvider.php</code> file:
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>HelperServiceProvider.php </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="o">?</span><span class="nx">php</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="k">namespace</span> <span class="nx">App\Providers</span><span class="p">;</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="k">use</span> <span class="nx">Illuminate\Support\ServiceProvider</span><span class="p">;</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="k">class</span> <span class="nc">HelperServiceProvider</span> <span class="k">extends</span> <span class="nx">ServiceProvider</span> <span class="p">{</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="o">/&lt;</span><span class="nx">em</span><span class="o">&gt;*</span>
-</span><span class='line'>   <span class="o">*</span> <span class="nx">Bootstrap</span> <span class="nx">the</span> <span class="nx">application</span> <span class="nx">services</span><span class="o">.</span>
-</span><span class='line'>   <span class="o">*</span>
-</span><span class='line'>   <span class="o">*</span> <span class="o">@</span><span class="k">return</span> <span class="nx">void</span>
-</span><span class='line'>   <span class="o">&lt;/</span><span class="nx">em</span><span class="o">&gt;/</span>
-</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">boot</span><span class="p">()</span>
-</span><span class='line'>  <span class="p">{</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;//</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="nx">code</span><span class="o">&gt;&lt;/</span><span class="nx">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">}</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="o">/&lt;</span><span class="nx">em</span><span class="o">&gt;*</span>
-</span><span class='line'>   <span class="o">*</span> <span class="nx">Register</span> <span class="nx">the</span> <span class="nx">application</span> <span class="nx">services</span><span class="o">.</span>
-</span><span class='line'>   <span class="o">*</span>
-</span><span class='line'>   <span class="o">*</span> <span class="o">@</span><span class="k">return</span> <span class="nx">void</span>
-</span><span class='line'>   <span class="o">&lt;/</span><span class="nx">em</span><span class="o">&gt;/</span>
-</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">register</span><span class="p">()</span>
-</span><span class='line'>  <span class="p">{</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="k">foreach</span> <span class="p">(</span><span class="nb">glob</span><span class="p">(</span><span class="nx">app_path</span><span class="p">()</span><span class="o">.</span><span class="s1">&#39;/Helpers/*.php&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="nv">$filename</span><span class="p">){</span>
-</span><span class='line'>  <span class="k">require_once</span><span class="p">(</span><span class="nv">$filename</span><span class="p">);</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="nx">code</span><span class="o">&gt;&lt;/</span><span class="nx">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock HelperServiceProvider.php lang:php %}
+&lt;?php</p>
+
+<p>namespace App\Providers;</p>
+
+<p>use Illuminate\Support\ServiceProvider;</p>
+
+<p>class HelperServiceProvider extends ServiceProvider {</p>
+
+<p>  /<em>*
+   * Bootstrap the application services.
+   *
+   * @return void
+   </em>/
+  public function boot()
+  {</p>
+
+<pre><code>//
+</code></pre>
+
+<p>  }</p>
+
+<p>  /<em>*
+   * Register the application services.
+   *
+   * @return void
+   </em>/
+  public function register()
+  {</p>
+
+<pre><code>foreach (glob(app_path().'/Helpers/*.php') as $filename){
+  require_once($filename);
+}
+</code></pre>
+
+<p>  }
+}
+{% endcodeblock %}</p>
 
 <p>
   - <code>namespace App\Providers;</code>: defines the namespace provider.<br/>
@@ -233,20 +517,18 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app.php </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">App\Providers\HelperServiceProvider</span><span class="o">::</span><span class="na">class</span><span class="p">,</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock app.php lang:php %}
+App\Providers\HelperServiceProvider::class,
+{% endcodeblock %}</p>
 
 <p>
  And then add the following line in aliases array variable.
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app.php </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">UserHelper</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;</span> <span class="o">=&gt;</span> <span class="nx">App\Helpers\UserHelper</span><span class="o">::</span><span class="na">class</span><span class="p">,</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock app.php lang:php %}
+&lsquo;UserHelper&rsquo; => App\Helpers\UserHelper::class,
+{% endcodeblock %}</p>
 
 <p>
   <strong>Using the Custom Helper</strong><br/>
@@ -254,14 +536,11 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>web.php </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">Route</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="o">/</span><span class="nx">users</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="k">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">UserHelper</span><span class="o">::</span><span class="na">full_name</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">ldquo</span><span class="p">;</span><span class="nx">Bunlong</span><span class="o">&amp;</span><span class="nx">rdquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="nx">ldquo</span><span class="p">;</span><span class="nx">Van</span><span class="o">&amp;</span><span class="nx">rdquo</span><span class="p">;);</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock web.php lang:php %}
+Route::get(&lsquo;/users&rsquo;, function () {
+  return UserHelper::full_name(&ldquo;Bunlong&rdquo;, &ldquo;Van&rdquo;);
+});
+{% endcodeblock %}</p>
 
 <p>
   - <code>return UserHelper::full_name("Bunlong", "Van");</code> calls the static function full_name in UserHelper class.
@@ -328,9 +607,9 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="k">list</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:php %}
+php artisan list
+{% endcodeblock %}</p>
 
 <p>
   <strong>Artisan Command To Generate Codes for a Controller</strong><br/>
@@ -338,9 +617,9 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">make</span><span class="o">:</span><span class="nx">controller</span> <span class="nx">HelloLaravelController</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:php %}
+php artisan make:controller HelloLaravelController
+{% endcodeblock %}</p>
 
 <p>
   - <code>php artisan</code> is used to run the artisan command line.<br/>
@@ -362,224 +641,116 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>HelloLaravelController.php </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-<span class='line-number'>81</span>
-<span class='line-number'>82</span>
-<span class='line-number'>83</span>
-<span class='line-number'>84</span>
-<span class='line-number'>85</span>
-<span class='line-number'>86</span>
-<span class='line-number'>87</span>
-<span class='line-number'>88</span>
-<span class='line-number'>89</span>
-<span class='line-number'>90</span>
-<span class='line-number'>91</span>
-<span class='line-number'>92</span>
-<span class='line-number'>93</span>
-<span class='line-number'>94</span>
-<span class='line-number'>95</span>
-<span class='line-number'>96</span>
-<span class='line-number'>97</span>
-<span class='line-number'>98</span>
-<span class='line-number'>99</span>
-<span class='line-number'>100</span>
-<span class='line-number'>101</span>
-<span class='line-number'>102</span>
-<span class='line-number'>103</span>
-<span class='line-number'>104</span>
-<span class='line-number'>105</span>
-<span class='line-number'>106</span>
-<span class='line-number'>107</span>
-<span class='line-number'>108</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="o">?</span><span class="nx">php</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="k">namespace</span> <span class="nx">App\Http\Controllers</span><span class="p">;</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="k">use</span> <span class="nx">Illuminate\Http\Request</span><span class="p">;</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="k">use</span> <span class="nx">App\Http\Requests</span><span class="p">;</span>
-</span><span class='line'><span class="k">use</span> <span class="nx">App\Http\Controllers\Controller</span><span class="p">;</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="k">class</span> <span class="nc">HelloLaravelController</span> <span class="k">extends</span> <span class="nx">Controller</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="o">/&lt;</span><span class="nx">em</span><span class="o">&gt;*</span>
-</span><span class='line'>   <span class="o">*</span> <span class="nx">Display</span> <span class="nx">a</span> <span class="nx">listing</span> <span class="nx">of</span> <span class="nx">the</span> <span class="nx">resource</span><span class="o">.</span>
-</span><span class='line'>   <span class="o">*</span>
-</span><span class='line'>   <span class="o">*</span> <span class="o">@</span><span class="k">return</span> <span class="nx">Response</span>
-</span><span class='line'>   <span class="o">&lt;/</span><span class="nx">em</span><span class="o">&gt;/</span>
-</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">index</span><span class="p">()</span>
-</span><span class='line'>  <span class="p">{</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;//</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="nx">code</span><span class="o">&gt;&lt;/</span><span class="nx">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">}</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="o">/&lt;</span><span class="nx">em</span><span class="o">&gt;*</span>
-</span><span class='line'>   <span class="o">*</span> <span class="nx">Show</span> <span class="nx">the</span> <span class="nx">form</span> <span class="k">for</span> <span class="nx">creating</span> <span class="nx">a</span> <span class="k">new</span> <span class="nx">resource</span><span class="o">.</span>
-</span><span class='line'>   <span class="o">*</span>
-</span><span class='line'>   <span class="o">*</span> <span class="o">@</span><span class="k">return</span> <span class="nx">Response</span>
-</span><span class='line'>   <span class="o">&lt;/</span><span class="nx">em</span><span class="o">&gt;/</span>
-</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">create</span><span class="p">()</span>
-</span><span class='line'>  <span class="p">{</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;//</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="nx">code</span><span class="o">&gt;&lt;/</span><span class="nx">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">}</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="o">/&lt;</span><span class="nx">em</span><span class="o">&gt;*</span>
-</span><span class='line'>   <span class="o">*</span> <span class="nx">Store</span> <span class="nx">a</span> <span class="nx">newly</span> <span class="nx">created</span> <span class="nx">resource</span> <span class="nx">in</span> <span class="nx">storage</span><span class="o">.</span>
-</span><span class='line'>   <span class="o">*</span>
-</span><span class='line'>   <span class="o">*</span> <span class="o">@</span><span class="nx">param</span>  <span class="nx">Request</span>  <span class="nv">$request</span>
-</span><span class='line'>   <span class="o">*</span> <span class="o">@</span><span class="k">return</span> <span class="nx">Response</span>
-</span><span class='line'>   <span class="o">&lt;/</span><span class="nx">em</span><span class="o">&gt;/</span>
-</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">store</span><span class="p">(</span><span class="nx">Request</span> <span class="nv">$request</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">{</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;//</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="nx">code</span><span class="o">&gt;&lt;/</span><span class="nx">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">}</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="o">/&lt;</span><span class="nx">em</span><span class="o">&gt;*</span>
-</span><span class='line'>   <span class="o">*</span> <span class="nx">Display</span> <span class="nx">the</span> <span class="nx">specified</span> <span class="nx">resource</span><span class="o">.</span>
-</span><span class='line'>   <span class="o">*</span>
-</span><span class='line'>   <span class="o">*</span> <span class="o">@</span><span class="nx">param</span>  <span class="nx">int</span>  <span class="nv">$id</span>
-</span><span class='line'>   <span class="o">*</span> <span class="o">@</span><span class="k">return</span> <span class="nx">Response</span>
-</span><span class='line'>   <span class="o">&lt;/</span><span class="nx">em</span><span class="o">&gt;/</span>
-</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">show</span><span class="p">(</span><span class="nv">$id</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">{</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;//</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="nx">code</span><span class="o">&gt;&lt;/</span><span class="nx">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">}</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="o">/&lt;</span><span class="nx">em</span><span class="o">&gt;*</span>
-</span><span class='line'>   <span class="o">*</span> <span class="nx">Show</span> <span class="nx">the</span> <span class="nx">form</span> <span class="k">for</span> <span class="nx">editing</span> <span class="nx">the</span> <span class="nx">specified</span> <span class="nx">resource</span><span class="o">.</span>
-</span><span class='line'>   <span class="o">*</span>
-</span><span class='line'>   <span class="o">*</span> <span class="o">@</span><span class="nx">param</span>  <span class="nx">int</span>  <span class="nv">$id</span>
-</span><span class='line'>   <span class="o">*</span> <span class="o">@</span><span class="k">return</span> <span class="nx">Response</span>
-</span><span class='line'>   <span class="o">&lt;/</span><span class="nx">em</span><span class="o">&gt;/</span>
-</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">edit</span><span class="p">(</span><span class="nv">$id</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">{</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;//</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="nx">code</span><span class="o">&gt;&lt;/</span><span class="nx">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">}</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="o">/&lt;</span><span class="nx">em</span><span class="o">&gt;*</span>
-</span><span class='line'>   <span class="o">*</span> <span class="nx">Update</span> <span class="nx">the</span> <span class="nx">specified</span> <span class="nx">resource</span> <span class="nx">in</span> <span class="nx">storage</span><span class="o">.</span>
-</span><span class='line'>   <span class="o">*</span>
-</span><span class='line'>   <span class="o">*</span> <span class="o">@</span><span class="nx">param</span>  <span class="nx">Request</span>  <span class="nv">$request</span>
-</span><span class='line'>   <span class="o">*</span> <span class="o">@</span><span class="nx">param</span>  <span class="nx">int</span>  <span class="nv">$id</span>
-</span><span class='line'>   <span class="o">*</span> <span class="o">@</span><span class="k">return</span> <span class="nx">Response</span>
-</span><span class='line'>   <span class="o">&lt;/</span><span class="nx">em</span><span class="o">&gt;/</span>
-</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">update</span><span class="p">(</span><span class="nx">Request</span> <span class="nv">$request</span><span class="p">,</span> <span class="nv">$id</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">{</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;//</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="nx">code</span><span class="o">&gt;&lt;/</span><span class="nx">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">}</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="o">/&lt;</span><span class="nx">em</span><span class="o">&gt;*</span>
-</span><span class='line'>   <span class="o">*</span> <span class="nx">Remove</span> <span class="nx">the</span> <span class="nx">specified</span> <span class="nx">resource</span> <span class="nx">from</span> <span class="nx">storage</span><span class="o">.</span>
-</span><span class='line'>   <span class="o">*</span>
-</span><span class='line'>   <span class="o">*</span> <span class="o">@</span><span class="nx">param</span>  <span class="nx">int</span>  <span class="nv">$id</span>
-</span><span class='line'>   <span class="o">*</span> <span class="o">@</span><span class="k">return</span> <span class="nx">Response</span>
-</span><span class='line'>   <span class="o">&lt;/</span><span class="nx">em</span><span class="o">&gt;/</span>
-</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">destroy</span><span class="p">(</span><span class="nv">$id</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">{</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;//</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="nx">code</span><span class="o">&gt;&lt;/</span><span class="nx">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock HelloLaravelController.php lang:php %}
+&lt;?php</p>
+
+<p>namespace App\Http\Controllers;</p>
+
+<p>use Illuminate\Http\Request;</p>
+
+<p>use App\Http\Requests;
+use App\Http\Controllers\Controller;</p>
+
+<p>class HelloLaravelController extends Controller
+{
+  /<em>*
+   * Display a listing of the resource.
+   *
+   * @return Response
+   </em>/
+  public function index()
+  {</p>
+
+<pre><code>//
+</code></pre>
+
+<p>  }</p>
+
+<p>  /<em>*
+   * Show the form for creating a new resource.
+   *
+   * @return Response
+   </em>/
+  public function create()
+  {</p>
+
+<pre><code>//
+</code></pre>
+
+<p>  }</p>
+
+<p>  /<em>*
+   * Store a newly created resource in storage.
+   *
+   * @param  Request  $request
+   * @return Response
+   </em>/
+  public function store(Request $request)
+  {</p>
+
+<pre><code>//
+</code></pre>
+
+<p>  }</p>
+
+<p>  /<em>*
+   * Display the specified resource.
+   *
+   * @param  int  $id
+   * @return Response
+   </em>/
+  public function show($id)
+  {</p>
+
+<pre><code>//
+</code></pre>
+
+<p>  }</p>
+
+<p>  /<em>*
+   * Show the form for editing the specified resource.
+   *
+   * @param  int  $id
+   * @return Response
+   </em>/
+  public function edit($id)
+  {</p>
+
+<pre><code>//
+</code></pre>
+
+<p>  }</p>
+
+<p>  /<em>*
+   * Update the specified resource in storage.
+   *
+   * @param  Request  $request
+   * @param  int  $id
+   * @return Response
+   </em>/
+  public function update(Request $request, $id)
+  {</p>
+
+<pre><code>//
+</code></pre>
+
+<p>  }</p>
+
+<p>  /<em>*
+   * Remove the specified resource from storage.
+   *
+   * @param  int  $id
+   * @return Response
+   </em>/
+  public function destroy($id)
+  {</p>
+
+<pre><code>//
+</code></pre>
+
+<p>  }
+}
+{% endcodeblock %}</p>
 
 <p>
   - <code>namespace App\Http\Controllers;</code>: defines the namespace for the controller.<br/>
@@ -610,14 +781,11 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>web.php </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">Route</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="o">/</span><span class="nx">hello_laravel</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span><span class="k">function</span><span class="p">(){</span>
-</span><span class='line'>  <span class="k">return</span> <span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">Hello</span> <span class="nx">Laravel</span><span class="o">!&amp;</span><span class="nx">rsquo</span><span class="p">;;</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock web.php lang:php %}
+Route::get(&lsquo;/hello_laravel&rsquo;,function(){
+  return &lsquo;Hello Laravel!&rsquo;;
+});
+{% endcodeblock %}</p>
 
 <p>
   <code>Route::get('/hello',function(){...});</code>: responds to the GET method of the URI hello. function() defines an anonymous function that does the actual work for the requested URI.<br/>
@@ -640,26 +808,21 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>web.php </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">Route</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">hello</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">HelloLaravelController</span><span class="o">@</span><span class="nx">index</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock web.php lang:php %}
+Route::get(&lsquo;hello&rsquo;, &lsquo;HelloLaravelController@index&rsquo;);
+{% endcodeblock %}</p>
 
 <p>
   And then open up <code>app/Http/Controllers/HelloLaravelController.php</code> file and add the following codes below:
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>HelloLaravelController.php </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="k">public</span> <span class="k">function</span> <span class="nf">index</span><span class="p">()</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="k">return</span> <span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">Hello</span> <span class="nx">Laravel</span><span class="o">!&amp;</span><span class="nx">rsquo</span><span class="p">;;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock HelloLaravelController.php lang:php %}
+public function index()
+{
+  return &lsquo;Hello Laravel!&rsquo;;
+}
+{% endcodeblock %}</p>
 
 <p>
   And then go to ther browser and type the uri <code>http://localhost:8000/hello</code> you will get the output "Hello Laravel!".
@@ -674,16 +837,12 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>HelloLaravelController.php </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="k">public</span> <span class="k">function</span> <span class="nf">index</span><span class="p">()</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">view</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">home</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;);</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock HelloLaravelController.php lang:php %}
+public function index()
+{
+  return view(&lsquo;home&rsquo;);
+}
+{% endcodeblock %}</p>
 
 <p>
   <code>return view('home');</code>: loads a view named hello.blade.php.
@@ -697,10 +856,9 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>home.blade.php </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">Hello</span> <span class="nx">Laravel</span><span class="o">!</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock home.blade.php lang:php %}
+Hello Laravel!
+{% endcodeblock %}</p>
 
 <p>
   And then go to ther browser and type the uri <code>http://localhost:8000/hello</code> you will get the output "Hello Laravel!".
@@ -786,18 +944,18 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">composer</span> <span class="nx">create</span><span class="o">-</span><span class="nx">project</span> <span class="o">&amp;</span><span class="nx">mdash</span><span class="p">;</span><span class="nx">prefer</span><span class="o">-</span><span class="nx">dist</span> <span class="nx">laravel</span><span class="o">/</span><span class="nx">laravel</span> <span class="nx">blog</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:php %}
+composer create-project &mdash;prefer-dist laravel/laravel blog
+{% endcodeblock %}</p>
 
 <p>
   Wait for the installation to complete then cd into the project and run the command below for running the Laravel built-in web server:
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">serve</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:php %}
+php artisan serve
+{% endcodeblock %}</p>
 
 <p>
   Browser to the following URL <code>http://localhost:300</code> in your web browser.
@@ -928,18 +1086,18 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">debug</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;</span> <span class="o">=&gt;</span> <span class="nx">env</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">APP_DEBUG</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="k">false</span><span class="p">),</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:php %}
+&lsquo;debug&rsquo; => env(&lsquo;APP_DEBUG&rsquo;, false),
+{% endcodeblock %}</p>
 
 <p>
   To:
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">debug</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;</span> <span class="o">=&gt;</span> <span class="nx">env</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">APP_DEBUG</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="k">true</span><span class="p">),</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:php %}
+&lsquo;debug&rsquo; => env(&lsquo;APP_DEBUG&rsquo;, true),
+{% endcodeblock %}</p>
 
 <p>
   2. Set the time zone – this setting is used for PHP date and date-time functions. 
@@ -960,9 +1118,9 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">timezone</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;</span> <span class="o">=&gt;</span> <span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">UTC</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:php %}
+&lsquo;timezone&rsquo; => &lsquo;UTC&rsquo;,
+{% endcodeblock %}</p>
 
 <p>
   3. Application key – this value is used for encryption purposes.
@@ -976,18 +1134,18 @@
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nb">key</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;</span> <span class="o">=&gt;</span> <span class="nx">env</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">APP_KEY</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">SomeRandomString</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;),</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:php %}
+&lsquo;key&rsquo; => env(&lsquo;APP_KEY&rsquo;, &lsquo;SomeRandomString&rsquo;),
+{% endcodeblock %}</p>
 
 <p>
   To:
 </p>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nb">key</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;</span> <span class="o">=&gt;</span> <span class="nx">env</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">APP_KEY</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">inesindinemwanawabambuyabakoiwe</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;),</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:php %}
+&lsquo;key&rsquo; => env(&lsquo;APP_KEY&rsquo;, &lsquo;inesindinemwanawabambuyabakoiwe&rsquo;),
+{% endcodeblock %}</p>
 
 <p>
   <strong>Authentication Configuration</strong><br/>

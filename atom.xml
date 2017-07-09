@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2017-07-02T20:15:54+07:00</updated>
+  <updated>2017-07-10T00:50:29+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,406 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Laravel 5.x.x Route &amp; SEO]]></title>
+    <link href="http://geekhmer.github.io/blog/2017/07/09/laravel-5-dot-x-x-route-and-seo/"/>
+    <updated>2017-07-09T10:49:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2017/07/09/laravel-5-dot-x-x-route-and-seo</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/laravel_news_letter.png" width="600" alt="Laravel 5.x.x Route and SEO" />
+</p>
+
+
+
+
+<p>
+  SEO stands for &#8220;search engine optimization&#8221;. URLs is an important thing in getting found on the web. In this article I will implement routes and SEO friendly URLs for Laravel project.
+</p>
+
+
+
+
+<p>
+  <strong>Things that Affect SEO</strong><br/>
+  The following are some of the things that search engines such as Google Search consider when evaluating web sites:<br/>
+  1. Website speed<br/>
+  - No one waiting to visit a websites that take forever to load. We all love fast websites. The goal should be to keep the load time under 2 seconds. If you can get it under a second that is even much better. You need to test your web application for speed and optimize if necessary.<br/>
+  2. Responsive designs<br/>
+  - Mobile devices have a market share of internet usage. Since user experience matters to search engines, you need to ensure that the web site displays properly in mobile devices, tablets and desktops as well.<br/>
+  3. Keywords<br/>
+  - Search engines look at keywords when querying billions of indexed websites. As a developer you have to ensure that you provide title tags, meta description and HTML H2 heading that the content writers can use to place keywords.<br/>
+  4. Social media statistics<br/>
+  - If you read something cool on the web, you naturally share it on social media. This is a stamp of approval to search engines. Your have to include tools on the web site that will make it easy for the visitors to share the contents.<br/>
+  5. Website URLs<br/>
+  - The URLs should be keyword rich and words should be separated by dashes and not underscores.
+</p>
+
+
+
+
+<p>
+  <strong>How to Implement SEO Friendly URLS in Laravel</strong><br/>
+  Now we have to cover the basics SEO and we will map routes to controllers and create a single controller for all routes. The following table shows the URLs that will be implemented:
+</p>
+
+
+
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>URLs</th>
+      <th>Method</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>/</td>
+      <td>index</td>
+      <td>Home page</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>/products</td>
+      <td>products</td>
+      <td>Products page</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>/products/details/{id}</td>
+      <td>product_details(id)</td>
+      <td>Product detailed based on product id</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>/products/category</td>
+      <td>product_categories</td>
+      <td>Product categories</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>/products/brands</td>
+      <td>product_brands</td>
+      <td>Product brands</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>/blog</td>
+      <td>blog</td>
+      <td>Blog postings list</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>/blog/post/{id}</td>
+      <td>blog_post{id}</td>
+      <td>Blog post content</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>/contact-us</td>
+      <td>contact_us</td>
+      <td>Contact us page</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>/login</td>
+      <td>login</td>
+      <td>Login user</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>/logout</td>
+      <td>logout</td>
+      <td>Logout user</td>
+    </tr>
+    <tr>
+      <td>11</td>
+      <td>/cart</td>
+      <td>cart</td>
+      <td>Cart contents</td>
+    </tr>
+    <tr>
+      <td>12</td>
+      <td>/checkout</td>
+      <td>checkout</td>
+      <td>Checkout shopper</td>
+    </tr>
+    <tr>
+      <td>13</td>
+      <td>/search/{query}</td>
+      <td>search</td>
+      <td>Search results</td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+
+<br/>
+
+
+
+
+<p>
+  For this section assumes you have created the tutorial project. If you haven’t done so yet then read this <a href="http://geekhmer.github.io/blog/2017/06/30/hello-laravel-5-dot-x-x/">Laravel Hello World</a>. We use the artisan command line tool to generate the codes for ShopController.php controller.
+</p>
+
+
+
+
+<p>
+  Then open up your terminator and run the following command to browse to the project. Assumed that you are using Laravel plugin web server. 
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">serve</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Then run the following command to generate the Shop controller:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">make</span><span class="o">:</span><span class="nx">controller</span> <span class="nx">ShopController</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Open up /app/Http/Controllers/ShopController.php and replace the generated codes with the following codes below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>ShopController.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">namespace</span> <span class="nx">App\Http\Controllers</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">use</span> <span class="nx">Illuminate\Http\Request</span><span class="p">;</span>
+</span><span class='line'><span class="k">use</span> <span class="nx">App\Http\Controllers\Controller</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">ShopController</span> <span class="k">extends</span> <span class="nx">Controller</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">index</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="s1">&#39;index page&#39;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">products</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="s1">&#39;products page&#39;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">product_details</span><span class="p">(</span><span class="nv">$id</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="s1">&#39;product details page&#39;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">product_categories</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="s1">&#39;product categories page&#39;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">product_brands</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="s1">&#39;product brands page&#39;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">blog</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="s1">&#39;blog page&#39;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">blog_post</span><span class="p">(</span><span class="nv">$id</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="s1">&#39;blog post page&#39;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">contact_us</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="s1">&#39;contact us page&#39;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">login</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="s1">&#39;login page&#39;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">logout</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="s1">&#39;logout page&#39;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">cart</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="s1">&#39;cart page&#39;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">checkout</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="s1">&#39;checkout page&#39;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">search</span><span class="p">(</span><span class="nv">$query</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">$query</span><span class="s2"> search page&quot;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The above code defines functions that will responds to the routes.
+</p>
+
+
+
+
+<p>
+  And then we will add routes that will call the methods in the controllers.
+</p>
+
+
+
+
+<p>
+  Open up <code>web.php</code> in /routes folder and replace the code with the following:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>web.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/*</span>
+</span><span class='line'><span class="cm">|--------------------------------------------------------------------------</span>
+</span><span class='line'><span class="cm">| Web Routes</span>
+</span><span class='line'><span class="cm">|--------------------------------------------------------------------------</span>
+</span><span class='line'><span class="cm">|</span>
+</span><span class='line'><span class="cm">| Here is where you can register web routes for your application. These</span>
+</span><span class='line'><span class="cm">| routes are loaded by the RouteServiceProvider within a group which</span>
+</span><span class='line'><span class="cm">| contains the &quot;web&quot; middleware group. Now create something great!</span>
+</span><span class='line'><span class="cm">|</span>
+</span><span class='line'><span class="cm">*/</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">Route</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span><span class="s1">&#39;ShopController@index&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="nx">Route</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/products&#39;</span><span class="p">,</span><span class="s1">&#39;ShopController@products&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="nx">Route</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/products/details/{id}&#39;</span><span class="p">,</span><span class="s1">&#39;ShopController@product_details&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="nx">Route</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/products/categories&#39;</span><span class="p">,</span><span class="s1">&#39;ShopController@product_categories&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="nx">Route</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/products/brands&#39;</span><span class="p">,</span><span class="s1">&#39;ShopController@product_brands&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="nx">Route</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/blog&#39;</span><span class="p">,</span><span class="s1">&#39;ShopController@blog&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="nx">Route</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/blog/post/{id}&#39;</span><span class="p">,</span><span class="s1">&#39;ShopController@blog_post&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="nx">Route</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/contact-us&#39;</span><span class="p">,</span><span class="s1">&#39;ShopController@contact_us&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="nx">Route</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/login&#39;</span><span class="p">,</span><span class="s1">&#39;ShopController@login&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="nx">Route</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/logout&#39;</span><span class="p">,</span><span class="s1">&#39;ShopController@logout&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="nx">Route</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/cart&#39;</span><span class="p">,</span><span class="s1">&#39;ShopController@cart&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="nx">Route</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/checkout&#39;</span><span class="p">,</span><span class="s1">&#39;ShopController@checkout&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="nx">Route</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/search/{query}&#39;</span><span class="p">,</span><span class="s1">&#39;ShopController@search&#39;</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Laravel 5.x.x Create Custom Helper]]></title>
@@ -4071,210 +4471,6 @@
 <p>
   It would be nice to be able to preview our website as we generate the content. Let’s do that next.
 </p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Gulp – Testing with Jasmine]]></title>
-    <link href="http://geekhmer.github.io/blog/2016/10/12/gulp-testing-with-jasmine/"/>
-    <updated>2016-10-12T09:07:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2016/10/12/gulp-testing-with-jasmine</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/bunlong_gulp.jpg" width="600" alt="Gulp, Gulp – Testing with Jasmine" />
-</p>
-
-
-
-
-<p>
-  You do test your JavaScript right? Well&#8230; you should and with gulp + Karma + Jasmine it is super easy.
-</p>
-
-
-
-
-<p>
-  First if you have not installed Karma and Jasmine, then do so now.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">npm</span> <span class="n">install</span> <span class="n">karma</span><span class="o">-</span><span class="n">jasmine</span> <span class="o">--</span><span class="n">save</span><span class="o">-</span><span class="n">dev</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Next we will install the <code>gulp-jasmine</code> plugin for gulp.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">npm</span> <span class="n">install</span> <span class="n">gulp</span><span class="o">-</span><span class="n">jasmine</span> <span class="o">--</span><span class="n">save</span><span class="o">-</span><span class="n">dev</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  We can then create a test task to run all the specs found in a specs folder we will create.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>gulpfile.js </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">var</span> <span class="n">jasmine</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s1">&#39;gulp-jasmine&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
-</span><span class='line'><span class="n">gulp</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;specs&#39;</span><span class="p">,</span> <span class="n">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">return</span> <span class="n">gulp</span><span class="o">.</span><span class="n">src</span><span class="p">(</span><span class="s1">&#39;specs/**.js&#39;</span><span class="p">)</span>
-</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">jasmine</span><span class="p">());</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Let’s create a basic (failing) test to see that it is working.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>/specs/our_test.js </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">describe</span><span class="p">(</span><span class="s1">&#39;OMG a JavaScript Test&#39;</span><span class="p">,</span> <span class="n">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="n">it</span><span class="p">(</span><span class="s1">&#39;should pass&#39;</span><span class="p">,</span> <span class="n">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="kp">true</span><span class="p">)</span><span class="o">.</span><span class="n">toBe</span><span class="p">(</span><span class="kp">false</span><span class="p">);</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">gulp</span> <span class="n">specs</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Using</span> <span class="n">gulpfile</span> <span class="o">~</span><span class="sr">/YOUR_DIRECTORY/</span><span class="n">gulpfile</span><span class="o">.</span><span class="n">js</span>
-</span><span class='line'><span class="no">Starting</span> <span class="s1">&#39;specs&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
-</span><span class='line'><span class="n">F</span>
-</span><span class='line'>
-</span><span class='line'><span class="ss">Failures</span><span class="p">:</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="mi">1</span><span class="p">)</span> <span class="no">OMG</span> <span class="n">a</span> <span class="no">JavaScript</span> <span class="no">Test</span> <span class="n">should</span> <span class="n">pass</span>
-</span><span class='line'>  <span class="mi">1</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span> <span class="no">Expected</span> <span class="kp">true</span> <span class="n">to</span> <span class="n">be</span> <span class="kp">false</span><span class="o">.</span>
-</span><span class='line'>
-</span><span class='line'><span class="mi">1</span> <span class="n">spec</span><span class="p">,</span> <span class="mi">1</span> <span class="n">failure</span>
-</span><span class='line'><span class="no">Finished</span> <span class="k">in</span> <span class="mi">0</span><span class="o">.</span><span class="mo">004</span> <span class="n">seconds</span>
-</span><span class='line'><span class="s1">&#39;specs&#39;</span> <span class="n">errored</span> <span class="n">after</span> <span class="mi">39</span> <span class="n">ms</span> <span class="no">Tests</span> <span class="n">failed</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now it is time to refactor. We will make the extremely difficult change from false to true to make our test pass.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>/specs/our_test.js </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">describe</span><span class="p">(</span><span class="s1">&#39;OMG a JavaScript Test&#39;</span><span class="p">,</span> <span class="n">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="n">it</span><span class="p">(</span><span class="s1">&#39;should pass&#39;</span><span class="p">,</span> <span class="n">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="kp">true</span><span class="p">)</span><span class="o">.</span><span class="n">toBe</span><span class="p">(</span><span class="kp">true</span><span class="p">);</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  And run our test suite again.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">gulp</span> <span class="n">specs</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Using</span> <span class="n">gulpfile</span> <span class="o">~</span><span class="sr">/YOUR_DIRECTORY/</span><span class="n">gulpfile</span><span class="o">.</span><span class="n">js</span>
-</span><span class='line'><span class="no">Starting</span> <span class="s1">&#39;specs&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
-</span><span class='line'><span class="o">.</span>
-</span><span class='line'>
-</span><span class='line'><span class="mi">1</span> <span class="n">spec</span><span class="p">,</span> <span class="mi">0</span> <span class="n">failures</span>
-</span><span class='line'><span class="no">Finished</span> <span class="k">in</span> <span class="mi">0</span> <span class="n">seconds</span>
-</span><span class='line'><span class="no">Finished</span> <span class="s1">&#39;specs&#39;</span> <span class="n">after</span> <span class="mi">39</span> <span class="n">ms</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Next we will do is improve our testing task by adding a test-watch task to run as we edit our JavaScript files.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>gulpfile.js </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
-</span><span class='line'><span class="n">gulp</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;spec-watch&#39;</span><span class="p">,</span> <span class="n">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="n">gulp</span><span class="o">.</span><span class="n">watch</span><span class="p">(</span><span class="o">[</span><span class="s1">&#39;specs/**.js&#39;</span><span class="p">,</span> <span class="s1">&#39;contents/javascripts/**.js&#39;</span><span class="o">]</span><span class="p">,</span> <span class="o">[</span><span class="s1">&#39;test&#39;</span><span class="o">]</span><span class="p">)</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
 
 ]]></content>
   </entry>
