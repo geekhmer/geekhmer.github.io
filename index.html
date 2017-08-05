@@ -79,6 +79,517 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2017/08/06/laravel-5-dot-x-x-template/">Laravel 5.x.x Template</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2017-08-06T00:40:00+07:00" pubdate data-updated="true">Aug 6<span>th</span>, 2017</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/laravel_news_letter.png" width="600" alt="Laravel 5.x.x Template" />
+</p>
+
+
+
+
+<p>
+  Blade is a powerful easy to use template that comes with Laravel. Blade templates can be mixed with plain php code.
+</p>
+
+
+
+
+<p>
+  Well, in this articles I will cover the following sections: Template inheritance, Master layout, Extending the master layout, Displaying variables, Blade conditional statements, Blade Loops and Executing PHP functions in blade template.
+</p>
+
+
+
+
+<p>
+  <strong>Template Inheritance</strong><br/>
+  In a nutshell, template inheritance allows us to define a master layout with elements that are common to all web pages. The individual pages extend the master layout. This saves us time of repeating the same elements in the individual pages.
+</p>
+
+
+
+
+<p>
+  <strong>Master Layout</strong><br/>
+  All blade templates must be saved with the .blade extension. In this section, we are going to create a master template that all pages will extend. The following is the syntax for defining a master layout.<br/>
+</p>
+
+
+
+
+<p>
+  Create a new file named <code>master.blade.php</code> in <code>/resources/views/layouts</code> folder with the following code below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>master.blade.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;@</span><span class="nx">yield</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">)</span><span class="o">&lt;/</span><span class="nx">title</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;/</span><span class="nx">head</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">@</span><span class="nx">section</span><span class="p">(</span><span class="s1">&#39;sidebar&#39;</span><span class="p">)</span>
+</span><span class='line'>      <span class="nx">Here</span> <span class="nx">is</span> <span class="nx">the</span> <span class="nx">master</span> <span class="nx">sidebar</span><span class="o">.</span>
+</span><span class='line'>    <span class="o">@</span><span class="nx">show</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">class</span><span class="o">=</span><span class="s2">&quot;container&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>      <span class="o">@</span><span class="nx">yield</span><span class="p">(</span><span class="s1">&#39;content&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">div</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;/</span><span class="nx">body</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="nx">html</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  - <code>@yield('title')</code> is used to display the value of the title.<br/>
+  - <code>@section('sidebar')</code> is used to define a section named sidebar.<br/>
+  - <code>@show</code> is used to display the contents of a section.<br/>
+  - <code>@yield('content')</code> is used to display the contents of content.
+</p>
+
+
+
+
+<p>
+  <strong>Extending the Master Layout</strong><br/>
+  Now we will create a page that extends the master layout. Create a new page named <code>page.blade.php</code> in <code>/resources/views</code> folder with the following code below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>page.blade.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">@</span><span class="k">extends</span><span class="p">(</span><span class="s1">&#39;layouts.master&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">@</span><span class="nx">section</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="s1">&#39;Page Title&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">@</span><span class="nx">section</span><span class="p">(</span><span class="s1">&#39;sidebar&#39;</span><span class="p">)</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">Here</span> <span class="nx">is</span> <span class="nx">appended</span> <span class="nx">to</span> <span class="nx">the</span> <span class="nx">master</span> <span class="nx">sidebar</span><span class="o">.&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">@</span><span class="nx">endsection</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">@</span><span class="nx">section</span><span class="p">(</span><span class="s1">&#39;content&#39;</span><span class="p">)</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">Here</span> <span class="nx">is</span> <span class="nx">my</span> <span class="nx">body</span> <span class="nx">content</span><span class="o">.&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">@</span><span class="nx">endsection</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  - <code>@extends('layouts.master')</code> is used to extends the master layout.<br/>
+  - <code>@section('title', 'Page Title')</code> is used to sets the value of the title section.<br/>
+  - <code>@section('sidebar')</code> is used to defines a sidebar section in the child page of master layout.<br/>
+  - <code>@endsection</code> is used to ends the sidebar section.<br/>
+  - <code>@section('content')</code> is used to defines the content section.<br/>
+</p>
+
+
+
+
+<p>
+  And now we will add a route to tests our blade template. Open up <code>/routes/web.php</code> file and add the following route below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>web.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">Route</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;blade&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">view</span><span class="p">(</span><span class="s1">&#39;page&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Load the <code>http:://localhost:8000/blade</code> URL in your web browser and you will see the paragraph.
+</p>
+
+
+
+
+<p>
+  <strong>Displaying Variables in a Blade Template</strong><br/>
+  Now we will define a variable and pass it to our blade template view. Open up <code>/routes/web.php</code> file and add the route below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>web.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">Route</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;blade&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">view</span><span class="p">(</span><span class="s1">&#39;page&#39;</span><span class="p">,</span><span class="k">array</span><span class="p">(</span><span class="s1">&#39;name&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;The Foodie&#39;</span><span class="p">));</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And then update <code>pages.blade.php</code> file to display the variable. Open up <code>page.blade.php</code> file and update the contents to the following:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>page.blade.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">@</span><span class="k">extends</span><span class="p">(</span><span class="s1">&#39;layouts.master&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">@</span><span class="nx">section</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="s1">&#39;Page Title&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">@</span><span class="nx">section</span><span class="p">(</span><span class="s1">&#39;sidebar&#39;</span><span class="p">)</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">Here</span> <span class="nx">is</span> <span class="nx">appended</span> <span class="nx">to</span> <span class="nx">the</span> <span class="nx">master</span> <span class="nx">sidebar</span><span class="o">.&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">@</span><span class="nx">endsection</span>
+</span><span class='line'><span class="o">@</span><span class="nx">section</span><span class="p">(</span><span class="s1">&#39;content&#39;</span><span class="p">)</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">h2</span><span class="o">&gt;&lt;/</span><span class="nx">h2</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">Here</span> <span class="nx">is</span> <span class="nx">my</span> <span class="nx">body</span> <span class="nx">content</span><span class="o">.&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">@</span><span class="nx">endsection</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <code>{{$name}}</code> double opening curly braces and double closing curly braces are used to display the value of $name variable.
+</p>
+
+
+
+
+<p>
+  <strong>Blade Condition Statements</strong><br/>
+  Blade also supports conditional statements. Conditional statements are used to determine what to display in the browser. We will pass a variable that will determine what to display in the browser.
+</p>
+
+
+
+
+<p>
+  Open up <code>/routes/web.php</code> file and modify route as follow:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>web.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">Route</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;blade&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">view</span><span class="p">(</span><span class="s1">&#39;page&#39;</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="s1">&#39;name&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;The Foodie&#39;</span><span class="p">,</span> <span class="s1">&#39;day&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Sunday&#39;</span><span class="p">));</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We added another variable <code>day</code> with a value of Sunday.
+</p>
+
+
+
+
+<p>
+  And then open up <code>/resources/views/page.blade.php</code> file and modify the codes to the following:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>page.blade.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">@</span><span class="k">extends</span><span class="p">(</span><span class="s1">&#39;layouts.master&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">@</span><span class="nx">section</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="s1">&#39;Page Title&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">@</span><span class="nx">section</span><span class="p">(</span><span class="s1">&#39;sidebar&#39;</span><span class="p">)</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">Here</span> <span class="nx">is</span> <span class="nx">appended</span> <span class="nx">to</span> <span class="nx">the</span> <span class="nx">master</span> <span class="nx">sidebar</span><span class="o">.&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">@</span><span class="nx">endsection</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">@</span><span class="nx">section</span><span class="p">(</span><span class="s1">&#39;content&#39;</span><span class="p">)</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">h2</span><span class="o">&gt;&lt;/</span><span class="nx">h2</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">Here</span> <span class="nx">is</span> <span class="nx">my</span> <span class="nx">body</span> <span class="nx">content</span><span class="o">.&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">h2</span><span class="o">&gt;</span><span class="k">If</span> <span class="nx">Statement</span><span class="o">&lt;/</span><span class="nx">h2</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">@</span><span class="k">if</span> <span class="p">(</span><span class="nv">$day</span> <span class="o">==</span> <span class="s1">&#39;Sunday&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">Time</span> <span class="nx">to</span> <span class="nx">party</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">@</span><span class="k">else</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">Time</span> <span class="nx">to</span> <span class="nx">make</span> <span class="nx">money</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">@</span><span class="k">endif</span>
+</span><span class='line'><span class="o">@</span><span class="nx">endsection</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  - <code>@if ($day == 'Sunday')</code> starts the if statement and evaluates the condition $day == &#8216;Sunday&#8217;.<br/>
+  - <code>@else</code> is the else part of the if statement.<br/>
+  - <code>@endif</code> ends the if statement.
+</p>
+
+
+
+
+<p>
+  <strong>Blade Loop</strong><br/>
+  Blade template supports all of the loops that PHP supports. We will look at how we can use the foreach loop in blade to loop through an array of items.
+</p>
+
+
+
+
+<p>
+  Open up <code>/routes/web.php</code> file and modify the codes for the blade route to the following:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>web.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">Route</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;blade&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nv">$drinks</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span><span class="s1">&#39;Vodka&#39;</span><span class="p">,</span> <span class="s1">&#39;Gin&#39;</span><span class="p">,</span> <span class="s1">&#39;Brandy&#39;</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">view</span><span class="p">(</span><span class="s1">&#39;page&#39;</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="s1">&#39;name&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;The Foodie&#39;</span><span class="p">,</span><span class="s1">&#39;day&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Sunday&#39;</span><span class="p">,</span> <span class="s1">&#39;drinks&#39;</span> <span class="o">=&gt;</span> <span class="nv">$drinks</span><span class="p">));</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <code>$drinks = array('Vodka', 'Gin', 'Brandy');</code> defines an array variable that we are passing to the blade template.
+</p>
+
+
+
+
+<p>
+  And then open up <code>/resources/views/page.blade.php</code> file and modify the contents to the following:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>page.blade.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">@</span><span class="k">extends</span><span class="p">(</span><span class="s1">&#39;layouts.master&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">@</span><span class="nx">section</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="s1">&#39;Page Title&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">@</span><span class="nx">section</span><span class="p">(</span><span class="s1">&#39;sidebar&#39;</span><span class="p">)</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">Here</span> <span class="nx">is</span> <span class="nx">appended</span> <span class="nx">to</span> <span class="nx">the</span> <span class="nx">master</span> <span class="nx">sidebar</span><span class="o">.&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">@</span><span class="nx">endsection</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">@</span><span class="nx">section</span><span class="p">(</span><span class="s1">&#39;content&#39;</span><span class="p">)</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">h2</span><span class="o">&gt;&lt;/</span><span class="nx">h2</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">Here</span> <span class="nx">is</span> <span class="nx">my</span> <span class="nx">body</span> <span class="nx">content</span><span class="o">.&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">h2</span><span class="o">&gt;</span><span class="k">If</span> <span class="nx">Statement</span><span class="o">&lt;/</span><span class="nx">h2</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">@</span><span class="k">if</span> <span class="p">(</span><span class="nv">$day</span> <span class="o">==</span> <span class="s1">&#39;Sunday&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">Time</span> <span class="nx">to</span> <span class="nx">party</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">@</span><span class="k">else</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">Time</span> <span class="nx">to</span> <span class="nx">make</span> <span class="nx">money</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">@</span><span class="k">endif</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">h2</span><span class="o">&gt;</span><span class="k">Foreach</span> <span class="nx">Loop</span><span class="o">&lt;/</span><span class="nx">h2</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">@</span><span class="k">foreach</span> <span class="p">(</span><span class="nv">$drinks</span> <span class="k">as</span> <span class="nv">$drink</span><span class="p">)</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">@</span><span class="k">endforeach</span>
+</span><span class='line'><span class="o">@</span><span class="nx">endsection</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Executing php functions in Blade</strong><br/>
+  We will call the php date function in the blade template. Open up <code>/resources/views/page.blade.php</code> file and modify the contents to the following:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>page.blade.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">@</span><span class="k">extends</span><span class="p">(</span><span class="s1">&#39;layouts.master&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">@</span><span class="nx">section</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="s1">&#39;Page Title&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">@</span><span class="nx">section</span><span class="p">(</span><span class="s1">&#39;sidebar&#39;</span><span class="p">)</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">Here</span> <span class="nx">is</span> <span class="nx">appended</span> <span class="nx">to</span> <span class="nx">the</span> <span class="nx">master</span> <span class="nx">sidebar</span><span class="o">.&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">@</span><span class="nx">endsection</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">@</span><span class="nx">section</span><span class="p">(</span><span class="s1">&#39;content&#39;</span><span class="p">)</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">h2</span><span class="o">&gt;&lt;/</span><span class="nx">h2</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">Here</span> <span class="nx">is</span> <span class="nx">my</span> <span class="nx">body</span> <span class="nx">content</span><span class="o">.&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">h2</span><span class="o">&gt;</span><span class="k">If</span> <span class="nx">Statement</span><span class="o">&lt;/</span><span class="nx">h2</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">@</span><span class="k">if</span> <span class="p">(</span><span class="nv">$day</span> <span class="o">==</span> <span class="s1">&#39;Sunday&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">Time</span> <span class="nx">to</span> <span class="nx">party</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">@</span><span class="k">else</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">Time</span> <span class="nx">to</span> <span class="nx">make</span> <span class="nx">money</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">@</span><span class="k">endif</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">h2</span><span class="o">&gt;</span><span class="k">Foreach</span> <span class="nx">Loop</span><span class="o">&lt;/</span><span class="nx">h2</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">@</span><span class="k">foreach</span> <span class="p">(</span><span class="nv">$drinks</span> <span class="k">as</span> <span class="nv">$drink</span><span class="p">)</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">@</span><span class="k">endforeach</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">h2</span><span class="o">&gt;</span><span class="nx">Execute</span> <span class="nx">PHP</span> <span class="nx">Function</span><span class="o">&lt;/</span><span class="nx">h2</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">The</span> <span class="nb">date</span> <span class="nx">is</span> <span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">@</span><span class="nx">endsection</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <code>{{date(' D M, Y')}}</code> double opening and closing curly braces are used to execute the php date function.
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2017/07/10/laravel-5-dot-x-x-4-steps-to-prevent-browsers-back-button-after-user-logout/">Laravel 5.x.x - 4 Steps to Prevent Browser&#8217;s Back Button After User Logout</a></h1>
     
     
@@ -3280,134 +3791,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2017/03/27/why-is-website-maintenance-important/">Why Is Website Maintenance Important?</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2017-03-27T00:53:00+07:00" pubdate data-updated="true">Mar 27<span>th</span>, 2017</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/website_maintenance_important.png" width="600" alt="Why Is Website Maintenance Important?" />
-</p>
-
-
-
-
-<p>
-  I saw it many times a company has a website delivered, with no changes, no additions, no fresh content and most important of all is no security updates. The website stays as it was delivered, sometimes for many years.
-</p>
-
-
-
-
-<p>
-  You truly ask yourself: &#8220;If I like the design and the website just works, why would I need to be maintained?&#8221;. Please go through with me and read on to learn why maintenance is very important:
-</p>
-
-
-
-
-<p>
-  <strong>SECURITY</strong><br/>
-  Probably the most important thing is: keep your site safe! Website software (Content Management Systems, plug-ins and other add-ons to the website’s functionality) are constantly updated. Partly to improve how it works or to add something new and handy, but often also to patch security holes.
-</p>
-
-
-
-
-<p>
-  Hackers are constantly looking for outdated websites or software (and known security holes). If you don’t keep up with the latest version of the software, your website could be at risk.
-</p>
-
-
-
-
-<p>
-  <strong>ATTRACTIVENESS</strong><br/>
-  A website that is regularly updated with fresh content (blog posts, news articles, promotions, new products, etc.) attracts more visitors. And isn’t that what you want to achieve with your website: attracting visitors? Visitors get a bad impression if there is old data on your website.
-</p>
-
-
-
-
-<p>
-  Regularly create the new content, text, or images that relate to your business to attract both new and returning visits.
-</p>
-
-
-
-
-<p>
-  <strong>GOOGLE RANKING</strong><br/>
-  Google loves websites that are regularly updated. Keeping your products and services up-to-date shows search engines that your site is fresh. A site with copyright on the bottom and the &#8220;Latest News&#8221; article years out of date will not be as attractive to Google in terms of quality or usefulness. When new content is added on a regular basis, Google values this and takes that into account with the overall ranking of your website.
-</p>
-
-
-
-
-<p>
-  Google itself provides a useful tool called &#8220;Webmaster Tools&#8221; which essentially checks the &#8216;health&#8217; of your website.
-</p>
-
-
-
-
-<p>
-  <strong>YOUR CORPORATE IMAGE</strong><br/>
-  Your website is an interface into your business and it can have a big impact on how visitors value your products or services. Your website should be kept relevant by regularly refreshing content. Also regularly check that contact forms work, addresses and phone numbers are updated and products, services and price lists are current and correct. This means visitors find what they are looking for quickly and easily, and are more likely to become customers.
-</p>
-
-
-
-
-<p>
-  <strong>Can you do maintenance yourself?</strong><br/>
-  Of course you can. The websites with Content Management Systems (like WordPress) that make it very easy to add or update content yourself. However, ask yourself: will you really do that? Will you really dedicate time every week or month to update your website’s content? And maintain those regular updates year after year? Or do you rather concentrate on your business instead of maintaining your website?
-</p>
-
-
-
-
-<p>
-  Additionally there is one thing that&#8217;s not easy for non-technical people to do software updates. An update to your website’s software can easily break your website. Because (part of) a software is not compatible with another application.
-</p>
-
-
-
-
-<p>
-  So far so good, let technical people do website maintenance for your business to professionals.
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -3428,6 +3811,10 @@
 </section><section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2017/08/06/laravel-5-dot-x-x-template/">Laravel 5.x.x Template</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2017/07/10/laravel-5-dot-x-x-4-steps-to-prevent-browsers-back-button-after-user-logout/">Laravel 5.x.x - 4 Steps to Prevent Browser&#8217;s Back Button After User Logout</a>
@@ -3451,10 +3838,6 @@
     
       <li class="post">
         <a href="/blog/2017/06/24/laravel-5-dot-x-x-installation-and-configuration/">Laravel 5.x.x Installation and Configuration</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/05/22/new-way-to-develop-react-app-with-create-react-app-no-build-configuration/">New Way to Develop React App With Create React App (No Build Configuration)</a>
       </li>
     
   </ul>
@@ -3536,7 +3919,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/laravel/">Laravel [ 5 ]</a>
+        <a href="/blog/categories/laravel/">Laravel [ 6 ]</a>
       </li>
     
   </ul>

@@ -79,6 +79,181 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2016/10/12/gulp-watch/">Gulp – Watch</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-10-12T16:02:00+07:00" pubdate data-updated="true">Oct 12<span>th</span>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/bunlong_gulp.jpg" width="600" alt="Gulp, Gulp – Watch" />
+</p>
+
+
+
+
+<p>
+  Now for something super amazing. Instead of running the gulp task explicitly, lets have gulp run our tasks when the files change.
+</p>
+
+
+
+
+<p>
+  First reorganize some of our tasks:<br/>
+  - Rename default task to css.<br/>
+  - Create a new default task to run css, &#8216;javascript&#8217;, and &#8216;homepage&#8217; tasks.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>gulpfile.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="n">gulp</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;css&#39;</span><span class="p">,</span> <span class="o">[</span><span class="s1">&#39;clean&#39;</span><span class="o">]</span><span class="p">,</span> <span class="n">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Concat, move, and minify all the css files in styles folder&quot;</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">gulp</span><span class="o">.</span><span class="n">src</span><span class="p">(</span><span class="s2">&quot;contents/styles/**.css&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">concat</span><span class="p">(</span><span class="s1">&#39;main.min.css&#39;</span><span class="p">))</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">cssmin</span><span class="p">())</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">gulp</span><span class="o">.</span><span class="n">dest</span><span class="p">(</span><span class="s1">&#39;build/styles&#39;</span><span class="p">));</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="n">gulp</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="o">[</span><span class="s1">&#39;css&#39;</span><span class="p">,</span> <span class="s1">&#39;homepage&#39;</span><span class="p">,</span> <span class="s1">&#39;javascript&#39;</span><span class="o">]</span><span class="p">);</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Next create our file watching task. Could you guess what?&#8230; there isn’t a plugin for this. It is just part of gulp.
+</p>
+
+
+
+
+<p>
+  We will create a gulp watch task to watch our contents folder and run our default task on file change.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>gulpfile.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="n">gulp</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;watch&#39;</span><span class="p">,</span> <span class="o">[]</span><span class="p">,</span> <span class="n">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">gulp</span><span class="o">.</span><span class="n">watch</span><span class="p">(</span><span class="o">[</span><span class="s1">&#39;contents/**&#39;</span><span class="o">]</span><span class="p">,</span> <span class="o">[</span><span class="s1">&#39;default&#39;</span><span class="o">]</span><span class="p">);</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  In the terminal type:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">gulp</span> <span class="n">watch</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Using</span> <span class="n">gulpfile</span> <span class="o">~</span><span class="sr">/YOUR_DIRECTORY/</span><span class="n">gulpfile</span><span class="o">.</span><span class="n">js</span>
+</span><span class='line'><span class="no">Starting</span> <span class="s1">&#39;watch&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="no">Finished</span> <span class="s1">&#39;watch&#39;</span> <span class="n">after</span> <span class="mi">11</span> <span class="n">ms</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If you update any of the css files in the styles folder, you should see gulp run the default task.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Starting</span> <span class="s1">&#39;clean&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="no">Clean</span> <span class="n">all</span> <span class="n">files</span> <span class="k">in</span> <span class="n">build</span> <span class="n">folder</span>
+</span><span class='line'><span class="no">Finished</span> <span class="s1">&#39;clean&#39;</span> <span class="n">after</span> <span class="mi">21</span> <span class="n">ms</span>
+</span><span class='line'><span class="no">Starting</span> <span class="s1">&#39;css&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="no">Concat</span><span class="p">,</span> <span class="n">move</span><span class="p">,</span> <span class="ow">and</span> <span class="n">minify</span> <span class="n">all</span> <span class="n">the</span> <span class="n">css</span> <span class="n">files</span> <span class="k">in</span> <span class="n">styles</span> <span class="n">folder</span>
+</span><span class='line'><span class="no">Starting</span> <span class="s1">&#39;homepage&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="no">Starting</span> <span class="s1">&#39;javascript&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="no">Validate</span><span class="p">,</span> <span class="no">Concat</span><span class="p">,</span> <span class="no">Uglify</span><span class="p">,</span> <span class="ow">and</span> <span class="no">Move</span> <span class="n">all</span> <span class="n">the</span> <span class="n">javascript</span> <span class="n">files</span>
+</span><span class='line'><span class="no">Finished</span> <span class="s1">&#39;homepage&#39;</span> <span class="n">after</span> <span class="mi">77</span> <span class="n">ms</span>
+</span><span class='line'><span class="no">Finished</span> <span class="s1">&#39;javascript&#39;</span> <span class="n">after</span> <span class="mi">75</span> <span class="n">ms</span>
+</span><span class='line'><span class="no">Finished</span> <span class="s1">&#39;css&#39;</span> <span class="n">after</span> <span class="mi">84</span> <span class="n">ms</span>
+</span><span class='line'><span class="no">Starting</span> <span class="s1">&#39;default&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="no">Finished</span> <span class="s1">&#39;default&#39;</span> <span class="n">after</span> <span class="mi">14</span> <span class="err">μ</span><span class="n">s</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2016/10/12/gulp-creating-a-webpage/">Gulp – Creating a Webpage</a></h1>
     
     
@@ -1786,295 +1961,6 @@ You might have been wondering what the empty array (<code>[]</code>) was before 
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/09/13/gulp-concat-combining-multiple-files-into-one/">Gulp – Concat: Combining Multiple Files Into One</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-09-13T09:35:00+07:00" pubdate data-updated="true">Sep 13<span>th</span>, 2016</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/gulp.jpg" width="600" alt="Gulp, Gulp – Concat: Combining multiple files into one" />
-</p>
-
-
-
-
-<p>
-  Printing Hello and moving files is rather boring. Let’s do something productive.
-</p>
-
-
-
-
-<p>
-  When we create websites, we are always trying to deliver the best experience possible.
-  This includes having our webpages displaying fast. Back in the day, this meant having
-  all our styles in one css file.
-</p>
-
-
-
-
-<p>
-  While this made our webpages load faster, it made maintaining the css file a night-mare!
-</p>
-
-
-
-
-<p>
-  These days we can use multiple css files for better organization and then concat (meaning merge or combine) the files together into one large file.
-</p>
-
-
-
-
-<p>
-  We left our project looking like:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">/build</span>
-</span><span class='line'><span class="sr">  /s</span><span class="n">tyles</span>
-</span><span class='line'>    <span class="n">some_styles</span><span class="o">.</span><span class="n">css</span>
-</span><span class='line'>    <span class="n">more_styles</span><span class="o">.</span><span class="n">css</span>
-</span><span class='line'><span class="sr">/node_modules</span>
-</span><span class='line'><span class="sr">/</span><span class="n">contents</span>
-</span><span class='line'>  <span class="sr">/styles</span>
-</span><span class='line'><span class="sr">    some_styles.css</span>
-</span><span class='line'><span class="sr">    more_styles.css</span>
-</span><span class='line'><span class="sr">gulpfile.js</span>
-</span><span class='line'><span class="sr">package.json</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Right now, we have two separate css files in our build/styles folder. We are going to use a gulp plugin to concat all our css files in the styles folder.
-</p>
-
-
-
-
-<p>
-  Gulp contains some basic tasks, but the power of gulp is the customization you can bring into your build process by using plugins.
-</p>
-
-
-
-
-<p>
-  For a list of all the gulp plugins available, go to <a href="http://gulpjs.com/plugins/" target="_blank">http://gulpjs.com/plugins/</a>
-</p>
-
-
-
-
-<p>
-  To concat the files together, we will need to install one of these plugins.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">npm</span> <span class="n">install</span> <span class="n">gulp</span><span class="o">-</span><span class="n">concat</span> <span class="o">--</span><span class="n">save</span><span class="o">-</span><span class="n">dev</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  We can then update our default gulp task to concat the files.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>gulpfile.js </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">var</span> <span class="n">gulp</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s1">&#39;gulp&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="n">var</span> <span class="n">concat</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s1">&#39;gulp-concat&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">gulp</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="o">[]</span><span class="p">,</span> <span class="n">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Concating and moving all the css files in styles folder&quot;</span><span class="p">);</span>
-</span><span class='line'>  <span class="n">gulp</span><span class="o">.</span><span class="n">src</span><span class="p">(</span><span class="s2">&quot;contents/styles/**.css&quot;</span><span class="p">)</span>
-</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">concat</span><span class="p">(</span><span class="s1">&#39;main.css&#39;</span><span class="p">))</span>
-</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">gulp</span><span class="o">.</span><span class="n">dest</span><span class="p">(</span><span class="s1">&#39;build/styles&#39;</span><span class="p">));</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Couple of things have changed, can you spot them? First, we had to reference the gulp plugin with:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">var</span> <span class="n">concat</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s1">&#39;gulp-concat&#39;</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  We chose to label this <code>concat</code>. Obviously we could call it anything we want, but concat communicates what the plugin does to those reading our build script.
-</p>
-
-
-
-
-<p>
-  Second, we added another step to our task. In between the <code>src</code> and the <code>pipe(gulp.dest...)</code> steps, we added <code>pipe(concat(...))</code>.
-</p>
-
-
-
-
-<p>
-  Gulp works by streaming files from one process to another. This allows us to create complex build tasks out of small, simple steps. Composition == winning.
-</p>
-
-
-
-
-<p>
-  Now run our gulp task:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">gulp</span>
-</span><span class='line'><span class="no">Using</span> <span class="n">gulpfile</span> <span class="o">~</span><span class="sr">/YOUR_DIRECTORY/</span><span class="n">gulpfile</span><span class="o">.</span><span class="n">js</span>
-</span><span class='line'><span class="no">Starting</span> <span class="s1">&#39;default&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
-</span><span class='line'><span class="no">Moving</span> <span class="n">all</span> <span class="n">the</span> <span class="n">css</span> <span class="n">files</span> <span class="k">in</span> <span class="n">styles</span> <span class="n">folder</span>
-</span><span class='line'><span class="no">Finished</span> <span class="s1">&#39;default&#39;</span> <span class="n">after</span> <span class="mi">6</span><span class="o">.</span><span class="mi">09</span> <span class="n">ms</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Our task will read all the css files in the <code>styles</code> folder, combine them into one <code>main.css</code> file, and then place that file in the <code>build/styles</code> folder.
-</p>
-
-
-
-
-<p>
-  Our project should now look like:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">/build</span>
-</span><span class='line'><span class="sr">  /s</span><span class="n">tyles</span>
-</span><span class='line'>    <span class="n">main</span><span class="o">.</span><span class="n">css</span>
-</span><span class='line'>    <span class="n">more_styles</span><span class="o">.</span><span class="n">css</span>
-</span><span class='line'>    <span class="n">some_styles</span><span class="o">.</span><span class="n">css</span>
-</span><span class='line'><span class="sr">/node_modules</span>
-</span><span class='line'><span class="sr">/s</span><span class="n">tyles</span>
-</span><span class='line'>  <span class="n">more_styles</span><span class="o">.</span><span class="n">css</span>
-</span><span class='line'>  <span class="n">some_styles</span><span class="o">.</span><span class="n">css</span>
-</span><span class='line'><span class="n">gulpfile</span><span class="o">.</span><span class="n">js</span>
-</span><span class='line'><span class="n">package</span><span class="o">.</span><span class="n">json</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Notice the more_styles.css and some_styles.css files are still in our build folder. :(
-</p>
-
-
-
-
-<p>
-  We don’t want those chumps there anymore. In the next chapter we will learn how to
-  get rid of those files.
-</p>
-
-
-
-
-<p>
-  So far so good, That’s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/4/">&larr; Older</a>
@@ -2099,6 +1985,10 @@ You might have been wondering what the empty array (<code>[]</code>) was before 
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2017/08/06/laravel-5-dot-x-x-template/">Laravel 5.x.x Template</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2017/07/10/laravel-5-dot-x-x-4-steps-to-prevent-browsers-back-button-after-user-logout/">Laravel 5.x.x - 4 Steps to Prevent Browser&#8217;s Back Button After User Logout</a>
       </li>
     
@@ -2120,10 +2010,6 @@ You might have been wondering what the empty array (<code>[]</code>) was before 
     
       <li class="post">
         <a href="/blog/2017/06/24/laravel-5-dot-x-x-installation-and-configuration/">Laravel 5.x.x Installation and Configuration</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/05/22/new-way-to-develop-react-app-with-create-react-app-no-build-configuration/">New Way to Develop React App With Create React App (No Build Configuration)</a>
       </li>
     
   </ul>
@@ -2205,7 +2091,7 @@ You might have been wondering what the empty array (<code>[]</code>) was before 
       </li>
     
       <li>
-        <a href="/blog/categories/laravel/">Laravel [ 5 ]</a>
+        <a href="/blog/categories/laravel/">Laravel [ 6 ]</a>
       </li>
     
   </ul>
