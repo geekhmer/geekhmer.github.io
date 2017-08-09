@@ -79,6 +79,784 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/05/02/ruby-on-rails-charting-with-chartkick-gem/">Ruby on Rails Charting With Chartkick Gem</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-05-02T20:30:00+07:00" pubdate data-updated="true">May 2<span>nd</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/chartkick.png" alt="Ruby on Rails Charting with Chartkick Gem" />
+</p>
+
+
+
+
+<p>
+  Chartkick is a charting library for Ruby on Rails that allows you to easily create nice looking charts. Chartkick is compatible with all major browsers and can easily be used to give your Ruby on Rails application some additional flair. In this article we will cover the basics of using Chartkick.
+</p>
+
+
+
+
+<p>
+  <strong>Rails Application Setup</strong><br/>
+  Before we can use Chartkick, we will need to add it to our Gemfile. Open up your Gemfile and add the following code.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;chartkick&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 1.2.4&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  In addition, let&#8217;s include a couple of helper gems that will make life easier when dealing with data. Add the following gems to your Gemfile.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;groupdate&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 2.1.1&#39;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;active_median&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 0.1.0&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now let&#8217;s run a bundle install to install all three gems.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now we need to create a model that we will use with our charts. For this example app we will create a simple model called Visit. This model will represent a single user&#8217;s &#8216;visit&#8217; to a website. Run the command below to create this model now.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="no">Visit</span> <span class="ss">country</span><span class="p">:</span><span class="n">string</span> <span class="n">visited_at</span><span class="ss">:datetime</span> <span class="n">load_time</span><span class="ss">:decimal</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now let&#8217;s run a rake db:migrate to create the table associated with this model.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now we need to add some data to our seeds file in order to give us some data to play with. Open up your seeds.rb file and add in the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>db/seeds.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">delete_all</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;United States&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">3</span><span class="o">.</span><span class="mi">5</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;United States&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">1</span><span class="o">.</span><span class="mi">5</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;United States&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">1</span><span class="o">.</span><span class="mi">0</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;United States&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">1</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">4</span><span class="o">.</span><span class="mi">5</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;United States&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">1</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">4</span><span class="o">.</span><span class="mi">0</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;United States&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">2</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">3</span><span class="o">.</span><span class="mi">5</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;United States&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">2</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">1</span><span class="o">.</span><span class="mi">0</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;United States&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">2</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">3</span><span class="o">.</span><span class="mi">5</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;United States&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">3</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">4</span><span class="o">.</span><span class="mi">5</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;United States&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">3</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">3</span><span class="o">.</span><span class="mi">0</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;Germany&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">1</span><span class="o">.</span><span class="mi">0</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;Germany&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">2</span><span class="o">.</span><span class="mi">0</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;Germany&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">1</span><span class="o">.</span><span class="mi">0</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;Germany&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">3</span><span class="o">.</span><span class="mi">0</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;Germany&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">1</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">4</span><span class="o">.</span><span class="mi">0</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;Germany&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">2</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">2</span><span class="o">.</span><span class="mi">0</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;Germany&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">2</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">1</span><span class="o">.</span><span class="mi">0</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;Germany&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">2</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">3</span><span class="o">.</span><span class="mi">0</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;Germany&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">3</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">3</span><span class="o">.</span><span class="mi">5</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;South Korea&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">2</span><span class="o">.</span><span class="mi">0</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;South Korea&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">2</span><span class="o">.</span><span class="mi">5</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;South Korea&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">1</span><span class="o">.</span><span class="mi">0</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;South Korea&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">1</span><span class="o">.</span><span class="mi">5</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;South Korea&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">1</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">2</span><span class="o">.</span><span class="mi">5</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;South Korea&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">1</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">4</span><span class="o">.</span><span class="mi">0</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;South Korea&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">1</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">3</span><span class="o">.</span><span class="mi">0</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;South Korea&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">2</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">1</span><span class="o">.</span><span class="mi">0</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;South Korea&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">3</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">5</span><span class="o">.</span><span class="mi">0</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;South Korea&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">3</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">4</span><span class="o">.</span><span class="mi">0</span>
+</span><span class='line'><span class="no">Visit</span><span class="o">.</span><span class="n">create</span>  <span class="ss">country</span><span class="p">:</span> <span class="s1">&#39;South Korea&#39;</span><span class="p">,</span> <span class="n">visited_at</span><span class="p">:</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">3</span><span class="o">.</span><span class="n">days</span><span class="p">,</span> <span class="n">load_time</span><span class="p">:</span> <span class="mi">5</span><span class="o">.</span><span class="mi">0</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now let&#8217;s run a rake db:seed to seed our database.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">seed</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now let&#8217;s create a controller to give us a place to play around. Run the commands below to create the Homes controller.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="n">homes</span> <span class="n">show</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now open up your routes file and add in the route listed below.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;homes#show&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Next, open up your homes controller and modify it so that it looks like the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/controllers/homes_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">HomesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>    <span class="vi">@visits</span> <span class="o">=</span> <span class="no">Visit</span><span class="o">.</span><span class="n">all</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Finally, we need to modify our application layout. Open up your application&#8217;s layout and modify it so that it looks like the following code. Note the inclusion of the Google API javascript file below. Chartkick can use either Google Charts or Highcharts for charting. In this example we use Google Charts. We also utilize Bootstrap for a cleaner look and feel.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/layouts/application.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;!</span><span class="no">DOCTYPE</span> <span class="n">html</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">html</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">head</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">title</span><span class="o">&gt;</span><span class="no">ChartKickExample</span><span class="o">&lt;</span><span class="sr">/title&gt;</span>
+</span><span class='line'><span class="sr">  </span>
+</span><span class='line'><span class="sr">  &lt;%= stylesheet_link_tag    &#39;application&#39;, media: &#39;all&#39; %&gt;</span>
+</span><span class='line'><span class="sr">  &lt;%= javascript_include_tag &#39;application&#39; %&gt;</span>
+</span><span class='line'><span class="sr">  &lt;%= javascript_include_tag &quot;http:/</span><span class="o">/</span><span class="n">www</span><span class="o">.</span><span class="n">google</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">jsapi</span><span class="s2">&quot;, &quot;</span><span class="n">chartkick</span><span class="s2">&quot; %&gt;</span>
+</span><span class='line'><span class="s2">  &lt;%= stylesheet_link_tag &#39;http://yandex.st/bootstrap/3.1.1/css/bootstrap.min.css&#39; %&gt;</span>
+</span><span class='line'><span class="s2">  &lt;%= javascript_include_tag &#39;http://yandex.st/bootstrap/3.1.1/js/bootstrap.min.js&#39; %&gt;</span>
+</span><span class='line'><span class="s2">  </span>
+</span><span class='line'><span class="s2">  &lt;%= csrf_meta_tags %&gt;</span>
+</span><span class='line'><span class="s2">&lt;/head&gt;</span>
+</span><span class='line'><span class="s2">&lt;body&gt;</span>
+</span><span class='line'><span class="s2">  &lt;div class=&quot;</span><span class="n">container</span><span class="s2">&quot;&gt;</span>
+</span><span class='line'><span class="s2">    &lt;%= yield %&gt;</span>
+</span><span class='line'><span class="s2">  &lt;/div&gt;</span>
+</span><span class='line'><span class="s2">&lt;/body&gt;</span>
+</span><span class='line'><span class="s2">&lt;/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Line Charts</strong><br/>
+  The first chart type we will work with is the line charts Line charts are handy for doing things like plotting out events over time. Open up your show view for the Homes controller and modify it so that it looks like the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/homes/show.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;row&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">&lt;!--</span> <span class="no">Line</span> <span class="no">Chart</span> <span class="o">-</span> <span class="no">Single</span> <span class="no">Series</span> <span class="o">--&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Visits</span> <span class="no">By</span> <span class="no">Day</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
+</span><span class='line'><span class="sr">    &lt;%= line_chart @visits.group_by_day(:visited_at, format: &quot;%B %d, %Y&quot;).count, discrete: true %&gt;</span>
+</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now if you start a <code>rails s</code> and navigate to http://localhost:3000 you will see a chart being rendered showing the number of vists by day.
+</p>
+
+
+
+
+<p>
+  Great, now lets make a slightly more complex line chart. Open up the show view again and modify it so that it looks like the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/homes/show.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;row&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">&lt;!--</span> <span class="no">Line</span> <span class="no">Chart</span> <span class="o">-</span> <span class="no">Single</span> <span class="no">Series</span> <span class="o">--&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Visits</span> <span class="no">By</span> <span class="no">Day</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
+</span><span class='line'><span class="sr">    &lt;%= line_chart @visits.group_by_day(:visited_at, format: &quot;%B %d, %Y&quot;).count, discrete: true %&gt;</span>
+</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">&lt;!--</span> <span class="no">Line</span> <span class="no">Chart</span> <span class="o">-</span> <span class="no">Multiple</span> <span class="no">Series</span> <span class="o">--&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Visits</span> <span class="no">By</span> <span class="no">Country</span> <span class="no">Per</span> <span class="no">Day</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
+</span><span class='line'><span class="sr">    &lt;%= line_chart   Visit.pluck(&quot;country&quot;).uniq.map { |c| { name: c, data: @visits.where(country: c).group_by_day(:visited_at, format: &quot;%B %d, %Y&quot;).count }  }, discrete: true %&gt;</span>
+</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Refreshing the page results in a new line chart with multiple series listed. You see a line for each country with each point corresponding to the number of visits for that day.
+</p>
+
+
+
+
+<p>
+  <strong>Pie Charts and Area Charts</strong><br/>
+  We can also render a pie chart. Open up your show view again and append the following code to the end of the view.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/homes/show.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;row&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Total</span> <span class="no">Visits</span> <span class="n">by</span> <span class="no">Country</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
+</span><span class='line'><span class="sr">    &lt;%= pie_chart @visits.group(:country).count %&gt;</span>
+</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If you refresh the page a pie chart will render with each slice representing the visits for that particular country. This information can also be represented via a geo chart. Modify your homes view to look like the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/homes/show.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;row&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">&lt;!--</span> <span class="no">Line</span> <span class="no">Chart</span> <span class="o">-</span> <span class="no">Single</span> <span class="no">Series</span> <span class="o">--&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Visits</span> <span class="no">By</span> <span class="no">Day</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
+</span><span class='line'><span class="sr">    &lt;%= line_chart @visits.group_by_day(:visited_at, format: &quot;%B %d, %Y&quot;).count, discrete: true %&gt;</span>
+</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">&lt;!--</span> <span class="no">Line</span> <span class="no">Chart</span> <span class="o">-</span> <span class="no">Multiple</span> <span class="no">Series</span> <span class="o">--&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Visits</span> <span class="no">By</span> <span class="no">Country</span> <span class="no">Per</span> <span class="no">Day</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
+</span><span class='line'><span class="sr">    &lt;%= line_chart   Visit.pluck(&quot;country&quot;).uniq.map { |c| { name: c, data: @visits.where(country: c).group_by_day(:visited_at, format: &quot;%B %d, %Y&quot;).count }  }, discrete: true %&gt;</span>
+</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;div class=&quot;row&quot;&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">  &lt;!-- Pie Chart --&gt;</span>
+</span><span class='line'><span class="sr">  &lt;div class=&quot;col-xs-6&quot;&gt;</span>
+</span><span class='line'><span class="sr">    &lt;h3&gt;Total Visits by Country&lt;/</span><span class="n">h3</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="sx">%= pie_chart @visits.group(:country).count %&gt;</span>
+</span><span class='line'><span class="sx">  &lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">  &lt;!-- Geo Chart --&gt; </span>
+</span><span class='line'><span class="sx">  &lt;div class=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Visits</span> <span class="no">By</span> <span class="no">Day</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
+</span><span class='line'><span class="sr">    &lt;%= geo_chart @visits.group(:country).count %&gt;</span>
+</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Awesome! Now if you refresh the page, you&#8217;ll notice a geo chart in the bottom right.
+</p>
+
+
+
+
+<p>
+  <strong>Area Charts</strong><br/>
+  You can also create an area chart. Add the code listed below to the end of your homes/show view.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/homes/show.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;!--</span> <span class="n">area</span> <span class="n">chart</span> <span class="o">--&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;row&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-12&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Total</span> <span class="no">Load</span> <span class="no">Time</span> <span class="no">By</span> <span class="no">Day</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
+</span><span class='line'><span class="sr">    &lt;%= area_chart @visits.group_by_day(:visited_at).maximum(:load_time) %&gt;</span>
+</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Great, now if you refresh the page you will see that the area chart has been added.
+</p>
+
+
+
+
+<p>
+  <strong>Bar Charts and Column Charts</strong><br/>
+  Both bar charts and column charts can be easily created. Modify your homes/show view so that it looks like the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/homes/show.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;row&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">&lt;!--</span> <span class="no">Line</span> <span class="no">Chart</span> <span class="o">-</span> <span class="no">Single</span> <span class="no">Series</span> <span class="o">--&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Visits</span> <span class="no">By</span> <span class="no">Day</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
+</span><span class='line'><span class="sr">    &lt;%= line_chart @visits.group_by_day(:visited_at, format: &quot;%B %d, %Y&quot;).count, discrete: true %&gt;</span>
+</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">&lt;!--</span> <span class="no">Line</span> <span class="no">Chart</span> <span class="o">-</span> <span class="no">Multiple</span> <span class="no">Series</span> <span class="o">--&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Visits</span> <span class="no">By</span> <span class="no">Country</span> <span class="no">Per</span> <span class="no">Day</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
+</span><span class='line'><span class="sr">    &lt;%= line_chart   Visit.pluck(&quot;country&quot;).uniq.map { |c| { name: c, data: @visits.where(country: c).group_by_day(:visited_at, format: &quot;%B %d, %Y&quot;).count }  }, discrete: true %&gt;</span>
+</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;div class=&quot;row&quot;&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">  &lt;!-- Pie Chart --&gt;</span>
+</span><span class='line'><span class="sr">  &lt;div class=&quot;col-xs-6&quot;&gt;</span>
+</span><span class='line'><span class="sr">    &lt;h3&gt;Total Visits by Country&lt;/</span><span class="n">h3</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="sx">%= pie_chart @visits.group(:country).count %&gt;</span>
+</span><span class='line'><span class="sx">  &lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">  &lt;!-- Geo Chart --&gt; </span>
+</span><span class='line'><span class="sx">  &lt;div class=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Visits</span> <span class="no">By</span> <span class="no">Day</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
+</span><span class='line'><span class="sr">    &lt;%= geo_chart @visits.group(:country).count %&gt;</span>
+</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;!-- area chart --&gt; </span>
+</span><span class='line'><span class="sr">&lt;div class=&quot;row&quot;&gt;</span>
+</span><span class='line'><span class="sr">  &lt;div class=&quot;col-xs-12&quot;&gt;</span>
+</span><span class='line'><span class="sr">    &lt;h3&gt;Total Load Time By Day&lt;/</span><span class="n">h3</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="sx">%= area_chart @visits.group_by_day(:visited_at).maximum(:load_time) %&gt;</span>
+</span><span class='line'><span class="sx">  &lt;/div&gt;</span>
+</span><span class='line'><span class="sx">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">&lt;div class=</span><span class="s2">&quot;row&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;!--</span> <span class="no">Column</span> <span class="no">Chart</span> <span class="o">--&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Total</span> <span class="no">Visits</span> <span class="no">Per</span> <span class="no">Country</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
+</span><span class='line'><span class="sr">    &lt;%= column_chart @visits.group(:country).count %&gt;</span>
+</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;!--</span> <span class="no">Bar</span> <span class="no">Chart</span> <span class="o">--&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-6&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Total</span> <span class="no">Visits</span> <span class="no">Per</span> <span class="no">Country</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
+</span><span class='line'><span class="sr">    &lt;%= bar_chart @visits.group(:country).count %&gt;</span>
+</span><span class='line'><span class="sr">  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If you refresh the page you&#8217;ll see both column and bar charts at the bottom.
+</p>
+
+
+
+
+<p>
+  <strong>Remote Charts</strong><br/>
+  You can quickly and easily build remote AJAX driven charts. Let&#8217;s create a simple series chart. First, we will create a new method on your homes controller called visits_by_day. Open up your homes controller and modify it so that it looks like the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/controllers/homes_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">HomesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>    <span class="vi">@visits</span> <span class="o">=</span> <span class="no">Visit</span><span class="o">.</span><span class="n">all</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">visits_by_day</span>
+</span><span class='line'>   <span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="no">Visit</span><span class="o">.</span><span class="n">group_by_day</span><span class="p">(</span><span class="ss">:visited_at</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s2">&quot;%B %d, %Y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Next, add in the code listed below to your homes/show view.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/views/homes/show.html.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;!--</span> <span class="no">Line</span> <span class="no">Chart</span> <span class="o">-</span> <span class="no">Single</span> <span class="no">Series</span> <span class="o">--&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-12&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">h3</span><span class="o">&gt;</span><span class="no">Visits</span> <span class="no">By</span> <span class="no">Day</span><span class="o">&lt;</span><span class="sr">/h3&gt;</span>
+</span><span class='line'><span class="sr">  &lt;%= line_chart visits_by_day_home_path %&gt;</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If you refresh the page, you&#8217;ll notice that the new chart has been rendered. A quick look at your browser&#8217;s developer console will show you that the visits_by_day data is pulled down via AJAX and then the site is rendered.
+</p>
+
+
+
+
+<p>
+  <strong>Global Options</strong><br/>
+  You can customize the global options for ChartKick. Create an initializer called chartkick.rb and add in the code listed below.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/initializers/chartkick.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Chartkick</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>  <span class="ss">height</span><span class="p">:</span> <span class="s2">&quot;300px&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="ss">colors</span><span class="p">:</span> <span class="o">[</span><span class="s2">&quot;#ff0000&quot;</span><span class="p">,</span> <span class="s2">&quot;#00ff00&quot;</span><span class="p">,</span> <span class="s2">&quot;#0000ff&quot;</span><span class="p">,</span> <span class="s2">&quot;#ffff00&quot;</span><span class="p">,</span> <span class="s2">&quot;#ff00ff&quot;</span><span class="p">,</span> <span class="s2">&quot;0000ff&quot;</span><span class="o">]</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If you restart your Rails server and refresh the page, you will notice that the colors have changed.
+</p>
+
+
+
+
+<p>
+  For more information on ChartKick you can check <a href="http://www.chartkick.com" target="_blank">Chartkick</a>.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/05/02/automatically-updating-timeago-text-with-rails-livestamp-gem/">Automatically-updating Timeago Text With Rails-livestamp Gem</a></h1>
     
     
@@ -1741,144 +2519,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/04/17/ruby-on-rails-export-csv/">Ruby on Rails Export CSV</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-04-17T22:25:00+07:00" pubdate data-updated="true">Apr 17<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/ruby_on_rails.png" width="400" alt="Ruby on Rails Export CSV" />
-</p>
-
-
-
-
-<p>
-  Sometime you will want to provide a CSV export option for your users. This article will show you how.
-</p>
-
-
-
-
-<p>
-  The first thing we need to do is open up the config/application.rb file and add:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>config/application.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;csv&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Next, we need to add some code to the model that will export the data in the CSV format. Add the following code to the model you wish to export to CSV:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">as_csv</span>
-</span><span class='line'>  <span class="no">CSV</span><span class="o">.</span><span class="n">generate</span> <span class="k">do</span> <span class="o">|</span><span class="n">csv</span><span class="o">|</span>
-</span><span class='line'>    <span class="n">csv</span> <span class="o">&lt;&lt;</span> <span class="n">column_names</span>
-</span><span class='line'>    <span class="n">all</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">item</span><span class="o">|</span>
-</span><span class='line'>      <span class="n">csv</span> <span class="o">&lt;&lt;</span> <span class="n">item</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">values_at</span><span class="p">(</span><span class="o">*</span><span class="n">column_names</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  This code will export both the column headers as well as the data in the csv format and return the result.
-</p>
-
-
-
-
-<p>
-  Finally, we need to add a bit of extra code to our controller in order to return the CSV data to our user. Assuming your model and controller are named posts, add the following code to your posts controller:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">index</span>
-</span><span class='line'>  <span class="vi">@posts</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="ss">:created_at</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
-</span><span class='line'>    <span class="nb">format</span><span class="o">.</span><span class="n">html</span>
-</span><span class='line'>    <span class="nb">format</span><span class="o">.</span><span class="n">csv</span> <span class="p">{</span> <span class="n">send_data</span> <span class="vi">@posts</span><span class="o">.</span><span class="n">as_csv</span> <span class="p">}</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now, if you visit http://localhost:3000/posts.csv, you will be prompted to download the CSV.
-</p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/14/">&larr; Older</a>
@@ -1903,6 +2543,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2017/08/06/laravel-5-dot-x-x-migrations/">Laravel 5.x.x Migrations</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2017/08/06/laravel-5-dot-x-x-template/">Laravel 5.x.x Template</a>
       </li>
     
@@ -1924,10 +2568,6 @@
     
       <li class="post">
         <a href="/blog/2017/06/25/what-is-full-stack-developer/">What Is Full Stack Developer?</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/06/24/laravel-5-dot-x-x-installation-and-configuration/">Laravel 5.x.x Installation and Configuration</a>
       </li>
     
   </ul>
@@ -2009,7 +2649,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/laravel/">Laravel [ 6 ]</a>
+        <a href="/blog/categories/laravel/">Laravel [ 7 ]</a>
       </li>
     
   </ul>

@@ -79,6 +79,254 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2016/09/26/gulp-cleaning-our-build-folder/">Gulp – Cleaning Our Build Folder</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-09-26T16:56:00+07:00" pubdate data-updated="true">Sep 26<span>th</span>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/gulpjs.jpg" width="600" alt="Gulp, Gulp – Cleaning Our Build Folder" />
+</p>
+
+
+
+
+<p>
+  A normal part of a build process is a cleaning task to remove all the old files in the build folder.
+</p>
+
+
+
+
+<p>
+For us, this means getting rid of the leftover <code>more_styles.css</code> and <code>some_styles.css</code> files in our <code>build/styles</code> folder.
+</p>
+
+
+
+
+<p>
+  To clean files, we will need another gulp plugin:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">npm</span> <span class="n">install</span> <span class="n">gulp</span><span class="o">-</span><span class="n">rimraf</span> <span class="o">--</span><span class="n">save</span><span class="o">-</span><span class="n">dev</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+For more information on gulp-rimraf check out <a href="https://www.npmjs.com/package/gulp-rimraf" target="_blank"> https://www.npmjs.org/package/gulp-rimraf</a>.
+</p>
+
+
+
+
+<p>
+  This task used to be handled by <code>gulp-clean</code> but has been replaced by <code>gulp-rimraf</code>.
+</p>
+
+
+
+
+<p>
+Instead of adjusting our <code>default</code> task, lets create a new task to clean out the directory.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>gulpfile.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">var</span> <span class="n">gulp</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s1">&#39;gulp&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="n">var</span> <span class="n">concat</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s1">&#39;gulp-concat&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="n">var</span> <span class="n">clean</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s1">&#39;gulp-rimraf&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">gulp</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;clean&#39;</span><span class="p">,</span> <span class="o">[]</span><span class="p">,</span> <span class="n">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Clean all files in build folder&quot;</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">gulp</span><span class="o">.</span><span class="n">src</span><span class="p">(</span><span class="s2">&quot;build/*&quot;</span><span class="p">,</span> <span class="p">{</span> <span class="ss">read</span><span class="p">:</span> <span class="kp">false</span> <span class="p">})</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">clean</span><span class="p">());</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">gulp</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="o">[</span><span class="s1">&#39;clean&#39;</span><span class="o">]</span><span class="p">,</span> <span class="n">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Concating and moving all the css files in styles folder&quot;</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">gulp</span><span class="o">.</span><span class="n">src</span><span class="p">(</span><span class="s2">&quot;contents/styles/**.css&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">concat</span><span class="p">(</span><span class="s1">&#39;main.css&#39;</span><span class="p">))</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">gulp</span><span class="o">.</span><span class="n">dest</span><span class="p">(</span><span class="s1">&#39;build/styles&#39;</span><span class="p">));</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So like before, we need to require <code>gulp-rimraf</code>.
+</p>
+
+
+
+
+<p>
+  This time though, we created a new task called <code>clean</code>. We tell this task to look at all the files in the <code>build</code> folder and then pipe them to our clean operation. This will delete the files.
+</p>
+
+
+
+
+<p>
+  You might notice that in our options we pass in <code>{ read: false }</code>. This tells the task to not read the contents of the files it is deleting. It is an easy performance gain.
+</p>
+
+
+
+
+<p>
+  To run our clean task from the command line, we just tell gulp which task to run:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">gulp</span> <span class="n">clean</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Using</span> <span class="n">gulpfile</span> <span class="o">~</span><span class="sr">/YOUR_DIRECTORY/</span><span class="n">gulpfile</span><span class="o">.</span><span class="n">js</span>
+</span><span class='line'><span class="no">Starting</span> <span class="s1">&#39;clean&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="no">Clean</span> <span class="n">all</span> <span class="n">files</span> <span class="k">in</span> <span class="n">build</span> <span class="n">folder</span>
+</span><span class='line'><span class="no">Finished</span> <span class="s1">&#39;clean&#39;</span> <span class="n">after</span> <span class="mi">8</span><span class="o">.</span><span class="mi">95</span> <span class="n">ms</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  What we would like is to run our <code>clean</code> task before we run our <code>default</code> task. That way our build folder will be nice and empty before we starting moving files there.
+</p>
+
+
+
+
+<p>
+You might have been wondering what the empty array (<code>[]</code>) was before our <code>function</code>. This is where we specify dependency tasks.
+</p>
+
+
+
+
+<p>
+  A <strong>dependency task</strong> is a task that needs to be completed before gulp can run the current task.
+</p>
+
+
+
+
+<p>
+  So for our scenario, our <code>clean</code> task is a dependency for <code>default</code>.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>gulpfile.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="n">gulp</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="o">[</span><span class="s1">&#39;clean&#39;</span><span class="o">]</span><span class="p">,</span> <span class="n">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now when we run our <code>default</code> gulp task, we should see that it runs the <code>clean</code> task before <code>default</code>.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">gulp</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Using</span> <span class="n">gulpfile</span> <span class="o">~</span><span class="sr">/YOUR_DIRECTORY/</span><span class="n">gulpfile</span><span class="o">.</span><span class="n">js</span>
+</span><span class='line'><span class="no">Starting</span> <span class="s1">&#39;clean&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="no">Clean</span> <span class="n">all</span> <span class="n">files</span> <span class="k">in</span> <span class="n">build</span> <span class="n">folder</span>
+</span><span class='line'><span class="no">Finished</span> <span class="s1">&#39;clean&#39;</span> <span class="n">after</span> <span class="mi">9</span><span class="o">.</span><span class="mo">03</span> <span class="n">ms</span>
+</span><span class='line'><span class="no">Starting</span> <span class="s1">&#39;default&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="no">Concating</span> <span class="ow">and</span> <span class="n">moving</span> <span class="n">all</span> <span class="n">files</span> <span class="n">from</span> <span class="n">styles</span> <span class="n">folder</span>
+</span><span class='line'><span class="no">Finished</span> <span class="s1">&#39;default&#39;</span> <span class="n">after</span> <span class="mi">8</span><span class="o">.</span><span class="mi">42</span> <span class="n">ms</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, That’s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2016/09/13/gulp-concat-combining-multiple-files-into-one/">Gulp – Concat: Combining Multiple Files Into One</a></h1>
     
     
@@ -2388,105 +2636,6 @@ The service command also provides some other methods such as <code>restart</code
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/03/22/the-freelancer/">The Freelancer</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-03-22T16:45:00+07:00" pubdate data-updated="true">Mar 22<span>nd</span>, 2016</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/the_freelancer.jpg" width="600" alt="The Freelancer" />
-</p>
-
-
-
-
-<p>
-  Freelancer is a self-employed person who pursues a profession without a long-term commitment to any particular employer. Your curiosity in this opportunity was probably sparked by posts marked &#8220;Freelance&#8221; or &#8220;Work from anywhere&#8221; on the myriad of job boards around the Web. Freelancing is equal parts freedom and responsibility. While you have the freedom to choose when you work, where you work and what you work on, you are also responsible for everything: deadlines, finding work, the quality of your work, communication and so much more.
-</p>
-
-
-
-
-<p>
-  So, your skill may be in Web development, Graphic design and your approach is to freelance, but it’s not that easy: freelancing is no walk in the park. It could become a living nightmare if you’re not able to use your time efficiently and remain focused and motivated until a project comes to a close. It could also become a nightmare if you market yourself poorly, are constantly desperate for work or surrender too much power to a client, putting you in the position of a monkey-worker responding to petty demands. The reasons I love being a freelancer:
-</p>
-
-
-
-
-<p>
-  <strong>Be your own boss</strong><br/>
-  Report to no one but yourself. You will work on boring tasks.
-</p>
-
-
-
-
-<p>
-  <strong>Enjoy your freedom</strong><br/>
-  You have the freedom to work when and where you please, the freedom to structure your day as you please.
-</p>
-
-
-
-
-<p>
-  <strong>Choose what to work on</strong><br/>
-  Want to spend 50% of your time on open-source projects? Interested in building your own Web app? You have the power to make that a reality. Want to work exclusively on projects in social media? Make it happen.
-</p>
-
-
-
-
-<p>
-  <strong>Set your rates</strong><br/>
-  Value is both a reflection of how you perceive yourself and how others perceive you. Are you capable of meeting deadlines, communicating well and delivering quality code?
-</p>
-
-
-
-
-<p>
-  If you are just starting out, charging $80 per hour will be hard; you have to earn that rate over time and with experience.
-</p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/5/">&larr; Older</a>
@@ -2511,6 +2660,10 @@ The service command also provides some other methods such as <code>restart</code
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2017/08/06/laravel-5-dot-x-x-migrations/">Laravel 5.x.x Migrations</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2017/08/06/laravel-5-dot-x-x-template/">Laravel 5.x.x Template</a>
       </li>
     
@@ -2532,10 +2685,6 @@ The service command also provides some other methods such as <code>restart</code
     
       <li class="post">
         <a href="/blog/2017/06/25/what-is-full-stack-developer/">What Is Full Stack Developer?</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/06/24/laravel-5-dot-x-x-installation-and-configuration/">Laravel 5.x.x Installation and Configuration</a>
       </li>
     
   </ul>
@@ -2617,7 +2766,7 @@ The service command also provides some other methods such as <code>restart</code
       </li>
     
       <li>
-        <a href="/blog/categories/laravel/">Laravel [ 6 ]</a>
+        <a href="/blog/categories/laravel/">Laravel [ 7 ]</a>
       </li>
     
   </ul>

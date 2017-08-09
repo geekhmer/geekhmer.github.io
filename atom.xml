@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2017-08-06T02:09:03+07:00</updated>
+  <updated>2017-08-09T21:44:48+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,1154 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Laravel 5.x.x Migrations]]></title>
+    <link href="http://geekhmer.github.io/blog/2017/08/06/laravel-5-dot-x-x-migrations/"/>
+    <updated>2017-08-06T09:59:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2017/08/06/laravel-5-dot-x-x-migrations</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/laravel_news_letter.png" width="600" alt="Laravel 5.x.x Migrations" />
+</p>
+
+
+
+
+<p>
+  Laravel migrations provide mechanisms for creating and modifying database tables. Migrations are database agnostic, this means you don&#8217;t have to worry about the specific SQL syntax for the database engine that you are creating tables for.
+</p>
+
+
+
+
+<p>
+  Well, in this articles I will cover the following sections: Requirements for running migrations, Artisan migration command, Migration structure, How to create a table using a migration, Laravel migration rollback, Laravel migration how-tos, Database seeding.
+</p>
+
+
+
+
+<h3>Requirements for Running Migrations</h3>
+
+
+
+
+<p>
+  1. Create the database for Laravel project<br/>
+  2. Set the database connection parameters for Laravel project<br/>
+  3. Set the database connection parameters for artisan command line
+</p>
+
+
+
+
+<p>
+  <strong>1. Create the Database for Laravel Project</strong><br/>
+  Open up terminator or what ever MySQL database management tool that you are using and run the command below:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">CREATE</span> <span class="nx">DATABASE</span> <span class="nx">foodie</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <code>CREATE DATABASE foodie;</code> creates a database called foodie in MySQL.
+</p>
+
+
+
+
+<p>
+  <strong>2. Set the Database Connection Parameters for Laravel Project</strong><br/>
+  Open up <code>/config/database.php</code> file and modify to the following:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>database.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="s1">&#39;mysql&#39;</span> <span class="o">=&gt;</span> <span class="p">[</span>
+</span><span class='line'>  <span class="s1">&#39;driver&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;mysql&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;host&#39;</span> <span class="o">=&gt;</span> <span class="nx">env</span><span class="p">(</span><span class="s1">&#39;DB_HOST&#39;</span><span class="p">,</span> <span class="s1">&#39;127.0.0.1&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="s1">&#39;port&#39;</span> <span class="o">=&gt;</span> <span class="nx">env</span><span class="p">(</span><span class="s1">&#39;DB_PORT&#39;</span><span class="p">,</span> <span class="s1">&#39;3306&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="s1">&#39;database&#39;</span> <span class="o">=&gt;</span> <span class="nx">env</span><span class="p">(</span><span class="s1">&#39;DB_DATABASE&#39;</span><span class="p">,</span> <span class="s1">&#39;foodie&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="s1">&#39;username&#39;</span> <span class="o">=&gt;</span> <span class="nx">env</span><span class="p">(</span><span class="s1">&#39;DB_USERNAME&#39;</span><span class="p">,</span> <span class="s1">&#39;root&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="s1">&#39;password&#39;</span> <span class="o">=&gt;</span> <span class="nx">env</span><span class="p">(</span><span class="s1">&#39;DB_PASSWORD&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="s1">&#39;unix_socket&#39;</span> <span class="o">=&gt;</span> <span class="nx">env</span><span class="p">(</span><span class="s1">&#39;DB_SOCKET&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="s1">&#39;charset&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;utf8mb4&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;collation&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;utf8mb4_unicode_ci&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;prefix&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;strict&#39;</span> <span class="o">=&gt;</span> <span class="k">true</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;engine&#39;</span> <span class="o">=&gt;</span> <span class="k">null</span><span class="p">,</span>
+</span><span class='line'><span class="p">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>3. Set the Database Connection Parameters for Artisan Command Line</strong><br/>
+  One of the challenges that most developers face when working with migrations in Laravel 5.x.x from the artisan command line is the following message:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">Access</span> <span class="nx">denied</span> <span class="k">for</span> <span class="nx">user</span> <span class="s1">&#39;homestead&#39;</span><span class="o">@</span><span class="s1">&#39; localhost&#39;</span> <span class="p">(</span><span class="nx">using</span> <span class="nx">password</span><span class="o">:</span> <span class="nx">YES</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  You will get the above message even you have set the correct parameters in <code>/config/database.php</code> file, because the artisan command line uses the database connection parameters specified in <code>.env</code> file.
+</p>
+
+
+
+
+<p>
+  The solutions is go to the project open up <code>/.env</code> file and modify to the following:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>.env </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">APP_NAME</span><span class="o">=</span><span class="nx">Laravel</span>
+</span><span class='line'><span class="nx">APP_ENV</span><span class="o">=</span><span class="nx">local</span>
+</span><span class='line'><span class="nx">APP_KEY</span><span class="o">=</span><span class="nx">base64</span><span class="o">:</span><span class="nx">n8KivGzDCuNX1SljFb8xxQxBOPquewnAQIBa0H81nR8</span><span class="o">=</span>
+</span><span class='line'><span class="nx">APP_DEBUG</span><span class="o">=</span><span class="k">true</span>
+</span><span class='line'><span class="nx">APP_LOG_LEVEL</span><span class="o">=</span><span class="nx">debug</span>
+</span><span class='line'><span class="nx">APP_URL</span><span class="o">=</span><span class="nx">http</span><span class="o">://</span><span class="nx">localhost</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">DB_CONNECTION</span><span class="o">=</span><span class="nx">mysql</span>
+</span><span class='line'><span class="nx">DB_HOST</span><span class="o">=</span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span>
+</span><span class='line'><span class="nx">DB_PORT</span><span class="o">=</span><span class="mi">3306</span>
+</span><span class='line'><span class="nx">DB_DATABASE</span><span class="o">=</span><span class="nx">foodie</span>
+</span><span class='line'><span class="nx">DB_USERNAME</span><span class="o">=</span><span class="nx">root</span>
+</span><span class='line'><span class="nx">DB_PASSWORD</span><span class="o">=</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">BROADCAST_DRIVER</span><span class="o">=</span><span class="nx">log</span>
+</span><span class='line'><span class="nx">CACHE_DRIVER</span><span class="o">=</span><span class="nb">file</span>
+</span><span class='line'><span class="nx">SESSION_DRIVER</span><span class="o">=</span><span class="nb">file</span>
+</span><span class='line'><span class="nx">QUEUE_DRIVER</span><span class="o">=</span><span class="nx">sync</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">REDIS_HOST</span><span class="o">=</span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span>
+</span><span class='line'><span class="nx">REDIS_PASSWORD</span><span class="o">=</span><span class="k">null</span>
+</span><span class='line'><span class="nx">REDIS_PORT</span><span class="o">=</span><span class="mi">6379</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">MAIL_DRIVER</span><span class="o">=</span><span class="nx">smtp</span>
+</span><span class='line'><span class="nx">MAIL_HOST</span><span class="o">=</span><span class="nx">smtp</span><span class="o">.</span><span class="nx">mailtrap</span><span class="o">.</span><span class="nx">io</span>
+</span><span class='line'><span class="nx">MAIL_PORT</span><span class="o">=</span><span class="mi">2525</span>
+</span><span class='line'><span class="nx">MAIL_USERNAME</span><span class="o">=</span><span class="k">null</span>
+</span><span class='line'><span class="nx">MAIL_PASSWORD</span><span class="o">=</span><span class="k">null</span>
+</span><span class='line'><span class="nx">MAIL_ENCRYPTION</span><span class="o">=</span><span class="k">null</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">PUSHER_APP_ID</span><span class="o">=</span>
+</span><span class='line'><span class="nx">PUSHER_APP_KEY</span><span class="o">=</span>
+</span><span class='line'><span class="nx">PUSHER_APP_SECRET</span><span class="o">=</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The database, username and password must match the ones on your system.
+</p>
+
+
+
+
+<h3>Artisan Migration Command</h3>
+
+
+
+
+<p>
+  We will create:<br/>
+  1. The migration table in our database.<br/>
+  2. A migration file that we will use to create a table for hard drinks.
+</p>
+
+
+
+
+<p>
+  When you create a migration file, Laravel will stores it in <code>/database/migrations</code> folder. You can specify a different path if you would like to but we won’t cover that in this articles. We will work with the default path.
+</p>
+
+
+
+
+<p>
+  <strong>Create Migration Table</strong><br/>
+  Open up the terminator and run the following artisan command to create a migration table:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">make</span><span class="o">:</span><span class="nx">migration</span> <span class="nx">create_drinks_table</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <code>php artisan make:migration</code> executes the make migration method via the artisan command.<br/>
+  <code>create_drinks_table</code> specifies the name of the migration file that will be created.
+</p>
+
+
+
+
+<p>
+  You will get the following results:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">Created</span> <span class="nx">Migration</span><span class="o">:</span> <span class="mi">2017</span><span class="nx">_08_08_072434_create_drinks_table</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<h3>Migration Structure</h3>
+
+
+
+
+<p>
+  You will get the following file with the contents below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>20170808072434createdrinkstable.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">use</span> <span class="nx">Illuminate\Database\Schema\Blueprint</span><span class="p">;</span>
+</span><span class='line'><span class="k">use</span> <span class="nx">Illuminate\Database\Migrations\Migration</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">CreateDrinksTable</span> <span class="k">extends</span> <span class="nx">Migration</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">up</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">//</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">down</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">//</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  - <code>class CreateDrinksTable extends Migration</code> defines the CreateDrinksTable class that extends Migration class.
+  - <code>public function up()</code> defines the function that is executed when the migration is run.<br/>
+  - <code>public function down()</code> defines the function that is executed when you run migration rollback.
+</p>
+
+
+
+
+<h3>How to Create a Table Using a Migration</h3>
+
+
+
+
+<p>
+  Now that we have successfully created a migration file, we will add the table definition fields in the migration modify the contents of <code>/database/migrations/20170808072434createdrinkstable.php file.</code>
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>20170808072434createdrinkstable.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
+</span><span class='line'><span class="k">use</span> <span class="nx">Illuminate\Database\Schema\Blueprint</span><span class="p">;</span>
+</span><span class='line'><span class="k">use</span> <span class="nx">Illuminate\Database\Migrations\Migration</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">CreateDrinksTable</span> <span class="k">extends</span> <span class="nx">Migration</span> <span class="p">{</span>
+</span><span class='line'>  <span class="sd">/**</span>
+</span><span class='line'><span class="sd">  * Run the migrations.</span>
+</span><span class='line'><span class="sd">  *</span>
+</span><span class='line'><span class="sd">  * @return void</span>
+</span><span class='line'><span class="sd">  */</span>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">up</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">Schema</span><span class="o">::</span><span class="na">create</span><span class="p">(</span><span class="s1">&#39;drinks&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">(</span><span class="nx">Blueprint</span> <span class="nv">$table</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nv">$table</span><span class="o">-&gt;</span><span class="na">increments</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">);</span>
+</span><span class='line'>      <span class="nv">$table</span><span class="o">-&gt;</span><span class="na">string</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="mi">75</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">unique</span><span class="p">();</span>
+</span><span class='line'>      <span class="nv">$table</span><span class="o">-&gt;</span><span class="na">text</span><span class="p">(</span><span class="s1">&#39;comments&#39;</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">nullable</span><span class="p">();</span>
+</span><span class='line'>      <span class="nv">$table</span><span class="o">-&gt;</span><span class="na">integer</span><span class="p">(</span><span class="s1">&#39;rating&#39;</span><span class="p">);</span>
+</span><span class='line'>      <span class="nv">$table</span><span class="o">-&gt;</span><span class="na">date</span><span class="p">(</span><span class="s1">&#39;brew_date&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nv">$table</span><span class="o">-&gt;</span><span class="na">timestamps</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="sd">/**</span>
+</span><span class='line'><span class="sd">  * Reverse the migrations.</span>
+</span><span class='line'><span class="sd">  *</span>
+</span><span class='line'><span class="sd">  * @return void</span>
+</span><span class='line'><span class="sd">  */</span>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">down</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">Schema</span><span class="o">::</span><span class="na">drop</span><span class="p">(</span><span class="s1">&#39;drinks&#39;</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  - <code>Schema::create('drinks', function (Blueprint $table) {...}</code> calls the create function of the Schema class. The create function is responsible for creating the database table.<br/>
+  - <code>(Blueprint $table)</code> is a closure function with a $table parameter.<br/>
+  - <code>$table</code> parameter is used to define the structure of the database.<br/>
+  - <code>$table->increments('id');</code> increments is used to define an auto increment field.<br/>
+  - <code>$table->string('name', 75)->unique();</code> string is used to define varchar fields. The second parameter is the length of the field. <code>->unique()</code> is used to mark the column as unique.<br/>
+  - <code>$table->text('comments')->nullable();</code> is used to define text fields. <code>->nullable()</code> is used to allow the column to accept null values.<br/>
+  - <code>$table->integer('rating');</code> integer is used to define int fields.<br/>
+  - <code>$table->date('brew_date');</code> is used to define date fields.<br/>
+  - <code>$table->timestamps();</code>  is used to automatically create two time stamp fields namely created_at and updated_at.
+</p>
+
+
+
+
+<p>
+  Go back to the terminator and run the command below:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">migrate</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And then you will get many tables drinks and users, password_resets which Laravel has migrated those two tables by defaults.
+</p>
+
+
+
+
+<h3>Laravel Migration Rollback</h3>
+
+
+
+
+<p>
+  One of the advantages of migrations is that it allow you to roll back to the previous state before you run the migrations. In this section, we will roll back the creation of the tables.
+</p>
+
+
+
+
+<p>
+  Go back to the terminator and run the command below:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">migrate</span><span class="o">:</span><span class="nx">rollback</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And then you will get the following output:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">Rolled</span> <span class="nx">back</span><span class="o">:</span> <span class="mi">2017</span><span class="nx">_08_08_000000_create_users_table</span><span class="o">.</span><span class="nx">php</span>
+</span><span class='line'><span class="nx">Rolled</span> <span class="nx">back</span><span class="o">:</span> <span class="mi">2017</span><span class="nx">_08_08_100000_create_password_resets_table</span><span class="o">.</span><span class="nx">php</span>
+</span><span class='line'><span class="nx">Rolled</span> <span class="nx">back</span><span class="o">:</span> <span class="mi">2017</span><span class="nx">_08_08_090421_create_drinks_table</span><span class="o">.</span><span class="nx">php</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<h3>Laravel Migration How-tos</h3>
+
+
+
+
+<p>
+  This section I will show how to perform various Laravel migration tasks.
+</p>
+
+
+
+
+<p>
+  <strong>Laravel Migration Insert Data</strong><br/>
+  This &#8220;how-to&#8221; shows you how to create a migration file that inserts data into the newly created table. We will create an employees table and add 33 seed records using Faker Library.
+</p>
+
+
+
+
+<p>
+  Open up the terminator and run the command below:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">make</span><span class="o">:</span><span class="nx">migration</span> <span class="nx">employees</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Open up <code>/database/migrations/xxxxxxxxx_employees.php</code> file and add the following codes:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>xxxxxxxxx_employees.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">use</span> <span class="nx">Illuminate\Database\Schema\Blueprint</span><span class="p">;</span>
+</span><span class='line'><span class="k">use</span> <span class="nx">Illuminate\Database\Migrations\Migration</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Employees</span> <span class="k">extends</span> <span class="nx">Migration</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="sd">/**</span>
+</span><span class='line'><span class="sd">   * Run the migrations.</span>
+</span><span class='line'><span class="sd">   *</span>
+</span><span class='line'><span class="sd">   * @return void</span>
+</span><span class='line'><span class="sd">   */</span>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">up</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">Schema</span><span class="o">::</span><span class="na">create</span><span class="p">(</span><span class="s1">&#39;employees&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">(</span><span class="nx">Blueprint</span> <span class="nv">$table</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nv">$table</span><span class="o">-&gt;</span><span class="na">increments</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">);</span>
+</span><span class='line'>      <span class="nv">$table</span><span class="o">-&gt;</span><span class="na">string</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">);</span>
+</span><span class='line'>      <span class="nv">$table</span><span class="o">-&gt;</span><span class="na">string</span><span class="p">(</span><span class="s1">&#39;email&#39;</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">unique</span><span class="p">();</span>
+</span><span class='line'>      <span class="nv">$table</span><span class="o">-&gt;</span><span class="na">string</span><span class="p">(</span><span class="s1">&#39;contact_number&#39;</span><span class="p">);</span>
+</span><span class='line'>      <span class="nv">$table</span><span class="o">-&gt;</span><span class="na">timestamps</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nv">$faker</span> <span class="o">=</span> <span class="nx">Faker\Factory</span><span class="o">::</span><span class="na">create</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nv">$limit</span> <span class="o">=</span> <span class="mi">33</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">for</span><span class="p">(</span><span class="nv">$i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nv">$i</span> <span class="o">&lt;</span> <span class="nv">$limit</span><span class="p">;</span> <span class="nv">$i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">DB</span><span class="o">::</span><span class="na">table</span><span class="p">(</span><span class="s1">&#39;employees&#39;</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">insert</span><span class="p">([</span> <span class="c1">//,</span>
+</span><span class='line'>        <span class="s1">&#39;name&#39;</span> <span class="o">=&gt;</span> <span class="nv">$faker</span><span class="o">-&gt;</span><span class="na">name</span><span class="p">,</span>
+</span><span class='line'>        <span class="s1">&#39;email&#39;</span> <span class="o">=&gt;</span> <span class="nv">$faker</span><span class="o">-&gt;</span><span class="na">unique</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">email</span><span class="p">,</span>
+</span><span class='line'>        <span class="s1">&#39;contact_number&#39;</span> <span class="o">=&gt;</span> <span class="nv">$faker</span><span class="o">-&gt;</span><span class="na">phoneNumber</span><span class="p">,</span>
+</span><span class='line'>      <span class="p">]);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="sd">/**</span>
+</span><span class='line'><span class="sd">   * Reverse the migrations.</span>
+</span><span class='line'><span class="sd">   *</span>
+</span><span class='line'><span class="sd">   * @return void</span>
+</span><span class='line'><span class="sd">   */</span>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">down</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">Schema</span><span class="o">::</span><span class="na">drop</span><span class="p">(</span><span class="s1">&#39;employees&#39;</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p><p>
+  <code>$faker = Faker\Factory::create();</code> creates an instance of Faker factory.<br/>
+  <code>$limit = 33;</code> sets the number of records that we want to add to the database.<br/>
+  <code>for($i = 0; $i &lt; $limit; $i++) { DB::table(&lsquo;employees&rsquo;)&ndash;>insert(&hellip;); }</code> uses a for loop to add records to the database 33 times. <code>$faker->name</code> generates a faker name. <code>$faker->unique()&ndash;>email</code> generates a fake unique email address. <code>$faker->phoneNumber</code> generates a fake phone number.
+</p></p>
+
+<p><p>
+  Open up the terminator and run the following command to run the migration:
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">migration</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  <strong>Laravel Migration Add Column/Drop Colum</strong><br/>
+  We will add a new gender column to employees table.
+</p></p>
+
+<p><p>
+  Open up the terminator and run the following command:
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">make</span><span class="o">:</span><span class="nx">migration</span> <span class="nx">add_gender_to_employees</span> <span class="o">&mdash;</span><span class="nx">table</span><span class="o">=</span><span class="nx">employees</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  <code>&mdash;table=employees</code> tells Laravel we want to work with an existing table called employees.
+</p></p>
+
+<p><p>
+  Open up <code>/database/migration/xxxxxxx_add_gender_to_employees.php</code> and modify to the following:
+</p></p>
+
+<p><figure class='code'><figcaption><span>xxxxxxx_add_gender_to_employees.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">use</span> <span class="nx">Illuminate\Database\Schema\Blueprint</span><span class="p">;</span>
+</span><span class='line'><span class="k">use</span> <span class="nx">Illuminate\Database\Migrations\Migration</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">AddGenderToEmployees</span> <span class="k">extends</span> <span class="nx">Migration</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="sd">/<strong></span>
+</span><span class='line'><span class="sd">   * Run the migrations.</span>
+</span><span class='line'><span class="sd">   <em></span>
+</span><span class='line'><span class="sd">   * @return void</span>
+</span><span class='line'><span class="sd">   </em>/</span>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">up</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">Schema</span><span class="o">::</span><span class="na">table</span><span class="p">(</span><span class="s1">&#39;employees&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">(</span><span class="nx">Blueprint</span> <span class="nv">$table</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nv">$table</span><span class="o">&ndash;&gt;</span><span class="na">string</span><span class="p">(</span><span class="s1">&#39;gender&#39;</span><span class="p">)</span><span class="o">&ndash;&gt;</span><span class="na">after</span><span class="p">(</span><span class="s1">&#39;contact_number&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="sd">/</strong></span>
+</span><span class='line'><span class="sd">   * Reverse the migrations.</span>
+</span><span class='line'><span class="sd">   <em></span>
+</span><span class='line'><span class="sd">   * @return void</span>
+</span><span class='line'><span class="sd">   </em>/</span>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">down</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">Schema</span><span class="o">::</span><span class="na">table</span><span class="p">(</span><span class="s1">&#39;employees&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">(</span><span class="nx">Blueprint</span> <span class="nv">$table</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nv">$table</span><span class="o">&ndash;&gt;</span><span class="na">dropColumn</span><span class="p">(</span><span class="s1">&#39;gender&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  <code>public function up() {&hellip;}</code> uses <code>Schema::table(&lsquo;employees&rsquo; &hellip;)</code> to add a new column gender.<br/>
+  <code>public function down() {&hellip;}</code> drops the new column from the table when we reverse the command. <code>$table->dropColumn(&lsquo;gender&rsquo;);</code> is the command that drops the table.
+</p></p>
+
+<p><p>
+  <strong>Laravel Migration Change Column Type</strong><br/>
+</p></p>
+
+<p><p>
+  We have created the gender column with the default size of 255. We want to change it to 5 as the maximum size.
+</p></p>
+
+<p><p>
+  Open up the terminator and run the following command:
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">make</span><span class="o">:</span><span class="nx">migration</span> <span class="nx">modify_gender_in_employees</span> <span class="o">&mdash;</span><span class="nx">table</span><span class="o">=</span><span class="nx">employees</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  Open up <code>/database/migrations/xxxxxxx_modify_gender_in_employees.php</code> file and modify to the following:
+</p></p>
+
+<p><figure class='code'><figcaption><span>xxxxxxx_modify_gender_in_employees.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">use</span> <span class="nx">Illuminate\Database\Schema\Blueprint</span><span class="p">;</span>
+</span><span class='line'><span class="k">use</span> <span class="nx">Illuminate\Database\Migrations\Migration</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">ModifyGenderInEmployees</span> <span class="k">extends</span> <span class="nx">Migration</span> <span class="p">{</span>
+</span><span class='line'>  <span class="sd">/<strong></span>
+</span><span class='line'><span class="sd">   * Run the migrations.</span>
+</span><span class='line'><span class="sd">   <em></span>
+</span><span class='line'><span class="sd">   * @return void</span>
+</span><span class='line'><span class="sd">   </em>/</span>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">up</span><span class="p">()</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>    <span class="nx">Schema</span><span class="o">::</span><span class="na">table</span><span class="p">(</span><span class="s1">&#39;employees&#39;</span><span class="p">,</span> <span class="k">function</span><span class="p">(</span><span class="nx">Blueprint</span> <span class="nv">$table</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nv">$table</span><span class="o">&ndash;&gt;</span><span class="na">string</span><span class="p">(</span><span class="s1">&#39;gender&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">&ndash;&gt;</span><span class="na">change</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="sd">/</strong></span>
+</span><span class='line'><span class="sd">   * Reverse the migrations.</span>
+</span><span class='line'><span class="sd">   <em></span>
+</span><span class='line'><span class="sd">   * @return void</span>
+</span><span class='line'><span class="sd">   </em>/</span>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">down</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">Schema</span><span class="o">::</span><span class="na">table</span><span class="p">(</span><span class="s1">&#39;employees&#39;</span><span class="p">,</span> <span class="k">function</span><span class="p">(</span><span class="nx">Blueprint</span> <span class="nv">$table</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nv">$table</span><span class="o">&ndash;&gt;</span><span class="na">string</span><span class="p">(</span><span class="s1">&#39;gender&#39;</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span><span class="o">&ndash;&gt;</span><span class="na">change</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  <code>$table->string(&lsquo;gender&rsquo;, 5)&ndash;>change();</code> maintains the varchar data type and sets the character limit to 5. If we wanted to change the data type too, we would have specified a different data type.<br/>
+  <code>$table->string(&lsquo;gender&rsquo;, 255)&ndash;>change();</code> rollback the migration to the previous state.
+</p></p>
+
+<p><p>
+  Open up the terminator and run the following command to run the migration:
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">migrate</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  <strong>Laravel Migration Nullable</strong><br/>
+  By default, Laravel assumes all columns are required unless you tell it so let’s assume the gender field is optional.
+</p></p>
+
+<p><p>
+  Open up the terminator and run the following command to create a migration file:
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">make</span><span class="o">:</span><span class="nx">migration</span> <span class="nx">make_gender_null_in_employees</span> <span class="err">–</span><span class="nx">table</span><span class="o">&ndash;</span><span class="nx">employees</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  Open up <code>/database/migrations/xxxxxxx_make_gender_null_in_employees.php</code> file and modify to the following:
+</p></p>
+
+<p><figure class='code'><figcaption><span>xxxxxxx_make_gender_null_in_employees.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">use</span> <span class="nx">Illuminate\Database\Schema\Blueprint</span><span class="p">;</span>
+</span><span class='line'><span class="k">use</span> <span class="nx">Illuminate\Database\Migrations\Migration</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">MakeGenderNullInEmployees</span> <span class="k">extends</span> <span class="nx">Migration</span> <span class="p">{</span>
+</span><span class='line'>  <span class="sd">/<strong></span>
+</span><span class='line'><span class="sd">   * Run the migrations.</span>
+</span><span class='line'><span class="sd">   <em></span>
+</span><span class='line'><span class="sd">   * @return void</span>
+</span><span class='line'><span class="sd">   </em>/</span>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">up</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">Schema</span><span class="o">::</span><span class="na">table</span><span class="p">(</span><span class="s1">&#39;employees&#39;</span><span class="p">,</span> <span class="k">function</span><span class="p">(</span><span class="nx">Blueprint</span> <span class="nv">$table</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nv">$table</span><span class="o">&ndash;&gt;</span><span class="na">string</span><span class="p">(</span><span class="s1">&#39;gender&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">&ndash;&gt;</span><span class="na">nullable</span><span class="p">()</span><span class="o">&ndash;&gt;</span><span class="na">change</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="sd">/</strong></span>
+</span><span class='line'><span class="sd">   * Reverse the migrations.</span>
+</span><span class='line'><span class="sd">   <em></span>
+</span><span class='line'><span class="sd">   * @return void</span>
+</span><span class='line'><span class="sd">   </em>/</span>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">down</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">Schema</span><span class="o">::</span><span class="na">table</span><span class="p">(</span><span class="s1">&#39;employees&#39;</span><span class="p">,</span> <span class="k">function</span><span class="p">(</span><span class="nx">Blueprint</span> <span class="nv">$table</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nv">$table</span><span class="o">&ndash;&gt;</span><span class="na">string</span><span class="p">(</span><span class="s1">&#39;gender&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">&ndash;&gt;</span><span class="na">change</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  <strong>Laravel Migration Foreign Key</strong><br/>
+  Let’s say we want to group our employees by their departments, we can add a foreign key for the dept_id.
+</p></p>
+
+<p><p>
+  Open up the terminator and run the following command to create a migration file for depts table:
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">make</span><span class="o">:</span><span class="nx">migration</span> <span class="nx">depts</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  Open up <code>/database/migrations/xxxxxxxxx_depts.php</code> file and add the following codes:
+</p></p>
+
+<p><figure class='code'><figcaption><span>xxxxxxxxx_depts.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">use</span> <span class="nx">Illuminate\Database\Schema\Blueprint</span><span class="p">;</span>
+</span><span class='line'><span class="k">use</span> <span class="nx">Illuminate\Database\Migrations\Migration</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Depts</span> <span class="k">extends</span> <span class="nx">Migration</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="sd">/<strong></span>
+</span><span class='line'><span class="sd">   * Run the migrations.</span>
+</span><span class='line'><span class="sd">   <em></span>
+</span><span class='line'><span class="sd">   * @return void</span>
+</span><span class='line'><span class="sd">   </em>/</span>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">up</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">Schema</span><span class="o">::</span><span class="na">create</span><span class="p">(</span><span class="s1">&#39;depts&#39;</span><span class="p">,</span> <span class="k">function</span><span class="p">(</span><span class="nx">Blueprint</span> <span class="nv">$table</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nv">$table</span><span class="o">&ndash;&gt;</span><span class="na">increments</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">);</span>
+</span><span class='line'>      <span class="nv">$table</span><span class="o">&ndash;&gt;</span><span class="na">string</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">);</span>
+</span><span class='line'>      <span class="nv">$table</span><span class="o">&ndash;&gt;</span><span class="na">timestamps</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="sd">/</strong></span>
+</span><span class='line'><span class="sd">   * Reverse the migrations.</span>
+</span><span class='line'><span class="sd">   <em></span>
+</span><span class='line'><span class="sd">   * @return void</span>
+</span><span class='line'><span class="sd">   </em>/</span>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">down</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">Schema</span><span class="o">::</span><span class="na">drop</span><span class="p">(</span><span class="s1">&#39;depts&#39;</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  Open up the terminator and run the following command to create the depts table:
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">migrate</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  The primary and foreign key relationship requires both tables to have the same data type and length. We used Schema’s increments to define the primary key for depts id. Schema’s increments creates an unsigned integer INT(10), Schema’s integer creates signed integer INT(11).
+</p></p>
+
+<p><p>
+  We need to use Schema’s unsignedInteger when creating dept_id so that both the primary and foreign keys will be INT(10).
+</p></p>
+
+<p><p>
+  Open up the terminator and run the following command to create the migration for adding the dept_id to the employees table:
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">make</span><span class="o">:</span><span class="nx">migration</span> <span class="nx">add_dept_id_in_employees</span> <span class="o">&mdash;</span><span class="nx">table</span><span class="o">=</span><span class="nx">employees</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  Open up <code>/database/migrations/xxxxxxxxx_add_dept_id_in_employees.php</code> file and add the following codes:
+</p></p>
+
+<p><figure class='code'><figcaption><span>xxxxxxxxx_add_dept_id_in_employees.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">use</span> <span class="nx">Illuminate\Database\Schema\Blueprint</span><span class="p">;</span>
+</span><span class='line'><span class="k">use</span> <span class="nx">Illuminate\Database\Migrations\Migration</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">AddDeptIdInEmployees</span> <span class="k">extends</span> <span class="nx">Migration</span> <span class="p">{</span>
+</span><span class='line'>  <span class="sd">/<strong></span>
+</span><span class='line'><span class="sd">   * Run the migrations.</span>
+</span><span class='line'><span class="sd">   <em></span>
+</span><span class='line'><span class="sd">   * @return void</span>
+</span><span class='line'><span class="sd">   </em>/</span>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">up</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">Schema</span><span class="o">::</span><span class="na">table</span><span class="p">(</span><span class="s1">&#39;employees&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">(</span><span class="nx">Blueprint</span> <span class="nv">$table</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nv">$table</span><span class="o">&ndash;&gt;</span> <span class="na">unsignedInteger</span> <span class="p">(</span><span class="s1">&#39;dept_id&#39;</span><span class="p">)</span><span class="o">&ndash;&gt;</span><span class="na">after</span><span class="p">(</span><span class="s1">&#39;gender&#39;</span><span class="p">);</span>
+</span><span class='line'>      <span class="nv">$table</span><span class="o">&ndash;&gt;</span><span class="na">foreign</span><span class="p">(</span><span class="s1">&#39;dept_id&#39;</span><span class="p">)</span>
+</span><span class='line'>              <span class="o">&ndash;&gt;</span><span class="na">references</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">)</span><span class="o">&ndash;&gt;</span><span class="na">on</span><span class="p">(</span><span class="s1">&#39;depts&#39;</span><span class="p">)</span>
+</span><span class='line'>              <span class="o">&ndash;&gt;</span><span class="na">onDelete</span><span class="p">(</span><span class="s1">&#39;cascade&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="sd">/</strong></span>
+</span><span class='line'><span class="sd">   * Reverse the migrations.</span>
+</span><span class='line'><span class="sd">   <em></span>
+</span><span class='line'><span class="sd">   * @return void</span>
+</span><span class='line'><span class="sd">   </em>/</span>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">down</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">Schema</span><span class="o">::</span><span class="na">table</span><span class="p">(</span><span class="s1">&#39;employees&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">(</span><span class="nx">Blueprint</span> <span class="nv">$table</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nv">$table</span><span class="o">&ndash;&gt;</span><span class="na">dropColumn</span><span class="p">(</span><span class="s1">&#39;dept_id&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  Open up the terminator and run the following command to execute the migration:
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">migrate</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><h3>Database Seeding</h3></p>
+
+<p><p>
+  In this section, we will add dummy data to our database. Seeding is a term that is used to describe the process of adding data to the database.
+</p></p>
+
+<p><p>
+  Open up the terminator and run the following command:
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">make</span><span class="o">:</span><span class="nx">seeder</span> <span class="nx">DrinksTableSeeder</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  Open up <code>/database/seeds/DrinksTableSeeder.php</code> file and add the following codes:
+</p></p>
+
+<p><figure class='code'><figcaption><span>DrinksTableSeeder.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">use</span> <span class="nx">Illuminate\Database\Seeder</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">DrinksTableSeeder</span> <span class="k">extends</span> <span class="nx">Seeder</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="sd">/<em><em></span>
+</span><span class='line'><span class="sd">   * Run the database seeds.</span>
+</span><span class='line'><span class="sd">   </em></span>
+</span><span class='line'><span class="sd">   * @return void</span>
+</span><span class='line'><span class="sd">   </em>/</span>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">run</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">DB</span><span class="o">::</span><span class="na">table</span><span class="p">(</span><span class="s1">&#39;drinks&#39;</span><span class="p">)</span><span class="o">&ndash;&gt;</span><span class="na">insert</span><span class="p">([</span>
+</span><span class='line'>      <span class="s1">&#39;name&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Vodka&#39;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s1">&#39;comments&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Blood of creativity&#39;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s1">&#39;rating&#39;</span> <span class="o">=&gt;</span> <span class="mi">9</span><span class="p">,</span>
+</span><span class='line'>      <span class="s1">&#39;brew_date&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;1973-09-03&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="p">]);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>
+  <code>class DrinksTableSeeder extends Seeder</code> defines the table DrinksTableSeeder that extends the Seeder class.<br/>
+  <code>public function run()</code> defines the function that is executed when you run the seed command from artisan.
+</p></p>
+
+<p><p>
+  The above table uses an array that matches database field name to values and inserts the record into the specified table drinks. Now let&rsquo;s run the seed and add our dummy record to the database.
+</p></p>
+
+<p><p>
+  Open up the terminator and run the following command:
+</p></p>
+
+<p><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">db</span><span class="o">:</span><span class="nx">seed</span> <span class="o">&mdash;</span><span class="nx">class</span><span class="o">=</span><span class="nx">DrinksTableSeeder</span>
+</span></code></pre></td></tr></table></div></figure></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Laravel 5.x.x Template]]></title>
@@ -4809,90 +5957,6 @@
 
 <p>
   Go to <code>http://localhost:8000</code> to watch our webpage.
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Gulp – Web Server]]></title>
-    <link href="http://geekhmer.github.io/blog/2016/10/12/gulp-web-server/"/>
-    <updated>2016-10-12T16:12:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2016/10/12/gulp-web-server</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/bunlong_gulp.jpg" width="600" alt="Gulp, Gulp – Web Server" />
-</p>
-
-
-
-
-<p>
-  We can actually serve our webpages by using a gulp plugin.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">npm</span> <span class="n">install</span> <span class="n">gulp</span><span class="o">-</span><span class="n">webserver</span> <span class="o">--</span><span class="n">save</span><span class="o">-</span><span class="n">dev</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  For more information about <code>gulp-webserver</code> check out <a href="https://www.npmjs.com/package/gulp-webserver" target="_blank">https://www.npmjs.com/package/gulp-webserver</a>
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>gulpfile.js </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
-</span><span class='line'><span class="n">var</span> <span class="n">webserver</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s1">&#39;gulp-webserver&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
-</span><span class='line'><span class="n">gulp</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;webserver&#39;</span><span class="p">,</span> <span class="n">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">return</span> <span class="n">gulp</span><span class="o">.</span><span class="n">src</span><span class="p">(</span><span class="s1">&#39;build&#39;</span><span class="p">)</span>
-</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">webserver</span><span class="p">());</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now when we run our gulp task webserver we will have a local webserver to view our website.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">gulp</span> <span class="n">webserver</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Using</span> <span class="n">gulpfile</span> <span class="o">~</span><span class="sr">/YOUR_DIRECTORY/</span><span class="n">gulpfile</span><span class="o">.</span><span class="n">js</span>
-</span><span class='line'><span class="no">Starting</span> <span class="s1">&#39;webserver&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
-</span><span class='line'><span class="no">Webserver</span> <span class="n">started</span> <span class="n">at</span> <span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="ss">localhost</span><span class="p">:</span><span class="mi">8000</span>
-</span><span class='line'><span class="no">Finished</span> <span class="s1">&#39;webserver&#39;</span> <span class="n">after</span> <span class="mi">20</span> <span class="n">ms</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  If you go to <code>http://localhost:8000</code> in your web browser you should see our index.html page saying Hello Gulp!.
 </p>
 
 ]]></content>
