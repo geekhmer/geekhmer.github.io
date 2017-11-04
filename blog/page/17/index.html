@@ -79,6 +79,138 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/03/02/ruby-on-rails-passing-optional-locals-to-partials/">Ruby on Rails Passing Optional Locals to Partials</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-03-02T23:32:00+07:00" pubdate data-updated="true">Mar 2<span>nd</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/ruby_on_rails.png" width="400" alt="Ruby on Rails Passing Optional Locals to Partials" />
+</p>
+
+
+
+
+<p>
+  When passing locals to Rails partials, you might run into cases where you need to pass optional locals in some places, but don’t want to pass it in every other place where you use the partial.
+</p>
+
+
+
+
+<p>
+  As an example, you have a <code>_post</code> partial which you render like this:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">render</span> <span class="s1">&#39;post&#39;</span><span class="p">,</span> <span class="ss">post</span><span class="p">:</span> <span class="n">post</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And now you want to render the same partial from another view, but this time you want to pass a boolean flag to tell the partial to render the author bio as well:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">render</span> <span class="s1">&#39;post&#39;</span><span class="p">,</span> <span class="ss">post</span><span class="p">:</span> <span class="n">post</span><span class="p">,</span> <span class="n">show_author_bio</span><span class="p">:</span> <span class="kp">true</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If we used the <code>show_author_bio</code> local in the partial, it would break the other view which does not know this local. To use it safely, we can use the <code>local_assigns</code> hash:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;&lt;</span><span class="sx">%= post.title %&gt;&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">&lt;% if local_assigns[:show_author_bio] %&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%=</span> <span class="n">render</span> <span class="s1">&#39;author_bio&#39;</span><span class="p">,</span> <span class="ss">author</span><span class="p">:</span> <span class="n">post</span><span class="o">.</span><span class="n">author</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">&lt;% end %&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;%=</span> <span class="n">post</span><span class="o">.</span><span class="n">body</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We’re using it for passing a boolean value here, we could pass in any other object as well. For instance, we could pass in an optional author object:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">% if </span><span class="n">local_assigns</span><span class="o">.</span><span class="n">has_key?</span><span class="p">(</span><span class="ss">:author</span><span class="p">)</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%= render &#39;author_bio&#39;, author: author %&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% end </span><span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  DHH (David Heinemeier Hansson) opened an issue (<a href="https://github.com/rails/rails/issues/18962" target="_blank">#18962</a>) about this as well, and had an interesting comment to make about this feature.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/02/27/how-to-debug-a-ruby-on-rails-application/">How to Debug a Ruby on Rails Application</a></h1>
     
     
@@ -2167,128 +2299,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/20/secrets-dot-yml-file-in-ruby-on-rails/">Secrets.yml File in Ruby on Rails</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-20T00:40:00+07:00" pubdate data-updated="true">Feb 20<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/move_to_rails.png" alt="Secrets.yml File in Ruby on Rails" />
-</p>
-
-
-
-
-<p>
-  You maybe have noticed a file called <code>secrets.yml</code> in the config directory of a Ruby on Rails 4.1 project. This feature was added as part of Rails 4.1 in order to have a common storage location for the keys and credentials for various services. You can use the secrets.yml for everything from AWS credentials to your secret_key_base (the default in Rails 4.1).
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>secrets.yml </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">development</span><span class="p">:</span>
-</span><span class='line'>  <span class="n">secret_key_base</span><span class="p">:</span> <span class="n">super_long_secret_key_for_development</span>
-</span><span class='line'>  <span class="n">active_merchant_login</span><span class="p">:</span> <span class="mi">112233</span>
-</span><span class='line'>  <span class="n">active_merchant_password</span><span class="p">:</span> <span class="n">super_secret_password</span>
-</span><span class='line'>
-</span><span class='line'><span class="nb">test</span><span class="p">:</span>
-</span><span class='line'>  <span class="n">secret_key_base</span><span class="p">:</span> <span class="n">super_long_secret_key_for_test</span>
-</span><span class='line'>  <span class="n">active_merchant_login</span><span class="p">:</span> <span class="mi">112233</span>
-</span><span class='line'>  <span class="n">active_merchant_password</span><span class="p">:</span> <span class="n">super_secret_password</span>
-</span><span class='line'>
-</span><span class='line'><span class="ss">production</span><span class="p">:</span>
-</span><span class='line'>  <span class="n">secret_key_base</span><span class="p">:</span> <span class="o">&lt;</span><span class="sx">%= ENV[&quot;SECRET_KEY_BASE&quot;] %&gt;</span>
-</span><span class='line'><span class="sx">  active_merchant_login: &lt;%=</span> <span class="no">ENV</span><span class="o">[</span><span class="s2">&quot;AM_LOGIN&quot;</span><span class="o">]</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">  active_merchant_password: &lt;%= ENV[&quot;AM_PASSWORD&quot;] %&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You have add this file to your <code>.gitignore</code> file to avoid accidently pushing your keys to git. You can also store your production keys in this file if you wish.
-</p>
-
-
-
-
-<p>
-  To access the various keys in the secrets.yml file:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">secrets</span><span class="o">.</span><span class="n">key_name</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Example: The following code will returns the merchant login.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">secrets</span><span class="o">.</span><span class="n">active_merchant_login</span> <span class="c1"># returns 112233 on development/test</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it! See ya! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/18/">&larr; Older</a>
@@ -2313,6 +2323,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2017/11/04/create-react-app-vs-nextjs/">Create-React-App vs NextJs</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2017/08/06/laravel-5-dot-x-x-migrations/">Laravel 5.x.x Migrations</a>
       </li>
     
@@ -2334,10 +2348,6 @@
     
       <li class="post">
         <a href="/blog/2017/06/30/hello-laravel-5-dot-x-x/">Hello Laravel 5.x.x</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/06/25/what-is-full-stack-developer/">What Is Full Stack Developer?</a>
       </li>
     
   </ul>
@@ -2395,7 +2405,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 44 ]</a>
+        <a href="/blog/categories/other/">Other [ 45 ]</a>
       </li>
     
       <li>

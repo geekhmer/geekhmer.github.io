@@ -79,6 +79,208 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/05/11/ruby-on-rails-with-bootstrap-sass/">Ruby on Rails With Bootstrap-Sass</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-05-11T16:41:00+07:00" pubdate data-updated="true">May 11<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/bootstrap.png" alt="Ruby on Rails with Bootstrap-Sass" />
+</p>
+
+
+
+
+<p>
+  Twitter Bootstrap is an insanely popular CSS framework that is used to quickly and easily throw together great looking websites. Many websites (including this one) are built on this framework, and with good reason; the power and ease of use rival that of most other frameworks.
+</p>
+
+
+
+
+<p>
+  In this tutorial we will show you how to add the framework using the bootstrap-sass gem. We will also show you how to override the bootstrap styles using the various scss variables provided by the bootstrap framework. Finally we will show you how to use the will_paginate-bootstrap gem to style your pagination using bootstrap&#8217;s pagination styles.
+</p>
+
+
+
+
+<p>
+  <strong>Setup Project</strong><br/>
+  In an existing or new project, add the following line to Gemfile:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;bootstrap-sass&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 2.3&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Run a <code>bundle install</code> and start your <code>rails server</code>. Now that the gem is installed you are ready to to start using bootstrap.
+</p>
+
+
+
+
+<p>
+  The first thing we will need to do is create a new SCSS file to store our bootstrap configuration. Create a file called <code>bootstrap_config.scss</code> in the <code>app/assets/stylesheets</code> folder.  This file will be used to store bootstrap specific configuration. Next, we will need to tell Rails to actually include bootstrap in this file. Open <code>app/assets/stylesheets/bootstrap_config.scss</code> and add the following line:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/assets/stylesheets/bootstrap_config.scss </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@import</span> <span class="s2">&quot;bootstrap&quot;</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If you want a responsive layout, also add the following line:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/assets/stylesheets/bootstrap_config.scss </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@import</span> <span class="s2">&quot;bootstrap-responsive&quot;</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  This will include bootstrap in your application. Now, any views you create will automatically include bootstrap as long as they use the main application layout. We aren&#8217;t quite done yet though, if you are on Rails 4 (Rails 3.2 users don&#8217;t need to do this) you will need to perform one more step. Open up the <code>config/application.rb</code> file and add the following line to your application&#8217;s configuration:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/application.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">assets</span><span class="o">.</span><span class="n">precompile</span> <span class="o">+=</span> <span class="sx">%w(*.png *.jpg *.jpeg *.gif)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  This is due to rails no longer compiling images in vendor assets by default.
+</p>
+
+
+
+
+<p>
+  Now go ahead and create a controller and try it out. If you aren&#8217;t familiar with the framework itself, the absolute best place to learn about it is at <a href="http://getbootstrap.com/" target="_blank">The Official Twitter Boostrap Site</a>. That&#8217;s all there is to setting it up!
+</p>
+
+
+
+
+<p>
+  <strong>Bootstrap Variables</strong><br/>
+  The bootstrap-sass gem, much like it&#8217;s official LESS-based cousin, has a number of variables that you can override to change the look and feel of various styles. Lets try it out. Suppose we want to change the background color of our website. To do this we just need to open up <code>app/assets/stylesheets/bootstrap_config.scss</code> and add the following line to the very top of the file:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>app/assets/stylesheets/bootstrap_config.scss </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vg">$bodyBackground</span><span class="p">:</span> <span class="c1">#e0e0e0;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now, if you refresh the page you will notice that the body background has changed to a light gray color. 
+</p>
+
+
+
+
+<p>
+  <strong>Will Paginate</strong><br/>
+  One pitfall that rails users often run into is utilizing will_paginate in a twitter bootstrap project. Luckily the will_paginate-bootstrap gem makes this very easy. Add the following line to your gemfile and then run a <code>bundle install</code> and restart your rails server:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;will_paginate-bootstrap&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now, open up the view where you are using will_paginate, find any will_paginate lines and add <code>:renderer => BootstrapPagination::Rails</code> to the end of them so they look like this:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= will_paginate @products, :renderer =</span><span class="o">&gt;</span> <span class="ss">BootstrapPagination</span><span class="p">:</span><span class="ss">:Rails</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now if you refresh the page, you&#8217;ll see that that will_paginate is now styled using bootstrap.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/05/11/enable-compression-for-nginx/">Enable Compression for Nginx</a></h1>
     
     
@@ -2828,228 +3030,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/05/05/where-does-your-code-go-in-rails-application/">Where Does Your Code Go in Rails Application?</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-05-05T08:50:00+07:00" pubdate data-updated="true">May 5<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/ruby_on_rails.png" width="400" alt="Where Does Your Code Go in Rails Application?" />
-</p>
-
-
-
-
-<p>
-  After you finish the Rails tutorials and start your own app, things get confusing something like where does your non-CRUD and general logic go?
-</p>
-
-
-
-
-<p>
-  You can&#8217;t build the app you&#8217;ve been dreaming of without some general, non-Rails logic. So where do you put your code, and still keep things simple?
-</p>
-
-
-
-
-<p>
-  <strong>The Easy Place to Start</strong><br/>
-  when I have logic that feels related to an existing ActiveRecord model, I&#8217;ll start by putting it into that model. For example if I had a Game model and I want to import a bunch of games from CSV files, I would put that method right onto the Game class.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/models/game.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Game</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">parse_from_csv</span><span class="p">(</span><span class="n">csv_string</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">games</span> <span class="o">=</span> <span class="o">[]</span>
-</span><span class='line'>    <span class="no">CSV</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">csv_string</span><span class="p">,</span> <span class="n">quote_char</span><span class="p">:</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">row</span><span class="o">|</span>
-</span><span class='line'>      <span class="n">games</span> <span class="o">&lt;&lt;</span> <span class="no">Game</span><span class="o">.</span><span class="n">from_csv_row</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">row</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">==</span> <span class="s1">&#39;G&#39;</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>    <span class="n">games</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">from_csv_row</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-</span><span class='line'>    <span class="no">Game</span><span class="o">.</span><span class="n">new</span><span class="p">({</span>
-</span><span class='line'>      <span class="n">dgs_game_id</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span><span class="p">,</span>
-</span><span class='line'>      <span class="n">opponent_name</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">2</span><span class="o">]</span><span class="p">,</span>
-</span><span class='line'>      <span class="n">created_at</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">4</span><span class="o">]</span><span class="p">,</span>
-</span><span class='line'>      <span class="n">updated_at</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">4</span><span class="o">]</span><span class="p">,</span>
-</span><span class='line'>    <span class="p">})</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You have all the information your methods need right at hand. it&#8217;s easily testable. And it&#8217;s probably where a new contributor world look for that logic first.
-</p>
-
-
-
-
-<p>
-  But if you keep adding and changing that model, it&#8217;ll get big and complicated. Different parts of the model will interact in strange ways. The more you change it, the harder it will be to change.
-</p>
-
-
-
-
-<p>
-  In that case, you would probably want to refactor that code out to a non-ActiveRecord model.
-</p>
-
-
-
-
-<p>
-  <strong>Non-ActiveRecord Models</strong><br/>
-  You can write your own Ruby code, in plain Ruby objects, and use them in your Rails app. These objects can still be called models, because they&#8217;re modeling part of your problem. They just don&#8217;t have an ActiveRecord database storing their data.
-</p>
-
-
-
-
-<p>
-  The next time I worked on that game CSV parser, the Game class was getting a little too big. So I moved the parser logic into its own GameCSVParser class.
-</p>
-
-
-
-
-<p>
-  Non-ActiveRecord class looks like:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/models/game_csv_parser.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">GameCSVParser</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">csv_string</span><span class="p">)</span>
-</span><span class='line'>    <span class="vi">@rows</span> <span class="o">=</span> <span class="no">CSV</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">csv_string</span><span class="p">,</span> <span class="n">quote_char</span><span class="p">:</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">games</span>
-</span><span class='line'>    <span class="n">game_rows</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">row</span><span class="o">|</span> <span class="no">Game</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">game_attributes</span><span class="p">(</span><span class="n">row</span><span class="p">))</span> <span class="p">}</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kp">private</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">game_rows</span>
-</span><span class='line'>    <span class="vi">@rows</span><span class="o">.</span><span class="n">select</span> <span class="p">{</span> <span class="o">|</span><span class="n">row</span><span class="o">|</span> <span class="n">is_game_row?</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="p">}</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">game_attributes</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-</span><span class='line'>    <span class="p">{</span>
-</span><span class='line'>      <span class="n">dgs_game_id</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span><span class="p">,</span>
-</span><span class='line'>      <span class="n">opponent_name</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">2</span><span class="o">]</span><span class="p">,</span>
-</span><span class='line'>      <span class="n">created_at</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">4</span><span class="o">]</span><span class="p">,</span>
-</span><span class='line'>      <span class="n">updated_at</span><span class="p">:</span> <span class="n">row</span><span class="o">[</span><span class="mi">4</span><span class="o">]</span><span class="p">,</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">is_game_row?</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">row</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">==</span> <span class="s1">&#39;G&#39;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  I will go right to creating a new plain Ruby object if the logic I&#8217;m adding doesn&#8217;t feel related to any specific ActiveRecord model. Of if the code seems like it should be a part of a thing that doesn&#8217;t exist yet in the app. Otherwise, they mostly pop up through refactoring.
-</p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/13/">&larr; Older</a>
@@ -3074,6 +3054,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2017/11/04/create-react-app-vs-nextjs/">Create-React-App vs NextJs</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2017/08/06/laravel-5-dot-x-x-migrations/">Laravel 5.x.x Migrations</a>
       </li>
     
@@ -3095,10 +3079,6 @@
     
       <li class="post">
         <a href="/blog/2017/06/30/hello-laravel-5-dot-x-x/">Hello Laravel 5.x.x</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/06/25/what-is-full-stack-developer/">What Is Full Stack Developer?</a>
       </li>
     
   </ul>
@@ -3156,7 +3136,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 44 ]</a>
+        <a href="/blog/categories/other/">Other [ 45 ]</a>
       </li>
     
       <li>
