@@ -79,6 +79,169 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2016/02/23/dynamic-programming-with-ruby/">Dynamic Programming With Ruby</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-02-23T10:32:00+07:00" pubdate data-updated="true">Feb 23<span>rd</span>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="Dynamic Programming with Ruby" />
+</p>
+
+
+
+
+<p>
+  I had a task to analyse the value of a cookie set by a tool on the subdomain. The value of the cookie set looked something like this:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="s2">&quot;18337|20120404|True#Q0A|18342|21-30|20120404|18344#Q1|18349|NO PARTNER|20120404|18351#Q2|18352|EMPLOYED|20120404|18353#Q4|18432|STRUGGLING|18539|WANT|20120404|18541#Q3|18358|EMPLOYED|20120404|18359#&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  My task was to try to decipher the values of set inside the cookie and how they changed depending on the progress through the application that set the values. I was told the answers to questions sat next to the ID of the question. For example, the answer to the &#8220;age&#8221; question (21-30) was related to the question 18342 and would always appear as |18342|21-30|. I started out with some tests and ended up with a method like this:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Answers</span>
+</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:age</span><span class="p">,</span> <span class="ss">:employment_status</span><span class="p">,</span> <span class="ss">:has_partner</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">cookie_contents</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">items</span> <span class="o">=</span> <span class="n">cookie_contents</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">items</span><span class="o">.</span><span class="n">each_index</span> <span class="k">do</span> <span class="o">|</span> <span class="n">i</span> <span class="o">|</span>
+</span><span class='line'>       <span class="n">current</span> <span class="o">=</span> <span class="n">items</span><span class="o">[</span><span class="n">i</span><span class="o">]</span>
+</span><span class='line'>       <span class="k">if</span> <span class="p">(</span><span class="n">current</span> <span class="o">==</span> <span class="s2">&quot;18342&quot;</span><span class="p">)</span>
+</span><span class='line'>         <span class="vi">@age</span> <span class="o">=</span> <span class="n">items</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">]</span>
+</span><span class='line'>       <span class="k">elsif</span> <span class="p">(</span><span class="n">current</span> <span class="o">==</span> <span class="s2">&quot;18352&quot;</span><span class="p">)</span>
+</span><span class='line'>         <span class="vi">@employment_status</span> <span class="o">=</span> <span class="n">items</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">]</span>
+</span><span class='line'>       <span class="k">elsif</span> <span class="p">(</span><span class="n">current</span> <span class="o">==</span> <span class="s2">&quot;18349&quot;</span><span class="p">)</span>
+</span><span class='line'>         <span class="vi">@current_partner</span> <span class="o">=</span> <span class="n">items</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">]</span>
+</span><span class='line'>       <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Of course, I wanted to avoid the growing if-else statement so found a way that I could do it dynamically and focus just on the mapping from an ID to an attribute. The resulting code looked like this:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Answers</span>
+</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:age</span><span class="p">,</span> <span class="ss">:employment_status</span><span class="p">,</span> <span class="ss">:has_partner</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="no">Mappings</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s2">&quot;18342&quot;</span> <span class="o">=&gt;</span> <span class="ss">:age</span><span class="o">=</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;18352&quot;</span> <span class="o">=&gt;</span> <span class="ss">:employment_status</span><span class="o">=</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;18349&quot;</span> <span class="o">=&gt;</span> <span class="ss">:has_partner</span><span class="o">=</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">cookie_contents</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">items</span> <span class="o">=</span> <span class="n">cookie_contents</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">items</span><span class="o">.</span><span class="n">each_index</span> <span class="k">do</span> <span class="o">|</span> <span class="n">i</span> <span class="o">|</span>
+</span><span class='line'>       <span class="n">current</span> <span class="o">=</span> <span class="n">items</span><span class="o">[</span><span class="n">i</span><span class="o">]</span>
+</span><span class='line'>       <span class="k">if</span> <span class="p">(</span><span class="no">Mappings</span><span class="o">.</span><span class="n">has_key?</span><span class="p">(</span><span class="n">current</span><span class="p">))</span>
+</span><span class='line'>          <span class="nb">self</span><span class="o">.</span><span class="n">public_send</span><span class="p">(</span><span class="no">Mappings</span><span class="o">[</span><span class="n">current</span><span class="o">]</span><span class="p">,</span> <span class="n">items</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>       <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  By the end of the analysis, I discovered that multiple IDs mapped to the same properties and all I had to do was add another entry into the map defining which ID mapped to what property on the object.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2016/02/10/rails-flash-messages-styles/">Rails Flash Messages Styles</a></h1>
     
     
@@ -966,247 +1129,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/01/27/how-to-make-session-data-available-to-models-in-ruby-on-rails/">How to Make Session Data Available to Models in Ruby on Rails?</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-01-27T11:11:00+07:00" pubdate data-updated="true">Jan 27<span>th</span>, 2016</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="How to Make Session Data Available to Models in Ruby on Rails?" />
-</p>
-
-
-
-
-<p>
-  Ruby on Rails is implemented as the Model View Controller (MVC) pattern. This pattern separates the context of the Web Application (in the Controller and the View) from the core Model of the application. The Model contains the Domain objects which encapsulate business logic, data retrieval, etc. The View displays information to the user and allows them to provide input to the application. The Controller handles the interactions between the View and the Model.
-</p>
-
-
-
-
-<p>
-  This separation is a very good design principle that generally helps prevent <a href="https://en.wikipedia.org/wiki/Spaghetti_code" target="_blank">spaghetti code</a>. Sometimes though the separation might break down.
-</p>
-
-
-
-
-<p>
-  Rails provides the Active Record Callbacks which allows you to write code that will respond to the lifecycle events of the Model objects. For example you could log information every time a specific kind of Model object is saved. For example you could record some information every time an Account changed using the following:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>account.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Account</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">after_update</span> <span class="ss">:log_audit_change</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kp">private</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">log_audit_change</span>
-</span><span class='line'>    <span class="no">Audit</span><span class="o">.</span><span class="n">audit_change</span><span class="p">(</span><span class="nb">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="n">new_balance</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You might have noticed a limitation with the previous API though. You didn&#8217;t notice? The only information passed to the model is the Object that is being changed. What if you want more context than this? For example, what if you want to audit not only the values that changed them, but the user who made the change?
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>account.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Account</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">after_update</span> <span class="ss">:log_audit_change</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kp">private</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">log_audit_change</span>
-</span><span class='line'>    <span class="no">Audit</span><span class="o">.</span><span class="n">audit_change</span><span class="p">(</span><span class="n">current_user</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="n">new_balance</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  How do you get the <code>current_user</code> value? Well, you have to plan ahead a little bit. The User in this application is stored in the HTTP Session when the user is authenticated. The session isn&#8217;t directly available to the Model level so you have to figure out a way around this. One way to accomplish this is by using a named <a href="http://ruby-doc.org/core-2.3.0/Thread.html#M000484" target="_blank">Thread local variable</a>. Each HTTP request is served by its own thread. That means that a variable stored as thread local will be available for the entire processing of a request.
-</p>
-
-
-
-
-<p>
-  The UserInfo module encapsulates reading and writing the User object from/to the Thread local. This module can then be mixed in with other objects for easy access.
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>user_info.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">UserInfo</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">current_user</span>
-</span><span class='line'>    <span class="no">Thread</span><span class="o">.</span><span class="n">current</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">current_user</span><span class="o">=</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
-</span><span class='line'>    <span class="no">Thread</span><span class="o">.</span><span class="n">current</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span> <span class="o">=</span> <span class="n">user</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  A <code>before_filter</code> set in the ApplicationController will be called before any action is called in any controller. You can take advantage of this to copy a value out of the HTTP session and set it in the Thread local:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>user_info.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="ss">ActionController</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">before_filter</span> <span class="ss">:set_user</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kp">protected</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">authenticate</span>
-</span><span class='line'>    <span class="k">unless</span> <span class="n">session</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span>
-</span><span class='line'>      <span class="n">redirect_to</span> <span class="ss">:controller</span> <span class="o">=&gt;</span> <span class="s2">&quot;login&quot;</span>
-</span><span class='line'>      <span class="k">return</span> <span class="kp">false</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1"># Sets the current user into a named Thread location so that it can be accessed by models and observers</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">set_user</span>
-</span><span class='line'>    <span class="no">UserInfo</span><span class="o">.</span><span class="n">current_user</span> <span class="o">=</span> <span class="n">session</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  At any point in a Model class that you need to have access to those values you can just mixin the helper module and then use its methods to access the data. In this final example we mixin the UserInfo module to our model and it will now have access to the <code>current_user</code> method:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>account.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Account</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="kp">include</span> <span class="no">UserInfo</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">after_update</span> <span class="ss">:log_audit_change</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kp">private</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">log_audit_change</span>
-</span><span class='line'>    <span class="no">Audit</span><span class="o">.</span><span class="n">audit_change</span><span class="p">(</span><span class="n">current_user</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="n">new_balance</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  You generally shouldn&#8217;t need this kind of trick outside of a model. In most cases the Controller should pass all of the information needed by a Model object to it through its methods. That will allow the Model objects to interact and the Controller to do the orchestration needed. But in a few special cases, this trick might be handy.
-</p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/7/">&larr; Older</a>
@@ -1231,6 +1153,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2017/11/07/the-most-popular-reactjs-data-table/">The Most Popular ReactJs Data Table</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2017/11/04/create-react-app-vs-nextjs/">Create-React-App vs NextJs</a>
       </li>
     
@@ -1252,10 +1178,6 @@
     
       <li class="post">
         <a href="/blog/2017/07/02/laravel-5-dot-x-x-create-custom-helper/">Laravel 5.x.x Create Custom Helper</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/06/30/hello-laravel-5-dot-x-x/">Hello Laravel 5.x.x</a>
       </li>
     
   </ul>
@@ -1313,7 +1235,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 45 ]</a>
+        <a href="/blog/categories/other/">Other [ 46 ]</a>
       </li>
     
       <li>
