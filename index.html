@@ -79,6 +79,187 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2018/03/29/import-markdown-files-and-serve-its-content-in-next-dot-js/">Import Markdown Files and Serve Its Content in Next.js</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2018-03-29T22:26:00+07:00" pubdate data-updated="true">Mar 29<span>th</span>, 2018</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/nextjs.png" width="600" alt="Import Markdown Files in Next.js" />
+</p>
+
+
+
+
+<p>
+  As <a href="https://github.com/arunoda" target="_blank">@arunoda</a> (Next.js founder) said Next.js does not support importing markdown files yet. But you can configure the Next.js webpack loaders to load <code>raw-loader</code> modules and import markdown files and return them as strings.
+</p>
+
+
+
+
+<p>
+  Let get started!
+</p>
+
+
+
+
+<p>
+  Open the terminal, run the command below to install <code>raw-loader</code> and <code>react-markdown</code> modules (noted: use react-markdown to renders markdown as pure React components):
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">npm</span> <span class="n">install</span> <span class="o">--</span><span class="n">save</span> <span class="n">raw</span><span class="o">-</span><span class="n">loader</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">npm</span> <span class="n">install</span> <span class="o">--</span><span class="n">save</span> <span class="n">react</span><span class="o">-</span><span class="n">markdown</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Create <code>next.config.js</code> file with content below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>next.config.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">module</span><span class="o">.</span><span class="n">exports</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>  <span class="ss">webpack</span><span class="p">:</span> <span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">config</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">rules</span><span class="o">.</span><span class="n">push</span><span class="p">(</span>
+</span><span class='line'>      <span class="p">{</span>
+</span><span class='line'>        <span class="nb">test</span><span class="p">:</span> <span class="sr">/\.md$/</span><span class="p">,</span>
+</span><span class='line'>        <span class="ss">use</span><span class="p">:</span> <span class="s1">&#39;raw-loader&#39;</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">return</span> <span class="n">config</span>
+</span><span class='line'>  <span class="p">},</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Create <code>docs/about.md</code> file with content below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>about.md </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># About</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Welcome</span> <span class="n">to</span> <span class="o">**</span><span class="no">GeeKhmer</span><span class="o">**!</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Create <code>pages/about.js</code> file with content below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>about.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">import</span> <span class="no">React</span> <span class="n">from</span> <span class="s1">&#39;react&#39;</span>
+</span><span class='line'><span class="n">import</span> <span class="no">ReactMarkdown</span> <span class="n">from</span> <span class="s1">&#39;react-markdown&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">export</span> <span class="n">default</span> <span class="k">class</span> <span class="n">extends</span> <span class="no">React</span><span class="o">.</span><span class="n">Component</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">static</span> <span class="n">async</span> <span class="n">getInitialProps</span><span class="p">({</span> <span class="n">req</span> <span class="p">})</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">const</span> <span class="n">content</span> <span class="o">=</span> <span class="n">await</span> <span class="nb">require</span><span class="p">(</span><span class="sb">`../docs/about.md`</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">{</span> <span class="n">content</span> <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">render</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">(</span>
+</span><span class='line'>      <span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="no">ReactMarkdown</span> <span class="n">source</span><span class="o">=</span><span class="p">{</span><span class="n">this</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">content</span><span class="p">}</span> <span class="sr">/&gt;</span>
+</span><span class='line'><span class="sr">      &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, That’s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2017/11/13/the-most-popular-reactjs-user-interface-frameworks/">The Most Popular ReactJs User Interface Frameworks</a></h1>
     
     
@@ -3621,305 +3802,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2017/06/25/what-is-full-stack-developer/">What Is Full Stack Developer?</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2017-06-25T00:26:00+07:00" pubdate data-updated="true">Jun 25<span>th</span>, 2017</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/full_lstack_developer.jpg" width="600" alt="What is Full Stack Developer?" />
-</p>
-
-
-
-
-<p>
-  We live in the world of start-ups and freelancers. If you want to make it in such a world, you need to be equipped with the necessary skills.
-</p>
-
-
-
-
-<p>
-  Big organizations can afford to have developer, designer, tester etc&#8230; and roles assigned to different people. 
-</p>
-
-
-
-
-<p>
-  As the start-up or small organization, such roles assigned to different people may be too costly. It is far much more preferable to have a single person who can work comfortably in all of the above roles.
-</p>
-
-
-
-
-<p>
-  Gone the days, one needed to know only one language/technology and get with. But these days, you will need to know more than one language/technology. This is where the full-stack developer comes in. A full-stack developer is comfortable working in both the back-end and front-end environments.
-</p>
-
-
-
-
-<h3>BACK-END DEVELOPER</h3>
-
-
-
-
-<p>
-  Back-end developers are much more focused on what happens on the server-side. This includes writing the code that responds to front-end user requests, interacting with the database and infrastructure for web server as well. One will need to know more than one of the following.
-</p>
-
-
-
-
-<p>
-  <strong>PROGRAMMING LANGUAGES</strong>
-</p>
-
-
-
-
-<p>
-  The following are some of the languages that you should know.
-</p>
-
-
-
-
-<p>
-  <strong>PHP/Laravel</strong><br/>
-   PHP is a scripting server-side language. You can use PHP to interact with the database, develop APIs and do a hell lot of things. PHP is open source and almost supported by all hosting environments.
-</p>
-
-
-
-
-<p>
-  As a full-stack developer, having knowledge of PHP is almost a must. It is a massive advantage but you will need to prove yourself to your employers or clients.
-</p>
-
-
-
-
-<p>
-  <strong>Ruby/Rails</strong><br/>
-  Ruby on rails is another popular MVC framework built on ruby. Just like PHP, Ruby on rails is open source. You can use ruby to create web applications and APIs.
-</p>
-
-
-
-
-<p>
-  <strong>ASP.Net</strong><br/>
-  ASP is the acronym for active server pages. It is a web development language developed by Microsoft and runs on the .Net framework.
-</p>
-
-
-
-
-<p>
-  <strong>JSP</strong><br/>
-  JSP is the acronym for Java Server Pages. It is powered by Java and used to create web applications.
-</p>
-
-
-
-
-<p>
-  <strong>DATABASE ENGINES</strong>
-</p>
-
-
-
-
-<p>
-  In today’s world, almost all applications must store data in the database. Data is literally the blood line of all modern businesses. Knowing about databases will help you to go a long way
-</p>
-
-
-
-
-<p>
-  <strong>MySQL</strong><br/>
-  MySQL is a client-server relational database management system. It runs on all operating systems and is mostly used with PHP. It supports tables, views, triggers and stored procedures etc. You can also use it with other programming languages such as Ruby, Java, C# etc.
-</p>
-
-
-
-
-<p>
-  <strong>Microsoft SQL Server</strong><br/>
-  SQL Server is a commercial relational database management systems developed by Microsoft. It is most commonly used with ASP.Net but you can also use it with other languages i.e. Java, PHP etc.
-</p>
-
-
-
-
-<p>
-  <strong>Sqlite</strong><br/>
-  SQLite is an embedded relational SQL database. It is commonly used on mobile devices i.e. smart phones. You can also use it when working with web applications.
-</p>
-
-
-
-
-<p>
-  <strong>Oracle</strong><br/>
-  Oracle is another popular relational database management system developed by Oracle. It is most used by big corporations.
-</p>
-
-
-
-
-<p>
-  <strong>PostgreSQL</strong><br/>
-  PostgreSQL (pronounced &#8220;post-gress-Q-L&#8221;) is an open source relational database management system ( DBMS ) developed by a worldwide team of volunteers. PostgreSQL is not controlled by any corporation or other private entity and the source code is available free of charge.
-</p>
-
-
-
-
-<p>
-  <strong>DEVELOPMENT METHODOLOGIES</strong>
-</p>
-
-
-
-
-<p>
-  In addition to possessing the technical skills, you will also need to know about project management and development methodologies.
-</p>
-
-
-
-
-<p>
-  <strong>Agile Development Methodologies</strong><br/>
-  Agile development is a term that is used to refer to development methodologies that incremental development practices. Some of the most popular methodologies include <a href="http://scrummethodology.com/" target="_blank">Scrum</a> and Extreme Programming (XP).
-</p>
-
-
-
-
-<p>
-  <strong>Development Tools / Techniques</strong><br/>
-  One only needed to know a single programing language, develop something functional and get away with it. Things have changed these days. In additional to knowing at least more than one language. Your skill set should also including: Version Control, Test Driven Development (TDD).
-</p>
-
-
-
-
-<h3>FRONT-END DEVELOPER</h3>
-
-
-
-
-<p>
-  The major role of a front-end developer is to create the user interface that the user interacts with. This generally requires knowing HTML, CSS, and JavaScript intimately. Let’s briefly look at some of the skills that you will need to know.
-</p>
-
-
-
-
-<p>
-  <strong>Hyper Text Markup Language (HTML)</strong><br/> 
-  As of this writing, the latest version of HTML is 5. It comes with a lot of cool features that you must know. Web pages are literally build using HTML.
-</p>
-
-
-
-
-<p>
-  <strong>Cascading Style Sheets (CSS)</strong><br/>
-  Another component of building web pages. CSS provides you with the styling that makes the web beautiful.
-</p>
-
-
-
-
-<p>
-  <strong>JavaScript (JS)</strong><br/>
-  JavaScript is a client-side scripting language that is used to make web pages interactive and provide a lot of functionality. You can use JavaScript to provide client-side validation, performing Ajax calls etc. apart from doing client-side activities, JavaScript can now be used on the server side as well i.e. Node.JS.
-</p>
-
-
-
-
-<p>
-  <strong>JavaScript Frameworks / Libraries</strong><br/>
-  Pure JavaScript is great for simple tasks but things can and usually tend to get more complex. Frameworks and libraries allow you to focus on the user needs while they take care of the technical needs. Libraries such as jQuery allow you to do more with less. jQuery comes with functionality for things like validation, animations, Ajax calls etc. You will also need to know JavaScript frameworks i.e. ReactJS, AngularJS etc. to create killer interactive interfaces.
-</p>
-
-
-
-
-<p>
-  <strong>Front-End Frameworks</strong><br/>
-  Time is money you don’t want to spent a lot of time on a project focusing on technical details. You can take advantage of front-end frameworks such as twitter bootstrap to make your life sweet. Twitter bootstrap comes with CSS and JavaScript functionality out of the box. Once you have the design mock-ups, you can focus on applying CSS classes to your HTML elements and watch the magic happen instead of writing the CSS code that will translate your mock-ups to cool HTML pages.
-</p>
-
-
-
-
-<p>
-  <strong>CSS Pre-Processors </strong><br/>
-  These enable you to speed up your CSS development. CSS pre-processors such as SASS and LESS process your CSS code before publishing to make the code cross-browser friendly and well formatted.
-</p>
-
-
-
-
-<p>
-  <strong>Template Engines</strong><br/>
-   Let’s assume that you are using PHP on the back-end, before template engines, the front-end developers would create the HTML, handle it over to the developers and then they would embed pure PHP code into the HTML. This is no longer acceptable. You need to learn a template engine and they are super easy actually. Laravel uses blade template.
-</p>
-
-
-
-
-<p>
-  <strong>Responsive and Mobile Designs</strong><br/>
-  Your interfaces need to be able to respond to the size of the design and mobile devices.
-</p>
-
-
-
-
-<p>
-  So far so good, as you can see from the above list, the back-end and front-end developers needs to know a lot of things. A full-stack developer needs to know all things.
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -3940,6 +3822,10 @@
 </section><section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2018/03/29/import-markdown-files-and-serve-its-content-in-next-dot-js/">Import Markdown Files and Serve Its Content in Next.js</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2017/11/13/the-most-popular-reactjs-user-interface-frameworks/">The Most Popular ReactJs User Interface Frameworks</a>
@@ -3963,10 +3849,6 @@
     
       <li class="post">
         <a href="/blog/2017/07/10/laravel-5-dot-x-x-4-steps-to-prevent-browsers-back-button-after-user-logout/">Laravel 5.x.x - 4 Steps to Prevent Browser&#8217;s Back Button After User Logout</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/07/09/laravel-5-dot-x-x-route-and-seo/">Laravel 5.x.x Route &amp; SEO</a>
       </li>
     
   </ul>
@@ -4024,7 +3906,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 47 ]</a>
+        <a href="/blog/categories/other/">Other [ 48 ]</a>
       </li>
     
       <li>
@@ -4126,7 +4008,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2017 GeeKhmer in Phnom Penh, Cambodia.
+  Copyright &copy; 2018 GeeKhmer in Phnom Penh, Cambodia.
 </p>
 
 </footer>

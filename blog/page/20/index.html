@@ -79,6 +79,140 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/01/18/erlang-tail-recursion/">Erlang Tail Recursion</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-18T21:33:00+07:00" pubdate data-updated="true">Jan 18<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/logo_erlang.png" alt="Erlang Variables" />
+</p>
+
+
+
+
+<p>
+  A function is called tail recursive when the recursive call to itself happens only in the last expression of the body in every clause.
+</p>
+
+
+
+
+<p>
+  Syntax:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">non_tail_recursive</span><span class="p">(</span><span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="p">)</span> <span class="o">-&gt;</span>
+</span><span class='line'>  <span class="n">non_tail_recursive</span><span class="p">(</span><span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="p">),</span>
+</span><span class='line'>  <span class="n">other_expression</span><span class="p">,</span>
+</span><span class='line'>  <span class="o">.</span><span class="n">.</span><span class="o">.</span> <span class="o">.</span>
+</span><span class='line'><span class="n">tail_recursive</span><span class="p">(</span><span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="p">)</span> <span class="o">-&gt;</span>
+</span><span class='line'>  <span class="n">other_expression</span><span class="p">,</span>
+</span><span class='line'>  <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>  <span class="n">tail_recursive</span><span class="p">(</span><span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="p">)</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The first function is not the tail recursive as the recursive call is followed by other expression. While the second is, since the recursive call is the last statement.
+</p>
+
+
+
+
+<p>
+  <strong>Tail Recursion & Performance</strong><br/>
+  In many programming languages tails recursion is a good approach performance. But in general, it is not the case in the latest releases of Erlang. Tail recursion is not guaranteed to give you better performance.
+</p>
+
+
+
+
+<p>
+  <strong>Tail Recursion VS Non Tail Recursion</strong><br/>
+</p>
+
+
+
+
+<p>
+  Non Tail Recursive:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">length</span><span class="p">(</span><span class="o">[]</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="n">length</span><span class="p">(</span><span class="o">[</span><span class="n">_</span> <span class="o">|</span> <span class="n">T</span><span class="o">]</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">length</span><span class="p">(</span><span class="n">T</span><span class="p">)</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Tail Recursive:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">length</span><span class="p">(</span><span class="no">List</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">length</span><span class="p">(</span><span class="no">List</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">length</span><span class="p">(</span><span class="o">[]</span><span class="p">,</span> <span class="n">L</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">L</span><span class="p">;</span>
+</span><span class='line'><span class="n">length</span><span class="p">(</span><span class="o">[</span><span class="n">_</span> <span class="o">|</span> <span class="n">T</span><span class="o">]</span><span class="p">,</span> <span class="n">L</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">length</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">L</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/01/18/erlang-recursion/">Erlang Recursion</a></h1>
     
     
@@ -1762,121 +1896,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/14/install-erlang-using-repository-on-ubuntu/">Install Erlang Using Repository on Ubuntu</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-14T21:56:00+07:00" pubdate data-updated="true">Jan 14<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/logo_erlang.png" alt="Install Erlang on Ubuntu" />
-</p>
-
-
-
-
-<p>
-  <strong>1. Adding Repository Entry</strong><br/>
-  To add Erlang repository to your system, pls call the following commands:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">wget</span> <span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="n">packages</span><span class="o">.</span><span class="n">erlang</span><span class="o">-</span><span class="n">solutions</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">erlang</span><span class="o">-</span><span class="n">solutions_1</span><span class="o">.</span><span class="mi">0</span><span class="n">_all</span><span class="o">.</span><span class="n">deb</span>
-</span><span class='line'><span class="n">sudo</span> <span class="n">dpkg</span> <span class="o">-</span><span class="n">i</span> <span class="n">erlang</span><span class="o">-</span><span class="n">solutions_1</span><span class="o">.</span><span class="mi">0</span><span class="n">_all</span><span class="o">.</span><span class="n">deb</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Or Adding the Repository Entry Manually</strong><br/>
-  Add one of the following lines to your /etc/apt/sources.list:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">deb</span> <span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="n">packages</span><span class="o">.</span><span class="n">erlang</span><span class="o">-</span><span class="n">solutions</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">ubuntu</span> <span class="n">trusty</span> <span class="n">contrib</span>
-</span><span class='line'><span class="n">deb</span> <span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="n">packages</span><span class="o">.</span><span class="n">erlang</span><span class="o">-</span><span class="n">solutions</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">ubuntu</span> <span class="n">saucy</span> <span class="n">contrib</span>
-</span><span class='line'><span class="n">deb</span> <span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="n">packages</span><span class="o">.</span><span class="n">erlang</span><span class="o">-</span><span class="n">solutions</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">ubuntu</span> <span class="n">precise</span> <span class="n">contrib</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  And next, add the Erlang public key for apt-secure using following commands:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">wget</span> <span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="n">packages</span><span class="o">.</span><span class="n">erlang</span><span class="o">-</span><span class="n">solutions</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">ubuntu</span><span class="o">/</span><span class="n">erlang_solutions</span><span class="o">.</span><span class="n">asc</span>
-</span><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">key</span> <span class="n">add</span> <span class="n">erlang_solutions</span><span class="o">.</span><span class="n">asc</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>2. Install Erlang</strong><br/>
-  To install Erlang to your system, pls call the following commands:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
-</span><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">erlang</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, hope you enjoyed the article. see ya! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/21/">&larr; Older</a>
@@ -1901,6 +1920,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/03/29/import-markdown-files-and-serve-its-content-in-next-dot-js/">Import Markdown Files and Serve Its Content in Next.js</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2017/11/13/the-most-popular-reactjs-user-interface-frameworks/">The Most Popular ReactJs User Interface Frameworks</a>
       </li>
     
@@ -1922,10 +1945,6 @@
     
       <li class="post">
         <a href="/blog/2017/07/10/laravel-5-dot-x-x-4-steps-to-prevent-browsers-back-button-after-user-logout/">Laravel 5.x.x - 4 Steps to Prevent Browser&#8217;s Back Button After User Logout</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/07/09/laravel-5-dot-x-x-route-and-seo/">Laravel 5.x.x Route &amp; SEO</a>
       </li>
     
   </ul>
@@ -1983,7 +2002,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 47 ]</a>
+        <a href="/blog/categories/other/">Other [ 48 ]</a>
       </li>
     
       <li>
@@ -2085,7 +2104,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2017 GeeKhmer in Phnom Penh, Cambodia.
+  Copyright &copy; 2018 GeeKhmer in Phnom Penh, Cambodia.
 </p>
 
 </footer>

@@ -79,6 +79,105 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/03/21/ruby-on-rails-callback-classes/">Ruby on Rails Callback Classes</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-03-21T14:51:00+07:00" pubdate data-updated="true">Mar 21<span>st</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/ruby_on_rails.png" width="400" alt="Ruby on Rails Callback Classes" />
+</p>
+
+
+
+
+<p>
+  If you want to reuse callback code for more than one object that Rails provides a way to write callback classes. All you have to do is pass a given callback queue an object that responds to the name of the callback and takes the model object as a parameter.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">MarkDeleted</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">before_destroy</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">model</span><span class="o">.</span><span class="n">update_attribute</span><span class="p">(</span><span class="ss">:deleted_at</span><span class="p">,</span> <span class="no">Time</span><span class="o">.</span><span class="n">current</span><span class="p">)</span>
+</span><span class='line'>    <span class="kp">false</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The behavior of MarkDeleted is stateless, so I added the callback as a class method.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Account</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">before_destroy</span> <span class="no">MarkDeleted</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Invoice</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">before_destroy</span> <span class="no">MarkDeleted</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/03/21/ruby-on-rails-currency-formatting/">Ruby on Rails Currency Formatting</a></h1>
     
     
@@ -1187,527 +1286,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/03/14/ruby-dsl-domain-specific-language/">Ruby DSL (Domain-Specific Language)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-03-14T23:47:00+07:00" pubdate data-updated="true">Mar 14<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/rights_and_wrongsof_ruby.jpg" width="400" />
-</p>
-
-
-
-
-<h3>What is a DSL?</h3>
-
-
-
-
-<p>
-  A domain-specific language (DSL) is a computer language specialized to a particular application domain. This is in contrast to a general-purpose language (GPL), which is broadly applicable across domains, and lacks specialized features for a particular domain.
-</p>
-
-
-
-
-<p>
-  A DSL is like a mini language inside of a language. It&#8217;s a specific syntax for describing a domain/area of your application. Think of a DSL like a mini game within a game&#8230; like when you were raising/racing Chocobos in Final Fantasy 7. A DSL in Ruby is still written in Ruby, it just provides a nicer interface and language for performing common tasks.
-</p>
-
-
-
-
-<h3>DSL you have seen</h3>
-
-
-
-
-<p>
-  You may not have realized it, but if you write Rails applications you most likely work with a variety of DSLs every day. Below are a few examples of some commons ones.
-</p>
-
-
-
-
-<p>
-  <strong>Rails Routing</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">root</span> <span class="s1">&#39;pages#home&#39;</span>
-</span><span class='line'>  <span class="n">resources</span> <span class="ss">:pages</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:index</span><span class="p">,</span> <span class="ss">:show</span><span class="o">]</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Rspec</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">describe</span> <span class="nb">Array</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">describe</span> <span class="s2">&quot;includes_subset?&quot;</span> <span class="k">do</span>
-</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;finds subsets&quot;</span> <span class="k">do</span>
-</span><span class='line'>      <span class="n">a</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="o">]</span>
-</span><span class='line'>      <span class="n">b</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="o">]</span>
-</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">includes_subset?</span><span class="p">(</span><span class="n">b</span><span class="p">))</span><span class="o">.</span><span class="n">to</span> <span class="n">eq</span><span class="p">(</span><span class="kp">true</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Capistrano</strong>
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">role</span> <span class="ss">:app</span><span class="p">,</span> <span class="sx">%w{deploy@localhost}</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">server</span> <span class="s1">&#39;localhost&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="ss">user</span><span class="p">:</span> <span class="s1">&#39;deploy&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="ss">roles</span><span class="p">:</span> <span class="sx">%w{app}</span><span class="p">,</span>
-</span><span class='line'>  <span class="n">ssh_options</span><span class="p">:</span> <span class="p">{</span>
-</span><span class='line'>    <span class="ss">keys</span><span class="p">:</span> <span class="sx">%w(/home/deploy/.ssh/id_rsa)</span><span class="p">,</span>
-</span><span class='line'>    <span class="n">auth_methods</span><span class="p">:</span> <span class="s1">&#39;publickey&#39;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<h3>Blocks are Key to DSLs</h3>
-
-
-<p>
-  Knowing how blocks work is crucial to understanding how DSLs work. I think of a block in Ruby as basically just a chunk of code that you can pass around to other methods. If you&#8217;re used to writing Javascript you&#8217;re definitely comfortable passing around functions, and blocks in Ruby are fairly similar to that.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">double</span> <span class="o">=</span> <span class="o">-&gt;</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="n">num</span> <span class="o">*</span> <span class="mi">2</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="nb">puts</span> <span class="n">double</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span class='line'><span class="c1"># 4</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Passing Blocks</strong><br/>
-  You&#8217;ve most likely used blocks before when calling the each method on an Array, or the collect method.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">item</span><span class="o">|</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="n">item</span> <span class="o">*</span> <span class="mi">2</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="c1"># 2, 4, 6</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  What you are doing is passing the block of code between do and end to the each method of the Array class.
-</p>
-
-
-
-
-<p>
-  <strong>Receiving Blocks</strong><br/>
-  On the recipients side, there are a couple ways to receive the block that was passed. The first way is via the yield keyword in Ruby. yield will call the block of code that was passed to the method. You can even pass variables to the block of code.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Array</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">each</span>
-</span><span class='line'>    <span class="n">array_size</span> <span class="o">=</span> <span class="nb">self</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span>
-</span><span class='line'>    <span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="mi">0</span><span class="o">.</span><span class="n">.array_size</span>
-</span><span class='line'>      <span class="k">yield</span> <span class="nb">self</span><span class="o">[</span><span class="n">i</span><span class="o">]</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  There is an alternate way of receiving a block of code that is called a named-block. This essentially allows you to save the block of code to a variable, which gives you the flexibility to pass the block on to another method. If you wish to execute the code inside of the block, you can do so via the call method on it.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Array</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">each</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">array_size</span> <span class="o">=</span> <span class="nb">self</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span>
-</span><span class='line'>    <span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="mi">0</span><span class="o">.</span><span class="n">.array_size</span>
-</span><span class='line'>      <span class="n">block</span><span class="o">.</span><span class="n">call</span> <span class="nb">self</span><span class="o">[</span><span class="n">i</span><span class="o">]</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Block Context</strong><br/>
-  Normally a block has the context of the place it was instantiated. It is possible to change this, to be the place where it is being called, but to do this instead of doing the usual yield or block.call(), you call it via the instance_eval(&block) method.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Dummy</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span>
-</span><span class='line'>    <span class="vi">@name</span> <span class="o">=</span> <span class="s2">&quot;Inside&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">print_name</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
-</span><span class='line'>    <span class="c1"># Has outside context</span>
-</span><span class='line'>    <span class="n">block</span><span class="o">.</span><span class="n">call</span>
-</span><span class='line'>    <span class="c1"># Has inside context</span>
-</span><span class='line'>    <span class="nb">instance_eval</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="vi">@name</span> <span class="o">=</span> <span class="s2">&quot;Outside&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Dummy</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">print_name</span> <span class="k">do</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="vi">@name</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  <strong>Create your own DSL</strong><br/>
-  Create a Ruby DSL to generate HTML. The output was to look like the following, and below is how the DSL should be called. To each HTML element you can pass text, options (html attributes), and a block. All are optional.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">html</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">body</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="n">div</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;container&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="n">ul</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;pretty&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="n">li</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;active&quot;</span><span class="o">&gt;</span><span class="no">Item</span> <span class="mi">1</span><span class="o">&lt;</span><span class="sr">/li&gt;</span>
-</span><span class='line'><span class="sr">        &lt;li&gt;Item 2&lt;/</span><span class="n">li</span><span class="o">&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="sr">/ul&gt;</span>
-</span><span class='line'><span class="sr">    &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="sr">/body&gt;</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">html</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">output</span> <span class="o">=</span> <span class="no">FancyMarkup</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">document</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">body</span> <span class="k">do</span>
-</span><span class='line'>    <span class="n">div</span> <span class="nb">id</span><span class="p">:</span> <span class="s2">&quot;container&quot;</span> <span class="k">do</span>
-</span><span class='line'>      <span class="n">ul</span> <span class="ss">class</span><span class="p">:</span> <span class="s2">&quot;pretty&quot;</span> <span class="k">do</span>
-</span><span class='line'>        <span class="n">li</span> <span class="s2">&quot;Item 1&quot;</span><span class="p">,</span> <span class="ss">class</span><span class="p">:</span> <span class="ss">:active</span>
-</span><span class='line'>        <span class="n">li</span> <span class="s2">&quot;Item 2&quot;</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  The solution I eventually came up with (after some serious refactoring) is below. I used some Ruby meta-programming by not actually defining methods for each HTML element, but rather utilizing method_missing as a catch-all, which then passes the element name, the args, and the block on to the tag method, which does the heavy lifting of generating the HTML.
-</p>
-
-
-
-
-<p>
-  One other thing I utilized here was that you can also check if a block was actually passed to the method by using the block_given? method.
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">FancyMarkup</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:indents</span><span class="p">,</span> <span class="ss">:html</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span>
-</span><span class='line'>    <span class="vi">@indents</span> <span class="o">=</span> <span class="mi">0</span>
-</span><span class='line'>    <span class="vi">@html</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1"># Catch-all method to avoid creating methods</span>
-</span><span class='line'>  <span class="c1"># for each HTML element.</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">method_missing</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">tag</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1"># The first method called when creating an</span>
-</span><span class='line'>  <span class="c1"># HTML document.</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">document</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">tag</span><span class="p">(</span><span class="ss">:html</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kp">private</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1"># Create the HTML tag</span>
-</span><span class='line'>  <span class="c1"># @param (String|Symbol) HTML tag (ul, li, strong, etc...)</span>
-</span><span class='line'>  <span class="c1"># @param (Array) Can contain a String of text or a Hash of attributes</span>
-</span><span class='line'>  <span class="c1"># @param (Block) An optional block which will further nest HTML</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">tag</span><span class="p">(</span><span class="n">html_tag</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">content</span> <span class="o">=</span> <span class="n">find_content</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">options</span> <span class="o">=</span> <span class="n">html_options</span><span class="p">(</span><span class="n">find_options</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">html</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="si">#{</span><span class="n">indent</span><span class="si">}</span><span class="s2">&lt;</span><span class="si">#{</span><span class="n">html_tag</span><span class="si">}#{</span><span class="n">options</span><span class="si">}</span><span class="s2">&gt;</span><span class="si">#{</span><span class="n">content</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>    <span class="k">if</span> <span class="nb">block_given?</span>
-</span><span class='line'>      <span class="vi">@indents</span> <span class="o">+=</span> <span class="mi">1</span>
-</span><span class='line'>      <span class="nb">instance_eval</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
-</span><span class='line'>      <span class="vi">@indents</span> <span class="o">-=</span> <span class="mi">1</span>
-</span><span class='line'>      <span class="n">html</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="si">#{</span><span class="n">indent</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>    <span class="n">html</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot;&lt;/</span><span class="si">#{</span><span class="n">html_tag</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1"># Searching the tag arguments, find the text/context element.</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">find_content</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">args</span><span class="o">.</span><span class="n">select</span><span class="p">{</span><span class="o">|</span><span class="n">arg</span><span class="o">|</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_a?</span> <span class="nb">String</span><span class="p">}</span><span class="o">.</span><span class="n">first</span> <span class="o">||</span> <span class="kp">nil</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1"># Searching the tag arguments, find the hash/attributes element</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">find_options</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">args</span><span class="o">.</span><span class="n">select</span><span class="p">{</span><span class="o">|</span><span class="n">arg</span><span class="o">|</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_a?</span> <span class="no">Hash</span><span class="p">}</span><span class="o">.</span><span class="n">first</span> <span class="o">||</span> <span class="p">{}</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1"># Indent output number of spaces</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">indent</span>
-</span><span class='line'>    <span class="s2">&quot;  &quot;</span> <span class="o">*</span> <span class="n">indents</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1"># Build html options string from Hash</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">html_options</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">options</span><span class="o">.</span><span class="n">collect</span><span class="p">{</span><span class="o">|</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="o">|</span>
-</span><span class='line'>      <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;\&quot;&#39;</span><span class="p">)</span>
-</span><span class='line'>      <span class="s2">&quot; </span><span class="si">#{</span><span class="n">key</span><span class="si">}</span><span class="s2">=</span><span class="se">\&quot;</span><span class="si">#{</span><span class="n">value</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2">&quot;</span>
-</span><span class='line'>    <span class="p">}</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far so good, I&#8217;ve realized how important blocks are to Ruby. Learning them well and understanding how DSLs work will improve the Ruby code that I write. That&#8217;s it!!! See ya!!!
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/17/">&larr; Older</a>
@@ -1732,6 +1310,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/03/29/import-markdown-files-and-serve-its-content-in-next-dot-js/">Import Markdown Files and Serve Its Content in Next.js</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2017/11/13/the-most-popular-reactjs-user-interface-frameworks/">The Most Popular ReactJs User Interface Frameworks</a>
       </li>
     
@@ -1753,10 +1335,6 @@
     
       <li class="post">
         <a href="/blog/2017/07/10/laravel-5-dot-x-x-4-steps-to-prevent-browsers-back-button-after-user-logout/">Laravel 5.x.x - 4 Steps to Prevent Browser&#8217;s Back Button After User Logout</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/07/09/laravel-5-dot-x-x-route-and-seo/">Laravel 5.x.x Route &amp; SEO</a>
       </li>
     
   </ul>
@@ -1814,7 +1392,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 47 ]</a>
+        <a href="/blog/categories/other/">Other [ 48 ]</a>
       </li>
     
       <li>
@@ -1916,7 +1494,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2017 GeeKhmer in Phnom Penh, Cambodia.
+  Copyright &copy; 2018 GeeKhmer in Phnom Penh, Cambodia.
 </p>
 
 </footer>

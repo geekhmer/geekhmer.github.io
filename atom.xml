@@ -4,7 +4,7 @@
   <title><![CDATA[GeeKhmer]]></title>
   <link href="http://geekhmer.github.io/atom.xml" rel="self"/>
   <link href="http://geekhmer.github.io/"/>
-  <updated>2017-11-13T22:32:34+07:00</updated>
+  <updated>2018-03-29T22:31:39+07:00</updated>
   <id>http://geekhmer.github.io/</id>
   <author>
     <name><![CDATA[Bunlong Van]]></name>
@@ -12,6 +12,160 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Import Markdown Files and Serve Its Content in Next.js]]></title>
+    <link href="http://geekhmer.github.io/blog/2018/03/29/import-markdown-files-and-serve-its-content-in-next-dot-js/"/>
+    <updated>2018-03-29T22:26:00+07:00</updated>
+    <id>http://geekhmer.github.io/blog/2018/03/29/import-markdown-files-and-serve-its-content-in-next-dot-js</id>
+    <content type="html"><![CDATA[<p>
+  <img src="http://geekhmer.github.io/images/nextjs.png" width="600" alt="Import Markdown Files in Next.js" />
+</p>
+
+
+
+
+<p>
+  As <a href="https://github.com/arunoda" target="_blank">@arunoda</a> (Next.js founder) said Next.js does not support importing markdown files yet. But you can configure the Next.js webpack loaders to load <code>raw-loader</code> modules and import markdown files and return them as strings.
+</p>
+
+
+
+
+<p>
+  Let get started!
+</p>
+
+
+
+
+<p>
+  Open the terminal, run the command below to install <code>raw-loader</code> and <code>react-markdown</code> modules (noted: use react-markdown to renders markdown as pure React components):
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">npm</span> <span class="n">install</span> <span class="o">--</span><span class="n">save</span> <span class="n">raw</span><span class="o">-</span><span class="n">loader</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">npm</span> <span class="n">install</span> <span class="o">--</span><span class="n">save</span> <span class="n">react</span><span class="o">-</span><span class="n">markdown</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Create <code>next.config.js</code> file with content below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>next.config.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">module</span><span class="o">.</span><span class="n">exports</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>  <span class="ss">webpack</span><span class="p">:</span> <span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">config</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">rules</span><span class="o">.</span><span class="n">push</span><span class="p">(</span>
+</span><span class='line'>      <span class="p">{</span>
+</span><span class='line'>        <span class="nb">test</span><span class="p">:</span> <span class="sr">/\.md$/</span><span class="p">,</span>
+</span><span class='line'>        <span class="ss">use</span><span class="p">:</span> <span class="s1">&#39;raw-loader&#39;</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">return</span> <span class="n">config</span>
+</span><span class='line'>  <span class="p">},</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Create <code>docs/about.md</code> file with content below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>about.md </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># About</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Welcome</span> <span class="n">to</span> <span class="o">**</span><span class="no">GeeKhmer</span><span class="o">**!</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Create <code>pages/about.js</code> file with content below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>about.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">import</span> <span class="no">React</span> <span class="n">from</span> <span class="s1">&#39;react&#39;</span>
+</span><span class='line'><span class="n">import</span> <span class="no">ReactMarkdown</span> <span class="n">from</span> <span class="s1">&#39;react-markdown&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">export</span> <span class="n">default</span> <span class="k">class</span> <span class="n">extends</span> <span class="no">React</span><span class="o">.</span><span class="n">Component</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">static</span> <span class="n">async</span> <span class="n">getInitialProps</span><span class="p">({</span> <span class="n">req</span> <span class="p">})</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">const</span> <span class="n">content</span> <span class="o">=</span> <span class="n">await</span> <span class="nb">require</span><span class="p">(</span><span class="sb">`../docs/about.md`</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">{</span> <span class="n">content</span> <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">render</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">(</span>
+</span><span class='line'>      <span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="no">ReactMarkdown</span> <span class="n">source</span><span class="o">=</span><span class="p">{</span><span class="n">this</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">content</span><span class="p">}</span> <span class="sr">/&gt;</span>
+</span><span class='line'><span class="sr">      &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, That’s it!!! See ya!!! :)
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[The Most Popular ReactJs User Interface Frameworks]]></title>
@@ -5613,62 +5767,6 @@
 
 <p>
   So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Why I do combining apache and nginx together?]]></title>
-    <link href="http://geekhmer.github.io/blog/2017/03/13/why-i-do-combining-apache-and-nginx-together/"/>
-    <updated>2017-03-13T10:08:00+07:00</updated>
-    <id>http://geekhmer.github.io/blog/2017/03/13/why-i-do-combining-apache-and-nginx-together</id>
-    <content type="html"><![CDATA[<p>
-  <img src="http://geekhmer.github.io/images/nginx_apache.jpg" width="600" alt="Why I do combining apache and nginx together?" />
-</p>
-
-
-
-
-<p>
-  Nginx and apache are powerful and effective servers by nowadays. Apache currently reigns as the number 1 server for websites and since its public release in 2006. And nginx has taken the world by storm and is now the number 2 server for active sites. 
-</p>
-
-
-
-
-<h3>The Reason Why I Use Nginx and Apache Together is</h3>
-
-
-
-
-<p>
-  <strong>Nginx</strong><br/>
-  - nginx serves static files (images, css, html etc.) really fast and efficient and passes php and .htaccess requests to apache for processing.<br/>
-  - nginx needs the help of php-fpm or similar modules for dynamic content.
-</p>
-
-
-
-
-<p>
-  <strong>Apache</strong><br/>
-  - apache is hard on server memory.<br/>
-  - apache serves php and .htaccess (most cms site like wordpress needs it for rewrite) and if you throw in a php opcode cache like zend opcache or xcache it should serve php even faster.
-</p>
-
-
-
-
-<p>
-  <strong>nginx + apache with php opcache = performance and server resource efficiency</strong>
-</p>
-
-
-
-
-<p>
-  So far so good, in the next article I will show you the configurations. That&#8217;s it!!! See ya!!! :)
 </p>
 
 ]]></content>
