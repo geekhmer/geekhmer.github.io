@@ -1,0 +1,226 @@
+---
+layout: post
+title: "Laravel 5.x.x Installation and Configuration"
+date: 2017-06-24 14:42
+categories: [Laravel]
+keywords: Laravel
+---
+
+<p>
+  <img src="/images/laravel_5.jpg" width="600" alt="Laravel 5" />
+</p>
+
+<p>
+  Laravel is a great PHP framework. Currently, it is the most PHP framework which a lot of companies and people all over the world use it to build amazing applications. In this tutorial, I'll show you how easy it is to build a web application with Laravel and add authentication to it.
+</p>
+
+<p>
+  Laravel is a free, open-source PHP framework designed for building web applications with an expressive and elegant syntax. Laravel saves your time and effort because it come with a lot of features. 
+</p>
+
+<p>
+  Well, in this article We are going to take a look on installing, configuration Laravel and explore the Laravel directories structures. And pretty sure We will work with a Ubuntu (Linux) machine.
+</p>
+
+<p>
+  <strong>Pre-requisites for Installing Laravel</strong><br/>
+  Before installing Laravel, ensure that you have installed: Web Server, PHP, MySQL, Composer.
+</p>
+
+<p>
+  <strong>Web Server, PHP & MySQL</strong><br/>
+  For this article, We will use Laravel built-in web server. or if you prefer other kind of web server i.e. XAMPP comes with Apache, MySQL and PHP. The good news is XAMPP come cross platform. If you do not have XAMPP, you can download it from this <a href="https://www.apachefriends.org/index.html" target="_blank">link</a>.
+</p>
+
+<p>
+  <strong>Composer</strong><br/>
+  Composer is a dependency manager for PHP. You can read more about composer from their <a href="https://getcomposer.org/" target="_blank">official website</a>. We will not cover how to install composer in this article.
+</p>
+
+<p>
+  <strong>Create a New Laravel Project Using Composer</strong><br/>
+  Laravel use Composer to manage its dependencies. So, before using Laravel, ensure you have Composer installed on your machine.
+</p>
+
+<p>
+  We can install Laravel by issuing the Composer <code>create-project</code> command in the terminal like so:
+</p>
+
+{% codeblock lang:php %}
+composer create-project --prefer-dist laravel/laravel blog
+{% endcodeblock %}
+
+<p>
+  Wait for the installation to complete then cd into the project and run the command below for running the Laravel built-in web server:
+</p>
+
+{% codeblock lang:php %}
+php artisan serve
+{% endcodeblock %}
+
+<p>
+  Browser to the following URL <code>http://localhost:300</code> in your web browser.
+</p>
+
+<p>
+  <strong>Explore Directory Structure</strong><br/>
+  Laravel follow the <code>Model-View-Controller</code> design pattern.
+</p>
+
+<p>
+  <img src="/images/mvc-diagram.png" width="600" alt="MVC" />
+</p>
+
+<p>
+  - Models: query the database and returns the data.<br/>
+  - Views: displays the model data, and sends user actions (e.g. button clicks) to the controller.<br/>
+  - Controllers: handle user requests from the view, retrieve data from the Models and pass them back into the views.
+</p>
+
+<p>
+  The following table briefly explains the key Laravel directories that you must know about:
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Directories</th>
+      <th>Descriptioin</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>app</td>
+      <td>contains all of your application code.</td>
+    </tr>
+    <tr>
+      <td>app/Console</td>
+      <td>contains all of your artisan commands.</td>
+    </tr>
+    <tr>
+      <td>app/Events</td>
+      <td>contains event classes.</td>
+    </tr>
+    <tr>
+      <td>app/Exceptions</td>
+      <td>contains exception handling classes.</td>
+    </tr>
+    <tr>
+      <td>app/Http</td>
+      <td>contains controllers, filters, and requests.</td>
+    </tr>
+    <tr>
+      <td>app/Jobs</td>
+      <td>contains jobs that can be queued.</td>
+    </tr>
+    <tr>
+      <td>app/Listeners</td>
+      <td>contains handler classes for events.</td>
+    </tr>
+    <tr>
+      <td>bootstrap</td>
+      <td>contains files required by the bootstrap framework.</td>
+    </tr>
+    <tr>
+      <td>config</td>
+      <td>contains the application configuration files.</td>
+    </tr>
+    <tr>
+      <td>database</td>
+      <td>contains database migrations and seeds. It is also used to store the database for SQLite.</td>
+    </tr>
+    <tr>
+      <td>public</td>
+      <td>contains the front controllers and assets such as images, CSS, JavaScript etc.</td>
+    </tr>
+    <tr>
+      <td>storage</td>
+      <td>contains compiled blade templates, filed based sessions, etc.</td>
+    </tr>
+    <tr>
+      <td>tests</td>
+      <td>contains automated unit tests.</td>
+    </tr>
+    <tr>
+      <td>vendor</td>
+      <td>contains composer dependencies.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  <br/>
+  <strong>Application Configuration</strong><br/>
+  The application configuration information is located in <code>config/app.php</code>. In this section, we are going to: 
+</p>
+
+<p>
+  1. Set the debugging mode – the debugging mode is used to determine how much information should be displayed when an error occurs.
+</p>
+
+<p>
+  Open the file <code>config/app.php</code> and upate the following code:
+</p>
+
+{% codeblock lang:php %}
+'debug' => env('APP_DEBUG', false),
+{% endcodeblock %}
+
+<p>
+  To:
+</p>
+
+{% codeblock lang:php %}
+'debug' => env('APP_DEBUG', true),
+{% endcodeblock %}
+
+<p>
+  2. Set the time zone – this setting is used for PHP date and date-time functions. 
+</p>
+
+<p>
+  Sets the time zone to UTC. This is the default value If you would like to have a different time zone, you can replace UTC with a value of your preferred time zone.
+</p>
+
+<p>
+  Locate the following code:
+</p>
+
+{% codeblock lang:php %}
+'timezone' => 'UTC',
+{% endcodeblock %}
+
+<p>
+  3. Application key – this value is used for encryption purposes.
+</p>
+
+<p>
+  Update following code:
+</p>
+
+{% codeblock lang:php %}
+'key' => env('APP_KEY', 'SomeRandomString'),
+{% endcodeblock %}
+
+<p>
+  To:
+</p>
+
+{% codeblock lang:php %}
+'key' => env('APP_KEY', 'inesindinemwanawabambuyabakoiwe'),
+{% endcodeblock %}
+
+
+<p>
+  <strong>Authentication Configuration</strong><br/>
+  The authentication configuration file is located in /config/auth.php. We will leave the default values as they are. If you want you can change them to meet your requirements.
+</p>
+
+<p>
+  <strong>Database Configuration</strong><br/>
+  The database configuration file is located in <code>config/database.php</code>. By default, MySQL will be used as the database engine. You can set it to a different database management system if you want.
+</p>
+
+<p>
+  So far so good, That's it!!! See ya!!! :)
+</p>
