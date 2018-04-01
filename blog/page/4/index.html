@@ -79,6 +79,177 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2016/10/11/gulp-notify-pop-up/">Gulp – Notify Pop Up</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-10-11T21:11:00+07:00" pubdate data-updated="true">Oct 11<span>th</span>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/bunlong_gulp.jpg" width="600" alt="Gulp, Gulp – Notify Pop Up" />
+</p>
+
+
+
+
+<p>
+  In the previous article, we used gulp to validate our JavaScript. The error message would appear in the console. While this is awesome, there is a chance we could miss it.
+</p>
+
+
+
+
+<p>
+  Let’s use notifications to display a pop up window when we have a JavaScript error.
+</p>
+
+
+
+
+<p>
+  There is a gulp plugin to send notifications.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">npm</span> <span class="n">install</span> <span class="n">gulp</span><span class="o">-</span><span class="n">notify</span> <span class="o">--</span><span class="n">save</span><span class="o">-</span><span class="n">dev</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  For more information on <code>gulp-notify</code> check out <a href="https://www.npmjs.org/package/gulp-notify" target="_blank">https://www.npmjs.org/package/gulp-notify</a>
+</p>
+
+
+
+
+<p>
+  Remember that gulp uses node’s streaming. It shouldn’t be a surprise that when <code>gulp-jsvalidate</code> finds an error, it emits an error event.
+</p>
+
+
+
+
+<p>
+  All we need to do is handle the event and use <code>gulp-notify</code> to send a notification with the error message.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>gulpfile.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="n">var</span> <span class="n">notify</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="s1">&#39;gulp-notify&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="n">gulp</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;javascript&#39;</span><span class="p">,</span> <span class="n">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Validate JavaScript&quot;</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">gulp</span><span class="o">.</span><span class="n">src</span><span class="p">(</span><span class="s2">&quot;contents/javascripts/**.js&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">jsValidate</span><span class="p">())</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="n">notify</span><span class="o">.</span><span class="n">onError</span><span class="p">(</span><span class="n">function</span><span class="p">(</span><span class="n">error</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">error</span><span class="o">.</span><span class="n">message</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}));</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Since our JavaScript is now valid, we need to make it invalid so we can see the error message.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>/contests/javascript/somejs.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">function</span> <span class="no">OMG</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">var</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">10</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now when we run gulp javascript we will get a notification window that an error was found.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">gulp</span> <span class="n">javascript</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Using</span> <span class="n">gulpfile</span> <span class="o">~</span><span class="sr">/YOUR_DIRECTORY/</span><span class="n">gulpFile</span><span class="o">.</span><span class="n">js</span>
+</span><span class='line'><span class="no">Starting</span> <span class="s1">&#39;javascript&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="no">Validate</span> <span class="no">JavaScript</span>
+</span><span class='line'><span class="n">gulp</span><span class="o">-</span><span class="ss">notify</span><span class="p">:</span> <span class="o">[</span><span class="no">Error</span> <span class="n">running</span> <span class="no">Gulp</span><span class="o">]</span> <span class="no">Line</span> <span class="mi">3</span><span class="p">:</span> <span class="no">Unexpected</span> <span class="n">token</span> <span class="o">*</span>
+</span><span class='line'><span class="s1">&#39;javascript&#39;</span> <span class="n">errored</span> <span class="n">after</span> <span class="mi">41</span> <span class="n">ms</span> <span class="no">Line</span> <span class="mi">3</span><span class="p">:</span> <span class="no">Unexpected</span> <span class="n">token</span> <span class="o">*</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2016/10/11/gulp-validate-javascript/">Gulp – Validate JavaScript</a></h1>
     
     
@@ -1813,98 +1984,6 @@ You might have been wondering what the empty array (<code>[]</code>) was before 
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/08/09/what-is-gulp/">What Is Gulp?</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-08-09T13:51:00+07:00" pubdate data-updated="true">Aug 9<span>th</span>, 2016</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/what_is_gulpjs.jpg" width="400" alt="What is Gulp?" />
-</p>
-
-
-
-
-<p>
-  <strong>What is Gulp?</strong><br/>
-  Gulp is a task runner that uses Node.js as a platform. Gulp purely uses the JavaScript code and helps to run front-end tasks and large-scale web applications. It builds system automated tasks like CSS and HTML minification, concatenating library files, and compiling the SASS files. These tasks can be run using Shell or Bash scripts on the command line.
-</p>
-
-
-
-
-<p>
-  <strong>Why Use Gulp?</strong><br/>
-  - It is shorter, simpler and faster as compared to other task runner.<br/>
-  - Uses SASS and LESS as CSS preprocessor.<br/>
-  - Automatically refreshes page after editing the source files.<br/>
-  - Easy to understand and build the Gulpfile.js because, it uses pure JavaScript code to build the task.
-</p>
-
-
-
-
-<p>
-  <strong>Features</strong><br/>
-  - Provides minification and concatenation.<br/>
-  - Uses pure JavaScript code.<br/>
-  - Converts LESS or SASS to CSS compilation.<br/>
-  - Manages file manipulation in the memory and enhances speed by using the Node.js
-platform.
-</p>
-
-
-
-
-<p>
-  <strong>Advantages</strong><br/>
-  - Huge speed advantage over any other task runner.<br/>
-  - Easy to code and understand.<br/>
-  - Easy to test the web applications.<br/>
-  - Plugins are simple to use and they are designed to do one thing at a time.<br/>
-  - Performs repetitive tasks repeatedly such as minifying stylesheets, compressing images, etc.
-</p>
-
-
-
-
-<p>
-  <strong>Disadvantages</strong><br/>
-  - More number of dependencies and is a newcomer compared to Grunt.<br/>
-  - Using Gulp plugins, you cannot perform multiple tasks.<br/>
-  - Configuration is not as clean as Grunt.
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/5/">&larr; Older</a>
@@ -1929,6 +2008,10 @@ platform.
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/04/01/import-css-files-into-nextjs/">Import CSS Files Into Nextjs</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/03/29/import-markdown-files-and-serve-its-content-in-next-dot-js/">Import Markdown Files and Serve Its Content in Next.js</a>
       </li>
     
@@ -1950,10 +2033,6 @@ platform.
     
       <li class="post">
         <a href="/blog/2017/08/06/laravel-5-dot-x-x-template/">Laravel 5.x.x Template</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/07/10/laravel-5-dot-x-x-4-steps-to-prevent-browsers-back-button-after-user-logout/">Laravel 5.x.x - 4 Steps to Prevent Browser&#8217;s Back Button After User Logout</a>
       </li>
     
   </ul>
@@ -2011,7 +2090,7 @@ platform.
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 48 ]</a>
+        <a href="/blog/categories/other/">Other [ 49 ]</a>
       </li>
     
       <li>

@@ -79,6 +79,229 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/11/14/reactjs-proptypes/">ReactJS PropTypes</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-11-14T10:14:00+07:00" pubdate data-updated="true">Nov 14<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/reactjs.png" width="600" alt="ReactJS PropTypes" />
+</p>
+
+
+
+
+<p>
+  ReactJS is built around the concept of components. The components get many specific attributes just like a HTML tag does.
+</p>
+
+
+
+
+<p>
+  The attributes are called &#8220;props&#8221; in ReactJS and can be of any type. It can be a string, function or an Array, as long as its valid javascript you can use it as a prop.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&lt;</span> <span class="nx">MyComponent</span> <span class="nx">size</span><span class="o">=</span><span class="p">{</span><span class="mi">24</span><span class="p">}</span> <span class="nx">position</span><span class="o">=</span><span class="s2">&quot;fixed&quot;</span> <span class="o">/&gt;</span>
+</span><span class='line'><span class="c1">// size &amp; position is props made up by MyComponent component.</span>
+</span><span class='line'><span class="c1">// Using anything other than a string you need to wrap your props in {}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>What is PropTypes?</strong><br/>
+  PropTypes defines type and which props are required. This benefits the future you using your component in two ways:<br/>
+  1. You can easily open up a component and check which props are required and what type they should be.<br/>
+  2. When things get messed up ReactJS will give you an awesome error message in the console, saying which props is wrong/missing plus the render method that caused the problem.
+</p>
+
+
+
+
+<p>
+  So how do we write the propTypes?
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">propTypes</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">size</span><span class="o">:</span> <span class="nx">React</span><span class="p">.</span><span class="nx">PropTypes</span><span class="p">.</span><span class="nx">number</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">position</span><span class="o">:</span> <span class="nx">React</span><span class="p">.</span><span class="nx">PropTypes</span><span class="p">.</span><span class="nx">string</span><span class="p">.</span><span class="nx">isRequired</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  And more awesome, if we can’t find a PropType that suits our needs we can write own with regex or shapes:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">propTypes</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">email</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">props</span><span class="p">,</span> <span class="nx">propName</span><span class="p">,</span> <span class="nx">componentName</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="sr">/emailRegex/</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">props</span><span class="p">[</span><span class="nx">email</span><span class="p">]))</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s1">&#39;Give me a real email!&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">},</span>
+</span><span class='line'>  <span class="nx">user</span><span class="o">:</span> <span class="nx">React</span><span class="p">.</span><span class="nx">PropTypes</span><span class="p">.</span><span class="nx">shape</span><span class="p">({</span>
+</span><span class='line'>    <span class="nx">name</span><span class="o">:</span> <span class="nx">React</span><span class="p">.</span><span class="nx">PropTypes</span><span class="p">.</span><span class="nx">string</span><span class="p">.</span><span class="nx">isRequired</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">age</span><span class="o">:</span> <span class="nx">React</span><span class="p">.</span><span class="nx">PropTypes</span><span class="p">.</span><span class="nx">number</span>
+</span><span class='line'>  <span class="p">}).</span><span class="nx">isRequired</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Example:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">meta</span> <span class="nx">charset</span><span class="o">=</span><span class="s2">&quot;UTF-8&quot;</span> <span class="o">/&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;</span><span class="nx">ReactJS</span> <span class="nx">PropTypes</span><span class="o">&lt;</span><span class="err">/title&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;react.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;JSXTransformer.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="err">/head&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>      <span class="kd">var</span> <span class="nx">Profile</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
+</span><span class='line'>        <span class="nx">getDefaultProps</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>          <span class="k">return</span> <span class="p">{</span>
+</span><span class='line'>            <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;This is a default prop&#39;</span><span class="p">,</span>
+</span><span class='line'>            <span class="nx">age</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+</span><span class='line'>            <span class="nx">activate</span><span class="o">:</span> <span class="kc">true</span>
+</span><span class='line'>          <span class="p">}</span>
+</span><span class='line'>        <span class="p">},</span>
+</span><span class='line'>        <span class="nx">propTypes</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>          <span class="nx">name</span><span class="o">:</span> <span class="nx">React</span><span class="p">.</span><span class="nx">PropTypes</span><span class="p">.</span><span class="nx">string</span><span class="p">,</span>
+</span><span class='line'>          <span class="nx">age</span><span class="o">:</span> <span class="nx">React</span><span class="p">.</span><span class="nx">PropTypes</span><span class="p">.</span><span class="nx">number</span><span class="p">.</span><span class="nx">isRequired</span><span class="p">,</span>
+</span><span class='line'>          <span class="nx">activate</span><span class="o">:</span> <span class="nx">React</span><span class="p">.</span><span class="nx">PropTypes</span><span class="p">.</span><span class="nx">bool</span><span class="p">.</span><span class="nx">isRequired</span>
+</span><span class='line'>        <span class="p">},</span>
+</span><span class='line'>        <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>          <span class="k">return</span><span class="p">(</span>
+</span><span class='line'>            <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+</span><span class='line'>              <span class="o">&lt;</span><span class="nx">h1</span><span class="o">&gt;</span><span class="nx">Name</span><span class="o">:</span> <span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">name</span><span class="p">}</span><span class="o">&lt;</span><span class="err">/h1&gt;</span>
+</span><span class='line'>              <span class="o">&lt;</span><span class="nx">h1</span><span class="o">&gt;</span><span class="nx">Age</span><span class="o">:</span> <span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">age</span><span class="p">}</span><span class="o">&lt;</span><span class="err">/h1&gt;</span>
+</span><span class='line'>              <span class="o">&lt;</span><span class="nx">h1</span><span class="o">&gt;</span><span class="nx">Activate</span><span class="o">:</span> <span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">activate</span><span class="p">}</span><span class="o">&lt;</span><span class="err">/h1&gt;</span>
+</span><span class='line'>            <span class="o">&lt;</span><span class="err">/div&gt;</span>
+</span><span class='line'>          <span class="p">);</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>      <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nx">React</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="o">&lt;</span><span class="nx">Profile</span> <span class="nx">name</span><span class="o">=</span><span class="s2">&quot;Bunlong&quot;</span> <span class="nx">age</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">}</span> <span class="nx">activate</span><span class="o">=</span><span class="p">{</span><span class="kc">true</span><span class="p">}</span> <span class="o">/&gt;</span><span class="p">,</span> <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">);</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="err">/script&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="err">/body&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/11/07/reactjs-jsx/">ReactJS JSX</a></h1>
     
     
@@ -2391,263 +2614,6 @@ React events:<br/>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/07/12/social-network-sharing-buttons-in-rails-app/">Social Network Sharing Buttons in Rails App</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-07-12T22:46:00+07:00" pubdate data-updated="true">Jul 12<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="Social Network Sharing Buttons in Rails App" />
-</p>
-
-
-
-
-<p>
-  There are many services that allow you to add social network buttons to your website. The problem with these services is that they are free because they harvest traffic statistics from your site, track your visitors, and in general are a big nuisance. They also have the disadvantage of being slow to load.
-</p>
-
-
-
-
-<p>
-  In this article we will show you how to add social sharing buttons to your website via a gem called Social Share Button. Unlike most services, Social Share Button has buttons that are hosted locally on your site and don&#8217;t go through a third party service. As a result, they are quick to load and extremely customizable.
-</p>
-
-
-
-
-<p>
-  <strong>Setup Application</strong><br/>
-  First we need to add the social-share-button gem to our Gemfile. Open up your Gemfile and add in the line listed below:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>Gemfile </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;social-share-button&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 0.1.6&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Next, we need to run a bundle install to install the gem:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now we need to run the <code>rails generate social_share_button:install</code> command to install some additional configuration files that the Social Sharing Button gem uses to display the buttons on your site. This includes an initializer called social_share_button.rb in your initializers folder as well as some localization files:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">generate</span> <span class="n">social_share_button</span><span class="ss">:install</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Great, Next we need to do is create a simple Home controller in order to test the social sharing button functionality:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">controller</span> <span class="n">homes</span> <span class="n">show</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now let&#8217;s modify our routes file a bit:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>config/routes.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">resources</span> <span class="ss">:homes</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:show</span><span class="o">]</span>
-</span><span class='line'>  <span class="n">root</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;homes#show&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Great, now we need to add some javascript and CSS includes to make things work. Open up your application.js file and modify it so that it looks like the code listed below:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/assets/javascripts/application.js </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">jquery</span>
-</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">jquery_ujs</span>
-</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">turbolinks</span>
-</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="nb">require</span> <span class="n">social</span><span class="o">-</span><span class="n">share</span><span class="o">-</span><span class="n">button</span>
-</span><span class='line'><span class="sr">//</span><span class="o">=</span> <span class="n">require_tree</span> <span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Great, now for the application.css file. Open it up and modify it so that it looks like the code listed below:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/assets/stylesheets/application.css </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">/*</span>
-</span><span class='line'><span class="sr"> *= require_tree .</span>
-</span><span class='line'><span class="sr"> *= require social-share-button</span>
-</span><span class='line'><span class="sr"> *= require_self</span>
-</span><span class='line'><span class="sr"> */</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Excellent, now we can add the social sharing buttons to our site. Open up your homes/show view and modify it so that it looks like the code listed below:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/views/homes/show.html.erb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">social_share_button_tag</span><span class="p">(</span><span class="s2">&quot;My Site&quot;</span><span class="p">)</span> <span class="o">%&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Great, now if we run rails server and visit http://localhost:3000, we will see the social sharing buttons. However, you&#8217;ll notice that there is a problem. About 15 or so buttons are listed, but we only care about a couple. Luckily we can easily resolve this. Open up the social_share_button initializer and modify it so that it looks like the code listed below:
-</p>
-
-
-
-
-<figure class='code'><figcaption><span>config/initializers/social_share_button.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">SocialShareButton</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
-</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">allow_sites</span> <span class="o">=</span> <span class="sx">%w(twitter facebook google_plus delicious tumblr pinterest)</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Now if you restart your rails server, you&#8217;ll notice that the buttons have been limited to the sites listed above. Note that you can also specify a specific url if needed. Social Share Button detects the current URL by default, but there are times when you may want to customize this. You can do this like so:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= social_share_button_tag(&quot;My Home Page&quot;, :url =</span><span class="o">&gt;</span> <span class="s2">&quot;http://mysite.com/sample&quot;</span><span class="p">)</span> <span class="o">%&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  However, what if we want to customize the button look/feel? Luckily this is pretty easy. If you inspect the elements in chrome developer tools you&#8217;ll notice that they each have a unique css class. We can override this CSS class with our own code. For example, to modify the facebook button to look different, we&#8217;d use something like the following CSS (placed into our application.css file):
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">social</span><span class="o">-</span><span class="n">share</span><span class="o">-</span><span class="n">button</span><span class="o">-</span><span class="n">facebook</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nb">display</span><span class="p">:</span> <span class="n">inline</span><span class="o">-</span><span class="n">block</span><span class="p">;</span>
-</span><span class='line'>  <span class="ss">width</span><span class="p">:</span> <span class="mi">16</span><span class="n">px</span><span class="p">;</span>
-</span><span class='line'>  <span class="ss">height</span><span class="p">:</span> <span class="mi">16</span><span class="n">px</span><span class="p">;</span>
-</span><span class='line'>  <span class="ss">background</span><span class="p">:</span> <span class="n">url</span><span class="p">(</span><span class="s2">&quot;/social/facebook.png&quot;</span><span class="p">)</span> <span class="n">no</span><span class="o">-</span><span class="n">repeat</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  So far go good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/10/">&larr; Older</a>
@@ -2672,6 +2638,10 @@ React events:<br/>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/04/01/import-css-files-into-nextjs/">Import CSS Files Into Nextjs</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/03/29/import-markdown-files-and-serve-its-content-in-next-dot-js/">Import Markdown Files and Serve Its Content in Next.js</a>
       </li>
     
@@ -2693,10 +2663,6 @@ React events:<br/>
     
       <li class="post">
         <a href="/blog/2017/08/06/laravel-5-dot-x-x-template/">Laravel 5.x.x Template</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/07/10/laravel-5-dot-x-x-4-steps-to-prevent-browsers-back-button-after-user-logout/">Laravel 5.x.x - 4 Steps to Prevent Browser&#8217;s Back Button After User Logout</a>
       </li>
     
   </ul>
@@ -2754,7 +2720,7 @@ React events:<br/>
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 48 ]</a>
+        <a href="/blog/categories/other/">Other [ 49 ]</a>
       </li>
     
       <li>

@@ -79,6 +79,188 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2014/07/26/implement-decorator-design-pattern-in-rails-with-draper-to-cleanup-views/">Implement Decorator Design Pattern in Rails With Draper to Cleanup Views</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-26T21:29:00+07:00" pubdate data-updated="true">Jul 26<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  Ruby on Rails is an awesome framework to build web application. Rails relies on the MVC pattern, and lots of conventions, code becomes complex to maintain, productivity start to decrease, etc.
+</p>
+
+
+
+
+<p>
+  We can find a lot of reasons to this(too much logic in controllers, fat models, lack of services layers, etc.), but I will just name one: logic in view, logic in view is bug prone, difficult to test, and can be a pain for front-end developers.
+</p>
+
+
+
+
+<p>
+  Sample problem
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>articles_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ArticlesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>    <span class="vi">@article</span> <span class="o">=</span> <span class="no">Article</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>show.html.haml </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">-</span> <span class="k">if</span> <span class="n">can?</span> <span class="ss">:update</span><span class="p">,</span> <span class="vi">@article</span>
+</span><span class='line'>  <span class="o">=</span> <span class="n">link_to</span> <span class="s2">&quot;Edit&quot;</span><span class="p">,</span> <span class="n">edit_article_path</span><span class="p">(</span><span class="vi">@article</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Well, you got it, logic in view. And since rails don&#8217;t have view inheritance, this code will have to be copy-pasted over and over, I would rather have something like: <code>= @article.link_to_edit</code>
+</p>
+
+
+
+
+<p>
+  So, how can we remove logic from the view?
+</p>
+
+
+
+
+<p>
+  <strong>Decorator Design Pattern save the views</strong><br/>
+  As usual, we can find a solution with a pattern. the decorator design pattern will help us remove logic from views in our Rails applications.<br/>
+  The idea is to insert an object between the model and the view, well there is a good ruby gem is <a href="https://github.com/drapergem/draper" target="_blank">Draper</a> that work well.
+</p>
+
+
+
+
+<p>
+  Let create a decorator for the Article class
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>article_decorator.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ArticleDecorator</span> <span class="o">&lt;</span> <span class="ss">Draper</span><span class="p">:</span><span class="ss">:Decorator</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">link_to_edit</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">h</span><span class="o">.</span><span class="n">can?</span> <span class="ss">:update</span><span class="p">,</span> <span class="n">object</span>
+</span><span class='line'>      <span class="n">h</span><span class="o">.</span><span class="n">link_to</span> <span class="s2">&quot;Edit&quot;</span><span class="p">,</span> <span class="n">h</span><span class="o">.</span><span class="n">edit_article_path</span><span class="p">(</span><span class="n">object</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>articles_controller.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ArticlesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>    <span class="vi">@article</span> <span class="o">=</span> <span class="no">ArticleDecorator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Article</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">))</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>show.html.haml </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">=</span> <span class="vi">@article</span><span class="o">.</span><span class="n">link_to_edit</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  A few things to notice here. From the controller, we call the decorate method on a instance of article, this will return a decorated version of the article object.
+</p>
+
+
+
+
+<p>
+  In the ArticleDecorator class, we have access to the decorated object with the object method and to all view helpers through the h object.<br/>
+  We can now call the link_to_edit method on the article object from our view, and the decorator will take care of the logic, and return a formatted link if the user has the right edit this resource, and nothing if he does not.
+</p>
+
+
+
+
+<p>
+  The code is easier to test, we just instantiate a new instance of the ArticleDecorator, and check the output of the link_to_edit method. No need to test whole renderd view, searching through the DOM object tree.
+</p>
+
+
+
+
+<p>
+  So far so good, we gain code readablility, code reuse, better testing, and in addition, we even lost a few lines of duplicated code. :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2014/07/24/vim-the-best-programming-editor-for-unix/">Vim - the Best Programming Editor for UNIX</a></h1>
     
     
@@ -2126,90 +2308,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/26/why-erlang/">Why Erlang?</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-26T20:51:00+07:00" pubdate data-updated="true">Jun 26<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/logo_erlang.png" />
-</p>
-
-
-
-
-<p>
-  Erlang is a programming language traditionally used to build massively scalable soft real-time systems with requirements on high availability. Some of its uses are in telecoms, banking, e-commerce, computer telephony, realtime application and instant messaging. Erlang’s runtime system has built-in support for concurrency, distribution and fault tolerance.
-</p>
-
-
-
-
-<p>
-  <strong>High Availability/Reliability</strong><br/>
-  - Simple and consistent error recovery and supervision hierarchiess.<br/>
-  - Built-in fault tolerance.<br/>
-  - Software upgrade (hot code loading) during runtime.
-</p>
-
-
-
-
-<p>
-  <strong>Scalability/Heterogeneity</strong><br/>
-  - Run on a variety of platforms, supports heterogeneous networks.<br/>
-  - Network aware runtime, out-of-the-box distributed architectures.<br/>
-  - Lightweight processes, highly scalable transparent or explicit concurrency.
-</p>
-
-
-
-
-<p>
-  <strong>Less Effort</strong><br/>
-  - Functional programming language, high abstraction level, concise readable programs.<br/>
-  - 4–20 times less code compared to C/C++/Java.<br/>
-  - Suitable for rapid prototyping.<br/>
-  - Powerful middleware and libraries (OTP).
-</p>
-
-
-
-
-<p>
-  For more information <a href="http://www.erlang.org/" target="_blank">erlang.org</a>
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/25/">&larr; Older</a>
@@ -2234,6 +2332,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/04/01/import-css-files-into-nextjs/">Import CSS Files Into Nextjs</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/03/29/import-markdown-files-and-serve-its-content-in-next-dot-js/">Import Markdown Files and Serve Its Content in Next.js</a>
       </li>
     
@@ -2255,10 +2357,6 @@
     
       <li class="post">
         <a href="/blog/2017/08/06/laravel-5-dot-x-x-template/">Laravel 5.x.x Template</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/07/10/laravel-5-dot-x-x-4-steps-to-prevent-browsers-back-button-after-user-logout/">Laravel 5.x.x - 4 Steps to Prevent Browser&#8217;s Back Button After User Logout</a>
       </li>
     
   </ul>
@@ -2316,7 +2414,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 48 ]</a>
+        <a href="/blog/categories/other/">Other [ 49 ]</a>
       </li>
     
       <li>
