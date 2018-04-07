@@ -88,6 +88,278 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2016/03/04/executing-background-tasks-with-scheduler-in-rails/">Executing Background Tasks With Scheduler in Rails</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-03-04T16:42:00+07:00" pubdate data-updated="true">Mar 4<span>th</span>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="Executing Background Tasks with Scheduler in Rails" />
+</p>
+
+
+
+
+<p>
+  <a href="https://rubygems.org/gems/rufus-scheduler/versions/3.2.0" target="_blank">rufus-scheduler</a> is a handy gem that allows you to perform background jobs. In this article we will show you how to use rufus-scheduler in your Rails applications. Let&#8217;s get started:
+</p>
+
+
+
+
+<h3>Setup</h3>
+
+
+
+
+<p>
+  In order to use rufus-scheduler, we must first add the rufus-scheduler gem to our Gemfile. To do this, open up your Gemfile and add in the line listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;rufus-scheduler&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Run a bundle install to install the gem:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Great, we need to create an initializer that will contain the jobs we wish to schedule. Create a new initializer called scheduler.rb in the <code>config/initializers</code> directory and add in the code listed below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/initializers/scheduler.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;rufus-scheduler&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">scheduler</span> <span class="o">=</span> <span class="ss">Rufus</span><span class="p">:</span><span class="ss">:Scheduler</span><span class="o">::</span><span class="n">singleton</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># jobs go below here.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Now we are ready to schedule jobs.
+</p>
+
+
+
+
+<h3>Scheduling the Jobs</h3>
+
+
+
+
+<p>
+  rufus-scheduler provides a simple syntax for scheduling jobs. You can schedule both one time jobs and recurring jobs. One time jobs can be either scheduled at a specific time, or you can tell rufus to wait a specific amount of time before running the job (a delayed job). For recurring jobs and delayed jobs, you can either use a simple plain English (30m = 30 minutes, etc.) format or you can use the cron format for scheduling jobs. For this article we&#8217;ll focus on the English format:
+</p>
+
+
+
+
+<p>
+  <strong>Recurring the Jobs</strong><br/>
+  Scheduling recurring jobs is easy. Simply use the following format in your scheduler.rb file:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/initializers/scheduler.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">scheduler</span><span class="o">.</span><span class="n">every</span> <span class="s1">&#39;5s&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># do stuff</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  The code above would perform your background task every 5 seconds. The list below will give you an idea of what time units are supported:
+</p>
+
+
+
+
+<p>
+  <strong>s</strong> Example: 5s - seconds, specifies the number of seconds you wish to wait.<br/>
+  <strong>m</strong> Example: 5m - the number of minutes you wish to wait.<br/>
+  <strong>h</strong> Example: 5h - the number of hours you wish to wait.<br/>
+  <strong>d</strong> Example: 5d - the number of days you wish to wait.<br/>
+  <strong>w</strong> Example: 5w - the number of weeks you wish to wait.<br/>
+  <strong>M</strong> Example: 5M - the number of months you wish to wait.<br/>
+  <strong>y</strong> Example: 1y - the number of years you wish to wait.
+</p>
+
+
+
+
+<p>
+  For example, the following code would tell rufus you wish to schedule a job for every 11 and a half hours:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/initializers/scheduler.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">scheduler</span><span class="o">.</span><span class="n">every</span> <span class="s1">&#39;11h30m&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># do stuff</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  Scheduling a delayed job is easy. The syntax is similar to the recurring syntax listed above, but we use the <code>.in</code> method instead of <code>.every</code>. For example, the following code would run a task 4 hours after the server starts:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/initializers/scheduler.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">scheduler</span><span class="o">.</span><span class="n">in</span> <span class="s1">&#39;4h&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># do stuff</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Scheduling the Jobs for Specific Dates/Times</strong><br/>
+  You can also schedule a job for a specific date and time. To do this we use the at method. For example, the following code would run at 12:01am on December 1st, 2017:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/initializers/scheduler.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">scheduler</span><span class="o">.</span><span class="n">at</span> <span class="s1">&#39;2017/12/01 00:01:00&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># do stuff</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<h3>Important Caveats</h3>
+
+
+
+
+<p>
+  1. Because rufus-scheduler runs in process, the scheduler will reset if your Rails server gets restarted. This means that the timer for your jobs will get reset, so don&#8217;t count on any monthly or yearly jobs getting called. If you need to persist jobs across server resets, use a job backend. We will show you how to do this in another article.<br/>
+  2. Rufus does not work with Active Job.<br/>
+  3. Some additional setup is needed for production environments (see below).
+</p>
+
+
+
+
+<h3>Production Setup</h3>
+
+
+
+
+<p>
+  Production servers require a bit of additional setup. On most production web servers, idle Ruby processes are killed. In order for rufus to work, you&#8217;ll need to stop this from happening. For Passenger/Nginx you can copy the following code below to your <code>nginx.conf</code> config file for your website after the line that says <code>passenger_enabled on;</code>.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>nginx.conf </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">passenger_spawn_method</span> <span class="n">direct</span><span class="p">;</span>
+</span><span class='line'><span class="n">passenger_min_instances</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'><span class="n">passenger_pool_idle_time</span> <span class="mi">0</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  rufus-scheduler is a simple, easy to use scheduler that provides great functionality. It can be used for stuff like sending emails, cleaning up temp files, and much more.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2016/03/01/4-startups-mark-zuckerberg-created-before-facebook/">4 Startups Mark Zuckerberg Created Before Facebook</a></h1>
     
     
@@ -1368,90 +1640,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/02/04/emerald-hub/">Emerald HUB</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-02-04T14:25:00+07:00" pubdate data-updated="true">Feb 4<span>th</span>, 2016</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/emerald_hub.jpg" width="500" alt="Emerald HUB" />
-</p>
-
-
-
-
-<p>
-  <a href="http://emeraldplus.biz/" target="_blank">Emerald HUB</a> is a Cambodia Co-Working space, located in Phnom Penh city. Emerald HUB offers young startup, entrepreneurs, small and growing businesses, service providers and investors the opportunity to work in an innovative, energetic and collaborative work space. Emerald HUB members can work at shared and dedicated “desks”, dedicated offices or private rooms, complimented with high speed Wi-Fi Internet and relevant amenities.
-</p>
-
-
-
-
-<p>
-  <img src="/images/emerald_hub_1.png" width="500" alt="Emerald HUB" />
-</p>
-
-
-
-
-<p>
-  <img src="/images/emerald_hub_2.jpg" width="500" alt="Emerald HUB" />
-</p>
-
-
-
-
-<p>
-  <img src="/images/emerald_hub_3.jpg" width="500" alt="Emerald HUB" />
-</p>
-
-
-
-
-<p>
-  <img src="/images/emerald_hub_4.jpg" width="500" alt="Emerald HUB" />
-</p>
-
-
-
-
-<p>
-  Address: St. 169, Phnom Penh, Cambodia 12253<br/>
-  Hours: Mon-Sun (8:00am - 9:00pm)<br/>
-  Parking: Street and Parking Lot<br/>
-  Phone: +855 97 492 7777
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/7/">&larr; Older</a>
@@ -1484,6 +1672,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/04/07/serve-static-files-sitemap-dot-xml-robots-dot-txt-and-favicon-dot-ico-with-next-dot-js/">Serve Static Files sitemap.xml, robots.txt and favicon.ico With Next.js</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/04/01/import-css-files-into-nextjs/">Import CSS Files Into Nextjs</a>
       </li>
     
@@ -1505,10 +1697,6 @@
     
       <li class="post">
         <a href="/blog/2017/08/06/laravel-5-dot-x-x-migrations/">Laravel 5.x.x Migrations</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/08/06/laravel-5-dot-x-x-template/">Laravel 5.x.x Template</a>
       </li>
     
   </ul>
@@ -1566,7 +1754,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 49 ]</a>
+        <a href="/blog/categories/other/">Other [ 47 ]</a>
       </li>
     
       <li>
@@ -1591,6 +1779,10 @@
     
       <li>
         <a href="/blog/categories/laravel/">Laravel [ 7 ]</a>
+      </li>
+    
+      <li>
+        <a href="/blog/categories/next.js/">Next.js [ 3 ]</a>
       </li>
     
   </ul>
