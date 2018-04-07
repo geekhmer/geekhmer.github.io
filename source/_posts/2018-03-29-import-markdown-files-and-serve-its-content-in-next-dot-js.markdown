@@ -3,7 +3,7 @@ layout: post
 title: "Import Markdown Files and Serve Its Content in Next.js"
 date: 2018-03-29 22:26
 comments: true
-categories: [Other]
+categories: [Next.js]
 keywords: Import Markdown Files and Serve Its Content in Next.js, React, Reactjs, Next, Nextjs, Next.js
 ---
 

@@ -3,7 +3,7 @@ layout: post
 title: "Import CSS Files into Nextjs"
 date: 2018-04-01 21:10
 comments: true
-categories: [Other]
+categories: [Next.js]
 keywords: Import CSS Files into Nextjs, React, Reactjs, Next, Nextjs, Next.js
 ---
 
