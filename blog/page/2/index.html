@@ -88,6 +88,230 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2017/07/10/laravel-5-dot-x-x-4-steps-to-prevent-browsers-back-button-after-user-logout/">Laravel 5.x.x - 4 Steps to Prevent Browser&#8217;s Back Button After User Logout</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2017-07-10T23:12:00+07:00" pubdate data-updated="true">Jul 10<span>th</span>, 2017</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/laravel_news_letter.png" width="600" alt="Laravel 5.x.x 4 Steps to Prevent Browser's Back Button After User Logout" />
+</p>
+
+
+
+
+<p>
+  Well, have you found out an issue with user logout? If you observe deeply then you can found out this issue that you can logout properly after you click logout link otherwise than if you click on browser&#8217;s back button you still able to see the content of the page which actually should not be seen with respect to auth middleware process.
+</p>
+
+
+
+
+<p>
+  We can prevent this issue by using Laravel middleware. We will create one middleware and prevent back button history. So we have to create new middleware and use that middleware in the route.
+</p>
+
+
+
+
+<p>
+  Like so, I am going to do from scratch so:
+</p>
+
+
+
+
+<p>
+  <strong>1. Create New Middleware</strong><br/>
+  Create a new middleware using following command:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">php</span> <span class="nx">artisan</span> <span class="nx">make</span><span class="o">:</span><span class="nx">middleware</span> <span class="nx">PreventBackHistory</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>2. Middleware Configuration</strong><br/>
+  Open up <code>PreventBackHistory.php</code> file in <code>app/Http/Middleware</code> folder and replace codes with the following codes below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>PreventBackHistory.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">namespace</span> <span class="nx">App\Http\Middleware</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">use</span> <span class="nx">Closure</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">PreventBackHistory</span> <span class="p">{</span>
+</span><span class='line'>  <span class="sd">/**</span>
+</span><span class='line'><span class="sd">   * Handle an incoming request.</span>
+</span><span class='line'><span class="sd">   *</span>
+</span><span class='line'><span class="sd">   * @param  \Illuminate\Http\Request  $request</span>
+</span><span class='line'><span class="sd">   * @param  \Closure  $next</span>
+</span><span class='line'><span class="sd">   * @return mixed</span>
+</span><span class='line'><span class="sd">   */</span>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">handle</span><span class="p">(</span><span class="nv">$request</span><span class="p">,</span> <span class="nx">Closure</span> <span class="nv">$next</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nv">$response</span> <span class="o">=</span> <span class="nv">$next</span><span class="p">(</span><span class="nv">$request</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">return</span> <span class="nv">$response</span><span class="o">-&gt;</span><span class="na">header</span><span class="p">(</span><span class="s1">&#39;Cache-Control&#39;</span><span class="p">,</span><span class="s1">&#39;nocache, no-store, max-age=0, must-revalidate&#39;</span><span class="p">)</span>
+</span><span class='line'>            <span class="o">-&gt;</span><span class="na">header</span><span class="p">(</span><span class="s1">&#39;Pragma&#39;</span><span class="p">,</span><span class="s1">&#39;no-cache&#39;</span><span class="p">)</span>
+</span><span class='line'>            <span class="o">-&gt;</span><span class="na">header</span><span class="p">(</span><span class="s1">&#39;Expires&#39;</span><span class="p">,</span><span class="s1">&#39;Sun, 02 Jan 1990 00:00:00 GMT&#39;</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>3. Register Middleware</strong><br/>
+  Open <code>Kernel.php</code> in <code>app/Http</code> folder and add a new middleware in $routeMiddleware variable array as below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>Kernel.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">namespace</span> <span class="nx">App\Http</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">use</span> <span class="nx">Illuminate\Foundation\Http\Kernel</span> <span class="k">as</span> <span class="nx">HttpKernel</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Kernel</span> <span class="k">extends</span> <span class="nx">HttpKernel</span> <span class="p">{</span>
+</span><span class='line'>  <span class="o">.....</span>
+</span><span class='line'>  <span class="o">.....</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="sd">/**</span>
+</span><span class='line'><span class="sd">   * The application&#39;s route middleware.</span>
+</span><span class='line'><span class="sd">   *</span>
+</span><span class='line'><span class="sd">   * These middleware may be assigned to groups or used individually.</span>
+</span><span class='line'><span class="sd">   *</span>
+</span><span class='line'><span class="sd">   * @var array</span>
+</span><span class='line'><span class="sd">   */</span>
+</span><span class='line'>  <span class="k">protected</span> <span class="nv">$routeMiddleware</span> <span class="o">=</span> <span class="p">[</span>
+</span><span class='line'>    <span class="o">.....</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="s1">&#39;prevent-back-history&#39;</span> <span class="o">=&gt;</span> <span class="nx">\App\Http\Middleware\PreventBackHistory</span><span class="o">::</span><span class="na">class</span><span class="p">,</span>
+</span><span class='line'>  <span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>4. Use Middleware in Route</strong><br/>
+  Now we are ready to use &#8220;prevent-back-history&#8221; middleware in route file as below:
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>web.php </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="nx">Route</span><span class="o">::</span><span class="na">group</span><span class="p">([</span><span class="s1">&#39;middleware&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;prevent-back-history&#39;</span><span class="p">],</span><span class="k">function</span><span class="p">(){</span>
+</span><span class='line'>  <span class="nx">Auth</span><span class="o">::</span><span class="na">routes</span><span class="p">();</span>
+</span><span class='line'>  <span class="nx">Route</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/home&#39;</span><span class="p">,</span> <span class="s1">&#39;HomeController@index&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2017/07/09/laravel-5-dot-x-x-route-and-seo/">Laravel 5.x.x Route &amp; SEO</a></h1>
     
     
@@ -3193,148 +3417,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2017/03/24/online-payment-gateway-in-cambodia/">Online Payment Gateway in Cambodia</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2017-03-24T17:19:00+07:00" pubdate data-updated="true">Mar 24<span>th</span>, 2017</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/payment_gateway.png" width="600" alt="Online Payment Gateway in Cambodia" />
-</p>
-
-
-
-
-<p>
-  The amount of shops in Cambodia wanna sell product and service online is growing. But you truly don&#8217;t know which Online Payment Gateway you consider to choose for implement and do integration right? 
-</p>
-
-
-
-
-<p>
-  The good news is here, take it easy I will do a presentaion for you, let go through with me:
-</p>
-
-
-
-
-<p>
-  <strong>PayPal</strong><br/>
-  <a href="https://www.paypal.com" target="_blank">PayPal</a> is by far the easiest method to receive online payments made by credit card or via PayPal itself. However, the company has <a href="https://www.paypal.com/kh/cgi-bin/webscr?cmd=_display-xborder-fees-outside&countries=" target="_blank">no relations with any bank in Cambodia.</a>
-</p>
-
-
-
-
-<p>
-  So it&#8217;s not possible right? Well, the only possibility is to have a bank account in another country linked to your PayPal account.
-</p>
-
-
-
-
-<p>
-  <strong>Cathay United Bank</strong><br/>
-  <a href="http://www.cathaybk.com.kh/index.php?view=bzspgwy" target="_blank">Cathay United Bank (formerly SBC Bank)</a> in Cambodia offers an online payment gateway, which is rather easy to implement.
-</p>
-
-
-
-
-<p>
-  Of course, you need an account with the bank and Cathay United charges a percentage fee for this service. It only can handle credit cards of MasterCard, JCB and VISA, which is a bit limited.
-</p>
-
-
-
-
-<p>
-  <strong>ACLEDA Bank</strong><br/>
-  As a well respected bank, ACLEDA is a bit late to the party, only announcing recently their <a href="http://www.acledabank.com.kh/kh/eng/ps_ebecommerce_migs" target="_blank">E-Commerce Payment Gateway</a>.
-</p>
-
-
-
-
-<p>
-  ACLEDA uses the same MasterCard Internet Gateway Service (MiGS) as Cathay United Bank, so this is just as easy to set up on your website.
-</p>
-
-
-
-
-<p>
-  <strong>WING</strong><br/>
-  WING is primarily a phone-to-phone payment service and very popular among Cambodians. They can send and receive money nationwide, the company has a large network of agents and also offers a solution for <a href="https://www.wingmoney.com/online-payment/" target="_blank">online payments</a>. The only thing you have to do is open a free business account. Once that’s done you’ll get instructions on how to implement it on your website to receive online payments in your Wing account. This service is only available for customers within Cambodia.
-</p>
-
-
-
-
-<p>
-  <strong>PayGo</strong><br/>
-  <a href="https://www.paygo24.com/" target="_blank">PayGo</a> is a service provided by ABA Bank. To use the service, customers first have to sign up using a mobile phone number. This only works for Cambodian phone numbers, so not suitable for international customers. Although it is convenient for customers in Cambodia, we have some doubts about the security of this system. Only using a phone number as a check seems not very secure.
-</p>
-
-
-
-
-<p>
-  My suggestion for you is that:<br/>
-</p>
-
-
-
-
-<p>
-  Due PayPal not yet entered in Cambodian market, the services offered by Cathay United Bank and ACLEDA Bank seem the most robust, secure and comparatively easy to implement.
-</p>
-
-
-
-
-<p>
-  And if you only or primarily target customers within Cambodia, WING and PayGo can be an alternative.
-</p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -3367,6 +3449,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/04/16/react-chartjsx-simple-yet-flexible-react-chart-components-for-designers-and-developer/">React-chartjsx Simple Yet Flexible React Chart Components for Designers &amp; Developer</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/04/15/progressive-and-lazy-loading-image-with-lazy-load-images-dot-js/">Progressive &amp; Lazy Loading Image With lazy-load-images.js</a>
       </li>
     
@@ -3388,10 +3474,6 @@
     
       <li class="post">
         <a href="/blog/2017/11/07/the-most-popular-reactjs-data-table/">The Most Popular ReactJs Data Table</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/11/04/create-react-app-vs-nextjs/">Create-React-App vs NextJs</a>
       </li>
     
   </ul>
@@ -3437,7 +3519,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/javascript/">Javascript [ 28 ]</a>
+        <a href="/blog/categories/javascript/">Javascript [ 29 ]</a>
       </li>
     
       <li>
@@ -3449,7 +3531,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 48 ]</a>
+        <a href="/blog/categories/other/">Other [ 49 ]</a>
       </li>
     
       <li>

@@ -88,6 +88,183 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/04/16/what-new-with-foreign-keys-in-rails-4-dot-2/">What New With Foreign Keys in Rails 4.2?</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-16T15:43:00+07:00" pubdate data-updated="true">Apr 16<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/ruby_on_rails.png" width="400" alt="What New with Foreign Keys in Rails 4.2?" />
+</p>
+
+
+
+
+<p>
+  Previous versions of Rails did not have the ability to create foreign keys without resorting to executing SQL statements directly. This lead to messy, database dependent solutions that weren&#8217;t very nice. 
+</p>
+
+
+
+
+<p>
+  Luckily, Rails 4.2 rectifies this with new features to add and remove foreign keys. In this article we will discuss what foreign keys are, and how to add them to your database.
+</p>
+
+
+
+
+<p>
+  If you don&#8217;t know what a foreign key is, well, quite simply, a foreign key links one table to another&#8217;s primary key. For example, if I have an authors table and a books table, I could create a foreign key that points from books back to authors, linking the two tables together. Then, these two tables become linked. It means that I cannot add or update the record with invalid data for the author_id field in the books table.  I can also tell the database server what to do when I update or delete the record. For example, I can tell rails to automatically delete child records when the parent is deleted (delete an author from the authors table and all the author&#8217;s books are deleted). I could also tell Rails to set the author_id column to null or to simply not let me delete the author while child records exist.
+</p>
+
+
+
+
+<p>
+  <strong>Add Foreign Keys</strong><br/>
+  To add a foreign key to the books table:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">add_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:authors</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We can also give the foreign key a custom name:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">add_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:authors</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="ss">:my_foreign_key</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If we are using a non Rails friendly database, we can specify the column names we wish to use for the foreign key. For example, let&#8217;s say the primary key of the authors table is author_id and the key in the books table is auid. We could simply use the following code to create the foreign key:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">add_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:authors</span><span class="p">,</span> <span class="ss">column</span><span class="p">:</span> <span class="ss">:auid</span><span class="p">,</span> <span class="n">primary_key</span><span class="p">:</span> <span class="ss">:author_id</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  We can control the behavior of the foreign key as well. A list of the available behaviors are below. Independent behaviors can be set for both update as well as delete.<br/>
+  - :restrict (default) - Prevents changes from being made.<br/>
+  - :nullify - Sets the child columns to null.<br/>
+  - :cascade - Cascades down to the child records. For instance, deleting an author deletes the author&#8217;s books.
+</p>
+
+
+
+
+<p>
+  To specify behaviors, you simply use the <code>on_delete</code> or <code>on_update</code> parameters. For example, the following code would cascade deletes so that the books get deleted when the parent gets deleted.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">add_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:authors</span><span class="p">,</span> <span class="n">on_delete</span><span class="p">:</span> <span class="n">cascade</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  <strong>Delete Foreign Keys</strong><br/>
+  It is just as easy to delete foreign keys:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">remove_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:authors</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  You can optionally specify the name of the foreign key to delete:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">remove_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="ss">:my_foreign_key</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  If you have non Rails friendly column names, you can specify the column name that contains the foreign key you wish to remove:
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">remove_foreign_key</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">column</span><span class="p">:</span> <span class="ss">:auid</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/04/16/ruby-on-rails-filter-vs-action/">Ruby on Rails _filter vs _action</a></h1>
     
     
@@ -1461,119 +1638,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/03/31/rails-5-timestamps-will-be-changed/">Rails 5 Timestamps Will Be Changed</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-03-31T19:52:00+07:00" pubdate data-updated="true">Mar 31<span>st</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/ruby_on_rails.png" width="400" alt="Rails 5 timestamps will be changed" />
-</p>
-
-
-
-
-<p>
-  If you are running Rails 4.2, you will notice the generated migration add a default option to timestamps:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">CreateFoods</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migration</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">change</span>
-</span><span class='line'>    <span class="n">create_table</span> <span class="ss">:products</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">timestamps</span> <span class="ss">null</span><span class="p">:</span> <span class="kp">false</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  Without the <code>null: false</code> it will emit a warning:
-</p>
-
-
-
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="s1">&#39;#timestamp&#39;</span> <span class="n">was</span> <span class="n">called</span> <span class="n">without</span> <span class="n">specifying</span> <span class="n">an</span> <span class="n">option</span> <span class="k">for</span> <span class="sb">`null`</span><span class="o">.</span> <span class="no">In</span> <span class="no">Rails</span> <span class="mi">5</span><span class="p">,</span> <span class="n">this</span> <span class="n">behavior</span> <span class="n">will</span>
-</span><span class='line'> <span class="n">change</span> <span class="n">to</span> <span class="sb">`null: false`</span><span class="o">.</span> <span class="no">You</span> <span class="n">should</span> <span class="n">manually</span> <span class="n">specify</span> <span class="s1">&#39;null: true&#39;</span> <span class="n">to</span> <span class="n">prevent</span> <span class="n">the</span> <span class="n">behavior</span> <span class="n">of</span>
-</span><span class='line'> <span class="n">your</span> <span class="n">existing</span> <span class="n">migrations</span> <span class="n">from</span> <span class="n">changing</span><span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>
-  This null option is:
-</p>
-
-
-
-
-<p>
-  :null - allows or disallows NULL values in the column. This option could have been named :null_allowed.
-</p>
-
-
-
-
-<p>
-  <code>null: false</code> means you cannot give NULL values for created_at and updated_at on Rails 5.
-</p>
-
-
-
-
-<p>
-  So far so good, That&#8217;s it!!! See ya!!! :)
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/16/">&larr; Older</a>
@@ -1606,6 +1670,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/04/16/react-chartjsx-simple-yet-flexible-react-chart-components-for-designers-and-developer/">React-chartjsx Simple Yet Flexible React Chart Components for Designers &amp; Developer</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/04/15/progressive-and-lazy-loading-image-with-lazy-load-images-dot-js/">Progressive &amp; Lazy Loading Image With lazy-load-images.js</a>
       </li>
     
@@ -1627,10 +1695,6 @@
     
       <li class="post">
         <a href="/blog/2017/11/07/the-most-popular-reactjs-data-table/">The Most Popular ReactJs Data Table</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/11/04/create-react-app-vs-nextjs/">Create-React-App vs NextJs</a>
       </li>
     
   </ul>
@@ -1676,7 +1740,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/javascript/">Javascript [ 28 ]</a>
+        <a href="/blog/categories/javascript/">Javascript [ 29 ]</a>
       </li>
     
       <li>
@@ -1688,7 +1752,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 48 ]</a>
+        <a href="/blog/categories/other/">Other [ 49 ]</a>
       </li>
     
       <li>

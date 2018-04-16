@@ -88,6 +88,368 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/06/21/use-message-queue-in-rails/">Use Message Queue in Rails</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-06-21T10:53:00+07:00" pubdate data-updated="true">Jun 21<span>st</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+  <img src="/images/message_queue .png" width="400" alt="Use Message Queue in Rails" />
+</p>
+
+
+
+
+<p>
+  This article describes the application architecture pattern which is (in general) nothing new, but (from my experience) rarely applied in the Rails world. I’m talking about the nice and simple abstraction – message queue. But let me start by describing the goals I want to achieve and some alternative solutions.
+</p>
+
+
+
+
+<h3>
+  Goals
+</h3>
+
+
+
+
+<p>
+  <strong>Split</strong> application into a few smaller applications<br/>
+  Smaller applications are easier to reason about. You don’t have to go through 50 classes, you can just read 10, because it’s all you’ve got. When a new developer joins the team he has nice onboarding if you can tell him: “hey, start with this small piece of code, everything you need to know to implement this new feature is encapsulated here”.
+</p>
+
+
+
+
+<p>
+  <strong>Separate</strong> code for concepts which are not logically connected<br/>
+  Smaller applications are easier to reason about. You don’t have to go through 50 classes, you can just read 10, because it’s all you’ve got. When a new developer joins the team he has nice onboarding if you can tell him: &#8220;hey, start with this small piece of code, everything you need to know to implement this new feature is encapsulated here&#8221;.
+</p>
+
+
+
+
+<p>
+  Use <strong>new</strong> languages and frameworks<br/>
+  We, developers, want to try and learn new languages, libraries, frameworks and technologies. If you make a small application with a shiny new tool and fail – the consequences are less severe, because you can quickly rewrite this small application. If you are going to make one big application, you will think twice before introducing a new tool. So, in some way, smaller applications minimize the risk.
+</p>
+
+
+
+
+<h3>
+  Solution1 - One database, multiple apps
+</h3>
+
+
+
+
+<p>
+  This is the very first idea which may come to your mind – just point multiple applications to the one shared database. Been there, done that, won’t do that again! Data is associated with validation logic. Either you duplicate this logic in every app or you extract it to Rails engine gem. Both solutions are hard to maintain (think about running migrations…) and you still have strong coupling in your system.
+</p>
+
+
+
+
+<p>
+  One case when this approach may work – one read-write app and many read-only apps, but I haven’t tried it.
+</p>
+
+
+
+
+<h3>
+  Solution2 - Expose REST API
+</h3>
+
+
+
+
+<p>
+  As Rails devs we are pretty familiar with REST, so we can expose REST API in one of our apps and call this API in the other. This approach has many solid use cases so here I’m just listing some weak points to take into consideration:
+</p>
+
+
+
+
+<p>
+  - Usually requests in Ruby are blocking – calling app has to wait for the response even if it’s not interested in it.<br/>
+  - Requires authentication – we have to somehow ensure that our internal API is not used… well, externally.<br/>
+  - Everything happens in server process – if you are calling your internal API you may end up using the same server process which is used for handling requests of your “real users”. You would like to give your “real users” priority.<br/>
+  - Calling app has knowledge about receiving app – you have to know which endpoints should be called and which parameters be passed. This introduces coupling.<br/>
+</p>
+
+
+
+
+<h3>
+  Solution3 - Message queue
+</h3>
+
+
+
+
+<p>
+  Message queue is a really nice abstraction. Publisher just leaves messages at one end of the &#8220;pipe&#8221;, consumer reads messages from the other end of the &#8220;pipe&#8221;. It is asynchronous, because publisher does not wait for his message to be processed. Moreover, it decouples publisher from consumer, because publisher does not care what happens with his message and who will read it.
+</p>
+
+
+
+
+<p>
+  This architecture is also resistant to outages, at least when we assume that the queue service rarely breaks. If the consumer is not processing messages, nothing prevents publisher from adding more of them to the queue. When consumer starts to function again, it will process messages from the buffer (if they didn’t take all of your memory).
+</p>
+
+
+
+
+<h3>
+  When it shines?
+</h3>
+
+
+
+
+<p>
+  Message queue is really useful if we have some processing which happens out of the main business flow and the main business flow does not have to wait for the results of this processing. The most common example is custom event tracking – own analytics module. We just publish an event and continue execution without slowing anything down.
+</p>
+
+
+
+
+<h3>
+  RabbitMQ
+</h3>
+
+
+
+
+<p>
+  RabbitMQ is a popular choice for message queue service, especially in Rails world. Honestly, I haven’t tried different implementations, because RabbitMQ really has everything I need.
+</p>
+
+
+
+
+<p>
+  There are Ruby gems for communicating with RabbitMQ and it’s also easy to install and configure.
+</p>
+
+
+
+
+<p>
+  <img src="/images/rabbitmq_concepts.png" width="400" alt="Use Message Queue in Rails" />
+</p>
+
+
+
+
+<p>
+  In this diagram there are presented some concepts introduced by RabbitMQ. Publisher leaves messages in the exchange. Then they are routed from the exchange to multiple queues. There are many routing algorithms available – <a href="https://www.rabbitmq.com/tutorials/amqp-concepts.html#exchanges" target="_blank">https://www.rabbitmq.com/tutorials/amqp-concepts.html#exchanges</a>
+</p>
+
+
+
+
+<p>
+  Workers grab messages from queue. If there are multiple workers connected to one queue, they will be load balanced and the message will be delivered only to one of them.
+</p>
+
+
+
+
+<h3>
+  Easy case
+</h3>
+
+
+
+
+<p>
+  If you feel overwhelmed – don’t worry. Here is what you should start with:
+</p>
+
+
+
+
+<p>
+  <img src="/images/rabbitmq_easy_case.png" width="400" alt="Use Message Queue in Rails" />
+</p>
+
+
+
+
+<h3>
+  Publishing
+</h3>
+
+
+
+
+<p>
+  Now it’s time for some code. It’s really simple, because integration with RabbitMQ is simple. We will use two gems – <code>bunny</code> and <code>sneakers</code>.
+</p>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Gemfile</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;bunny&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># an initializer</span>
+</span><span class='line'><span class="n">connection</span> <span class="o">=</span> <span class="no">Bunny</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">host</span><span class="p">:</span> <span class="s1">&#39;localhost&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="n">connection</span><span class="o">.</span><span class="n">start</span>
+</span><span class='line'><span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">create_channel</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># a service</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">RabbitPublisher</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">channel</span> <span class="o">=</span> <span class="n">channel</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">publish</span><span class="p">(</span><span class="n">exchange_name</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">exchange</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="n">fanout</span><span class="p">(</span><span class="n">exchange_name</span><span class="p">,</span> <span class="ss">durable</span><span class="p">:</span> <span class="kp">true</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">exchange</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">to_json</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:channel</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<h3>
+  Receiving
+</h3>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Gemfile</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;sneakers&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># an initializer</span>
+</span><span class='line'><span class="no">Sneakers</span><span class="o">.</span><span class="n">configure</span>  <span class="ss">daemonize</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span>
+</span><span class='line'>                    <span class="ss">amqp</span><span class="p">:</span> <span class="s2">&quot;amqp://localhost&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="ss">log</span><span class="p">:</span> <span class="s2">&quot;log/sneakers.log&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="n">pid_path</span><span class="p">:</span> <span class="s2">&quot;tmp/pids/sneakers.pid&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="ss">threads</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+</span><span class='line'>                    <span class="ss">workers</span><span class="p">:</span> <span class="mi">1</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># app/workers/events_worker.rb</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">EventsWorker</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="ss">Sneakers</span><span class="p">:</span><span class="ss">:Worker</span>
+</span><span class='line'>  <span class="n">from_queue</span> <span class="s2">&quot;events&quot;</span><span class="p">,</span> <span class="ss">env</span><span class="p">:</span> <span class="kp">nil</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">work</span><span class="p">(</span><span class="n">raw_event</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">event_params</span> <span class="o">=</span> <span class="no">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">raw_event</span><span class="p">)</span>
+</span><span class='line'>    <span class="no">SomeWiseService</span><span class="o">.</span><span class="n">build</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">event_params</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">ack!</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>
+  For details refer to documentation of <a href="https://github.com/ruby-amqp/bunny" target="_blank">bunny</a> and <a href="https://github.com/jondot/sneakers" target="_blank">sneakers</a>.
+</p>
+
+
+
+
+<p>
+  If you enjoyed this article you can consider ping me for more details.
+</p>
+
+
+
+
+<p>
+  So far so good, That&#8217;s it!!! See ya!!! :)
+</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/06/19/ajax-on-rails/">Ajax on Rails</a></h1>
     
     
@@ -3469,100 +3831,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/05/22/main-advantages-of-ruby-on-rails-usage/">Main Advantages of Ruby on Rails Usage</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-05-22T16:39:00+07:00" pubdate data-updated="true">May 22<span>nd</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-  <img src="/images/happy_ruby_on_rails.jpg" width="400" alt="Main Advantages of Ruby on Rails Usage" />
-</p>
-
-
-
-
-<p>
-  Ruby on Rails (RoR) is a compact and effective way to build web applications. Each platform has advantages and disadvantages that make sense in light of each company&#8217;s target market. The main advantages of Ruby on Rails usage are:
-</p>
-
-
-
-
-<p>
-  <strong>1. High Speed of Development</strong><br/>
-  For example, site development that would traditionally take about 2-3 months can commonly be launched much quicker with Ruby on Rails. This time savings results from a few factors: a leaner code-base (fewer lines of redundant code) and a modular design (re-using existing components rather than building everything from scratch). As such, after launching the site, modifications can be made more quickly as well.
-</p>
-
-
-
-
-<p>
-  <strong>2. Cost-Effectiveness</strong><br/>
-  As Rails sites can be built and modified quickly, this is a really cost-effective way to create and maintain the website — without compromising the quality, performance, or scalability of your site.
-</p>
-
-
-
-
-<p>
-  <strong>3. Flexibility</strong><br/>
-  There are lots of gems (already built components of specific functionality available); re-using them rather than building everything from scratch provides a lot of different bricks to build the application and extend its functionality.A variety of plugins are available to solve just about any functional challenge you may need for your project. Additionally, Rails is an ideal way to build custom database solutions at a fraction of the usual time and expense.
-</p>
-
-
-
-
-<p>
-  <strong>3. Flexibility</strong><br/>
-  There are lots of gems (already built components of specific functionality available); re-using them rather than building everything from scratch provides a lot of different bricks to build the application and extend its functionality.A variety of plugins are available to solve just about any functional challenge you may need for your project. Additionally, Rails is an ideal way to build custom database solutions at a fraction of the usual time and expense.
-</p>
-
-
-
-
-<p>
-  <strong>4. High code quality</strong><br/>
-  The Ruby language and Ruby on Rails framework are under active development and support. New features, ideas are introduced quite often. Security updates and fixes are released regularly. A large body of books, blog entries and experiences are also shared online to learn from.
-</p>
-
-
-
-
-<p>
-  <strong>5. Industry support</strong><br/>
-  There are professional hosting support companies, (Heroku, EngineYard). experienced consulting companies, two primary cloud-based offerings, and help with development and deployment and more. Both provide an easy-to-scale, managed hosting environment. Both are built on Amazon EC2 and offer contrasting approaches and features that will appeal to different audiences.
-</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/12/">&larr; Older</a>
@@ -3595,6 +3863,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/04/16/react-chartjsx-simple-yet-flexible-react-chart-components-for-designers-and-developer/">React-chartjsx Simple Yet Flexible React Chart Components for Designers &amp; Developer</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/04/15/progressive-and-lazy-loading-image-with-lazy-load-images-dot-js/">Progressive &amp; Lazy Loading Image With lazy-load-images.js</a>
       </li>
     
@@ -3616,10 +3888,6 @@
     
       <li class="post">
         <a href="/blog/2017/11/07/the-most-popular-reactjs-data-table/">The Most Popular ReactJs Data Table</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/11/04/create-react-app-vs-nextjs/">Create-React-App vs NextJs</a>
       </li>
     
   </ul>
@@ -3665,7 +3933,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/javascript/">Javascript [ 28 ]</a>
+        <a href="/blog/categories/javascript/">Javascript [ 29 ]</a>
       </li>
     
       <li>
@@ -3677,7 +3945,7 @@
       </li>
     
       <li>
-        <a href="/blog/categories/other/">Other [ 48 ]</a>
+        <a href="/blog/categories/other/">Other [ 49 ]</a>
       </li>
     
       <li>
